@@ -7,6 +7,8 @@ import '../classes/home_page.dart';
 import '../classes/profile_page.dart';
 import '../classes/launch_page.dart';
 import '../classes/login_page.dart';
+import '../classes/login_detail_page.dart';
+import '../classes/register_page.dart';
 import 'app_shell.dart';
 
 final GoRouter goRouter = GoRouter(
@@ -23,6 +25,18 @@ final GoRouter goRouter = GoRouter(
       path: '/login',
       name: 'login',
       builder: (context, state) => const LoginPage(),
+    ),
+    // 登录详情页（不需要底部导航）
+    GoRoute(
+      path: '/login-detail',
+      name: 'login-detail',
+      builder: (context, state) => const LoginDetailPage(),
+    ),
+    // 注册页（不需要底部导航）
+    GoRoute(
+      path: '/register',
+      name: 'register',
+      builder: (context, state) => const RegisterPage(),
     ),
     // 主应用页面（带底部导航）
     ShellRoute(
