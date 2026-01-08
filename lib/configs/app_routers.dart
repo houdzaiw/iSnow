@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../classes/calendar_page.dart';
 import '../classes/home_page.dart';
 import '../classes/profile/edit_profile_page.dart';
+import '../classes/profile/edit_nickname_page.dart';
 import '../classes/profile/profile_page.dart';
 import '../classes/launch_page.dart';
 import '../classes/login_page.dart';
@@ -44,6 +45,12 @@ final GoRouter goRouter = GoRouter(
       path: '/edit-profile',
       name: 'edit-profile',
       builder: (context, state) => const EditProfilePage(),
+    ),
+    // 编辑昵称页（不需要底部导航）
+    GoRoute(
+      path: '/edit-nickname',
+      name: 'edit-nickname',
+      builder: (context, state) => const EditNicknamePage(),
     ),
     // 主应用页面（带底部导航）
     ShellRoute(
