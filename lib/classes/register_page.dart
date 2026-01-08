@@ -28,6 +28,7 @@ class _RegisterPageState extends State<RegisterPage> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
+        alignment: Alignment.center,
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/base/base_bg_image.png'),
@@ -36,132 +37,150 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          child: Stack(
             children: [
-              const SizedBox(height: 60),
-              const Text(
-                '创建账号',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF212121),
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(40),
                 ),
-              ),
-              const SizedBox(height: 40),
-              // 邮箱输入框
-              TextField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  hintText: '邮箱',
-                  filled: true,
-                  fillColor: Colors.white.withValues(alpha: 0.9),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  prefixIcon: const Icon(Icons.email_outlined),
-                ),
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 16),
-              // 密码输入框
-              TextField(
-                controller: _passwordController,
-                decoration: InputDecoration(
-                  hintText: '密码',
-                  filled: true,
-                  fillColor: Colors.white.withValues(alpha: 0.9),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  prefixIcon: const Icon(Icons.lock_outline),
-                ),
-                obscureText: true,
-              ),
-              const SizedBox(height: 16),
-              // 确认密码输入框
-              TextField(
-                controller: _confirmPasswordController,
-                decoration: InputDecoration(
-                  hintText: '确认密码',
-                  filled: true,
-                  fillColor: Colors.white.withValues(alpha: 0.9),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  prefixIcon: const Icon(Icons.lock_outline),
-                ),
-                obscureText: true,
-              ),
-              const SizedBox(height: 32),
-              // 注册按钮
-              GestureDetector(
-                onTap: () {
-                  // TODO: 实现真实的注册逻辑
-                  // 验证邮箱格式
-                  // 验证密码强度
-                  // 验证两次密码是否一致
-                  // 调用注册 API
-
-                  // 注册成功后可以选择：
-                  // 1. 跳转到登录页
-                  // context.go('/login');
-                  // 2. 自动登录并跳转到首页
-                  // context.go('/home');
-
-                  // 临时：直接跳转到首页
-                  context.go('/home');
-                },
-                child: Container(
-                  width: 280,
-                  height: 56,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/base/button_bg_image.png'),
-                      fit: BoxFit.fill,
-                    ),
-                  ),
-                  alignment: Alignment.center,
-                  child: const Text(
-                    '注册',
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Color(0xFF212121),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              // 已有账号？去登录
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    '已有账号？',
-                    style: TextStyle(
-                      color: Color(0xFF212121),
-                      fontSize: 14,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      // 跳转到登录详情页
-                      context.push('/login-detail');
-                    },
-                    child: const Text(
-                      '去登录',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 48),
+                    const Text(
+                      'Please enter your registration email',
                       style: TextStyle(
-                        color: Color(0xFF212121),
-                        fontSize: 14,
+                        fontSize: 15,
                         fontWeight: FontWeight.bold,
+                        color: Color(0xFF212121),
                       ),
                     ),
+                    const SizedBox(height: 8),
+                    // 邮箱输入框
+                    SizedBox(
+                      height: 43,
+                      child: TextField(
+                        controller: _emailController,
+                        decoration: InputDecoration(
+                          hintText: 'example@gmail.com',
+                          filled: true,
+                          fillColor: const Color(0xFFFDF5EB),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                          isDense: true,
+                        ),
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+                    // Please enter your password
+                    const Text(
+                      'Please enter your password',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF212121),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // 密码输入框
+                    SizedBox(
+                      height: 43,
+                      child: TextField(
+                        controller: _passwordController,
+                        decoration: InputDecoration(
+                          hintText: 'Your password',
+                          filled: true,
+                          fillColor: const Color(0xFFFDF5EB),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                          isDense: true,
+                        ),
+                        obscureText: true,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // Please enter your password
+                    const Text(
+                      'Please re-enter your password to confirm',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF212121),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // 密码输入框
+                    SizedBox(
+                      height: 43,
+                      child: TextField(
+                        controller: _passwordController,
+                        decoration: InputDecoration(
+                          hintText: 'Your password',
+                          filled: true,
+                          fillColor: const Color(0xFFFDF5EB),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                          isDense: true,
+                        ),
+                        obscureText: true,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    // 登录按钮
+                    GestureDetector(
+                      onTap: () {
+                        context.go('/home');
+                      },
+                      child: Container(
+                        width: 280,
+                        height: 53,
+                        decoration: const BoxDecoration(
+                          //背景色#F9E707
+                          color: Color(0xFFF9E707),
+                          borderRadius: BorderRadius.all(Radius.circular(28)),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text(
+                          'Register',
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: Color(0xFF212121),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              ),
+              // 关闭按钮
+              Positioned(
+                top: 0,
+                right: 0,
+                child: GestureDetector(
+                  onTap: () {
+                    context.pop();
+                  },
+                  child: Image.asset(
+                    'assets/base/close_button_image.png',
+                    width: 32,
+                    height: 32,
                   ),
-                ],
+                ),
               ),
             ],
           ),

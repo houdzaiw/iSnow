@@ -22,16 +22,77 @@ class AppShell extends StatelessWidget {
       body: child,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Color(0xFFF9E707),
+        selectedItemColor: Colors.transparent,
+        unselectedItemColor: Colors.transparent,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        enableFeedback: false,
         onTap: (index) {
           final target = _tabs[index];
           if (location != target) {
             context.go(target);
           }
         },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: '首页'),
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: '日历'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: '个人'),
+        items: [
+          BottomNavigationBarItem(
+            icon: Container(
+              padding: const EdgeInsets.only(top: 6),
+              child: Image.asset(
+                'assets/tabbar/home_normal.png',
+                width: 36,
+                height: 36,
+              ),
+            ),
+            activeIcon: Container(
+              padding: const EdgeInsets.only(top: 6),
+              child: Image.asset(
+                'assets/tabbar/home_select.png',
+                width: 36,
+                height: 36,
+              ),
+            ),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Container(
+              padding: const EdgeInsets.only(top: 6),
+              child: Image.asset(
+                'assets/tabbar/message_normal.png',
+                width: 36,
+                height: 36,
+              ),
+            ),
+            activeIcon: Container(
+              padding: const EdgeInsets.only(top: 6),
+              child: Image.asset(
+                'assets/tabbar/message_select.png',
+                width: 36,
+                height: 36,
+              ),
+            ),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Container(
+              padding: const EdgeInsets.only(top: 6),
+              child: Image.asset(
+                'assets/tabbar/user_profile_normal.png',
+                width: 36,
+                height: 36,
+              ),
+            ),
+            activeIcon: Container(
+              padding: const EdgeInsets.only(top: 6),
+              child: Image.asset(
+                'assets/tabbar/user_profile_select.png',
+                width: 36,
+                height: 36,
+              ),
+            ),
+            label: '',
+          ),
         ],
       ),
     );
