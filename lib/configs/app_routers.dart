@@ -4,12 +4,12 @@ import 'package:go_router/go_router.dart';
 
 import '../classes/calendar_page.dart';
 import '../classes/home_page.dart';
-import '../classes/profile_page.dart';
+import '../classes/profile/edit_profile_page.dart';
+import '../classes/profile/profile_page.dart';
 import '../classes/launch_page.dart';
 import '../classes/login_page.dart';
 import '../classes/login_detail_page.dart';
 import '../classes/register_page.dart';
-import '../classes/edit_profile_page.dart';
 import 'app_shell.dart';
 
 final GoRouter goRouter = GoRouter(
