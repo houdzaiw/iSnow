@@ -9,6 +9,7 @@ import '../classes/launch_page.dart';
 import '../classes/login_page.dart';
 import '../classes/login_detail_page.dart';
 import '../classes/register_page.dart';
+import '../classes/edit_profile_page.dart';
 import 'app_shell.dart';
 
 final GoRouter goRouter = GoRouter(
@@ -37,6 +38,12 @@ final GoRouter goRouter = GoRouter(
       path: '/register',
       name: 'register',
       builder: (context, state) => const RegisterPage(),
+    ),
+    // 编辑资料页（不需要底部导航）
+    GoRoute(
+      path: '/edit-profile',
+      name: 'edit-profile',
+      builder: (context, state) => const EditProfilePage(),
     ),
     // 主应用页面（带底部导航）
     ShellRoute(
