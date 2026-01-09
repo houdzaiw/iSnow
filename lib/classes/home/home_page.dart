@@ -74,12 +74,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     if (_overlayEntry != null) return;
 
     _overlayEntry = OverlayEntry(
-      builder: (context) => DialogOverlay(
-        onClose: _hideDialog,
-      ),
+        builder: (context) => Positioned.fill(
+          child: DialogOverlay(
+            onClose: _hideDialog,
+          ),
+        )
     );
-
-    Overlay.of(context).insert(_overlayEntry!);
+    Overlay.of(context, rootOverlay: true).insert(_overlayEntry!);
   }
 
   void _hideDialog() {
