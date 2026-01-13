@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../configs/consts.dart';
+
 class PublishEditPage extends HookConsumerWidget {
   const PublishEditPage({super.key});
 
@@ -56,10 +58,7 @@ class PublishEditPage extends HookConsumerWidget {
           const SizedBox(height: 16),
           // 3. 图片选择按钮
           GestureDetector(
-            onTap: () {
-              // TODO: 实现图片选择功能
-              print('Select image tapped');
-            },
+            onTap: () => showAvatarOptions(context),
             child: Image.asset(
               'assets/calendar/select_image_button.png',
               width: 60,

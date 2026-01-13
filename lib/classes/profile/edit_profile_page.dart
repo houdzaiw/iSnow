@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../widgets/custom_scaffold.dart';
+import '../../configs/consts.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -56,7 +57,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               _buildProfileItem(
                 context,
                 title: 'Avatar',
-                onTap: () => _showAvatarOptions(context),
+                onTap: () => showAvatarOptions(context),
                 showAvatar: true,
               ),
               Container(
@@ -172,54 +173,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  void _showAvatarOptions(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return Container(
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Choose from Album'),
-                onTap: () {
-                  Navigator.pop(context);
-                  // TODO: Implement image picker from gallery
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Album selected')),
-                  );
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Take Photo'),
-                onTap: () {
-                  Navigator.pop(context);
-                  // TODO: Implement image picker from camera
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Camera selected')),
-                  );
-                },
-              ),
-              const SizedBox(height: 10),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text(
-                  'Cancel',
-                  style: TextStyle(color: Color(0xFF999999)),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 
   void _navigateToEditNickname(BuildContext context) {
     context.push('/edit-nickname');

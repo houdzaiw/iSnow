@@ -98,6 +98,7 @@ class _PublishPageState extends State<PublishPage> with SingleTickerProviderStat
             // TabBarView with content
             Expanded(
               child: TabBarView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 controller: _tabController,
                 children: [
                   // Edit mood tab content
