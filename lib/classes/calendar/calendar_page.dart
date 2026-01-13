@@ -1,7 +1,7 @@
 // dart
 import 'package:flutter/material.dart';
+import 'package:project/classes/calendar/select_mood_page.dart';
 
-import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class CalendarPage extends StatefulWidget {
@@ -37,6 +37,16 @@ class _CalendarPageState extends State<CalendarPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFFF6E5),
+      // 右下角悬浮发布按钮
+      floatingActionButton: FloatingActionButton(
+        onPressed: _onPublishPressed,
+        backgroundColor: const Color(0xFFF9E707),
+        child: const Icon(
+          Icons.add,
+          color: Color(0xFF212121),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: SafeArea(
         child: Column(
           children: [
@@ -63,56 +73,45 @@ class _CalendarPageState extends State<CalendarPage> {
 
   /// 日历本体
   Widget _buildCalendar() {
-    return GestureDetector(
-      onVerticalDragEnd: (details) {
-        if (details.primaryVelocity == null) return;
-
-        if (details.primaryVelocity! < -50) {
-          setState(() => _calendarFormat = CalendarFormat.month);
-        } else if (details.primaryVelocity! > 50) {
-          setState(() => _calendarFormat = CalendarFormat.week);
-        }
-      },
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 12),
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: TableCalendar(
-          firstDay: DateTime.utc(2020),
-          lastDay: DateTime.utc(2030),
-          focusedDay: _focusedDay,
-          calendarFormat: _calendarFormat,
-          selectedDayPredicate: (day) =>
-              isSameDay(day, _selectedDay),
-          onDaySelected: (selectedDay, focusedDay) {
-            setState(() {
-              _selectedDay = selectedDay;
-              _focusedDay = focusedDay;
-            });
-          },
-          onPageChanged: (focusedDay) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: TableCalendar(
+        firstDay: DateTime.utc(2020),
+        lastDay: DateTime.utc(2030),
+        focusedDay: _focusedDay,
+        calendarFormat: _calendarFormat,
+        selectedDayPredicate: (day) =>
+            isSameDay(day, _selectedDay),
+        onDaySelected: (selectedDay, focusedDay) {
+          setState(() {
+            _selectedDay = selectedDay;
             _focusedDay = focusedDay;
-          },
+          });
+        },
+        onPageChanged: (focusedDay) {
+          _focusedDay = focusedDay;
+        },
 
-          headerVisible: false,
-          daysOfWeekHeight: 24,
-          rowHeight: 60,
+        headerVisible: false,
+        daysOfWeekHeight: 24,
+        rowHeight: 60,
 
-          calendarStyle: const CalendarStyle(
-            outsideDaysVisible: false,
-          ),
+        calendarStyle: const CalendarStyle(
+          outsideDaysVisible: false,
+        ),
 
-          calendarBuilders: CalendarBuilders(
-            defaultBuilder: (_, day, __) =>
-                _buildDayCell(day, false),
-            selectedBuilder: (_, day, __) =>
-                _buildDayCell(day, true),
-            todayBuilder: (_, day, __) =>
-                _buildDayCell(day, false, isToday: true),
-          ),
+        calendarBuilders: CalendarBuilders(
+          defaultBuilder: (_, day, __) =>
+              _buildDayCell(day, false),
+          selectedBuilder: (_, day, __) =>
+              _buildDayCell(day, true),
+          todayBuilder: (_, day, __) =>
+              _buildDayCell(day, false, isToday: true),
         ),
       ),
     );
@@ -154,18 +153,51 @@ class _CalendarPageState extends State<CalendarPage> {
 
   /// 中间拖拽条
   Widget _buildDragHandle() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Container(
-        width: 36,
-        height: 4,
-        decoration: BoxDecoration(
-          color: Colors.orange,
-          borderRadius: BorderRadius.circular(2),
-        ),
-      ),
-    );
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: _toggleCalendar,
+      onVerticalDragEnd: (details) {
+        if (details.primaryVelocity == null) return;
+
+        if (details.primaryVelocity! < -50) {
+          _expandCalendar();
+        } else if (details.primaryVelocity! > 50) {
+          _collapseCalendar();
+        }
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Center(
+          child: Image.asset(
+              _calendarFormat == CalendarFormat.week
+                  ? "assets/calendar/expand_button.png"
+                  : "assets/calendar/fold_button.png",
+             width: 36,
+             height: 12,
+           )
+         ),
+       ),
+     );
+   }
+  void _toggleCalendar() {
+    setState(() {
+      _calendarFormat =
+      _calendarFormat == CalendarFormat.week
+          ? CalendarFormat.month
+          : CalendarFormat.week;
+    });
   }
+
+  void _expandCalendar() {
+    if (_calendarFormat == CalendarFormat.month) return;
+    setState(() => _calendarFormat = CalendarFormat.month);
+  }
+
+  void _collapseCalendar() {
+    if (_calendarFormat == CalendarFormat.week) return;
+    setState(() => _calendarFormat = CalendarFormat.week);
+  }
+
 
   /// 下方列表
   Widget _buildList() {
@@ -188,6 +220,19 @@ class _CalendarPageState extends State<CalendarPage> {
           );
         },
       ),
+    );
+  }
+
+  void _onPublishPressed() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+      ),
+      builder: (ctx) {
+        return const SelectMoodPage();
+      },
     );
   }
 }

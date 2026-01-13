@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'dart:async';
+import '../../configs/consts.dart';
 
 import 'capture_finished_page.dart';
 
@@ -13,28 +14,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
-  final List<String> _moodImages = [
-    'assets/mood/model_01.png',
-    'assets/mood/model_02.png',
-    'assets/mood/model_03.png',
-    'assets/mood/model_04.png',
-    'assets/mood/model_05.png',
-    'assets/mood/model_06.png',
-    'assets/mood/model_07.png',
-    'assets/mood/model_08.png',
-    'assets/mood/model_09.png',
-    'assets/mood/model_010.png',
-    'assets/mood/model_011.png',
-    'assets/mood/model_012.png',
-    'assets/mood/model_013.png',
-    'assets/mood/model_014.png',
-    'assets/mood/model_015.png',
-    'assets/mood/model_016.png',
-    'assets/mood/model_017.png',
-    'assets/mood/model_018.png',
-    'assets/mood/model_019.png',
-    'assets/mood/model_020.png',
-  ];
+  // moodImages is defined in lib/consts.dart
 
   final Random _random = Random();
   late List<MoodImageData> _randomMoodImages;
@@ -79,7 +59,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   void _generateRandomMoodImages() {
-    _randomMoodImages = _moodImages.map((imagePath) {
+    _randomMoodImages = moodImages.map((imagePath) {
       // 70-90%的图片显示在下方，10-30%显示在上方
       final isInBottomArea = _random.nextDouble() < 0.8; // 80%概率在下方
       final top = isInBottomArea
@@ -101,17 +81,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     _isAnimating = true;
 
     // 随机选择30-50%的图片进行动画
-    final animateCount = (_moodImages.length * (0.3 + _random.nextDouble() * 0.2)).round();
+    final animateCount = (moodImages.length * (0.3 + _random.nextDouble() * 0.2)).round();
     final animateIndices = <int>{};
 
     // 随机选择要动画的图片索引
     while (animateIndices.length < animateCount) {
-      animateIndices.add(_random.nextInt(_moodImages.length));
-      animateIndices.add(_random.nextInt(_moodImages.length));
+      animateIndices.add(_random.nextInt(moodImages.length));
+      animateIndices.add(_random.nextInt(moodImages.length));
     }
 
     // 生成新的目标位置（只为选中的图片生成新位置）
-    _targetMoodImages = List.generate(_moodImages.length, (index) {
+    _targetMoodImages = List.generate(moodImages.length, (index) {
       if (animateIndices.contains(index)) {
         // 这个图片会动画到新位置
         // 70-90%的图片显示在下方，10-30%显示在上方
@@ -121,7 +101,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             : _random.nextDouble() * 0.4;        // 上方区域: 0%-40%
 
         return MoodImageData(
-          imagePath: _moodImages[index],
+          imagePath: moodImages[index],
           left: _random.nextDouble() * 0.7,
           top: top,
           rotation: _random.nextDouble() * 2 * pi,
