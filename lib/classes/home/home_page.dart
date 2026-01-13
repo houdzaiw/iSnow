@@ -1,6 +1,7 @@
 // dart
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'dart:async';
 
 import 'capture_finished_page.dart';
 
@@ -41,6 +42,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   late AnimationController _animationController;
   late Animation<double> _animation;
   OverlayEntry? _overlayEntry;
+  // Flag to prevent repeated triggering while animation/dialog is pending
+  bool _isAnimating = false;
 
   @override
   void initState() {
@@ -70,19 +73,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     super.dispose();
   }
 
-  void _showDialog() {
-    if (_overlayEntry != null) return;
-
-    _overlayEntry = OverlayEntry(
-        builder: (context) => Positioned.fill(
-          child: DialogOverlay(
-            onClose: _hideDialog,
-          ),
-        )
-    );
-    Overlay.of(context, rootOverlay: true).insert(_overlayEntry!);
-  }
-
   void _hideDialog() {
     _overlayEntry?.remove();
     _overlayEntry = null;
@@ -106,6 +96,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   void _animateMoodImages() {
+    // Prevent re-entry while an animation/dialog is pending
+    if (_isAnimating || _overlayEntry != null) return;
+    _isAnimating = true;
+
     // 随机选择30-50%的图片进行动画
     final animateCount = (_moodImages.length * (0.3 + _random.nextDouble() * 0.2)).round();
     final animateIndices = <int>{};
@@ -140,14 +134,37 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
     // 重置并开始动画
     _animationController.reset();
-    _animationController.forward().then((_) {
+    _animationController.forward().then((_) async {
       // 动画完成后，更新起始位置为目标位置
       setState(() {
         _randomMoodImages = List.from(_targetMoodImages);
       });
-      // 显示全屏弹框
-      _showDialog();
+      // 显示全屏弹框并等待弹框插入完成的下一帧
+      await _showDialogAsync();
+      // allow further animations/clicks after dialog has been shown
+      _isAnimating = false;
     });
+  }
+
+  /// Inserts the overlay and completes after the next frame so callers can
+  /// be sure the dialog has been presented.
+  Future<void> _showDialogAsync() {
+    if (_overlayEntry != null) return Future.value();
+
+    _overlayEntry = OverlayEntry(
+        builder: (context) => Positioned.fill(
+          child: DialogOverlay(
+            onClose: _hideDialog,
+          ),
+        )
+    );
+    Overlay.of(context, rootOverlay: true).insert(_overlayEntry!);
+
+    final completer = Completer<void>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      completer.complete();
+    });
+    return completer.future;
   }
 
   List<MoodImageData> _getInterpolatedMoodImages() {
@@ -225,6 +242,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 bottom: 8,
                 child: GestureDetector(
                   onTap: () {
+                    // ignore taps while animating or when overlay is already shown
+                    if (_isAnimating || _overlayEntry != null) return;
                     _animateMoodImages();
                   },
                   child: Image.asset(
