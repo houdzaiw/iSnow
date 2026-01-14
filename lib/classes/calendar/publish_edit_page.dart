@@ -10,11 +10,46 @@ import '../../configs/consts.dart';
 
 class PublishEditPage extends HookConsumerWidget {
   final int? moodIndex;
-  const PublishEditPage({super.key,  this.moodIndex});
+  final Function(String description, List<String> imagePaths)? onSave;
+
+  const PublishEditPage({
+    super.key,
+    this.moodIndex,
+    this.onSave,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedImages = useState<List<XFile>>([]);
+    final textController = useTextEditingController();
+
+    // 监听数据变化，自动调用 onSave 回调
+    useEffect(() {
+      void listener() {
+        if (onSave != null) {
+          final description = textController.text;
+          final imagePaths = selectedImages.value.map((e) => e.path).toList();
+          onSave!(description, imagePaths);
+        }
+      }
+
+      textController.addListener(listener);
+
+      return () {
+        textController.removeListener(listener);
+      };
+    }, [textController]);
+
+    // 监听图片变化
+    useEffect(() {
+      if (onSave != null) {
+        final description = textController.text;
+        final imagePaths = selectedImages.value.map((e) => e.path).toList();
+        onSave!(description, imagePaths);
+      }
+      return null;
+    }, [selectedImages.value]);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
@@ -32,6 +67,7 @@ class PublishEditPage extends HookConsumerWidget {
           const SizedBox(height: 16),
           // 2. 输入框
           TextField(
+            controller: textController,
             maxLines: 6,
             decoration: InputDecoration(
               hintText: 'What Happened Today...',

@@ -1,42 +1,105 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../configs/app_Isar.dart';
+import '../../model/diary_entry.dart';
 import 'publish_edit_page.dart';
 import 'publish_voice_page.dart';
 
-class PublishPage extends StatefulWidget {
+class PublishPage extends HookConsumerWidget {
   final int? moodIndex;
   const PublishPage({super.key, this.moodIndex});
 
-  @override
-  State<PublishPage> createState() => _PublishPageState();
-}
+  // 保存数据到 Isar 数据库
+  Future<void> _saveToDatabase(
+    BuildContext context,
+    TabController tabController,
+    String editDescription,
+    List<String> editImagePaths,
+    String voicePath,
+  ) async {
+    try {
+      final isar = await IsarDB.instance.db;
 
-class _PublishPageState extends State<PublishPage> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+      // 判断当前是 edit 还是 voice
+      final currentType = tabController.index == 0 ? 'edit' : 'voice';
 
-  // 初始化图标数组
-  final List<IconData> _tabIcons = [
-    Icons.edit,
-    Icons.mic,
-  ];
+      // 创建日记条目
+      final diaryEntry = DiaryEntry()
+        ..date = DateTime.now()
+        ..emoji = '' // 可以根据 moodIndex 设置 emoji
+        ..moodIndex = moodIndex
+        ..type = currentType
+        ..createdAt = DateTime.now();
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: _tabIcons.length, vsync: this);
-    _tabController.addListener(() {
-      setState(() {});
-    });
+      if (currentType == 'edit') {
+        // 编辑模式：保存描述和图片
+        diaryEntry.description = editDescription;
+        diaryEntry.images = editImagePaths;
+        diaryEntry.content = editDescription; // 兼容旧字段
+        diaryEntry.type = currentType;
+      } else {
+        // 语音模式：保存语音路径
+        // TODO: 语音功能待实现
+        diaryEntry.images = editImagePaths;
+        diaryEntry.content = voicePath;
+        diaryEntry.type = currentType;
+      }
+
+      // 保存到数据库
+      await isar.writeTxn(() async {
+        await isar.diaryEntrys.put(diaryEntry);
+      });
+
+      // 显示成功提示
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('保存成功！')),
+        );
+        // 关闭弹框
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      // 显示错误提示
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('保存失败：$e')),
+
+        );
+        print("Error saving to database: $e");
+      }
+    }
   }
 
   @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 初始化图标数组
+    final tabIcons = [
+      Icons.edit,
+      Icons.mic,
+    ];
 
-  @override
-  Widget build(BuildContext context) {
+    // 使用 useSingleTickerProvider 创建 TabController
+    final tabController = useTabController(initialLength: tabIcons.length);
+
+    // 存储编辑页面的数据
+    final editDescription = useState('');
+    final editImagePaths = useState<List<String>>([]);
+
+    // 存储语音页面的数据
+    final voicePath = useState('');
+
+    // 监听 TabController 变化以触发重建
+    final currentTabIndex = useState(0);
+    useEffect(() {
+      void listener() {
+        currentTabIndex.value = tabController.index;
+      }
+      tabController.addListener(listener);
+      return () => tabController.removeListener(listener);
+    }, [tabController]);
+
     return SizedBox(
       height: MediaQuery.of(context).size.height * 0.64,
       child: Padding(
@@ -50,13 +113,13 @@ class _PublishPageState extends State<PublishPage> with SingleTickerProviderStat
                 const SizedBox(width: 36),
                 Expanded(
                   child: TabBar(
-                    controller: _tabController,
+                    controller: tabController,
                     indicator: const BoxDecoration(),
                     labelPadding: EdgeInsets.zero,
-                    tabs: _tabIcons.asMap().entries.map((entry) {
+                    tabs: tabIcons.asMap().entries.map((entry) {
                       int index = entry.key;
                       IconData iconData = entry.value;
-                      bool isSelected = _tabController.index == index;
+                      bool isSelected = tabController.index == index;
                       return Tab(
                         child: Container(
                           width: 99,
@@ -82,10 +145,34 @@ class _PublishPageState extends State<PublishPage> with SingleTickerProviderStat
                 const SizedBox(width: 36),
                 // 右边增加发送按钮
                 GestureDetector(
-                  onTap: () {
-                    // TODO: 实现发送功能
-                    print('Send post tapped');
+                  onTap: () async {
+                    // 判断当前是编辑还是语音模式，并保存数据
+                    if (tabController.index == 0) {
+                      // 编辑模式：检查是否有内容
+                      if (editDescription.value.isEmpty && editImagePaths.value.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('请输入内容或选择图片')),
+                        );
+                        return;
+                      }
+                    } else {
+                      // 语音模式：检查是否有语音
+                      if (voicePath.value.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('请录制语音')),
+                        );
+                        return;
+                      }
+                    }
 
+                    // 保存到数据库
+                    await _saveToDatabase(
+                      context,
+                      tabController,
+                      editDescription.value,
+                      editImagePaths.value,
+                      voicePath.value,
+                    );
                   },
                   child: Image.asset(
                     'assets/calendar/send_post.png',
@@ -101,12 +188,23 @@ class _PublishPageState extends State<PublishPage> with SingleTickerProviderStat
             Expanded(
               child: TabBarView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                controller: _tabController,
+                controller: tabController,
                 children: [
                   // Edit mood tab content
-                  PublishEditPage(moodIndex: widget.moodIndex),
+                  PublishEditPage(
+                    moodIndex: moodIndex,
+                    onSave: (description, imagePaths) {
+                      editDescription.value = description;
+                      editImagePaths.value = imagePaths;
+                    },
+                  ),
                   // Voice mood tab content
-                  PublishVoicePage(moodIndex: widget.moodIndex),
+                  PublishVoicePage(
+                    moodIndex: moodIndex,
+                    onSave: (voicePathValue) {
+                      voicePath.value = voicePathValue;
+                    },
+                  ),
                 ],
               ),
             ),

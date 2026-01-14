@@ -4,7 +4,13 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class PublishVoicePage extends HookConsumerWidget {
   final int? moodIndex;
-  const PublishVoicePage({super.key, this.moodIndex});
+  final Function(String voicePath)? onSave;
+
+  const PublishVoicePage({
+    super.key,
+    this.moodIndex,
+    this.onSave,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
