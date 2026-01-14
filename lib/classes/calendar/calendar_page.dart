@@ -24,7 +24,7 @@ class CalendarPage extends HookConsumerWidget {
     final focusedDay = useState(DateTime.now());
     final selectedDay = useState(DateTime.now());
     final diaryEntries = useState<List<DiaryEntry>>([]);
-    final emotionMap = useState<Map<DateTime, String>>({});
+    final emotionMap = useState<Map<DateTime, List<String>>>({});
 
     // 加载数据库中的日记条目
     Future<void> loadDiaryEntries() async {
@@ -33,15 +33,39 @@ class CalendarPage extends HookConsumerWidget {
         final entries = await isar.diaryEntrys.where().findAll();
         diaryEntries.value = entries;
 
-        // 更新 emotionMap
-        final newEmotionMap = <DateTime, String>{};
+        // 更新 emotionMap - 每个日期显示最后3个mood icon
+        final newEmotionMap = <DateTime, List<String>>{};
+
+        // 按日期分组
+        final Map<DateTime, List<DiaryEntry>> entriesByDate = {};
         for (var entry in entries) {
           final normalizedDate = _normalize(entry.date);
-          if (entry.moodIndex != null && entry.moodIndex! >= 0 && entry.moodIndex! < moodImages.length) {
-            // 这里可以根据 moodIndex 显示对应的图标
-            newEmotionMap[normalizedDate] = '😊'; // 可以后续优化为实际的 mood icon
+          if (!entriesByDate.containsKey(normalizedDate)) {
+            entriesByDate[normalizedDate] = [];
           }
+          entriesByDate[normalizedDate]!.add(entry);
         }
+
+        // 为每个日期获取最后3条记录的mood icon
+        entriesByDate.forEach((date, dateEntries) {
+          // 按时间倒序排序，获取最后3条
+          dateEntries.sort((a, b) => b.date.compareTo(a.date));
+          final last3Entries = dateEntries.take(3).toList();
+
+          final moodIcons = <String>[];
+          for (var entry in last3Entries) {
+            if (entry.moodIndex != null &&
+                entry.moodIndex! >= 0 &&
+                entry.moodIndex! < moodImages.length) {
+              moodIcons.add(moodImages[entry.moodIndex!]);
+            }
+          }
+
+          if (moodIcons.isNotEmpty) {
+            newEmotionMap[date] = moodIcons;
+          }
+        });
+
         emotionMap.value = newEmotionMap;
       } catch (e) {
         print('Error loading diary entries: $e');
@@ -66,9 +90,14 @@ class CalendarPage extends HookConsumerWidget {
     // 获取选中日期的日记条目
     List<DiaryEntry> getEntriesForSelectedDay() {
       final normalized = _normalize(selectedDay.value);
-      return diaryEntries.value.where((entry) {
+      final entries = diaryEntries.value.where((entry) {
         return _normalize(entry.date).isAtSameMomentAs(normalized);
       }).toList();
+
+      // 按时间倒序排序（最新的在前）
+      entries.sort((a, b) => b.date.compareTo(a.date));
+
+      return entries;
     }
 
     void toggleCalendar() {
@@ -88,7 +117,7 @@ class CalendarPage extends HookConsumerWidget {
     }
 
     Widget buildDayCell(DateTime day, bool selected, {bool isToday = false}) {
-      final emoji = emotionMap.value[_normalize(day)];
+      final moodIcons = emotionMap.value[_normalize(day)];
 
       return Container(
         decoration: selected
@@ -100,10 +129,66 @@ class CalendarPage extends HookConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              emoji ?? "⚪️",
-              style: const TextStyle(fontSize: 18),
-            ),
+            // 显示mood icons（最多3个，重叠布局）
+            if (moodIcons != null && moodIcons.isNotEmpty)
+              SizedBox(
+                height: 42,
+                width: 50,
+                child: Stack(
+                  children: [
+                    // 第3个图标（最旧的）- 中间偏下（最底层）
+                    if (moodIcons.length > 2)
+                      Positioned(
+                        left: 0,
+                        top: -3,
+                        child: Image.asset(
+                          moodIcons[2],
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    // 第2个图标 - 右上（中间层）
+                    if (moodIcons.length > 1)
+                      Positioned(
+                        right: -4,
+                        top: -2,
+                        child: Image.asset(
+                          moodIcons[1],
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    // 第1个图标（最新的）- 左上（最顶层）
+                    if (moodIcons.isNotEmpty)
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: -3,
+                        child: Image.asset(
+                          moodIcons[0],
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                  ],
+                ),
+              )
+            else
+              // 无数据时显示默认图标
+              SizedBox(
+                height: 30,
+                child: Center(
+                  child: Image.asset(
+                    'assets/calendar/default_icon.png',
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
             const SizedBox(height: 4),
             Text(
               '${day.day}',
