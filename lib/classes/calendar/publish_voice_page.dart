@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class PublishVoicePage extends HookConsumerWidget {
-  const PublishVoicePage({super.key});
+  final int? moodIndex;
+  const PublishVoicePage({super.key, this.moodIndex});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

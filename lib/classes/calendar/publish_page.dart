@@ -4,7 +4,8 @@ import 'publish_edit_page.dart';
 import 'publish_voice_page.dart';
 
 class PublishPage extends StatefulWidget {
-  const PublishPage({super.key});
+  final int? moodIndex;
+  const PublishPage({super.key, this.moodIndex});
 
   @override
   State<PublishPage> createState() => _PublishPageState();
@@ -102,9 +103,9 @@ class _PublishPageState extends State<PublishPage> with SingleTickerProviderStat
                 controller: _tabController,
                 children: [
                   // Edit mood tab content
-                  PublishEditPage(),
+                  PublishEditPage(moodIndex: widget.moodIndex),
                   // Voice mood tab content
-                  PublishVoicePage(),
+                  PublishVoicePage(moodIndex: widget.moodIndex),
                 ],
               ),
             ),

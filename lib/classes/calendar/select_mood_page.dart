@@ -34,7 +34,9 @@ class SelectMoodPage extends HookConsumerWidget {
                   crossAxisCount: 4, //横轴四个子widget
                   childAspectRatio: 1.0, //宽高比为1时，子widget
                 ),
-                children: moodImages.map((imagePath) {
+                children: moodImages.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final imagePath = entry.value;
                   return GestureDetector(
                     onTap: () {
                       // 关闭当前 SelectMoodPage 弹框
@@ -48,7 +50,7 @@ class SelectMoodPage extends HookConsumerWidget {
                           borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
                         ),
                         builder: (ctx) {
-                          return const PublishPage();
+                          return PublishPage(moodIndex: index);
                         },
                       );
                     },

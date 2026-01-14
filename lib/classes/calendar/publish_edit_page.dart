@@ -5,7 +5,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../configs/consts.dart';
 
 class PublishEditPage extends HookConsumerWidget {
-  const PublishEditPage({super.key});
+  final int? moodIndex;
+  const PublishEditPage({super.key,  this.moodIndex});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
