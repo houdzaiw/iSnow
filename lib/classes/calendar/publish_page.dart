@@ -85,6 +85,7 @@ class _PublishPageState extends State<PublishPage> with SingleTickerProviderStat
                   onTap: () {
                     // TODO: 实现发送功能
                     print('Send post tapped');
+
                   },
                   child: Image.asset(
                     'assets/calendar/send_post.png',
