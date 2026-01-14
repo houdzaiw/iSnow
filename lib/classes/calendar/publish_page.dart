@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../configs/app_Isar.dart';
+import '../../configs/providers.dart';
 import '../../model/diary_entry.dart';
 import 'publish_edit_page.dart';
 import 'publish_voice_page.dart';
@@ -14,6 +15,7 @@ class PublishPage extends HookConsumerWidget {
   // 保存数据到 Isar 数据库
   Future<void> _saveToDatabase(
     BuildContext context,
+    WidgetRef ref,
     TabController tabController,
     String editDescription,
     List<String> editImagePaths,
@@ -52,6 +54,9 @@ class PublishPage extends HookConsumerWidget {
         await isar.diaryEntrys.put(diaryEntry);
       });
 
+      // 触发刷新
+      ref.read(diaryRefreshProvider.notifier).state++;
+
       // 显示成功提示
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -61,17 +66,10 @@ class PublishPage extends HookConsumerWidget {
         Navigator.pop(context);
       }
     } catch (e) {
-      // 显示错误提示
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('保存失败：$e')),
-
-        );
-        print("Error saving to database: $e");
-      }
+      // ...existing code...
     }
   }
-
+  
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // 初始化图标数组
@@ -168,6 +166,7 @@ class PublishPage extends HookConsumerWidget {
                     // 保存到数据库
                     await _saveToDatabase(
                       context,
+                      ref,
                       tabController,
                       editDescription.value,
                       editImagePaths.value,
