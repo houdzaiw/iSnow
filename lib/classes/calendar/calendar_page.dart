@@ -296,14 +296,17 @@ class CalendarPage extends HookConsumerWidget {
                 itemCount: entriesForDay.length,
                 itemBuilder: (_, index) {
                   final entry = entriesForDay[index];
+                  if (entry.type == 'voice' ) {
+                    return _buildVoiceView(entry);
+                  }
                   return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
+                    margin: const EdgeInsets.symmetric(vertical: 10),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: entry.type == 'edit' ? _buildContentView(entry) : _buildVoiceView(entry),
+                    child: _buildContentView(entry),
                   );
                 },
               ),
@@ -353,51 +356,58 @@ class CalendarPage extends HookConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: 10),
         // 显示心情图标
-        if (entry.moodIndex != null &&
-            entry.moodIndex! >= 0 &&
-            entry.moodIndex! < moodImages.length)
-          Row(
-            children: [
-              Image.asset(
-                moodImages[entry.moodIndex!],
-                width: 40,
-                height: 40,
+        Row(
+          children: [
+            Spacer(),
+            Text(
+              '${entry.date.hour.toString().padLeft(2, '0')}:${entry.date.minute.toString().padLeft(2, '0')}',
+              style: TextStyle(
+                fontSize: 12,
+                color: Color(0xFFB2B2B2),
               ),
-              const SizedBox(width: 8),
-              Text(
-                '${entry.date.hour.toString().padLeft(2, '0')}:${entry.date.minute.toString().padLeft(2, '0')}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
+        ),
         const SizedBox(height: 8),
         // 显示语音播放控件占位符
-        Container(
-          width: 179,
-          height: 41,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/calendar/speak_bg_image.png'),
-              fit: BoxFit.contain,
+        Row(
+          children: [
+            if (entry.moodIndex != null &&
+                entry.moodIndex! >= 0 &&
+                entry.moodIndex! < moodImages.length)
+              Image.asset(
+              moodImages[entry.moodIndex!],
+              width: 40,
+              height: 40,
             ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              SizedBox(width: 18),
-              Image.asset('assets/calendar/speak_icon.png', width: 10, height: 16),
-              SizedBox(width: 4),
-              Text(
-                entry.description ?? '',
-                style: TextStyle(color: Color(0xFF212121)),
+            const SizedBox(width: 8),
+            Container(
+              width: 179,
+              height: 41,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/calendar/speak_bg_image.png'),
+                  fit: BoxFit.contain,
+                ),
               ),
-            ],
-          ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SizedBox(width: 18),
+                  Image.asset('assets/calendar/speak_icon.png', width: 10, height: 16),
+                  SizedBox(width: 4),
+                  Text(
+                    entry.description ?? '',
+                    style: TextStyle(color: Color(0xFF212121)),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
+        const SizedBox(height: 10),
       ],
     );
   }
@@ -495,9 +505,4 @@ class CalendarPage extends HookConsumerWidget {
         ],
       );
   }
-  // 将recordDuration.value转为总共秒数
-  // String _durationToSeconds(String? d) {
-  //   if (d == null) return "";
-  //   return d.inSeconds.toString();
-  // }
 }
