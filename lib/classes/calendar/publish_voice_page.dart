@@ -74,6 +74,9 @@ class PublishVoicePage extends HookConsumerWidget {
         isRecording.value = false;
         if (path != null) {
           recordedFilePath.value = path;
+          if (onSave != null) {
+            onSave!(recordedFilePath.value!);
+          }
           // prepare player
           try {
             await player.setFilePath(path);
