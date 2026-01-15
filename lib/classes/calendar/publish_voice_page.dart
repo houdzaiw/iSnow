@@ -9,7 +9,7 @@ import 'package:record/record.dart';
 
 class PublishVoicePage extends HookConsumerWidget {
   final int? moodIndex;
-  final Function(String voicePath)? onSave;
+  final Function(String voicePath, String inSecond)? onSave;
 
   const PublishVoicePage({
     super.key,
@@ -75,7 +75,7 @@ class PublishVoicePage extends HookConsumerWidget {
         if (path != null) {
           recordedFilePath.value = path;
           if (onSave != null) {
-            onSave!(recordedFilePath.value!);
+            onSave!(recordedFilePath.value!, _durationToSeconds(recordDuration.value));
           }
           // prepare player
           try {

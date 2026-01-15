@@ -44,6 +44,7 @@ class PublishPage extends HookConsumerWidget {
       } else {
         // 语音模式：保存语音路径
         // TODO: 语音功能待实现
+        diaryEntry.description = editDescription;
         diaryEntry.images = editImagePaths;
         diaryEntry.content = voicePath;
         diaryEntry.type = currentType;
@@ -200,7 +201,8 @@ class PublishPage extends HookConsumerWidget {
                   // Voice mood tab content
                   PublishVoicePage(
                     moodIndex: moodIndex,
-                    onSave: (voicePathValue) {
+                    onSave: (voicePathValue, inSeconds) {
+                      editDescription.value = inSeconds;
                       voicePath.value = voicePathValue;
                     },
                   ),

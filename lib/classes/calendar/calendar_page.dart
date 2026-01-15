@@ -303,104 +303,12 @@ class CalendarPage extends HookConsumerWidget {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // 显示心情图标
-                        if (entry.moodIndex != null &&
-                            entry.moodIndex! >= 0 &&
-                            entry.moodIndex! < moodImages.length)
-                          Row(
-                            children: [
-                              Image.asset(
-                                moodImages[entry.moodIndex!],
-                                width: 40,
-                                height: 40,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                '${entry.date.hour.toString().padLeft(2, '0')}:${entry.date.minute.toString().padLeft(2, '0')}',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          ),
-                        const SizedBox(height: 8),
-                        // 显示描述内容
-                        if (entry.description != null &&
-                            entry.description!.isNotEmpty)
-                          Text(
-                            entry.description!,
-                            style: const TextStyle(fontSize: 14),
-                          ),
-                        // 显示图片
-                        if (entry.images != null && entry.images!.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: entry.images!.take(4).map((imagePath) {
-                                return ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.file(
-                                    File(imagePath),
-                                    width: 60,
-                                    height: 60,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      // 如果图片加载失败，显示占位图
-                                      return Container(
-                                        width: 60,
-                                        height: 60,
-                                        color: Colors.grey[300],
-                                        child: const Icon(
-                                          Icons.image_not_supported,
-                                          color: Colors.grey,
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                          ),
-                        // 显示类型标签
-                        if (entry.type != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: entry.type == 'edit'
-                                    ? Colors.blue.shade50
-                                    : Colors.green.shade50,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                entry.type == 'edit' ? '编辑' : '语音',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: entry.type == 'edit'
-                                      ? Colors.blue
-                                      : Colors.green,
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
+                    child: entry.type == 'edit' ? _buildContentView(entry) : _buildVoiceView(entry),
                   );
                 },
               ),
       );
     }
-
     void onPublishPressed() async {
       await showModalBottomSheet<void>(
         context: context,
@@ -440,4 +348,156 @@ class CalendarPage extends HookConsumerWidget {
       ),
     );
   }
+
+  Widget _buildVoiceView(DiaryEntry entry) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 显示心情图标
+        if (entry.moodIndex != null &&
+            entry.moodIndex! >= 0 &&
+            entry.moodIndex! < moodImages.length)
+          Row(
+            children: [
+              Image.asset(
+                moodImages[entry.moodIndex!],
+                width: 40,
+                height: 40,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '${entry.date.hour.toString().padLeft(2, '0')}:${entry.date.minute.toString().padLeft(2, '0')}',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+        const SizedBox(height: 8),
+        // 显示语音播放控件占位符
+        Container(
+          width: 179,
+          height: 41,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/calendar/speak_bg_image.png'),
+              fit: BoxFit.contain,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SizedBox(width: 18),
+              Image.asset('assets/calendar/speak_icon.png', width: 10, height: 16),
+              SizedBox(width: 4),
+              Text(
+                entry.description ?? '',
+                style: TextStyle(color: Color(0xFF212121)),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+  Widget _buildContentView(DiaryEntry entry) {
+    return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 显示心情图标
+          if (entry.moodIndex != null &&
+              entry.moodIndex! >= 0 &&
+              entry.moodIndex! < moodImages.length)
+            Row(
+              children: [
+                Image.asset(
+                  moodImages[entry.moodIndex!],
+                  width: 40,
+                  height: 40,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '${entry.date.hour.toString().padLeft(2, '0')}:${entry.date.minute.toString().padLeft(2, '0')}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          const SizedBox(height: 8),
+          // 显示描述内容
+          if (entry.description != null &&
+              entry.description!.isNotEmpty)
+            Text(
+              entry.description!,
+              style: const TextStyle(fontSize: 14),
+            ),
+          // 显示图片
+          if (entry.images != null && entry.images!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: entry.images!.take(4).map((imagePath) {
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.file(
+                      File(imagePath),
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        // 如果图片加载失败，显示占位图
+                        return Container(
+                          width: 60,
+                          height: 60,
+                          color: Colors.grey[300],
+                          child: const Icon(
+                            Icons.image_not_supported,
+                            color: Colors.grey,
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          // 显示类型标签
+          if (entry.type != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: entry.type == 'edit'
+                      ? Colors.blue.shade50
+                      : Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  entry.type == 'edit' ? '编辑' : '语音',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: entry.type == 'edit'
+                        ? Colors.blue
+                        : Colors.green,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      );
+  }
+  // 将recordDuration.value转为总共秒数
+  // String _durationToSeconds(String? d) {
+  //   if (d == null) return "";
+  //   return d.inSeconds.toString();
+  // }
 }
