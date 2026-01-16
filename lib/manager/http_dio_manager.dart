@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 
 class HttpDioManager {
-  static const String _baseUrl = 'http://w1.luyouxia.com/simise';
+  static const String _baseUrl = 'http://simi2.w1.luyouxia.net/simi';
 
   static final HttpDioManager _instance = HttpDioManager._internal();
   late Dio _dio;
