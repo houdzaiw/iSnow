@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:project/classes/profile/my_posts_page.dart';
+import 'package:project/classes/web/web_view_page.dart';
 
 import '../classes/calendar/calendar_page.dart';
 import '../classes/home/home_page.dart';
@@ -78,6 +79,18 @@ final GoRouter goRouter = GoRouter(
           path: '/my-posts',
           name: 'my-posts',
           builder: (context, state) => const MyPostsPage(),
+        ),
+        GoRoute(
+          path: '/web-view',
+          name: 'web-view',
+          builder: (context, state) {
+            final title = state.uri.queryParameters['title'] ?? 'WebView';
+            final uri = state.uri.queryParameters['uri'] ?? '';
+            return WebViewPage(
+              title: title,
+              uri: uri,
+            );
+          },
         ),
       ],
     ),

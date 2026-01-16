@@ -107,6 +107,14 @@ class ProfilePage extends StatelessWidget {
                         if (item.name == 'My Posts') {
                           context.push('/my-posts');
                         }
+                        if (item.name == 'User Privacy') {
+                          context.push(
+                            '/web-view?title=User Privacy&uri=https://www.example.com/user-privacy',
+                          );
+                        }
+                        if (item.name == 'Settings') {
+                          context.push('/settings');
+                        }
                       },
                     ),
                   );

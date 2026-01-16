@@ -46,6 +46,7 @@ dependencies:
   record: ^6.1.2
   just_audio: ^0.9.34
   dio: ^5.9.0
+  webview_flutter: ^4.13.1
 
 dev_dependencies:
   flutter_test:
