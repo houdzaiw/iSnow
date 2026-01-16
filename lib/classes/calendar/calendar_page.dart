@@ -8,9 +8,9 @@ import 'package:isar/isar.dart';
 import 'package:project/classes/calendar/select_mood_page.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-import '../../configs/app_Isar.dart';
+import '../../manager/app_Isar.dart';
 import '../../configs/consts.dart';
-import '../../configs/providers.dart';
+import '../../manager/providers.dart';
 import '../../model/diary_entry.dart';
 
 class CalendarPage extends HookConsumerWidget {

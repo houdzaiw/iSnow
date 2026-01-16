@@ -45,6 +45,7 @@ dependencies:
   flutter_hooks: ^0.21.3+1
   record: ^6.1.2
   just_audio: ^0.9.34
+  dio: ^5.9.0
 
 dev_dependencies:
   flutter_test:

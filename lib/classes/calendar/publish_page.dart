@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../configs/app_Isar.dart';
-import '../../configs/providers.dart';
+import '../../manager/app_Isar.dart';
+import '../../manager/providers.dart';
 import '../../model/diary_entry.dart';
 import 'publish_edit_page.dart';
 import 'publish_voice_page.dart';

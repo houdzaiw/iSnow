@@ -11,7 +11,7 @@ import '../classes/launch_page.dart';
 import '../classes/login_page.dart';
 import '../classes/login_detail_page.dart';
 import '../classes/register_page.dart';
-import 'app_shell.dart';
+import '../manager/app_shell.dart';
 
 final GoRouter goRouter = GoRouter(
   initialLocation: '/launch',
