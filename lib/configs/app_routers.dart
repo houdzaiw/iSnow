@@ -54,6 +54,23 @@ final GoRouter goRouter = GoRouter(
       name: 'edit-nickname',
       builder: (context, state) => const EditNicknamePage(),
     ),
+    GoRoute(
+      path: '/my-posts',
+      name: 'my-posts',
+      builder: (context, state) => const MyPostsPage(),
+    ),
+    GoRoute(
+      path: '/web-view',
+      name: 'web-view',
+      builder: (context, state) {
+        final title = state.uri.queryParameters['title'] ?? 'WebView';
+        final uri = state.uri.queryParameters['uri'] ?? '';
+        return WebViewPage(
+          title: title,
+          uri: uri,
+        );
+      },
+    ),
     // 主应用页面（带底部导航）
     ShellRoute(
       builder: (BuildContext context, GoRouterState state, Widget child) {
@@ -75,23 +92,7 @@ final GoRouter goRouter = GoRouter(
           name: 'profile',
           builder: (context, state) => const ProfilePage(),
         ),
-        GoRoute(
-          path: '/my-posts',
-          name: 'my-posts',
-          builder: (context, state) => const MyPostsPage(),
-        ),
-        GoRoute(
-          path: '/web-view',
-          name: 'web-view',
-          builder: (context, state) {
-            final title = state.uri.queryParameters['title'] ?? 'WebView';
-            final uri = state.uri.queryParameters['uri'] ?? '';
-            return WebViewPage(
-              title: title,
-              uri: uri,
-            );
-          },
-        ),
+
       ],
     ),
   ],
