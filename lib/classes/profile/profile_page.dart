@@ -103,6 +103,10 @@ class ProfilePage extends StatelessWidget {
                       onTap: () {
                         // 处理点击事件
                         print('点击了: ${item.name}');
+                        //调用my posts 路由跳转
+                        if (item.name == 'My Posts') {
+                          context.push('/my-posts');
+                        }
                       },
                     ),
                   );

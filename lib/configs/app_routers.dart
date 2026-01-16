@@ -1,6 +1,7 @@
 // dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:project/classes/profile/my_posts_page.dart';
 
 import '../classes/calendar/calendar_page.dart';
 import '../classes/home/home_page.dart';
@@ -72,6 +73,11 @@ final GoRouter goRouter = GoRouter(
           path: '/profile',
           name: 'profile',
           builder: (context, state) => const ProfilePage(),
+        ),
+        GoRoute(
+          path: '/my-posts',
+          name: 'my-posts',
+          builder: (context, state) => const MyPostsPage(),
         ),
       ],
     ),
