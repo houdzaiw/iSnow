@@ -6,6 +6,7 @@ import 'package:project/classes/web/web_view_page.dart';
 
 import '../classes/calendar/calendar_page.dart';
 import '../classes/home/home_page.dart';
+import '../classes/profile/about_us_page.dart';
 import '../classes/profile/edit_profile_page.dart';
 import '../classes/profile/edit_nickname_page.dart';
 import '../classes/profile/profile_page.dart';
@@ -70,6 +71,11 @@ final GoRouter goRouter = GoRouter(
           uri: uri,
         );
       },
+    ),
+    GoRoute(
+      path: '/about-us',
+      name: 'about-us',
+      builder: (context, state) => const AboutUsPage(),
     ),
     // 主应用页面（带底部导航）
     ShellRoute(

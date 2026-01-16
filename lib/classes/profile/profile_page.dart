@@ -112,6 +112,14 @@ class ProfilePage extends StatelessWidget {
                             '/web-view?title=User Privacy&uri=https://www.example.com/user-privacy',
                           );
                         }
+                        if (item.name == 'About Us') {
+                          context.push('/about-us');
+                        }
+                        if (item.name == 'Contact Us') {
+                          context.push(
+                            '/web-view?title=Contact Us&uri=https://www.example.com/contact',
+                          );
+                        }
                         if (item.name == 'Settings') {
                           context.push('/settings');
                         }
