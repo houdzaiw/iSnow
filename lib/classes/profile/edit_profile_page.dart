@@ -41,7 +41,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       body: Container(
         //圆角， 白色背景
         margin: const EdgeInsets.only(left: 16, right: 16, top: 20),
-        height: 52 * 4 + 3, // 四个条目高度加间隔
+        height: 52 * 4 + 20, // 四个条目高度加间隔
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.all(

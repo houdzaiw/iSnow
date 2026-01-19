@@ -2,6 +2,7 @@ import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../model/diary_entry.dart';
+import '../model/chat_message.dart';
 
 class IsarDB {
   IsarDB._();
@@ -14,7 +15,7 @@ class IsarDB {
 
     final dir = await getApplicationDocumentsDirectory();
     _isar = await Isar.open(
-      [DiaryEntrySchema],
+      [DiaryEntrySchema, ChatMessageSchema],
       directory: dir.path,
     );
     return _isar!;
