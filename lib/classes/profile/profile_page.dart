@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import '../../widgets/custom_scaffold.dart';
 import 'profile_menu_item.dart';
 
 class ProfilePage extends HookConsumerWidget {
@@ -11,7 +12,21 @@ class ProfilePage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final menuItems = ProfileMenuData.getMenuItems();
     return Scaffold(
-      appBar: null,
+      extendBodyBehindAppBar: true,  // ★ 关键：让 body 内容延伸到 AppBar 后面
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: Image.asset(
+              "assets/message/message_icon.png",
+              width: 24,
+              height: 24,
+            ),
+            onPressed: () => onRightIconTap(context),
+          ),
+        ],
+      ),
       backgroundColor: const Color(0xFFFFF6E5),
       body: Container(
         decoration: const BoxDecoration(
@@ -134,5 +149,11 @@ class ProfilePage extends HookConsumerWidget {
         ),
       ),
     );
+  }
+
+  void onRightIconTap(BuildContext context) {
+    // 跳转到消息页面
+    print('跳转到消息页面');
+    context.push('/messages');
   }
 }
