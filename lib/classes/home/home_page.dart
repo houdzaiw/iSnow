@@ -1,5 +1,6 @@
 // dart
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'dart:math';
 import 'dart:async';
 import '../../configs/consts.dart';
@@ -56,6 +57,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   void _hideDialog() {
     _overlayEntry?.remove();
     _overlayEntry = null;
+  }
+  void _onGoToMessageTap(BuildContext context) {
+    _hideDialog();
+    context.push('/chat-view');
   }
 
   void _generateRandomMoodImages() {
@@ -135,6 +140,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         builder: (context) => Positioned.fill(
           child: DialogOverlay(
             onClose: _hideDialog,
+            onOpen: () => _onGoToMessageTap(context), // No-op for now
           ),
         )
     );

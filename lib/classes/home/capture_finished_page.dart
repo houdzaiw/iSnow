@@ -5,10 +5,12 @@ import 'dart:math';
 // 弹框图层类
 class DialogOverlay extends StatelessWidget {
   final VoidCallback onClose;
+  final VoidCallback onOpen;
 
   const DialogOverlay({
     super.key,
     required this.onClose,
+    required this.onOpen,
   });
 
   @override
@@ -94,7 +96,7 @@ class DialogOverlay extends StatelessWidget {
             GestureDetector(
               onTap: () {
                 // TODO: 实现open按钮功能
-                onClose();
+                onOpen();
               },
               child: Container(
                 width: 153,
@@ -110,6 +112,7 @@ class DialogOverlay extends StatelessWidget {
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF212121),
+                    decoration: TextDecoration.none,
                   ),
                 ),
               ),

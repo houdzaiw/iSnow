@@ -1,6 +1,7 @@
 // dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:project/classes/message/chat_page.dart';
 import 'package:project/classes/message/message_page.dart';
 import 'package:project/classes/profile/my_posts_page.dart';
 import 'package:project/classes/web/web_view_page.dart';
@@ -82,6 +83,11 @@ final GoRouter goRouter = GoRouter(
       path: '/messages',
       name: 'messages',
       builder: (context, state) => const MessagePage(),
+    ),
+    GoRoute(
+      path: '/chat-view',
+      name: 'chat-view',
+      builder: (context, state) => const ChatPage(),
     ),
     // 主应用页面（带底部导航）
     ShellRoute(
