@@ -1,6 +1,6 @@
 // dart
 import 'dart:io';
-
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -313,6 +313,19 @@ class CalendarPage extends HookConsumerWidget {
       );
     }
     void onPublishPressed() async {
+      // 判断选择日历日期是否为今天， 不为今天就toast提示
+      final now = DateTime.now();
+      final normalizedSelected = _normalize(selectedDay.value);
+      final normalizedNow = _normalize(now);
+      if (!normalizedSelected.isAtSameMomentAs(normalizedNow)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('只能在当天发布心情哦~'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        return;
+      }
       await showModalBottomSheet<void>(
         context: context,
         backgroundColor: Colors.white,
@@ -362,7 +375,7 @@ class CalendarPage extends HookConsumerWidget {
           children: [
             Spacer(),
             Text(
-              '${entry.date.hour.toString().padLeft(2, '0')}:${entry.date.minute.toString().padLeft(2, '0')}',
+              _dateFormatter(entry.date),
               style: TextStyle(
                 fontSize: 12,
                 color: Color(0xFFB2B2B2),
@@ -374,6 +387,7 @@ class CalendarPage extends HookConsumerWidget {
         // 显示语音播放控件占位符
         Row(
           children: [
+            const SizedBox(width: 12),
             if (entry.moodIndex != null &&
                 entry.moodIndex! >= 0 &&
                 entry.moodIndex! < moodImages.length)
@@ -428,10 +442,19 @@ class CalendarPage extends HookConsumerWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '${entry.date.hour.toString().padLeft(2, '0')}:${entry.date.minute.toString().padLeft(2, '0')}',
+                  "This is my mood today",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF212121),
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  _dateFormatter(entry.date),
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey[600],
+                    color: Color(0xFFB2B2B2),
                   ),
                 ),
               ],
@@ -442,12 +465,12 @@ class CalendarPage extends HookConsumerWidget {
               entry.description!.isNotEmpty)
             Text(
               entry.description!,
-              style: const TextStyle(fontSize: 14),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Color(0xFF212121)),
             ),
           // 显示图片
           if (entry.images != null && entry.images!.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.only(top: 8),
+              padding: const EdgeInsets.only(top: 12),
               child: Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -476,33 +499,12 @@ class CalendarPage extends HookConsumerWidget {
                 }).toList(),
               ),
             ),
-          // 显示类型标签
-          if (entry.type != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: entry.type == 'edit'
-                      ? Colors.blue.shade50
-                      : Colors.green.shade50,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  entry.type == 'edit' ? '编辑' : '语音',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: entry.type == 'edit'
-                        ? Colors.blue
-                        : Colors.green,
-                  ),
-                ),
-              ),
-            ),
         ],
       );
+  }
+  String _dateFormatter(DateTime date) {
+    final dateFormatter = DateFormat('yyyy-MM-dd HH:mm:ss');
+    final formattedDate = dateFormatter.format(date);
+    return formattedDate;
   }
 }
