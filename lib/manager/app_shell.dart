@@ -20,6 +20,7 @@ class AppShell extends StatelessWidget {
 
     return Scaffold(
       body: child,
+      backgroundColor: const Color(0xFFFDF5EB),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
         type: BottomNavigationBarType.fixed,

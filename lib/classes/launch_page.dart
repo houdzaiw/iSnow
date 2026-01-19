@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:project/widgets/custom_scaffold.dart';
 
 class LaunchPage extends StatefulWidget {
   const LaunchPage({super.key});
@@ -48,7 +49,8 @@ class _LaunchPageState extends State<LaunchPage> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return CustomScaffold(
+      title: '',
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

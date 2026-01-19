@@ -53,13 +53,6 @@ class AboutUsPage extends HookConsumerWidget {
                             color: const Color(0xFF999999),
                           ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Build 1',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: const Color(0xFFCCCCCC),
-                          ),
-                    ),
                   ],
                 ),
                 const SizedBox(height: 40),

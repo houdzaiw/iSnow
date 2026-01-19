@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../widgets/custom_scaffold.dart';
+
 class LoginDetailPage extends StatefulWidget {
   const LoginDetailPage({super.key});
 
@@ -21,8 +23,8 @@ class _LoginDetailPageState extends State<LoginDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: null,
+    return CustomScaffold(
+      title: '',
       body: Container(
         width: double.infinity,
         height: double.infinity,

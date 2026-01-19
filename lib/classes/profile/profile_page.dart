@@ -1,17 +1,18 @@
 // dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'profile_menu_item.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends HookConsumerWidget {
   const ProfilePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final menuItems = ProfileMenuData.getMenuItems();
-
     return Scaffold(
       appBar: null,
+      backgroundColor: const Color(0xFFFFF6E5),
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
