@@ -21,9 +21,9 @@ class ChatPage extends HookConsumerWidget {
     Future<void> loadMessages() async {
       try {
         final isar = await IsarDB.instance.db;
-        final loadedMessages = await isar.chatMessages.where().sortByCreatedAtDesc().findAll();
-        // 反转顺序，使最新消息在下方
-        messages.value = loadedMessages.reversed.toList();
+        final loadedMessages = await isar.chatMessages.where().sortByCreatedAt().findAll();
+        // 使最新消息在下方
+        messages.value = loadedMessages.toList();
       } catch (e) {
         // 错误处理，不显示调试信息
         debugPrint('Error loading messages: $e');
@@ -124,7 +124,6 @@ class ChatPage extends HookConsumerWidget {
                     ),
                   )
                 : ListView.builder(
-                    reverse: true,
                     itemCount: messages.value.length,
                     itemBuilder: (context, index) {
                       return buildMessageBubble(messages.value[index]);
