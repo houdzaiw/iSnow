@@ -1,4 +1,6 @@
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +10,7 @@ import 'package:isar/isar.dart';
 import '../../manager/app_Isar.dart';
 import '../../model/chat_message.dart';
 import '../../widgets/custom_scaffold.dart';
+import 'delete_message_dialog.dart';
 
 class MessagePage extends HookConsumerWidget {
   const MessagePage({super.key});
@@ -16,6 +19,7 @@ class MessagePage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final messages = useState<List<ChatMessage>>([]);
     final isLoading = useState(true);
+    final overlayEntry = useState<OverlayEntry?>(null);
 
     // 加载最近的消息列表
     Future<void> loadLatestMessages() async {
@@ -24,7 +28,7 @@ class MessagePage extends HookConsumerWidget {
         final allMessages = await isar.chatMessages.where().sortByCreatedAtDesc().findAll();
 
         // 获取最新的 10 条消息作为对话列表的预览
-        messages.value = allMessages.take(10).toList();
+        messages.value = allMessages.take(1).toList();
         isLoading.value = false;
       } catch (e) {
         debugPrint('Error loading messages: $e');
@@ -47,57 +51,61 @@ class MessagePage extends HookConsumerWidget {
       );
     }
 
+
     return CustomScaffold(
       title: 'Messages',
-      body: messages.value.isEmpty
-          ? Center(
-              child: Text(
-                '暂无消息',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
-              ),
-            )
-          : ListView.builder(
-              itemCount: messages.value.length,
-              itemBuilder: (context, index) {
-                final message = messages.value[index];
-                return _buildMessageTile(context, message);
-              },
+      body: Container(
+        decoration: BoxDecoration(
+          image: const DecorationImage(
+            image: AssetImage('assets/message/message_bg_image.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: messages.value.isEmpty
+            ? Center(
+          child: Text(
+            '暂无消息',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
             ),
+          ),
+        )
+            : ListView.builder(
+          itemCount: messages.value.length,
+          itemBuilder: (context, index) {
+            final message = messages.value[index];
+            return _buildMessageTile(context, message, overlayEntry);
+          },
+        ),
+      ),
     );
   }
 
-  Widget _buildMessageTile(BuildContext context, ChatMessage message) {
+  Widget _buildMessageTile(BuildContext context, ChatMessage message, ValueNotifier<OverlayEntry?> overlayEntry) {
     return GestureDetector(
       onTap: () {
         // 进入聊天详情页
         context.push('/chat-view');
       },
+      // 长按
+      onLongPress: () {
+        // 显示删除对话选项
+        _showDialogAsync(context, overlayEntry);
+      },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withValues(alpha: 0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
+        color: Colors.transparent,
         child: Row(
           children: [
             // 头像占位符
             Container(
-              width: 48,
-              height: 48,
+              width: 50,
+              height: 50,
               decoration: BoxDecoration(
-                color: Colors.orange.shade100,
-                borderRadius: BorderRadius.circular(24),
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(25),
               ),
               child: Center(
                 child: Text(
@@ -123,8 +131,8 @@ class MessagePage extends HookConsumerWidget {
                       Text(
                         message.sender == 'user' ? 'You' : 'Contact',
                         style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
                           color: Color(0xFF212121),
                         ),
                       ),
@@ -132,7 +140,7 @@ class MessagePage extends HookConsumerWidget {
                         _formatTime(message.createdAt),
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.grey[600],
+                          color: Color(0x66000000),
                         ),
                       ),
                     ],
@@ -144,8 +152,8 @@ class MessagePage extends HookConsumerWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[700],
+                      fontSize: 16,
+                      color: Color(0xFF777777),
                     ),
                   ),
                 ],
@@ -155,6 +163,32 @@ class MessagePage extends HookConsumerWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _showDialogAsync(BuildContext context, ValueNotifier<OverlayEntry?> overlayEntry) {
+    if (overlayEntry.value != null) return Future.value();
+
+    overlayEntry.value = OverlayEntry(
+        builder: (overlayContext) => Positioned.fill(
+          child: DeleteMessageDialog(
+            onCancel: () {
+              overlayEntry.value?.remove();
+              overlayEntry.value = null;
+            },
+            onConfirm: () {
+              overlayEntry.value?.remove();
+              overlayEntry.value = null;
+            },
+          ),
+        )
+    );
+    Overlay.of(context, rootOverlay: true).insert(overlayEntry.value!);
+
+    final completer = Completer<void>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      completer.complete();
+    });
+    return completer.future;
   }
 
   String _formatTime(DateTime dateTime) {
