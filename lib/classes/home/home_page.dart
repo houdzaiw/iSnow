@@ -19,7 +19,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   final Random _random = Random();
   late List<MoodImageData> _randomMoodImages;
-  late List<MoodImageData> _targetMoodImages;
+  late List<List<MoodImageData>> _waypointsList; // 存储多个路径点
   late AnimationController _animationController;
   late Animation<double> _animation;
   OverlayEntry? _overlayEntry;
@@ -30,20 +30,30 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   void initState() {
     super.initState();
     _generateRandomMoodImages();
-    _targetMoodImages = List.from(_randomMoodImages);
+    _waypointsList = [List.from(_randomMoodImages)];
 
+    // 一次性动画，包含多个阶段，从快到慢
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 2500),
+      duration: const Duration(milliseconds: 3000), // 总时长3秒
       vsync: this,
     );
 
     _animation = CurvedAnimation(
       parent: _animationController,
-      curve: Curves.elasticOut, // 弹跳效果
+      curve: Curves.easeOutCubic, // 从快到慢，开始快结束慢
     );
 
     _animationController.addListener(() {
       setState(() {});
+    });
+
+    _animationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        // 动画完成后显示弹框
+        _showDialogAsync().then((_) {
+          _isAnimating = false;
+        });
+      }
     });
   }
 
@@ -80,55 +90,55 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     }).toList();
   }
 
+  void _generateWaypoints() {
+    // 生成3个路径点（包括起点共4个点）
+    const int waypointCount = 3;
+    _waypointsList = [List.from(_randomMoodImages)]; // 起点
+
+    for (int i = 0; i < waypointCount; i++) {
+      // 每次随机选择50-80%的图片进行移动
+      final animateCount = (moodImages.length * (0.5 + _random.nextDouble() * 0.3)).round();
+      final animateIndices = <int>{};
+
+      while (animateIndices.length < animateCount) {
+        animateIndices.add(_random.nextInt(moodImages.length));
+      }
+
+      // 生成新的路径点
+      final previousWaypoint = _waypointsList.last;
+      final newWaypoint = List.generate(moodImages.length, (index) {
+        if (animateIndices.contains(index)) {
+          // 这个图片会移动到新位置
+          final isInBottomArea = _random.nextDouble() < 0.8;
+          final top = isInBottomArea
+              ? 0.4 + _random.nextDouble() * 0.4
+              : _random.nextDouble() * 0.4;
+
+          return MoodImageData(
+            imagePath: moodImages[index],
+            left: _random.nextDouble() * 0.7,
+            top: top,
+            rotation: _random.nextDouble() * 2 * pi,
+          );
+        } else {
+          // 保持上一个路径点的位置
+          return previousWaypoint[index];
+        }
+      });
+
+      _waypointsList.add(newWaypoint);
+    }
+  }
+
   void _animateMoodImages() {
     // Prevent re-entry while an animation/dialog is pending
     if (_isAnimating || _overlayEntry != null) return;
     _isAnimating = true;
 
-    // 随机选择30-50%的图片进行动画
-    final animateCount = (moodImages.length * (0.3 + _random.nextDouble() * 0.2)).round();
-    final animateIndices = <int>{};
+    _generateWaypoints();
 
-    // 随机选择要动画的图片索引
-    while (animateIndices.length < animateCount) {
-      animateIndices.add(_random.nextInt(moodImages.length));
-      animateIndices.add(_random.nextInt(moodImages.length));
-    }
-
-    // 生成新的目标位置（只为选中的图片生成新位置）
-    _targetMoodImages = List.generate(moodImages.length, (index) {
-      if (animateIndices.contains(index)) {
-        // 这个图片会动画到新位置
-        // 70-90%的图片显示在下方，10-30%显示在上方
-        final isInBottomArea = _random.nextDouble() < 0.8; // 80%概率在下方
-        final top = isInBottomArea
-            ? 0.4 + _random.nextDouble() * 0.4  // 下方区域: 40%-80%
-            : _random.nextDouble() * 0.4;        // 上方区域: 0%-40%
-
-        return MoodImageData(
-          imagePath: moodImages[index],
-          left: _random.nextDouble() * 0.7,
-          top: top,
-          rotation: _random.nextDouble() * 2 * pi,
-        );
-      } else {
-        // 这个图片保持原位置
-        return _randomMoodImages[index];
-      }
-    });
-
-    // 重置并开始动画
-    _animationController.reset();
-    _animationController.forward().then((_) async {
-      // 动画完成后，更新起始位置为目标位置
-      setState(() {
-        _randomMoodImages = List.from(_targetMoodImages);
-      });
-      // 显示全屏弹框并等待弹框插入完成的下一帧
-      await _showDialogAsync();
-      // allow further animations/clicks after dialog has been shown
-      _isAnimating = false;
-    });
+    // 开始动画
+    _animationController.forward(from: 0);
   }
 
   /// Inserts the overlay and completes after the next frame so callers can
@@ -154,20 +164,50 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   List<MoodImageData> _getInterpolatedMoodImages() {
-    if (!_animationController.isAnimating) {
+    if (!_animationController.isAnimating || _waypointsList.length < 2) {
       return _randomMoodImages;
     }
 
+    final progress = _animation.value;
+
+    // 将动画分为3个阶段，速度由快到慢
+    // 第1阶段: 0.0-0.2 (快，占20%时间，约0.6秒)
+    // 第2阶段: 0.2-0.5 (中，占30%时间，约0.9秒)
+    // 第3阶段: 0.5-1.0 (慢，占50%时间，约1.5秒)
+
+    int startWaypointIndex;
+    int endWaypointIndex;
+    double segmentProgress;
+
+    if (progress <= 0.2) {
+      // 第1阶段：快速移动
+      startWaypointIndex = 0;
+      endWaypointIndex = 1;
+      segmentProgress = progress / 0.2;
+    } else if (progress <= 0.5) {
+      // 第2阶段：中速移动
+      startWaypointIndex = 1;
+      endWaypointIndex = 2;
+      segmentProgress = (progress - 0.2) / 0.3;
+    } else {
+      // 第3阶段：慢速移动
+      startWaypointIndex = 2;
+      endWaypointIndex = 3;
+      segmentProgress = (progress - 0.5) / 0.5;
+    }
+
+    final startWaypoint = _waypointsList[startWaypointIndex];
+    final endWaypoint = _waypointsList[endWaypointIndex];
+
     return List.generate(_randomMoodImages.length, (index) {
-      final start = _randomMoodImages[index];
-      final end = _targetMoodImages[index];
-      final t = _animation.value;
+      final start = startWaypoint[index];
+      final end = endWaypoint[index];
 
       return MoodImageData(
         imagePath: start.imagePath,
-        left: start.left + (end.left - start.left) * t,
-        top: start.top + (end.top - start.top) * t,
-        rotation: start.rotation + (end.rotation - start.rotation) * t,
+        left: start.left + (end.left - start.left) * segmentProgress,
+        top: start.top + (end.top - start.top) * segmentProgress,
+        rotation: start.rotation + (end.rotation - start.rotation) * segmentProgress,
       );
     });
   }
