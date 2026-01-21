@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isar/isar.dart';
 
+import '../../configs/consts.dart';
 import '../../manager/app_Isar.dart';
 import '../../model/chat_message.dart';
 import '../../widgets/custom_scaffold.dart';
@@ -102,6 +103,14 @@ class ChatPage extends HookConsumerWidget {
       rightIconPath: 'assets/base/more_button.png',
       onRightIconTap: () {
         // 更多选项逻辑
+        showUserActionOptions(context,
+            onDeleteSelected: () async {
+          final isar = await IsarDB.instance.db;
+          await isar.writeTxn(() async {
+            await isar.chatMessages.clear();
+          });
+          await loadMessages();
+        });
       },
       body: Column(
         children: [
