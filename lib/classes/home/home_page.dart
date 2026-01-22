@@ -1,6 +1,7 @@
 // dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:project/model/diary_entry.dart';
 import 'dart:math';
 import 'dart:async';
 import '../../configs/consts.dart';
@@ -70,7 +71,15 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
   void _onGoToMessageTap(BuildContext context) {
     _hideDialog();
-    context.push('/chat-view');
+    final entry = DiaryEntry()
+      ..id = 100200
+      ..date = DateTime.parse("2024-01-01")
+      ..emoji = "😊"
+      ..content = "This is a captured voice entry."
+      ..description = "This is a captured voice entry."
+      ..type = "edit"
+      ..moodIndex = 0;
+    context.push("/post_detail-view", extra: entry);
   }
 
   void _generateRandomMoodImages() {
