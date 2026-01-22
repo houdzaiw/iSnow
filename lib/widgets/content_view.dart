@@ -6,8 +6,8 @@ import '../model/diary_entry.dart';
 
 class ContentView extends StatelessWidget {
   final DiaryEntry entry;
-
-  const ContentView({super.key, required this.entry});
+  final bool isDetail;
+  const ContentView({super.key, required this.entry, this.isDetail = false});
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +35,7 @@ class ContentView extends StatelessWidget {
                 ),
               ),
               const Spacer(),
+              isDetail ? SizedBox.shrink() :
               Text(
                 setDateFormatter(entry.date),
                 style: TextStyle(

@@ -15,6 +15,7 @@ class DiaryEntry {
   String? description; // 文字描述
   List<String>? images; // 图片路径数组
   String? type; // 类型：'edit' 或 'voice'
-
+  bool? sad;
+  bool? happy;
   DateTime createdAt = DateTime.now();
 }

@@ -42,18 +42,28 @@ const DiaryEntrySchema = CollectionSchema(
       name: r'emoji',
       type: IsarType.string,
     ),
-    r'images': PropertySchema(
+    r'happy': PropertySchema(
       id: 5,
+      name: r'happy',
+      type: IsarType.bool,
+    ),
+    r'images': PropertySchema(
+      id: 6,
       name: r'images',
       type: IsarType.stringList,
     ),
     r'moodIndex': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'moodIndex',
       type: IsarType.long,
     ),
+    r'sad': PropertySchema(
+      id: 8,
+      name: r'sad',
+      type: IsarType.bool,
+    ),
     r'type': PropertySchema(
-      id: 7,
+      id: 9,
       name: r'type',
       type: IsarType.string,
     )
@@ -123,9 +133,11 @@ void _diaryEntrySerialize(
   writer.writeDateTime(offsets[2], object.date);
   writer.writeString(offsets[3], object.description);
   writer.writeString(offsets[4], object.emoji);
-  writer.writeStringList(offsets[5], object.images);
-  writer.writeLong(offsets[6], object.moodIndex);
-  writer.writeString(offsets[7], object.type);
+  writer.writeBool(offsets[5], object.happy);
+  writer.writeStringList(offsets[6], object.images);
+  writer.writeLong(offsets[7], object.moodIndex);
+  writer.writeBool(offsets[8], object.sad);
+  writer.writeString(offsets[9], object.type);
 }
 
 DiaryEntry _diaryEntryDeserialize(
@@ -140,10 +152,12 @@ DiaryEntry _diaryEntryDeserialize(
   object.date = reader.readDateTime(offsets[2]);
   object.description = reader.readStringOrNull(offsets[3]);
   object.emoji = reader.readString(offsets[4]);
+  object.happy = reader.readBoolOrNull(offsets[5]);
   object.id = id;
-  object.images = reader.readStringList(offsets[5]);
-  object.moodIndex = reader.readLongOrNull(offsets[6]);
-  object.type = reader.readStringOrNull(offsets[7]);
+  object.images = reader.readStringList(offsets[6]);
+  object.moodIndex = reader.readLongOrNull(offsets[7]);
+  object.sad = reader.readBoolOrNull(offsets[8]);
+  object.type = reader.readStringOrNull(offsets[9]);
   return object;
 }
 
@@ -165,10 +179,14 @@ P _diaryEntryDeserializeProp<P>(
     case 4:
       return (reader.readString(offset)) as P;
     case 5:
-      return (reader.readStringList(offset)) as P;
+      return (reader.readBoolOrNull(offset)) as P;
     case 6:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readStringList(offset)) as P;
     case 7:
+      return (reader.readLongOrNull(offset)) as P;
+    case 8:
+      return (reader.readBoolOrNull(offset)) as P;
+    case 9:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -807,6 +825,32 @@ extension DiaryEntryQueryFilter
     });
   }
 
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> happyIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'happy',
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> happyIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'happy',
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> happyEqualTo(
+      bool? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'happy',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> idEqualTo(
       Id value) {
     return QueryBuilder.apply(this, (query) {
@@ -1173,6 +1217,32 @@ extension DiaryEntryQueryFilter
     });
   }
 
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> sadIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'sad',
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> sadIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'sad',
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> sadEqualTo(
+      bool? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'sad',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> typeIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -1388,6 +1458,18 @@ extension DiaryEntryQuerySortBy
     });
   }
 
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> sortByHappy() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'happy', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> sortByHappyDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'happy', Sort.desc);
+    });
+  }
+
   QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> sortByMoodIndex() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'moodIndex', Sort.asc);
@@ -1397,6 +1479,18 @@ extension DiaryEntryQuerySortBy
   QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> sortByMoodIndexDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'moodIndex', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> sortBySad() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'sad', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> sortBySadDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'sad', Sort.desc);
     });
   }
 
@@ -1475,6 +1569,18 @@ extension DiaryEntryQuerySortThenBy
     });
   }
 
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> thenByHappy() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'happy', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> thenByHappyDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'happy', Sort.desc);
+    });
+  }
+
   QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -1496,6 +1602,18 @@ extension DiaryEntryQuerySortThenBy
   QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> thenByMoodIndexDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'moodIndex', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> thenBySad() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'sad', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> thenBySadDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'sad', Sort.desc);
     });
   }
 
@@ -1547,6 +1665,12 @@ extension DiaryEntryQueryWhereDistinct
     });
   }
 
+  QueryBuilder<DiaryEntry, DiaryEntry, QDistinct> distinctByHappy() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'happy');
+    });
+  }
+
   QueryBuilder<DiaryEntry, DiaryEntry, QDistinct> distinctByImages() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'images');
@@ -1556,6 +1680,12 @@ extension DiaryEntryQueryWhereDistinct
   QueryBuilder<DiaryEntry, DiaryEntry, QDistinct> distinctByMoodIndex() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'moodIndex');
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QDistinct> distinctBySad() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'sad');
     });
   }
 
@@ -1605,6 +1735,12 @@ extension DiaryEntryQueryProperty
     });
   }
 
+  QueryBuilder<DiaryEntry, bool?, QQueryOperations> happyProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'happy');
+    });
+  }
+
   QueryBuilder<DiaryEntry, List<String>?, QQueryOperations> imagesProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'images');
@@ -1614,6 +1750,12 @@ extension DiaryEntryQueryProperty
   QueryBuilder<DiaryEntry, int?, QQueryOperations> moodIndexProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'moodIndex');
+    });
+  }
+
+  QueryBuilder<DiaryEntry, bool?, QQueryOperations> sadProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'sad');
     });
   }
 

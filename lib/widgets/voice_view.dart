@@ -5,8 +5,8 @@ import '../model/diary_entry.dart';
 
 class VoiceView extends StatelessWidget {
   final DiaryEntry entry;
-
-  const VoiceView({super.key, required this.entry});
+  final bool isDetail;
+  const VoiceView({super.key, required this.entry, this.isDetail = false});
 
   @override
   Widget build(BuildContext context) {
@@ -18,6 +18,7 @@ class VoiceView extends StatelessWidget {
         Row(
           children: [
             Spacer(),
+            isDetail ? SizedBox.shrink() :
             Text(
               setDateFormatter(entry.date),
               style: TextStyle(
