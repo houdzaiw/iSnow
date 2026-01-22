@@ -23,8 +23,10 @@ class _LoginDetailPageState extends State<LoginDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CustomScaffold(
-      title: '',
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: null,
+      backgroundColor: const Color(0xFFFDF5EB),
       body: Container(
         width: double.infinity,
         height: double.infinity,

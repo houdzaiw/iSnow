@@ -31,7 +31,7 @@ class ProfilePage extends HookConsumerWidget {
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/profile/profile_bg_image.png'),
+            image: AssetImage('assets/base/bg_image.png'),
             fit: BoxFit.cover,
           ),
         ),

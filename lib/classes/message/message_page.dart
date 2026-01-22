@@ -57,7 +57,7 @@ class MessagePage extends HookConsumerWidget {
       body: Container(
         decoration: BoxDecoration(
           image: const DecorationImage(
-            image: AssetImage('assets/message/message_bg_image.png'),
+            image: AssetImage('assets/base/bg_image.png'),
             fit: BoxFit.cover,
           ),
         ),

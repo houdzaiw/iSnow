@@ -49,19 +49,17 @@ class _LaunchPageState extends State<LaunchPage> {
 
   @override
   Widget build(BuildContext context) {
-    return CustomScaffold(
-      title: '',
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 20),
-            Text(
-              '加载中...',
-              style: TextStyle(fontSize: 16),
-            ),
-          ],
+    return Scaffold(
+      appBar: null,
+      backgroundColor: const Color(0xFFFDF5EB),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/base/launch_bg_image.png'),
+            fit: BoxFit.cover,
+          ),
         ),
       ),
     );

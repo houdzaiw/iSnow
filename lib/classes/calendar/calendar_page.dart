@@ -122,9 +122,9 @@ class CalendarPage extends HookConsumerWidget {
       return Container(
         decoration: selected
             ? BoxDecoration(
-                color: Colors.orange.shade100,
-                borderRadius: BorderRadius.circular(12),
-              )
+          color: Colors.orange.shade100,
+          borderRadius: BorderRadius.circular(12),
+        )
             : null,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -177,7 +177,7 @@ class CalendarPage extends HookConsumerWidget {
                 ),
               )
             else
-              // 无数据时显示默认图标
+            // 无数据时显示默认图标
               SizedBox(
                 height: 30,
                 child: Center(
@@ -283,33 +283,33 @@ class CalendarPage extends HookConsumerWidget {
       return Expanded(
         child: entriesForDay.isEmpty
             ? Center(
-                child: Text(
-                  '暂无心情记录',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              )
+          child: Text(
+            '暂无心情记录',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
+        )
             : ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                itemCount: entriesForDay.length,
-                itemBuilder: (_, index) {
-                  final entry = entriesForDay[index];
-                  if (entry.type == 'voice' ) {
-                    return _buildVoiceView(entry);
-                  }
-                  return Container(
-                    margin: const EdgeInsets.symmetric(vertical: 10),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: _buildContentView(entry),
-                  );
-                },
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          itemCount: entriesForDay.length,
+          itemBuilder: (_, index) {
+            final entry = entriesForDay[index];
+            if (entry.type == 'voice' ) {
+              return _buildVoiceView(entry);
+            }
+            return Container(
+              margin: const EdgeInsets.symmetric(vertical: 10),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
               ),
+              child: _buildContentView(entry),
+            );
+          },
+        ),
       );
     }
     void onPublishPressed() async {
@@ -352,14 +352,24 @@ class CalendarPage extends HookConsumerWidget {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      body: SafeArea(
-        child: Column(
-          children: [
-            buildHeader(),
-            buildCalendar(),
-            buildDragHandle(),
-            buildList(),
-          ],
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/base/bg_image.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              buildHeader(),
+              buildCalendar(),
+              buildDragHandle(),
+              buildList(),
+            ],
+          ),
         ),
       ),
     );
@@ -392,10 +402,10 @@ class CalendarPage extends HookConsumerWidget {
                 entry.moodIndex! >= 0 &&
                 entry.moodIndex! < moodImages.length)
               Image.asset(
-              moodImages[entry.moodIndex!],
-              width: 40,
-              height: 40,
-            ),
+                moodImages[entry.moodIndex!],
+                width: 40,
+                height: 40,
+              ),
             const SizedBox(width: 8),
             Container(
               width: 179,
@@ -427,80 +437,80 @@ class CalendarPage extends HookConsumerWidget {
   }
   Widget _buildContentView(DiaryEntry entry) {
     return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 显示心情图标
-          if (entry.moodIndex != null &&
-              entry.moodIndex! >= 0 &&
-              entry.moodIndex! < moodImages.length)
-            Row(
-              children: [
-                Image.asset(
-                  moodImages[entry.moodIndex!],
-                  width: 40,
-                  height: 40,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  "This is my mood today",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF212121),
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  _dateFormatter(entry.date),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFFB2B2B2),
-                  ),
-                ),
-              ],
-            ),
-          const SizedBox(height: 8),
-          // 显示描述内容
-          if (entry.description != null &&
-              entry.description!.isNotEmpty)
-            Text(
-              entry.description!,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Color(0xFF212121)),
-            ),
-          // 显示图片
-          if (entry.images != null && entry.images!.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: entry.images!.take(4).map((imagePath) {
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.file(
-                      File(imagePath),
-                      width: 60,
-                      height: 60,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        // 如果图片加载失败，显示占位图
-                        return Container(
-                          width: 60,
-                          height: 60,
-                          color: Colors.grey[300],
-                          child: const Icon(
-                            Icons.image_not_supported,
-                            color: Colors.grey,
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                }).toList(),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 显示心情图标
+        if (entry.moodIndex != null &&
+            entry.moodIndex! >= 0 &&
+            entry.moodIndex! < moodImages.length)
+          Row(
+            children: [
+              Image.asset(
+                moodImages[entry.moodIndex!],
+                width: 40,
+                height: 40,
               ),
+              const SizedBox(width: 8),
+              Text(
+                "This is my mood today",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF212121),
+                ),
+              ),
+              const Spacer(),
+              Text(
+                _dateFormatter(entry.date),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFFB2B2B2),
+                ),
+              ),
+            ],
+          ),
+        const SizedBox(height: 8),
+        // 显示描述内容
+        if (entry.description != null &&
+            entry.description!.isNotEmpty)
+          Text(
+            entry.description!,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Color(0xFF212121)),
+          ),
+        // 显示图片
+        if (entry.images != null && entry.images!.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: entry.images!.take(4).map((imagePath) {
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.file(
+                    File(imagePath),
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      // 如果图片加载失败，显示占位图
+                      return Container(
+                        width: 60,
+                        height: 60,
+                        color: Colors.grey[300],
+                        child: const Icon(
+                          Icons.image_not_supported,
+                          color: Colors.grey,
+                        ),
+                      );
+                    },
+                  ),
+                );
+              }).toList(),
             ),
-        ],
-      );
+          ),
+      ],
+    );
   }
   String _dateFormatter(DateTime date) {
     final dateFormatter = DateFormat('yyyy-MM-dd HH:mm:ss');

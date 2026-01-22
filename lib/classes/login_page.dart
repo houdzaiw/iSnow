@@ -8,8 +8,9 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomScaffold(
-      title: '',
+    return Scaffold(
+      appBar: null,
+      backgroundColor: const Color(0xFFFDF5EB),
       body: Container(
         width: double.infinity,
         height: double.infinity,

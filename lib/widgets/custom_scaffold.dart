@@ -9,6 +9,7 @@ class CustomScaffold extends StatelessWidget {
   final VoidCallback? onRightIconTap;
   final bool showBackButton;
   final VoidCallback? onBackPressed;
+  final bool extendBodyBehindAppBar;
 
   const CustomScaffold({
     super.key,
@@ -19,12 +20,14 @@ class CustomScaffold extends StatelessWidget {
     this.onRightIconTap,
     this.showBackButton = true,
     this.onBackPressed,
+    this.extendBodyBehindAppBar = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFDF5EB),
+      extendBodyBehindAppBar: extendBodyBehindAppBar,
       appBar: AppBar(
         backgroundColor: const Color(0xFFF9E707),
         elevation: 0,
