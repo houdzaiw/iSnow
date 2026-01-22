@@ -7,6 +7,7 @@ import 'package:project/classes/profile/my_posts_page.dart';
 import 'package:project/classes/web/web_view_page.dart';
 
 import '../classes/calendar/calendar_page.dart';
+import '../classes/detail/post_detail_page.dart';
 import '../classes/home/home_page.dart';
 import '../classes/profile/about_us_page.dart';
 import '../classes/profile/edit_profile_page.dart';
@@ -88,6 +89,11 @@ final GoRouter goRouter = GoRouter(
       path: '/chat-view',
       name: 'chat-view',
       builder: (context, state) => const ChatPage(),
+    ),
+    GoRoute(
+      path: '/post_detail-view',
+      name: 'post_detail-view',
+      builder: (context, state) => PostDetailPage(entry: state.extra as dynamic),
     ),
     // 主应用页面（带底部导航）
     ShellRoute(

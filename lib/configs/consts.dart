@@ -1,7 +1,7 @@
 // Common constants used across the app
 
 import 'package:flutter/material.dart';
-
+import 'package:intl/intl.dart';
 
 enum UserActionOption {
   delete('Delete'),
@@ -34,6 +34,13 @@ const List<String> moodImages = [
   'assets/mood/model_019.png',
   'assets/mood/model_020.png',
 ];
+
+
+String setDateFormatter(DateTime date) {
+  final dateFormatter = DateFormat('yyyy-MM-dd HH:mm:ss');
+  final formattedDate = dateFormatter.format(date);
+  return formattedDate;
+}
 
 /// 显示选择头像的底部弹框（相册或相机）
 void showAvatarOptions(BuildContext context, {
