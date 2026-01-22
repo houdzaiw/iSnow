@@ -132,15 +132,10 @@ class ChatPage extends HookConsumerWidget {
           ),
           // 底部输入框和发送按钮
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 21, vertical: 5),
+            margin: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom+5),
             decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(
-                top: BorderSide(
-                  color: Colors.grey[200]!,
-                  width: 1,
-                ),
-              ),
+              color: Colors.transparent,
             ),
             child: Row(
               children: [
@@ -149,7 +144,7 @@ class ChatPage extends HookConsumerWidget {
                     height: 43,
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFDF5EB),
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: TextField(
