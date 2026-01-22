@@ -348,7 +348,8 @@ class CalendarPage extends HookConsumerWidget {
         backgroundColor: const Color(0xFFF9E707),
         child: const Icon(
           Icons.add,
-          color: Color(0xFF212121),
+          color: Colors.white,
+          size: 40,
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
