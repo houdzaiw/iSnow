@@ -47,6 +47,8 @@ dependencies:
   just_audio: ^0.9.34
   dio: ^5.9.0
   webview_flutter: ^4.13.1
+  device_info_plus: ^12.3.0
+  package_info_plus: ^9.0.0
 
 dev_dependencies:
   flutter_test:
