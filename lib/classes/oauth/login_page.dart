@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../widgets/custom_scaffold.dart';
-
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 

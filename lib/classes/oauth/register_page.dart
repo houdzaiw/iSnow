@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../widgets/custom_scaffold.dart';
+import '../../widgets/custom_scaffold.dart';
 
-class LoginDetailPage extends StatefulWidget {
-  const LoginDetailPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  State<LoginDetailPage> createState() => _LoginDetailPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginDetailPageState extends State<LoginDetailPage> {
+class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -51,9 +53,8 @@ class _LoginDetailPageState extends State<LoginDetailPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 48),
-                    //Please enter your email
                     const Text(
-                      'Please enter your email',
+                      'Please enter your registration email',
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
@@ -67,7 +68,7 @@ class _LoginDetailPageState extends State<LoginDetailPage> {
                       child: TextField(
                         controller: _emailController,
                         decoration: InputDecoration(
-                          hintText: 'Your Email address',
+                          hintText: 'example@gmail.com',
                           filled: true,
                           fillColor: const Color(0xFFFDF5EB),
                           border: OutlineInputBorder(
@@ -111,6 +112,36 @@ class _LoginDetailPageState extends State<LoginDetailPage> {
                         obscureText: true,
                       ),
                     ),
+                    const SizedBox(height: 20),
+                    // Please enter your password
+                    const Text(
+                      'Please re-enter your password to confirm',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF212121),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // 密码输入框
+                    SizedBox(
+                      height: 43,
+                      child: TextField(
+                        controller: _passwordController,
+                        decoration: InputDecoration(
+                          hintText: 'Your password',
+                          filled: true,
+                          fillColor: const Color(0xFFFDF5EB),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                          isDense: true,
+                        ),
+                        obscureText: true,
+                      ),
+                    ),
                     const SizedBox(height: 32),
                     // 登录按钮
                     GestureDetector(
@@ -127,7 +158,7 @@ class _LoginDetailPageState extends State<LoginDetailPage> {
                         ),
                         alignment: Alignment.center,
                         child: const Text(
-                          'Login',
+                          'Register',
                           style: TextStyle(
                             fontSize: 20,
                             color: Color(0xFF212121),

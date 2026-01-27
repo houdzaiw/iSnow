@@ -9,14 +9,14 @@ import 'package:project/classes/web/web_view_page.dart';
 import '../classes/calendar/calendar_page.dart';
 import '../classes/detail/post_detail_page.dart';
 import '../classes/home/home_page.dart';
+import '../classes/oauth/login_page.dart';
 import '../classes/profile/about_us_page.dart';
 import '../classes/profile/edit_profile_page.dart';
 import '../classes/profile/edit_nickname_page.dart';
 import '../classes/profile/profile_page.dart';
 import '../classes/launch_page.dart';
-import '../classes/login_page.dart';
-import '../classes/login_detail_page.dart';
-import '../classes/register_page.dart';
+import '../classes/oauth/login_detail_page.dart';
+import '../classes/oauth/register_page.dart';
 import '../manager/app_shell.dart';
 
 final GoRouter goRouter = GoRouter(

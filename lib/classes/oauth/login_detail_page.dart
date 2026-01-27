@@ -1,25 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../widgets/custom_scaffold.dart';
+import '../../widgets/custom_scaffold.dart';
 
-class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
+class LoginDetailPage extends StatefulWidget {
+  const LoginDetailPage({super.key});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  State<LoginDetailPage> createState() => _LoginDetailPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _LoginDetailPageState extends State<LoginDetailPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -53,8 +51,9 @@ class _RegisterPageState extends State<RegisterPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 48),
+                    //Please enter your email
                     const Text(
-                      'Please enter your registration email',
+                      'Please enter your email',
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
@@ -68,7 +67,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       child: TextField(
                         controller: _emailController,
                         decoration: InputDecoration(
-                          hintText: 'example@gmail.com',
+                          hintText: 'Your Email address',
                           filled: true,
                           fillColor: const Color(0xFFFDF5EB),
                           border: OutlineInputBorder(
@@ -112,36 +111,6 @@ class _RegisterPageState extends State<RegisterPage> {
                         obscureText: true,
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    // Please enter your password
-                    const Text(
-                      'Please re-enter your password to confirm',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF212121),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    // 密码输入框
-                    SizedBox(
-                      height: 43,
-                      child: TextField(
-                        controller: _passwordController,
-                        decoration: InputDecoration(
-                          hintText: 'Your password',
-                          filled: true,
-                          fillColor: const Color(0xFFFDF5EB),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-                          isDense: true,
-                        ),
-                        obscureText: true,
-                      ),
-                    ),
                     const SizedBox(height: 32),
                     // 登录按钮
                     GestureDetector(
@@ -158,7 +127,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         alignment: Alignment.center,
                         child: const Text(
-                          'Register',
+                          'Login',
                           style: TextStyle(
                             fontSize: 20,
                             color: Color(0xFF212121),
@@ -192,5 +161,6 @@ class _RegisterPageState extends State<RegisterPage> {
       ),
     );
   }
+
 }
 
