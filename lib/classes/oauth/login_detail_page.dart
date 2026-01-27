@@ -1,28 +1,88 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../widgets/custom_scaffold.dart';
+import 'provider/login_provider.dart';
 
-class LoginDetailPage extends StatefulWidget {
+class LoginDetailPage extends HookConsumerWidget {
   const LoginDetailPage({super.key});
 
   @override
-  State<LoginDetailPage> createState() => _LoginDetailPageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final emailController = useTextEditingController();
+    final passwordController = useTextEditingController();
+    final loginProvider = useMemoized(() => LoginProvider());
+    final isLoading = useState(false);
 
-class _LoginDetailPageState extends State<LoginDetailPage> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+    Future<void> handleLogin() async {
+      final account = emailController.text.trim();
+      final password = passwordController.text.trim();
 
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
+      // 验证输入
+      if (account.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter your email or phone')),
+        );
+        return;
+      }
 
-  @override
-  Widget build(BuildContext context) {
+      if (password.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter your password')),
+        );
+        return;
+      }
+
+      // 开始加载
+      isLoading.value = true;
+
+      try {
+        // 调用登录接口
+        final response = await loginProvider.login(
+          account: account,
+          password: password,
+          loginType: 5,
+          areaCode: '1',
+          countryCode: 'us',
+        );
+
+        if (!context.mounted) return;
+
+        if (response.success) {
+          // 登录成功，保存token和用户信息
+          if (response.token != null) {
+            // TODO: 保存token到本地存储
+            print('Token: ${response.token}');
+          }
+
+          if (response.data != null) {
+            // TODO: 保存用户信息到本地存储
+            print('User: ${response.data?.email}');
+          }
+
+          // 跳转到首页
+          if (context.mounted) {
+            context.go('/home');
+          }
+        } else {
+          // 登录失败，显示错误信息
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(response.message ?? 'Login failed')),
+            );
+          }
+        }
+      } catch (e) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login error: $e')),
+        );
+      } finally {
+        isLoading.value = false;
+      }
+    }
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: null,
@@ -65,7 +125,7 @@ class _LoginDetailPageState extends State<LoginDetailPage> {
                     SizedBox(
                       height: 43,
                       child: TextField(
-                        controller: _emailController,
+                        controller: emailController,
                         decoration: InputDecoration(
                           hintText: 'Your Email address',
                           filled: true,
@@ -96,7 +156,7 @@ class _LoginDetailPageState extends State<LoginDetailPage> {
                     SizedBox(
                       height: 43,
                       child: TextField(
-                        controller: _passwordController,
+                        controller: passwordController,
                         decoration: InputDecoration(
                           hintText: 'Your password',
                           filled: true,
@@ -114,9 +174,7 @@ class _LoginDetailPageState extends State<LoginDetailPage> {
                     const SizedBox(height: 32),
                     // 登录按钮
                     GestureDetector(
-                      onTap: () {
-                        context.go('/home');
-                      },
+                      onTap: isLoading.value ? null : handleLogin,
                       child: Container(
                         width: 280,
                         height: 53,
@@ -126,14 +184,23 @@ class _LoginDetailPageState extends State<LoginDetailPage> {
                           borderRadius: BorderRadius.all(Radius.circular(28)),
                         ),
                         alignment: Alignment.center,
-                        child: const Text(
-                          'Login',
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: Color(0xFF212121),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        child: isLoading.value
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Color(0xFF212121),
+                                ),
+                              )
+                            : const Text(
+                                'Login',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  color: Color(0xFF212121),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                       ),
                     ),
                     const SizedBox(height: 16),
