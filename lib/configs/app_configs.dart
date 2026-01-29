@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project/configs/app_device.dart';
 
 import 'app_enum.dart';
 
@@ -14,7 +15,7 @@ class AppConfig with WidgetsBindingObserver {
   run(AppEnv env) async {
     WidgetsBinding.instance.addObserver(this);
     appEnv = env;
-
+    AppDevice().init();
   }
 
   @override

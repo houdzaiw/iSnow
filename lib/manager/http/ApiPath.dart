@@ -1,4 +1,4 @@
-class HttpApi {
+class ApiPath {
   /// ==================== 国家相关 ====================
   /// 获取默认国家码
   static const defaultCountry = '/country-list/default-country';
@@ -28,4 +28,7 @@ class HttpApi {
 
   /// 登出
   static const logout = '/oauth2/logout';
+
+  /// 礼物
+  static const sendGift = '/oauth2/logout';
 }

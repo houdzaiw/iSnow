@@ -2,6 +2,8 @@
 
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:fext_fingerprint/fext_fingerprint.dart';
+import 'package:fext_sim_util/fext_sim_util.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
@@ -20,16 +22,24 @@ class AppDevice {
   String? _os;
   String? _osVersion;
   String? _deviceBrand;
+  String? _simCountryCode;
+  String? _fingerprint;
 
   /// 初始化设备信息
   Future<void> init() async {
     _packageInfo = await PackageInfo.fromPlatform();
-
+    print("device init PackageInfo");
     if (Platform.isAndroid) {
       await _initAndroidInfo();
     } else if (Platform.isIOS) {
       await _initIOSInfo();
     }
+
+    final simUtilPlugin = FextSimUtil();
+    _simCountryCode = await simUtilPlugin.getCountryCodeWithSimInfo() ?? '';
+
+    final fingerprintPlugin = FextFingerprint();
+    _fingerprint = await fingerprintPlugin.getFingerprint();
   }
 
   /// 初始化 Android 设备信息
@@ -58,6 +68,7 @@ class AppDevice {
     // 生成设备ID (使用 identifierForVendor 生成 MD5)
     final vendorId = iosInfo.identifierForVendor ?? '';
     _deviceId = _generateDeviceId(vendorId);
+
   }
 
   /// 生成设备ID
@@ -113,6 +124,24 @@ class AppDevice {
 
   /// 获取当前时间戳 (毫秒)
   int get currentTimestamp => DateTime.now().millisecondsSinceEpoch;
+
+  /// 国家地区
+  String get countryCode {
+    final localeParts = Platform.localeName.split('_');
+    if (localeParts.length > 1) {
+      return localeParts[1];
+    }
+    return 'US'; // 默认值
+  }
+
+  /// 获取 SIM 卡国家代码，优先使用 SIM 卡信息;
+  String get simCountryCode {
+    return _simCountryCode ?? countryCode;
+  }
+  /// 获取设备指纹
+  String get fingerprint {
+    return _fingerprint ?? '';
+  }
 
   /// 生成请求签名 b 参数
   String generateSignature() {

@@ -50,6 +50,17 @@ dependencies:
   device_info_plus: ^12.3.0
   package_info_plus: ^9.0.0
   crypto: ^3.0.3
+  retrofit: ^4.9.0
+  logger: ^2.6.0  # for logging purpose
+  json_annotation: ^4.9.0
+  native_dio_adapter: ^1.5.1
+  talker_flutter: ^5.1.13
+  dio_smart_retry: ^7.0.1
+  cryptography: ^2.9.0
+  fext_sim_util:
+    git: https://codeup.aliyun.com/675ee27a35730943ed49279d/app/fext-sim-util.git
+  fext_fingerprint:
+    git: https://codeup.aliyun.com/675ee27a35730943ed49279d/app/fext-fingerprint.git
 
 dev_dependencies:
   flutter_test:
@@ -59,6 +70,7 @@ dev_dependencies:
   riverpod_generator: ^2.4.0
   isar_generator: ^3.1.0+1
   build_runner: ^2.4.13
+  retrofit_generator: ^8.2.1
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

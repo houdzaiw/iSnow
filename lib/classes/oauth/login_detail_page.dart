@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-
 import 'provider/login_provider.dart';
+
 
 class LoginDetailPage extends HookConsumerWidget {
   const LoginDetailPage({super.key});
@@ -12,7 +12,7 @@ class LoginDetailPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final emailController = useTextEditingController();
     final passwordController = useTextEditingController();
-    final loginProvider = useMemoized(() => LoginProvider());
+    final loginProvider = ref.watch(loginProviderProvider);
     final isLoading = useState(false);
 
     Future<void> handleLogin() async {
@@ -63,7 +63,7 @@ class LoginDetailPage extends HookConsumerWidget {
 
           // 跳转到首页
           if (context.mounted) {
-            context.go('/home');
+            context.go('/');
           }
         } else {
           // 登录失败，显示错误信息
