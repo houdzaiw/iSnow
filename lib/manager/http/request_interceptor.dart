@@ -10,8 +10,8 @@ import 'package:project/lib/logger.dart';
 
 
 import '../server_response.dart';
-import 'ApiPath.dart';
 import 'api_client.dart';
+import 'api_path.dart';
 import 'dio_provider.dart';
 // import 'nds_manager.dart';
 

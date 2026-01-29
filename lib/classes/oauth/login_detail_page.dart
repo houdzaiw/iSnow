@@ -2,7 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-//import 'provider/login_provider.dart';
+import 'package:project/configs/app_device.dart';
+import 'package:project/manager/http/api_client.dart';
+import 'package:project/manager/http/dio_provider.dart';
+import 'package:crypto/crypto.dart';
+import 'dart:convert';
+
+import '../../manager/http/api_path.dart';
 
 
 class LoginDetailPage extends HookConsumerWidget {
@@ -32,10 +38,102 @@ class LoginDetailPage extends HookConsumerWidget {
         );
         return;
       }
+
       // 开始加载
       isLoading.value = true;
 
+      try {
+        // 加密密码（使用 SHA-512）
+        final bytes = utf8.encode(password);
+        final digest = sha512.convert(bytes);
+        final encryptedPassword = digest.toString();
 
+        // 获取设备信息
+        final appDevice = AppDevice();
+
+        // 构建登录参数
+        final params = {
+          "code": account,
+          "loginType": 5,
+          "passwd": encryptedPassword,
+          "smsCode": "",
+          "areaCode": "966",
+          "countryCode": "us",
+          "fbLimited": false,
+          "deviceId": appDevice.deviceId,
+          "app": appDevice.appName,
+          "appVersion": appDevice.appVersion,
+          "appVersionCode": int.tryParse(appDevice.appVersionCode) ?? 1,
+          "channel": "DEV",
+          "systemLanguage": appDevice.systemLanguage,
+          "appLanguage": appDevice.appLanguage,
+          "isp": "",
+          "model": appDevice.model,
+          "os": appDevice.os,
+          "osVersion": appDevice.osVersion,
+          "deviceBrand": appDevice.deviceBrand,
+          "appsflyerUID": appDevice.fingerprint,
+        };
+        print("params====$params");
+        // 获取 Dio 实例
+        final dio = ref.read(dioProvider);
+
+        // 创建 ApiClient
+        final apiClient = ApiClient(
+          dio: dio,
+          baseUrl: ApiPath.baseUrl,
+        );
+
+        // 发送登录请求
+        final response = await apiClient.dio.post(
+          ApiPath.login,
+          data: params,
+        );
+
+        if (!context.mounted) return;
+
+        // 处理响应
+        if (response.statusCode == 200) {
+          final data = response.data;
+
+          if (data['code'] == ServiceStatusCode.successCode) {
+            // 登录成功
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Login successful!')),
+            );
+
+            // TODO: 保存 token 和用户信息到本地存储
+            final token = data['data']?['token'];
+            print('Login Token: $token');
+
+            // 跳转到首页
+            if (context.mounted) {
+              context.go('/');
+            }
+          } else {
+            // 登录失败
+            final message = data['message'] ?? 'Login failed';
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(message)),
+              );
+            }
+          }
+        } else {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Server error: ${response.statusCode}')),
+            );
+          }
+        }
+      } catch (e) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login error: $e')),
+        );
+      } finally {
+        isLoading.value = false;
+      }
     }
 
     return Scaffold(

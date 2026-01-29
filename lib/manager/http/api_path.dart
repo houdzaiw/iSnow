@@ -1,4 +1,7 @@
 class ApiPath {
+  // 基础路径
+  static const String baseUrl = 'http://w1.luyouxia.com/simise';
+
   /// ==================== 国家相关 ====================
   /// 获取默认国家码
   static const defaultCountry = '/country-list/default-country';
