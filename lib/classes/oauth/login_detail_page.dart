@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'provider/login_provider.dart';
+//import 'provider/login_provider.dart';
 
 
 class LoginDetailPage extends HookConsumerWidget {
@@ -12,7 +12,6 @@ class LoginDetailPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final emailController = useTextEditingController();
     final passwordController = useTextEditingController();
-    final loginProvider = ref.watch(loginProviderProvider);
     final isLoading = useState(false);
 
     Future<void> handleLogin() async {
@@ -33,54 +32,10 @@ class LoginDetailPage extends HookConsumerWidget {
         );
         return;
       }
-
       // 开始加载
       isLoading.value = true;
 
-      try {
-        // 调用登录接口
-        final response = await loginProvider.login(
-          account: account,
-          password: password,
-          loginType: 5,
-          areaCode: '1',
-          countryCode: 'us',
-        );
 
-        if (!context.mounted) return;
-
-        if (response.success) {
-          // 登录成功，保存token和用户信息
-          if (response.token != null) {
-            // TODO: 保存token到本地存储
-            print('Token: ${response.token}');
-          }
-
-          if (response.data != null) {
-            // TODO: 保存用户信息到本地存储
-            print('User: ${response.data?.email}');
-          }
-
-          // 跳转到首页
-          if (context.mounted) {
-            context.go('/');
-          }
-        } else {
-          // 登录失败，显示错误信息
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(response.message ?? 'Login failed')),
-            );
-          }
-        }
-      } catch (e) {
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login error: $e')),
-        );
-      } finally {
-        isLoading.value = false;
-      }
     }
 
     return Scaffold(
