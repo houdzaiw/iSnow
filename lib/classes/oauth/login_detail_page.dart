@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:project/configs/app_device.dart';
+import 'package:project/lib/crypt_util.dart';
 import 'package:project/manager/http/api_client.dart';
 import 'package:project/manager/http/dio_provider.dart';
 import 'package:crypto/crypto.dart';
@@ -47,6 +48,24 @@ class LoginDetailPage extends HookConsumerWidget {
     final passwordController = useTextEditingController(text: "123456");
     final isLoading = useState(false);
 
+    Future<void> getDefaultCountry() async {
+      // 获取 Dio 实例
+      final dio = ref.read(dioProvider);
+
+      final apiClient = ApiClient(dio: dio);
+
+      print("baseUrl====${ApiPath.baseUrl}");
+      // 发送登录请求
+      final response = await apiClient.dio.get(
+        ApiPath.defaultCountry,
+        data: {},
+      );
+      if (response.statusCode == 200) {
+        final data = response.data;
+      } else {
+
+      }
+    }
     Future<void> handleLogin() async {
       final account = emailController.text.trim();
       final password = passwordController.text.trim();
@@ -70,11 +89,6 @@ class LoginDetailPage extends HookConsumerWidget {
       isLoading.value = true;
 
       try {
-        // 加密密码（使用 SHA-512）
-        final bytes = utf8.encode(password);
-        final digest = sha512.convert(bytes);
-        final encryptedPassword = digest.toString();
-
         // 获取设备信息
         final appDevice = AppDevice();
 
@@ -82,7 +96,7 @@ class LoginDetailPage extends HookConsumerWidget {
         final params = {
           "code": account,
           "loginType": 5,
-          "passwd": encryptedPassword,
+          "passwd": CryptUtil.encrypt(password),
           "smsCode": "",
           "areaCode": "966",
           "countryCode": "us",
