@@ -12,8 +12,6 @@ import 'package:project/lib/logger.dart';
 import '../server_response.dart';
 import 'api_client.dart';
 import 'api_path.dart';
-import 'dio_provider.dart';
-// import 'nds_manager.dart';
 
 class RequestInterceptors extends Interceptor {
   final Ref ref;
@@ -80,7 +78,7 @@ class RequestInterceptors extends Interceptor {
       options.headers['appVersion'] = deviceData.appVersion;
 
     options.headers['appLanguage'] = language;
-    options.headers['x-auth-token'] = _toString();
+    options.headers['x-auth-token'] = await _toString();
     options.headers['startTime'] = DateTime.now().millisecondsSinceEpoch;
     Logger.info(
       """

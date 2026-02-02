@@ -1,6 +1,6 @@
 class ApiPath {
   // 基础路径
-  static const String baseUrl = 'http://w1.luyouxia.com/simise';
+  static const String baseUrl = 'http://simi2.w1.luyouxia.net/simi';
 
   /// ==================== 国家相关 ====================
   /// 获取默认国家码

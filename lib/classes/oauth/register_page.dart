@@ -9,8 +9,8 @@ class RegisterPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final emailController = useTextEditingController();
-    final passwordController = useTextEditingController();
+    final emailController = useTextEditingController(text: "13104889693");
+    final passwordController = useTextEditingController(text: "123456");
     final confirmPasswordController = useTextEditingController();
     final loginProvider = ref.watch(loginProviderProvider);
     final isLoading = useState(false);

@@ -1,14 +1,13 @@
-
 import 'package:dio/dio.dart';
+import 'api_path.dart';
 
 // ApiClient 类用于管理 API 调用
 class ApiClient {
   final Dio dio;
-  final String baseUrl;
 
-  ApiClient({required this.dio, required this.baseUrl}) {
+  ApiClient({required this.dio}) {
     // 设置 baseUrl
-    dio.options.baseUrl = baseUrl;
+    dio.options.baseUrl = ApiPath.baseUrl;
   }
 
   // 可以在这里添加具体的 API 方法
@@ -17,6 +16,7 @@ class ApiClient {
   //   return await dio.post('/api/login', data: data);
   // }
 }
+
 class ServiceStatusCode {
   static const int successCode = 200;
   static const int failCode = -1;
@@ -46,7 +46,6 @@ class ServiceStatusCode {
   ];
 }
 
-
 class CommonApi {
   static final CommonApi _instance = CommonApi._();
 
@@ -59,4 +58,8 @@ class CommonApi {
   CommonApi._();
 
   late ApiClient api;
+
+  void initialize(Dio dio) {
+    api = ApiClient(dio: dio);
+  }
 }

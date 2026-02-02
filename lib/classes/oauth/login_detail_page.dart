@@ -10,14 +10,41 @@ import 'dart:convert';
 
 import '../../manager/http/api_path.dart';
 
+// final loginRepositoryProvider = Provider<LoginRepository>((ref) {
+//   final dio = ref.read(dioProvider);
+//   final apiClient = ApiClient(dio: dio);
+//   return LoginRepository(apiClient);
+// });
+//
+// class LoginRepository {
+//   final ApiClient _apiClient;
+//
+//   LoginRepository(this._apiClient);
+//
+//   Future<void> login(Map<String, dynamic> params) async {
+//     try {
+//       final response = await _apiClient.dio.post(ApiPath.login, data: params);
+//       if (response.statusCode == 200) {
+//         // Handle successful login
+//         print('Login successful: ${response.data}');
+//       } else {
+//         // Handle error response
+//         print('Login failed: ${response.statusCode}');
+//       }
+//     } catch (e) {
+//       // Handle exceptions
+//       print('Login error: $e');
+//     }
+//   }
+// }
 
 class LoginDetailPage extends HookConsumerWidget {
   const LoginDetailPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final emailController = useTextEditingController();
-    final passwordController = useTextEditingController();
+    final emailController = useTextEditingController(text: "13104889693");
+    final passwordController = useTextEditingController(text: "123456");
     final isLoading = useState(false);
 
     Future<void> handleLogin() async {
@@ -79,11 +106,9 @@ class LoginDetailPage extends HookConsumerWidget {
         final dio = ref.read(dioProvider);
 
         // 创建 ApiClient
-        final apiClient = ApiClient(
-          dio: dio,
-          baseUrl: ApiPath.baseUrl,
-        );
+        final apiClient = ApiClient(dio: dio);
 
+        print("baseUrl====${ApiPath.baseUrl}");
         // 发送登录请求
         final response = await apiClient.dio.post(
           ApiPath.login,
@@ -281,6 +306,4 @@ class LoginDetailPage extends HookConsumerWidget {
       ),
     );
   }
-
 }
-
