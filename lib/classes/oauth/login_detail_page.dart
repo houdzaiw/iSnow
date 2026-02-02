@@ -92,11 +92,14 @@ class LoginDetailPage extends HookConsumerWidget {
         // 获取设备信息
         final appDevice = AppDevice();
 
+        // 加密密码
+        final encryptedPassword = await CryptUtil.encrypt(password);
+
         // 构建登录参数
         final params = {
           "code": account,
           "loginType": 5,
-          "passwd": CryptUtil.encrypt(password),
+          "passwd": encryptedPassword,
           "smsCode": "",
           "areaCode": "966",
           "countryCode": "us",

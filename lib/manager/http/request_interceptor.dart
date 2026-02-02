@@ -78,7 +78,11 @@ class RequestInterceptors extends Interceptor {
       options.headers['appVersion'] = deviceData.appVersion;
 
     options.headers['appLanguage'] = language;
-    options.headers['x-auth-token'] = await _toString();
+
+    // Await the async _toString() call
+    final xAuthToken = await _toString();
+    options.headers['x-auth-token'] = xAuthToken;
+
     options.headers['startTime'] = DateTime.now().millisecondsSinceEpoch;
     Logger.info(
       """
@@ -340,13 +344,9 @@ class RequestInterceptors extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     Logger.error(err.requestOptions.baseUrl + err.requestOptions.path);
-    Logger.error('dio error', err);
-    Logger.error('dio error String', err.toString());
     Logger.error('请求报错接口2: ${err.requestOptions.baseUrl}${err.requestOptions.path}');
     _infoRequestDurationTime(err.requestOptions);
     //SmartDialog.dismiss(status: SmartStatus.loading);
-    Logger.infoWrite("获取到了错误 err.message0： ${err.message}");
-    Logger.infoWrite("获取到了错误 err.message1： ${err.toString()}");
     Logger.infoWrite("获取到了错误 err.message2： ${err.error.toString()}");
     if (getOpenHttpNDSResult(err)) {
       // NDSManager().setLocalNeedEnable(true);
