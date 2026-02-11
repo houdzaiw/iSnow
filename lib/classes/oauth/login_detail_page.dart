@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -47,6 +48,7 @@ class LoginDetailPage extends HookConsumerWidget {
     final emailController = useTextEditingController(text: "13104889693");
     final passwordController = useTextEditingController(text: "123456");
     final isLoading = useState(false);
+    final agreeToTerms = useState(false);
 
     Future<void> getDefaultCountry() async {
       // 获取 Dio 实例
@@ -81,6 +83,14 @@ class LoginDetailPage extends HookConsumerWidget {
       if (password.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Please enter your password')),
+        );
+        return;
+      }
+
+      // 验证是否同意协议
+      if (!agreeToTerms.value) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please agree to the terms and policy')),
         );
         return;
       }
@@ -208,7 +218,7 @@ class LoginDetailPage extends HookConsumerWidget {
                     const SizedBox(height: 48),
                     //Please enter your email
                     const Text(
-                      'Please enter your email',
+                      'Please enter your phone number',
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
@@ -222,7 +232,7 @@ class LoginDetailPage extends HookConsumerWidget {
                       child: TextField(
                         controller: emailController,
                         decoration: InputDecoration(
-                          hintText: 'Your Email address',
+                          hintText: 'Your phone number',
                           filled: true,
                           fillColor: const Color(0xFFFDF5EB),
                           border: OutlineInputBorder(
@@ -267,6 +277,84 @@ class LoginDetailPage extends HookConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 32),
+                    // 隐私协议和用户协议
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            agreeToTerms.value = !agreeToTerms.value;
+                          },
+                          child: Container(
+                            width: 15,
+                            height: 15,
+                            margin: const EdgeInsets.only(top: 2),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: const Color(0xFFFF7F00),
+                                width: 1.5,
+                              ),
+                              borderRadius: BorderRadius.circular(9),
+                              color: agreeToTerms.value
+                                  ? const Color(0xFFF9E707)
+                                  : Colors.white,
+                            ),
+                            child: agreeToTerms.value
+                                ? const Icon(
+                                    Icons.check,
+                                    size: 14,
+                                    color: Color(0xFF212121),
+                                  )
+                                : null,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: RichText(
+                            text: TextSpan(
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF212121),
+                                height: 1.5,
+                              ),
+                              children: [
+                                const TextSpan(
+                                  text: 'Logging in means you agree to the ',
+                                ),
+                                TextSpan(
+                                  text: 'user service agreement',
+                                  style: const TextStyle(
+                                    color: Color(0xFFFF8000),
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      context.push(
+                                        '/web-view?title=User Privacy&uri=https://www.example.com/user-privacy',
+                                      );
+                                    },
+                                ),
+                                const TextSpan(
+                                  text: ' and ',
+                                ),
+                                TextSpan(
+                                  text: 'private policy',
+                                  style: const TextStyle(
+                                    color: Color(0xFFFF8000),
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      context.push(
+                                        '/web-view?title=User Privacy&uri=https://www.example.com/user-privacy',
+                                      );
+                                    },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
                     // 登录按钮
                     GestureDetector(
                       onTap: isLoading.value ? null : handleLogin,

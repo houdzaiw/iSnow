@@ -23,7 +23,7 @@ class RegisterPage extends HookConsumerWidget {
       // 验证输入
       if (account.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please enter your email')),
+          const SnackBar(content: Text('Please enter your phone number')),
         );
         return;
       }
@@ -119,7 +119,7 @@ class RegisterPage extends HookConsumerWidget {
                   children: [
                     const SizedBox(height: 48),
                     const Text(
-                      'Please enter your registration email',
+                      'Please enter your registration phone number',
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
@@ -133,7 +133,7 @@ class RegisterPage extends HookConsumerWidget {
                       child: TextField(
                         controller: emailController,
                         decoration: InputDecoration(
-                          hintText: 'example@gmail.com',
+                          hintText: 'Your phone number',
                           filled: true,
                           fillColor: const Color(0xFFFDF5EB),
                           border: OutlineInputBorder(
