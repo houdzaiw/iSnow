@@ -10,13 +10,74 @@ class RegisterPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final emailController = useTextEditingController(text: "13104889693");
+    final verificationCodeController = useTextEditingController();
     final passwordController = useTextEditingController(text: "123456");
     final confirmPasswordController = useTextEditingController();
     final loginProvider = ref.watch(loginProviderProvider);
     final isLoading = useState(false);
+    final countdown = useState(0);
+    final isSendingCode = useState(false);
+
+    // 倒计时效果
+    useEffect(() {
+      if (countdown.value > 0) {
+        final timer = Future.delayed(const Duration(seconds: 1), () {
+          countdown.value = countdown.value - 1;
+        });
+        return () {}; // cleanup
+      }
+      return null;
+    }, [countdown.value]);
+
+    Future<void> handleGetCode() async {
+      final phone = emailController.text.trim();
+
+      if (phone.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter your phone number')),
+        );
+        return;
+      }
+
+      if (countdown.value > 0) {
+        return; // 倒计时中，不能重复发送
+      }
+
+      isSendingCode.value = true;
+
+      try {
+        final response = await loginProvider.sendSms(
+          phone: phone,
+          areaCode: '966',
+          countryCode: 'us',
+          smsType: 1, // 注册
+        );
+
+        if (!context.mounted) return;
+
+        if (response.success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Verification code sent successfully')),
+          );
+          countdown.value = 60; // 开始60秒倒计时
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(response.message ?? 'Failed to send code')),
+          );
+        }
+      } catch (e) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      } finally {
+        isSendingCode.value = false;
+      }
+    }
 
     Future<void> handleRegister() async {
       final account = emailController.text.trim();
+      final verificationCode = verificationCodeController.text.trim();
       final password = passwordController.text.trim();
       final confirmPassword = confirmPasswordController.text.trim();
 
@@ -24,6 +85,13 @@ class RegisterPage extends HookConsumerWidget {
       if (account.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Please enter your phone number')),
+        );
+        return;
+      }
+
+      if (verificationCode.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter verification code')),
         );
         return;
       }
@@ -127,7 +195,7 @@ class RegisterPage extends HookConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    // 邮箱输入框
+                    // 手机号输入框
                     SizedBox(
                       height: 43,
                       child: TextField(
@@ -146,7 +214,78 @@ class RegisterPage extends HookConsumerWidget {
                         keyboardType: TextInputType.emailAddress,
                       ),
                     ),
-
+                    const SizedBox(height: 20),
+                    // Please enter your verification code
+                    const Text(
+                      'Please enter your verification code',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF212121),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // 验证码输入框
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: 43,
+                            child: TextField(
+                              controller: verificationCodeController,
+                              decoration: InputDecoration(
+                                hintText: 'Your verification code',
+                                filled: true,
+                                fillColor: const Color(0xFFFDF5EB),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide.none,
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                                isDense: true,
+                              ),
+                              keyboardType: TextInputType.number,
+                              obscureText: false,
+                            ),
+                          ),
+                        ),
+                        // 获取验证码按钮
+                        const SizedBox(width: 12),
+                        GestureDetector(
+                          onTap: countdown.value > 0 || isSendingCode.value ? null : handleGetCode,
+                          child: Container(
+                            height: 43,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: countdown.value > 0 || isSendingCode.value
+                                  ? const Color(0xFFCCCCCC)
+                                  : const Color(0xFFF9E707),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            alignment: Alignment.center,
+                            child: isSendingCode.value
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Color(0xFF212121),
+                                    ),
+                                  )
+                                : Text(
+                                    countdown.value > 0 ? '${countdown.value}s' : 'Get Code',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: countdown.value > 0 || isSendingCode.value
+                                          ? const Color(0xFF666666)
+                                          : const Color(0xFF212121),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                          ),
+                        )
+                      ],
+                    ),
                     const SizedBox(height: 20),
                     // Please enter your password
                     const Text(
@@ -165,36 +304,6 @@ class RegisterPage extends HookConsumerWidget {
                         controller: passwordController,
                         decoration: InputDecoration(
                           hintText: 'Your password',
-                          filled: true,
-                          fillColor: const Color(0xFFFDF5EB),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-                          isDense: true,
-                        ),
-                        obscureText: true,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    // Please re-enter your password
-                    const Text(
-                      'Please re-enter your password to confirm',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF212121),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    // 确认密码输入框
-                    SizedBox(
-                      height: 43,
-                      child: TextField(
-                        controller: confirmPasswordController,
-                        decoration: InputDecoration(
-                          hintText: 'Confirm your password',
                           filled: true,
                           fillColor: const Color(0xFFFDF5EB),
                           border: OutlineInputBorder(
