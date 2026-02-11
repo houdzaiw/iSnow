@@ -89,9 +89,7 @@ class LoginDetailPage extends HookConsumerWidget {
 
       // 验证是否同意协议
       if (!agreeToTerms.value) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please agree to the terms and policy')),
-        );
+        context.push('/agree_policy-view');
         return;
       }
 
@@ -160,7 +158,7 @@ class LoginDetailPage extends HookConsumerWidget {
 
             // 跳转到首页
             if (context.mounted) {
-              context.go('/');
+              context.go('/home');
             }
           } else {
             // 登录失败
