@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import '../../configs/app_device.dart';
+import '../../manager/http/api_client.dart';
+import '../../manager/http/api_path.dart';
+import '../../manager/http/dio_provider.dart';
 import 'provider/login_provider.dart';
 
 class RegisterPage extends HookConsumerWidget {
@@ -46,23 +50,31 @@ class RegisterPage extends HookConsumerWidget {
       isSendingCode.value = true;
 
       try {
-        final response = await loginProvider.sendSms(
-          phone: phone,
-          areaCode: '966',
-          countryCode: 'us',
-          smsType: 1, // 注册
+         final params = {
+           "phone": phone,
+           "areaCode": '966',
+           "purpose": 1,
+           "type": 1, // 注册
+           "language": AppDevice().appLanguage, // 注册
+         };
+        // 创建 ApiClient
+        final dio = ref.read(dioProvider);
+        final apiClient = ApiClient(dio: dio);
+        final response = await apiClient.dio.post(
+          ApiPath.sendSms,
+          data: params,
         );
-
         if (!context.mounted) return;
 
-        if (response.success) {
+         if (response.statusCode == 200) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Verification code sent successfully')),
           );
           countdown.value = 60; // 开始60秒倒计时
         } else {
+           final data = response.data;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(response.message ?? 'Failed to send code')),
+            SnackBar(content: Text(data['message'] ?? 'Failed to send code')),
           );
         }
       } catch (e) {
