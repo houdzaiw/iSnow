@@ -20,11 +20,11 @@ class ApiPath {
   /// 登录
   static const login = '/oauth2/login';
 
-  /// 注册
-  static const register = '/oauth2/register';
-
   /// 发送验证码
   static const sendSms = '/oauth2/sendSms';
+
+  /// 获取当前登录用户信息
+  static const getMineUserInfo = '/api/user/mine';
 
   /// 校验验证码
   static const verifyCode = '/oauth2/verify/code';

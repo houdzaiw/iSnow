@@ -12,7 +12,6 @@ class RegisterPage extends HookConsumerWidget {
     final emailController = useTextEditingController(text: "13104889693");
     final verificationCodeController = useTextEditingController();
     final passwordController = useTextEditingController(text: "123456");
-    final confirmPasswordController = useTextEditingController();
     final loginProvider = ref.watch(loginProviderProvider);
     final isLoading = useState(false);
     final countdown = useState(0);
@@ -79,7 +78,6 @@ class RegisterPage extends HookConsumerWidget {
       final account = emailController.text.trim();
       final verificationCode = verificationCodeController.text.trim();
       final password = passwordController.text.trim();
-      final confirmPassword = confirmPasswordController.text.trim();
 
       // 验证输入
       if (account.isEmpty) {
@@ -103,20 +101,6 @@ class RegisterPage extends HookConsumerWidget {
         return;
       }
 
-      if (confirmPassword.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please confirm your password')),
-        );
-        return;
-      }
-
-      if (password != confirmPassword) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Passwords do not match')),
-        );
-        return;
-      }
-
       // 开始加载
       isLoading.value = true;
 
@@ -125,6 +109,7 @@ class RegisterPage extends HookConsumerWidget {
         final response = await loginProvider.register(
           account: account,
           password: password,
+          smsCode: verificationCode,
           areaCode: '1',
           countryCode: 'us',
         );

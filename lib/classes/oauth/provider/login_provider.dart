@@ -65,6 +65,7 @@ class LoginProvider {
   Future<LoginResponse> login({
     required String account,
     required String password,
+    required String smsCode,
     int loginType = 5,
     String areaCode = '966',
     String countryCode = 'us',
@@ -78,7 +79,7 @@ class LoginProvider {
         "code": account,
         "loginType": loginType,
         "passwd": encryptedPassword,
-        "smsCode": "",
+        "smsCode": smsCode,
         "areaCode": areaCode,
         "countryCode": countryCode,
         "fbLimited": false,
@@ -235,6 +236,7 @@ class LoginProvider {
   Future<LoginResponse> register({
     required String account,
     required String password,
+    required String smsCode,
     String areaCode = '966',
     String countryCode = 'us',
   }) async {
@@ -246,32 +248,53 @@ class LoginProvider {
         'countryCode': countryCode,
       };
 
-      final response = await _apiClient.dio.post(
-        ApiPath.register,
-        data: data,
+      final response = await login(
+        account: account,
+        password: "",
+        smsCode: smsCode,
+        areaCode: '966',
+        countryCode: 'us',
       );
-
-      if (response.statusCode == 200) {
-        final responseData = response.data;
-        if (responseData['code'] == 0) {
-          return LoginResponse(
-            success: true,
-            message: 'Registration successful',
-            data: responseData['data'] != null ? UserData.fromJson(responseData['data']) : null,
-            token: responseData['data']?['token'] as String?,
-          );
+      // 调用getMineUserInfo
+      final userInfoResponse = await _apiClient.dio.post(
+        ApiPath.getMineUserInfo,
+        data: {},
+      );
+      if (userInfoResponse.statusCode == 200) {
+         //调用修改密码接口setPassword
+        final setPasswordResponse = await _apiClient.dio.post(
+          ApiPath.setPassword,
+          data: {
+            'password': await CryptUtil.encrypt(password),
+          },
+        );
+        if (setPasswordResponse.statusCode == 200) {
+          final setPasswordData = setPasswordResponse.data;
+          if (setPasswordData['code'] == 0) {
+            return LoginResponse(
+              success: true,
+              message: 'Registration and password setup successful',
+            );
+          } else {
+            return LoginResponse(
+              success: false,
+              message: setPasswordData['message'] ?? 'Failed to set password',
+            );
+          }
         } else {
+          print("mmmmmmmmmmmmmm333333333");
           return LoginResponse(
             success: false,
-            message: responseData['message'] ?? 'Registration failed',
+            message: 'Server error: ${setPasswordResponse.statusCode}',
           );
         }
       } else {
         return LoginResponse(
           success: false,
-          message: 'Server error: ${response.statusCode}',
+          message: 'Server error: ${userInfoResponse.statusCode}',
         );
       }
+
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout) {

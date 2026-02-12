@@ -49,6 +49,7 @@ class LoginDetailPage extends HookConsumerWidget {
         final response = await loginProvider.login(
           account: account,
           password: password,
+          smsCode: "",
           areaCode: '966',
           countryCode: 'us',
         );
