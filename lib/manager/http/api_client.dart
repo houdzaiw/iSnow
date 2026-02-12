@@ -1,6 +1,9 @@
 import 'package:dio/dio.dart';
 import 'api_path.dart';
 
+// HTTP 状态码
+const int _httpOk = 200;
+
 // ApiClient 类用于管理 API 调用
 class ApiClient {
   final Dio dio;
@@ -10,11 +13,126 @@ class ApiClient {
     dio.options.baseUrl = ApiPath.baseUrl;
   }
 
-  // 可以在这里添加具体的 API 方法
-  // 例如：
-  // Future<Response> login(Map<String, dynamic> data) async {
-  //   return await dio.post('/api/login', data: data);
-  // }
+  /// 统一的 POST 请求处理
+  /// 返回 ApiResponse，封装了 HTTP 层面的错误处理
+  Future<ApiResponse> post(
+    String path, {
+    Map<String, dynamic>? data,
+    Map<String, dynamic>? queryParameters,
+  }) async {
+    try {
+      final response = await dio.post(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+      );
+
+      // HTTP 请求失败
+      if (response.statusCode != _httpOk) {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+
+      // HTTP 请求成功，返回数据
+      return ApiResponse(
+        success: true,
+        data: response.data,
+        statusCode: response.statusCode,
+      );
+    } on DioException catch (e) {
+      return _handleDioException(e);
+    } catch (e) {
+      return ApiResponse(
+        success: false,
+        message: 'Unexpected error: $e',
+      );
+    }
+  }
+
+  /// 统一的 GET 请求处理
+  /// 返回 ApiResponse，封装了 HTTP 层面的错误处理
+  Future<ApiResponse> get(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+  }) async {
+    try {
+      final response = await dio.get(
+        path,
+        queryParameters: queryParameters,
+      );
+
+      // HTTP 请求失败
+      if (response.statusCode != _httpOk) {
+        return ApiResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
+      }
+
+      // HTTP 请求成功，返回数据
+      return ApiResponse(
+        success: true,
+        data: response.data,
+        statusCode: response.statusCode,
+      );
+    } on DioException catch (e) {
+      return _handleDioException(e);
+    } catch (e) {
+      return ApiResponse(
+        success: false,
+        message: 'Unexpected error: $e',
+      );
+    }
+  }
+
+  /// 统一处理 DioException
+  ApiResponse _handleDioException(DioException e) {
+    if (e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout) {
+      return ApiResponse(
+        success: false,
+        message: 'Connection timeout, please try again',
+      );
+    } else if (e.type == DioExceptionType.badResponse) {
+      final data = e.response?.data;
+      if (data is Map<String, dynamic>) {
+        return ApiResponse(
+          success: false,
+          message: data['message'] ?? 'Server error',
+          data: data,
+        );
+      }
+      return ApiResponse(
+        success: false,
+        message: 'Server error: ${e.response?.statusCode}',
+      );
+    } else {
+      return ApiResponse(
+        success: false,
+        message: 'Network error: ${e.message}',
+      );
+    }
+  }
+}
+
+/// API 响应封装类
+/// 用于统一封装 HTTP 层面的响应
+class ApiResponse {
+  final bool success; // HTTP 请求是否成功
+  final String? message; // 错误消息
+  final dynamic data; // 响应数据
+  final int? statusCode; // HTTP 状态码
+
+  ApiResponse({
+    required this.success,
+    this.message,
+    this.data,
+    this.statusCode,
+  });
 }
 
 class ServiceStatusCode {

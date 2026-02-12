@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:project/model/login_response.dart';
 import 'package:project/manager/http/dio_provider.dart';
@@ -7,8 +6,6 @@ import 'package:project/manager/http/api_client.dart';
 import 'package:project/configs/app_device.dart';
 import 'package:project/lib/crypt_util.dart';
 
-// HTTP 状态码
-const int _httpOk = 200;
 
 enum GetSMSType {
   none,
@@ -101,20 +98,21 @@ class LoginProvider {
         "appsflyerUID": _appDevice.fingerprint,
       };
 
-      final response = await _apiClient.dio.post(
+      // 使用 ApiClient 统一处理 HTTP 请求
+      final response = await _apiClient.post(
         ApiPath.login,
         data: params,
       );
 
-      // HTTP 请求失败
-      if (response.statusCode != _httpOk) {
+      // HTTP 层面失败
+      if (!response.success) {
         return LoginResponse(
           success: false,
-          message: 'Server error: ${response.statusCode}',
+          message: response.message ?? 'Request failed',
         );
       }
 
-      // HTTP 请求成功，检查业务状态码
+      // HTTP 层面成功，检查业务状态码
       final data = response.data;
       if (data['code'] == ServiceStatusCode.successCode) {
         return LoginResponse(
@@ -127,33 +125,6 @@ class LoginProvider {
         return LoginResponse(
           success: false,
           message: data['message'] ?? 'Login failed',
-        );
-      }
-    } on DioException catch (e) {
-      // 处理网络错误
-      if (e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.receiveTimeout) {
-        return LoginResponse(
-          success: false,
-          message: 'Connection timeout, please try again',
-        );
-      } else if (e.type == DioExceptionType.badResponse) {
-        // 服务器返回错误
-        final data = e.response?.data;
-        if (data is Map<String, dynamic>) {
-          return LoginResponse(
-            success: false,
-            message: data['message'] ?? 'Server error',
-          );
-        }
-        return LoginResponse(
-          success: false,
-          message: 'Server error: ${e.response?.statusCode}',
-        );
-      } else {
-        return LoginResponse(
-          success: false,
-          message: 'Network error: ${e.message}',
         );
       }
     } catch (e) {
@@ -184,43 +155,46 @@ class LoginProvider {
         "language": _appDevice.appLanguage,
       };
 
-      final result = await _apiClient.dio.get(
+      // 检查用户是否存在
+      final result = await _apiClient.get(
         ApiPath.hasUser,
         queryParameters: hasUserParams,
       );
 
-      // 检查用户是否存在
-      if (result.statusCode == _httpOk) {
-        final resultData = result.data;
-        final hasUser = resultData['data']?['hasUser'] as bool? ?? false;
-
-        if (purpose == GetSMSPurpose.register && hasUser) {
-          return LoginResponse(
-            success: false,
-            message: 'Account already exists',
-          );
-        }
-      } else {
+      // HTTP 层面失败
+      if (!result.success) {
         return LoginResponse(
           success: false,
-          message: 'Server error: ${result.statusCode}',
+          message: result.message ?? 'Request failed',
         );
       }
 
-      final response = await _apiClient.dio.post(
+      // HTTP 层面成功，检查用户是否存在
+      final resultData = result.data;
+      final hasUser = resultData['data']?['hasUser'] as bool? ?? false;
+
+      if (purpose == GetSMSPurpose.register && hasUser) {
+        return LoginResponse(
+          success: false,
+          message: 'Account already exists',
+        );
+      }
+
+      // 发送验证码
+      final response = await _apiClient.post(
         ApiPath.sendSms,
         data: params,
       );
 
-      // HTTP 请求失败
-      if (response.statusCode != _httpOk) {
+      // HTTP 层面失败
+      if (!response.success) {
         return LoginResponse(
           success: false,
-          message: 'Server error: ${response.statusCode}',
+          message: response.message ?? 'Request failed',
         );
       }
 
-      // HTTP 请求成功，检查业务状态码
+      // HTTP 层面成功，检查业务状态码
       final responseData = response.data;
       if (responseData['code'] == ServiceStatusCode.successCode) {
         return LoginResponse(
@@ -231,31 +205,6 @@ class LoginProvider {
         return LoginResponse(
           success: false,
           message: responseData['message'] ?? 'Failed to send verification code',
-        );
-      }
-    } on DioException catch (e) {
-      if (e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.receiveTimeout) {
-        return LoginResponse(
-          success: false,
-          message: 'Connection timeout, please try again',
-        );
-      } else if (e.type == DioExceptionType.badResponse) {
-        final data = e.response?.data;
-        if (data is Map<String, dynamic>) {
-          return LoginResponse(
-            success: false,
-            message: data['message'] ?? 'Server error',
-          );
-        }
-        return LoginResponse(
-          success: false,
-          message: 'Server error: ${e.response?.statusCode}',
-        );
-      } else {
-        return LoginResponse(
-          success: false,
-          message: 'Network error: ${e.message}',
         );
       }
     } catch (e) {
@@ -290,93 +239,77 @@ class LoginProvider {
       }
 
       // 调用getMineUserInfo
-      final userInfoResponse = await _apiClient.dio.get(
+      final userInfoResponse = await _apiClient.get(
         ApiPath.getMineUserInfo,
-        data: {},
       );
 
-      // HTTP 请求失败
-      if (userInfoResponse.statusCode != _httpOk) {
+      // HTTP 层面失败
+      if (!userInfoResponse.success) {
         return LoginResponse(
           success: false,
-          message: 'Server error: ${userInfoResponse.statusCode}',
+          message: userInfoResponse.message ?? 'Failed to get user info',
         );
       }
 
       // 调用修改密码接口setPassword
-      final setPasswordResponse = await _apiClient.dio.post(
+      final setPasswordResponse = await _apiClient.post(
         ApiPath.setPassword,
         data: {
           'password': await CryptUtil.encrypt(password),
         },
       );
 
-      // HTTP 请求失败
-      if (setPasswordResponse.statusCode != _httpOk) {
+      // HTTP 层面失败
+      if (!setPasswordResponse.success) {
         return LoginResponse(
           success: false,
-          message: 'Server error: ${setPasswordResponse.statusCode}',
+          message: setPasswordResponse.message ?? 'Failed to set password',
         );
       }
 
-      // HTTP 请求成功，检查业务状态码
+      // HTTP 层面成功，检查业务状态码
       final setPasswordData = setPasswordResponse.data;
-      if (setPasswordData['code'] == ServiceStatusCode.successCode) {
-         //继续完善用户信息completeUserInfo
-        final completeParams = {
-           'nick': 'User${DateTime.now().millisecondsSinceEpoch}',
-           'gender': 0,
-            'birth': '2000-01-01',
-            'uid': 18416564,
-            'code': 'SA',
-            'inviteCode': '',
-        };
-        final completeInfoResponse = await _apiClient.dio.post(
-          ApiPath.completeUserInfo,
-          data: completeParams
-        );
-        if (completeInfoResponse.statusCode == _httpOk &&
-            completeInfoResponse.data['code'] == ServiceStatusCode.successCode) {
-          return LoginResponse(
-            success: true,
-            message: 'Registration successful',
-          );
-        } else {
-          return LoginResponse(
-            success: false,
-            message: completeInfoResponse.data['message'] ?? 'Failed to complete user info',
-          );
-        }
-      } else {
+      if (setPasswordData['code'] != ServiceStatusCode.successCode) {
         return LoginResponse(
           success: false,
           message: setPasswordData['message'] ?? 'Failed to set password',
         );
       }
 
-    } on DioException catch (e) {
-      if (e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.receiveTimeout) {
+      // 继续完善用户信息completeUserInfo
+      final completeParams = {
+        'nick': 'User${DateTime.now().millisecondsSinceEpoch}',
+        'gender': 0,
+        'birth': '2000-01-01',
+        'uid': 18416564,
+        'code': 'SA',
+        'inviteCode': '',
+      };
+
+      final completeInfoResponse = await _apiClient.post(
+        ApiPath.completeUserInfo,
+        data: completeParams,
+      );
+
+      // HTTP 层面失败
+      if (!completeInfoResponse.success) {
         return LoginResponse(
           success: false,
-          message: 'Connection timeout, please try again',
+          message: completeInfoResponse.message ?? 'Failed to complete user info',
         );
-      } else if (e.type == DioExceptionType.badResponse) {
-        final data = e.response?.data;
-        if (data is Map<String, dynamic>) {
-          return LoginResponse(
-            success: false,
-            message: data['message'] ?? 'Server error',
-          );
-        }
+      }
+
+      // HTTP 层面成功，检查业务状态码
+      final completeData = completeInfoResponse.data;
+      if (completeData['code'] == ServiceStatusCode.successCode) {
         return LoginResponse(
-          success: false,
-          message: 'Server error: ${e.response?.statusCode}',
+          success: true,
+          message: 'Registration successful',
         );
       } else {
         return LoginResponse(
           success: false,
-          message: 'Network error: ${e.message}',
+          message: completeData['message'] ?? 'Failed to complete user info',
         );
       }
     } catch (e) {
