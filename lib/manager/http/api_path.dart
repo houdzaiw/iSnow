@@ -20,6 +20,9 @@ class ApiPath {
   /// 登录
   static const login = '/oauth2/login';
 
+  /// 注册
+  static const register = '/oauth2/register';
+
   /// 发送验证码
   static const sendSms = '/oauth2/sendSms';
 

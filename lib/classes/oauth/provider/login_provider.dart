@@ -1,11 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import '../../../model/login_request.dart';
-import '../../../model/login_response.dart';
-import '../../../model/get_sms_code_request.dart';
-import '../../../manager/http/dio_provider.dart';
-import '../../../manager/http/api_path.dart';
-import '../../../configs/app_device.dart';
+import 'package:project/model/login_response.dart';
+import 'package:project/manager/http/dio_provider.dart';
+import 'package:project/manager/http/api_path.dart';
+import 'package:project/manager/http/api_client.dart';
+import 'package:project/configs/app_device.dart';
+import 'package:project/lib/crypt_util.dart';
 
 enum GetSMSType {
   none,
@@ -56,33 +56,73 @@ extension GetSMSPurposeExt on GetSMSPurpose {
 }
 
 class LoginProvider {
-  final Dio _dio;
+  final ApiClient _apiClient;
+  final AppDevice _appDevice = AppDevice();
 
-  LoginProvider(this._dio);
+  LoginProvider(this._apiClient);
 
   // 登录接口
   Future<LoginResponse> login({
     required String account,
     required String password,
     int loginType = 5,
-    String areaCode = '1',
+    String areaCode = '966',
     String countryCode = 'us',
   }) async {
     try {
-      final request = LoginRequest(
-        account: account,
-        password: password,
-        loginType: loginType,
-        areaCode: areaCode,
-        countryCode: countryCode,
+      // 加密密码
+      final encryptedPassword = await CryptUtil.encrypt(password);
+
+      // 构建登录参数
+      final params = {
+        "code": account,
+        "loginType": loginType,
+        "passwd": encryptedPassword,
+        "smsCode": "",
+        "areaCode": areaCode,
+        "countryCode": countryCode,
+        "fbLimited": false,
+        "deviceId": _appDevice.deviceId,
+        "app": _appDevice.appName,
+        "appVersion": _appDevice.appVersion,
+        "appVersionCode": int.tryParse(_appDevice.appVersionCode) ?? 1,
+        "channel": "DEV",
+        "systemLanguage": _appDevice.systemLanguage,
+        "appLanguage": _appDevice.appLanguage,
+        "isp": "",
+        "model": _appDevice.model,
+        "os": _appDevice.os,
+        "osVersion": _appDevice.osVersion,
+        "deviceBrand": _appDevice.deviceBrand,
+        "appsflyerUID": _appDevice.fingerprint,
+      };
+
+      final response = await _apiClient.dio.post(
+        ApiPath.login,
+        data: params,
       );
 
-      final response = await _dio.post(
-        '/api/login',
-        data: request.toJson(),
-      );
-
-      return LoginResponse.fromJson(response.data);
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data['code'] == 0) {
+          return LoginResponse(
+            success: true,
+            message: 'Login successful',
+            data: data['data'] != null ? UserData.fromJson(data['data']) : null,
+            token: data['data']?['token'] as String?,
+          );
+        } else {
+          return LoginResponse(
+            success: false,
+            message: data['message'] ?? 'Login failed',
+          );
+        }
+      } else {
+        return LoginResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
     } on DioException catch (e) {
       // 处理网络错误
       if (e.type == DioExceptionType.connectionTimeout ||
@@ -95,7 +135,10 @@ class LoginProvider {
         // 服务器返回错误
         final data = e.response?.data;
         if (data is Map<String, dynamic>) {
-          return LoginResponse.fromJson(data);
+          return LoginResponse(
+            success: false,
+            message: data['message'] ?? 'Server error',
+          );
         }
         return LoginResponse(
           success: false,
@@ -119,24 +162,21 @@ class LoginProvider {
   Future<LoginResponse> sendSms({
     required String phone,
     String areaCode = '966',
-    String countryCode = 'us',
-    int smsType = 1, // 1: 注册, 2: 登录, 3: 找回密码
+    GetSMSPurpose purpose = GetSMSPurpose.register,
+    GetSMSType type = GetSMSType.sms,
   }) async {
     try {
-      final appDevice = AppDevice();
-      final request = GetSMSCodeRequest(
-        phone: phone,
-        areaCode: areaCode,
-        purpose: GetSMSPurpose.register,
-        type: GetSMSType.sms,
-        language: appDevice.appLanguage,
-      );
+      final params = {
+        "phone": phone,
+        "areaCode": areaCode,
+        "purpose": purpose.value,
+        "type": type == GetSMSType.sms ? 1 : 2,
+        "language": _appDevice.appLanguage,
+      };
 
-      print('Sending SMS with params: $request');
-
-      final response = await _dio.post(
+      final response = await _apiClient.dio.post(
         ApiPath.sendSms,
-        data: request.toJson(),
+        data: params,
       );
 
       if (response.statusCode == 200) {
@@ -206,12 +246,32 @@ class LoginProvider {
         'countryCode': countryCode,
       };
 
-      final response = await _dio.post(
-        '/api/register',
+      final response = await _apiClient.dio.post(
+        ApiPath.register,
         data: data,
       );
 
-      return LoginResponse.fromJson(response.data);
+      if (response.statusCode == 200) {
+        final responseData = response.data;
+        if (responseData['code'] == 0) {
+          return LoginResponse(
+            success: true,
+            message: 'Registration successful',
+            data: responseData['data'] != null ? UserData.fromJson(responseData['data']) : null,
+            token: responseData['data']?['token'] as String?,
+          );
+        } else {
+          return LoginResponse(
+            success: false,
+            message: responseData['message'] ?? 'Registration failed',
+          );
+        }
+      } else {
+        return LoginResponse(
+          success: false,
+          message: 'Server error: ${response.statusCode}',
+        );
+      }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout) {
@@ -222,7 +282,10 @@ class LoginProvider {
       } else if (e.type == DioExceptionType.badResponse) {
         final data = e.response?.data;
         if (data is Map<String, dynamic>) {
-          return LoginResponse.fromJson(data);
+          return LoginResponse(
+            success: false,
+            message: data['message'] ?? 'Server error',
+          );
         }
         return LoginResponse(
           success: false,
@@ -246,6 +309,7 @@ class LoginProvider {
 // Riverpod provider
 final loginProviderProvider = Provider<LoginProvider>((ref) {
   final dio = ref.read(dioProvider);
-  return LoginProvider(dio);
+  final apiClient = ApiClient(dio: dio);
+  return LoginProvider(apiClient);
 });
 

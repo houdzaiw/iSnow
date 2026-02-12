@@ -3,42 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:project/configs/app_device.dart';
-import 'package:project/lib/crypt_util.dart';
-import 'package:project/manager/http/api_client.dart';
-import 'package:project/manager/http/dio_provider.dart';
-import 'package:crypto/crypto.dart';
-import 'dart:convert';
-
-import '../../manager/http/api_path.dart';
-
-// final loginRepositoryProvider = Provider<LoginRepository>((ref) {
-//   final dio = ref.read(dioProvider);
-//   final apiClient = ApiClient(dio: dio);
-//   return LoginRepository(apiClient);
-// });
-//
-// class LoginRepository {
-//   final ApiClient _apiClient;
-//
-//   LoginRepository(this._apiClient);
-//
-//   Future<void> login(Map<String, dynamic> params) async {
-//     try {
-//       final response = await _apiClient.dio.post(ApiPath.login, data: params);
-//       if (response.statusCode == 200) {
-//         // Handle successful login
-//         print('Login successful: ${response.data}');
-//       } else {
-//         // Handle error response
-//         print('Login failed: ${response.statusCode}');
-//       }
-//     } catch (e) {
-//       // Handle exceptions
-//       print('Login error: $e');
-//     }
-//   }
-// }
+import 'provider/login_provider.dart';
 
 class LoginDetailPage extends HookConsumerWidget {
   const LoginDetailPage({super.key});
@@ -49,25 +14,8 @@ class LoginDetailPage extends HookConsumerWidget {
     final passwordController = useTextEditingController(text: "123456");
     final isLoading = useState(false);
     final agreeToTerms = useState(false);
+    final loginProvider = ref.watch(loginProviderProvider);
 
-    Future<void> getDefaultCountry() async {
-      // 获取 Dio 实例
-      final dio = ref.read(dioProvider);
-
-      final apiClient = ApiClient(dio: dio);
-
-      print("baseUrl====${ApiPath.baseUrl}");
-      // 发送登录请求
-      final response = await apiClient.dio.get(
-        ApiPath.defaultCountry,
-        data: {},
-      );
-      if (response.statusCode == 200) {
-        final data = response.data;
-      } else {
-
-      }
-    }
     Future<void> handleLogin() async {
       final account = emailController.text.trim();
       final password = passwordController.text.trim();
@@ -97,82 +45,35 @@ class LoginDetailPage extends HookConsumerWidget {
       isLoading.value = true;
 
       try {
-        // 获取设备信息
-        final appDevice = AppDevice();
-
-        // 加密密码
-        final encryptedPassword = await CryptUtil.encrypt(password);
-
-        // 构建登录参数
-        final params = {
-          "code": account,
-          "loginType": 5,
-          "passwd": encryptedPassword,
-          "smsCode": "",
-          "areaCode": "966",
-          "countryCode": "us",
-          "fbLimited": false,
-          "deviceId": appDevice.deviceId,
-          "app": appDevice.appName,
-          "appVersion": appDevice.appVersion,
-          "appVersionCode": int.tryParse(appDevice.appVersionCode) ?? 1,
-          "channel": "DEV",
-          "systemLanguage": appDevice.systemLanguage,
-          "appLanguage": appDevice.appLanguage,
-          "isp": "",
-          "model": appDevice.model,
-          "os": appDevice.os,
-          "osVersion": appDevice.osVersion,
-          "deviceBrand": appDevice.deviceBrand,
-          "appsflyerUID": appDevice.fingerprint,
-        };
-        print("params====$params");
-        // 获取 Dio 实例
-        final dio = ref.read(dioProvider);
-
-        // 创建 ApiClient
-        final apiClient = ApiClient(dio: dio);
-
-        print("baseUrl====${ApiPath.baseUrl}");
-        // 发送登录请求
-        final response = await apiClient.dio.post(
-          ApiPath.login,
-          data: params,
+        // 使用 LoginProvider 登录
+        final response = await loginProvider.login(
+          account: account,
+          password: password,
+          areaCode: '966',
+          countryCode: 'us',
         );
 
         if (!context.mounted) return;
 
-        // 处理响应
-        if (response.statusCode == 200) {
-          final data = response.data;
+        if (response.success) {
+          // 登录成功
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(response.message ?? 'Login successful')),
+          );
 
-          if (data['code'] == ServiceStatusCode.successCode) {
-            // 登录成功
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Login successful!')),
-            );
+          // TODO: 保存 token 和用户信息到本地存储
+          final token = response.token;
+          print('Login Token: $token');
 
-            // TODO: 保存 token 和用户信息到本地存储
-            final token = data['data']?['token'];
-            print('Login Token: $token');
-
-            // 跳转到首页
-            if (context.mounted) {
-              context.go('/home');
-            }
-          } else {
-            // 登录失败
-            final message = data['message'] ?? 'Login failed';
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(message)),
-              );
-            }
+          // 跳转到首页
+          if (context.mounted) {
+            context.go('/home');
           }
         } else {
+          // 登录失败
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Server error: ${response.statusCode}')),
+              SnackBar(content: Text(response.message ?? 'Login failed')),
             );
           }
         }
