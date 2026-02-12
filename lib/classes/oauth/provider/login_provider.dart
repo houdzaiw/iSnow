@@ -7,6 +7,9 @@ import 'package:project/manager/http/api_client.dart';
 import 'package:project/configs/app_device.dart';
 import 'package:project/lib/crypt_util.dart';
 
+// HTTP 状态码
+const int _httpOk = 200;
+
 enum GetSMSType {
   none,
   sms,
@@ -103,25 +106,27 @@ class LoginProvider {
         data: params,
       );
 
-      if (response.statusCode == 200) {
-        final data = response.data;
-        if (data['code'] == 0) {
-          return LoginResponse(
-            success: true,
-            message: 'Login successful',
-            data: data['data'] != null ? UserData.fromJson(data['data']) : null,
-            token: data['data']?['token'] as String?,
-          );
-        } else {
-          return LoginResponse(
-            success: false,
-            message: data['message'] ?? 'Login failed',
-          );
-        }
-      } else {
+      // HTTP 请求失败
+      if (response.statusCode != _httpOk) {
         return LoginResponse(
           success: false,
           message: 'Server error: ${response.statusCode}',
+        );
+      }
+
+      // HTTP 请求成功，检查业务状态码
+      final data = response.data;
+      if (data['code'] == ServiceStatusCode.successCode) {
+        return LoginResponse(
+          success: true,
+          message: 'Login successful',
+          data: data['data'] != null ? UserData.fromJson(data['data']) : null,
+          token: data['data']?['token'] as String?,
+        );
+      } else {
+        return LoginResponse(
+          success: false,
+          message: data['message'] ?? 'Login failed',
         );
       }
     } on DioException catch (e) {
@@ -183,7 +188,9 @@ class LoginProvider {
         ApiPath.hasUser,
         queryParameters: hasUserParams,
       );
-      if (result.statusCode == 200) {
+
+      // 检查用户是否存在
+      if (result.statusCode == _httpOk) {
         final resultData = result.data;
         final hasUser = resultData['data']?['hasUser'] as bool? ?? false;
 
@@ -205,23 +212,25 @@ class LoginProvider {
         data: params,
       );
 
-      if (response.statusCode == 200) {
-        final responseData = response.data;
-        if (responseData['code'] == 200) {
-          return LoginResponse(
-            success: true,
-            message: 'Verification code sent successfully',
-          );
-        } else {
-          return LoginResponse(
-            success: false,
-            message: responseData['message'] ?? 'Failed to send verification code',
-          );
-        }
-      } else {
+      // HTTP 请求失败
+      if (response.statusCode != _httpOk) {
         return LoginResponse(
           success: false,
           message: 'Server error: ${response.statusCode}',
+        );
+      }
+
+      // HTTP 请求成功，检查业务状态码
+      final responseData = response.data;
+      if (responseData['code'] == ServiceStatusCode.successCode) {
+        return LoginResponse(
+          success: true,
+          message: 'Verification code sent successfully',
+        );
+      } else {
+        return LoginResponse(
+          success: false,
+          message: responseData['message'] ?? 'Failed to send verification code',
         );
       }
     } on DioException catch (e) {
@@ -281,42 +290,67 @@ class LoginProvider {
       }
 
       // 调用getMineUserInfo
-      final userInfoResponse = await _apiClient.dio.post(
+      final userInfoResponse = await _apiClient.dio.get(
         ApiPath.getMineUserInfo,
         data: {},
       );
-      if (userInfoResponse.statusCode == 200) {
-         //调用修改密码接口setPassword
-        final setPasswordResponse = await _apiClient.dio.post(
-          ApiPath.setPassword,
-          data: {
-            'password': await CryptUtil.encrypt(password),
-          },
+
+      // HTTP 请求失败
+      if (userInfoResponse.statusCode != _httpOk) {
+        return LoginResponse(
+          success: false,
+          message: 'Server error: ${userInfoResponse.statusCode}',
         );
-        if (setPasswordResponse.statusCode == 200) {
-          final setPasswordData = setPasswordResponse.data;
-          if (setPasswordData['code'] == 0) {
-            return LoginResponse(
-              success: true,
-              message: 'Registration and password setup successful',
-            );
-          } else {
-            return LoginResponse(
-              success: false,
-              message: setPasswordData['message'] ?? 'Failed to set password',
-            );
-          }
+      }
+
+      // 调用修改密码接口setPassword
+      final setPasswordResponse = await _apiClient.dio.post(
+        ApiPath.setPassword,
+        data: {
+          'password': await CryptUtil.encrypt(password),
+        },
+      );
+
+      // HTTP 请求失败
+      if (setPasswordResponse.statusCode != _httpOk) {
+        return LoginResponse(
+          success: false,
+          message: 'Server error: ${setPasswordResponse.statusCode}',
+        );
+      }
+
+      // HTTP 请求成功，检查业务状态码
+      final setPasswordData = setPasswordResponse.data;
+      if (setPasswordData['code'] == ServiceStatusCode.successCode) {
+         //继续完善用户信息completeUserInfo
+        final completeParams = {
+           'nick': 'User${DateTime.now().millisecondsSinceEpoch}',
+           'gender': 0,
+            'birth': '2000-01-01',
+            'uid': 18416564,
+            'code': 'SA',
+            'inviteCode': '',
+        };
+        final completeInfoResponse = await _apiClient.dio.post(
+          ApiPath.completeUserInfo,
+          data: completeParams
+        );
+        if (completeInfoResponse.statusCode == _httpOk &&
+            completeInfoResponse.data['code'] == ServiceStatusCode.successCode) {
+          return LoginResponse(
+            success: true,
+            message: 'Registration successful',
+          );
         } else {
-          print("mmmmmmmmmmmmmm333333333");
           return LoginResponse(
             success: false,
-            message: 'Server error: ${setPasswordResponse.statusCode}',
+            message: completeInfoResponse.data['message'] ?? 'Failed to complete user info',
           );
         }
       } else {
         return LoginResponse(
           success: false,
-          message: 'Server error: ${userInfoResponse.statusCode}',
+          message: setPasswordData['message'] ?? 'Failed to set password',
         );
       }
 

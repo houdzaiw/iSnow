@@ -32,6 +32,9 @@ class ApiPath {
   /// 设置密码
   static const setPassword = '/oauth2/setPassword';
 
+  /// 完善用户信息
+  static const completeUserInfo = '/api/user/complete';
+
   /// 登出
   static const logout = '/oauth2/logout';
 
