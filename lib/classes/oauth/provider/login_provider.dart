@@ -104,7 +104,7 @@ class LoginProvider {
         data: params,
       );
 
-      // HTTP 层面失败
+      // HTTP 或业务层面失败（ApiClient 已统一处理）
       if (!response.success) {
         return LoginResponse(
           success: false,
@@ -112,21 +112,14 @@ class LoginProvider {
         );
       }
 
-      // HTTP 层面成功，检查业务状态码
+      // 成功，response.data 已经是纯净的业务数据
       final data = response.data;
-      if (data['code'] == ServiceStatusCode.successCode) {
-        return LoginResponse(
-          success: true,
-          message: 'Login successful',
-          data: data['data'] != null ? UserData.fromJson(data['data']) : null,
-          token: data['data']?['token'] as String?,
-        );
-      } else {
-        return LoginResponse(
-          success: false,
-          message: data['message'] ?? 'Login failed',
-        );
-      }
+      return LoginResponse(
+        success: true,
+        message: response.message ?? 'Login successful',
+        data: data != null ? UserData.fromJson(data) : null,
+        token: data?['token'] as String?,
+      );
     } catch (e) {
       return LoginResponse(
         success: false,
@@ -161,7 +154,7 @@ class LoginProvider {
         queryParameters: hasUserParams,
       );
 
-      // HTTP 层面失败
+      // HTTP 或业务层面失败
       if (!result.success) {
         return LoginResponse(
           success: false,
@@ -169,9 +162,9 @@ class LoginProvider {
         );
       }
 
-      // HTTP 层面成功，检查用户是否存在
+      // 检查用户是否存在
       final resultData = result.data;
-      final hasUser = resultData['data']?['hasUser'] as bool? ?? false;
+      final hasUser = resultData?['hasUser'] as bool? ?? false;
 
       if (purpose == GetSMSPurpose.register && hasUser) {
         return LoginResponse(
@@ -186,7 +179,7 @@ class LoginProvider {
         data: params,
       );
 
-      // HTTP 层面失败
+      // HTTP 或业务层面失败
       if (!response.success) {
         return LoginResponse(
           success: false,
@@ -194,19 +187,11 @@ class LoginProvider {
         );
       }
 
-      // HTTP 层面成功，检查业务状态码
-      final responseData = response.data;
-      if (responseData['code'] == ServiceStatusCode.successCode) {
-        return LoginResponse(
-          success: true,
-          message: 'Verification code sent successfully',
-        );
-      } else {
-        return LoginResponse(
-          success: false,
-          message: responseData['message'] ?? 'Failed to send verification code',
-        );
-      }
+      // 成功
+      return LoginResponse(
+        success: true,
+        message: response.message ?? 'Verification code sent successfully',
+      );
     } catch (e) {
       return LoginResponse(
         success: false,
@@ -243,7 +228,7 @@ class LoginProvider {
         ApiPath.getMineUserInfo,
       );
 
-      // HTTP 层面失败
+      // HTTP 或业务层面失败
       if (!userInfoResponse.success) {
         return LoginResponse(
           success: false,
@@ -259,20 +244,11 @@ class LoginProvider {
         },
       );
 
-      // HTTP 层面失败
+      // HTTP 或业务层面失败
       if (!setPasswordResponse.success) {
         return LoginResponse(
           success: false,
           message: setPasswordResponse.message ?? 'Failed to set password',
-        );
-      }
-
-      // HTTP 层面成功，检查业务状态码
-      final setPasswordData = setPasswordResponse.data;
-      if (setPasswordData['code'] != ServiceStatusCode.successCode) {
-        return LoginResponse(
-          success: false,
-          message: setPasswordData['message'] ?? 'Failed to set password',
         );
       }
 
@@ -291,7 +267,7 @@ class LoginProvider {
         data: completeParams,
       );
 
-      // HTTP 层面失败
+      // HTTP 或业务层面失败
       if (!completeInfoResponse.success) {
         return LoginResponse(
           success: false,
@@ -299,19 +275,11 @@ class LoginProvider {
         );
       }
 
-      // HTTP 层面成功，检查业务状态码
-      final completeData = completeInfoResponse.data;
-      if (completeData['code'] == ServiceStatusCode.successCode) {
-        return LoginResponse(
-          success: true,
-          message: 'Registration successful',
-        );
-      } else {
-        return LoginResponse(
-          success: false,
-          message: completeData['message'] ?? 'Failed to complete user info',
-        );
-      }
+      // 成功
+      return LoginResponse(
+        success: true,
+        message: completeInfoResponse.message ?? 'Registration successful',
+      );
     } catch (e) {
       return LoginResponse(
         success: false,

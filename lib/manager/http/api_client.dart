@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'api_path.dart';
+import '../../model/server_response.dart';
 
 // HTTP 状态码
 const int _httpOk = 200;
@@ -36,7 +37,36 @@ class ApiClient {
         );
       }
 
-      // HTTP 请求成功，返回数据
+      // HTTP 请求成功，解析服务端响应
+      if (response.data is Map<String, dynamic>) {
+        final serverResponse = ServerResponse.fromJson(
+          response.data as Map<String, dynamic>,
+          null,
+        );
+
+        // 检查业务状态码
+        if (!serverResponse.isSuccess) {
+          // 业务失败，返回失败响应
+          return ApiResponse(
+            success: false,
+            message: serverResponse.message,
+            data: serverResponse.data,
+            statusCode: response.statusCode,
+            traceId: serverResponse.traceId,
+          );
+        }
+
+        // HTTP 和业务都成功，返回 data 字段中的数据
+        return ApiResponse(
+          success: true,
+          data: serverResponse.data, // 只返回 data.data
+          statusCode: response.statusCode,
+          message: serverResponse.message,
+          traceId: serverResponse.traceId,
+        );
+      }
+
+      // 如果响应不是标准格式，返回原始数据
       return ApiResponse(
         success: true,
         data: response.data,
@@ -73,7 +103,36 @@ class ApiClient {
         );
       }
 
-      // HTTP 请求成功，返回数据
+      // HTTP 请求成功，解析服务端响应
+      if (response.data is Map<String, dynamic>) {
+        final serverResponse = ServerResponse.fromJson(
+          response.data as Map<String, dynamic>,
+          null,
+        );
+
+        // 检查业务状态码
+        if (!serverResponse.isSuccess) {
+          // 业务失败，返回失败响应
+          return ApiResponse(
+            success: false,
+            message: serverResponse.message,
+            data: serverResponse.data,
+            statusCode: response.statusCode,
+            traceId: serverResponse.traceId,
+          );
+        }
+
+        // HTTP 和业务都成功，返回 data 字段中的数据
+        return ApiResponse(
+          success: true,
+          data: serverResponse.data, // 只返回 data.data
+          statusCode: response.statusCode,
+          message: serverResponse.message,
+          traceId: serverResponse.traceId,
+        );
+      }
+
+      // 如果响应不是标准格式，返回原始数据
       return ApiResponse(
         success: true,
         data: response.data,
@@ -124,14 +183,16 @@ class ApiClient {
 class ApiResponse {
   final bool success; // HTTP 请求是否成功
   final String? message; // 错误消息
-  final dynamic data; // 响应数据
+  final dynamic data; // 响应数据（仅包含 data.data）
   final int? statusCode; // HTTP 状态码
+  final String? traceId; // 追踪 ID
 
   ApiResponse({
     required this.success,
     this.message,
     this.data,
     this.statusCode,
+    this.traceId,
   });
 }
 
