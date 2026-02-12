@@ -192,11 +192,6 @@ class LoginProvider {
             success: false,
             message: 'Account already exists',
           );
-        } else if (purpose == GetSMSPurpose.forgetPassword && !hasUser) {
-          return LoginResponse(
-            success: false,
-            message: 'Account does not exist',
-          );
         }
       } else {
         return LoginResponse(
@@ -212,7 +207,7 @@ class LoginProvider {
 
       if (response.statusCode == 200) {
         final responseData = response.data;
-        if (responseData['code'] == 0) {
+        if (responseData['code'] == 200) {
           return LoginResponse(
             success: true,
             message: 'Verification code sent successfully',
