@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'provider/login_provider.dart';
 
 class LoginDetailPage extends HookConsumerWidget {
@@ -15,6 +16,24 @@ class LoginDetailPage extends HookConsumerWidget {
     final isLoading = useState(false);
     final agreeToTerms = useState(false);
     final loginProvider = ref.watch(loginProviderProvider);
+
+    // 加载协议同意状态
+    useEffect(() {
+      Future<void> loadAgreeStatus() async {
+        final prefs = await SharedPreferences.getInstance();
+        final agreed = prefs.getBool('agree_to_terms') ?? false;
+        agreeToTerms.value = agreed;
+      }
+      loadAgreeStatus();
+      return null;
+    }, []);
+
+    // 保存协议同意状态
+    Future<void> saveAgreeStatus(bool agreed) async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('agree_to_terms', agreed);
+      agreeToTerms.value = agreed;
+    }
 
     Future<void> handleLogin() async {
       final account = emailController.text.trim();
@@ -37,7 +56,16 @@ class LoginDetailPage extends HookConsumerWidget {
 
       // 验证是否同意协议
       if (!agreeToTerms.value) {
-        context.push('/agree_policy-view');
+        // 跳转到协议页面，等待用户响应
+        final result = await context.push<bool>('/agree_policy-view');
+
+        if (result == true) {
+          // 用户同意协议，保存状态并继续登录
+          await saveAgreeStatus(true);
+          // 递归调用登录，此时 agreeToTerms.value 已经是 true
+          await handleLogin();
+        }
+        // 如果用户不同意或关闭，不做任何操作
         return;
       }
 
@@ -182,8 +210,9 @@ class LoginDetailPage extends HookConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         GestureDetector(
-                          onTap: () {
-                            agreeToTerms.value = !agreeToTerms.value;
+                          onTap: () async {
+                            final newValue = !agreeToTerms.value;
+                            await saveAgreeStatus(newValue);
                           },
                           child: Container(
                             width: 15,

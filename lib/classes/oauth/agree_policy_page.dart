@@ -99,8 +99,8 @@ class AgreePolicyPage extends HookConsumerWidget {
                     // Agree to Continue 按钮
                     GestureDetector(
                       onTap: () {
-                        // 同意并继续
-                        context.pop();
+                        // 同意并继续，返回 true
+                        context.pop(true);
                       },
                       child: Container(
                         width: double.infinity,
@@ -124,8 +124,8 @@ class AgreePolicyPage extends HookConsumerWidget {
                     // Disagree 按钮
                     GestureDetector(
                       onTap: () {
-                        // 不同意
-                        context.pop();
+                        // 不同意，返回 false
+                        context.pop(false);
                       },
                       child: Container(
                         width: double.infinity,
@@ -151,7 +151,7 @@ class AgreePolicyPage extends HookConsumerWidget {
                 right: 0,
                 child: GestureDetector(
                   onTap: () {
-                    context.pop();
+                    context.pop(null);
                   },
                   child: Image.asset(
                     'assets/base/close_button_image.png',
