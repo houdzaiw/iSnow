@@ -167,6 +167,10 @@ class LoginProvider {
     GetSMSType type = GetSMSType.sms,
   }) async {
     try {
+      final hasUserParams = {
+        "phone": phone,
+        "areaCode": areaCode,
+      };
       final params = {
         "phone": phone,
         "areaCode": areaCode,
@@ -174,6 +178,32 @@ class LoginProvider {
         "type": type == GetSMSType.sms ? 1 : 2,
         "language": _appDevice.appLanguage,
       };
+
+      final result = await _apiClient.dio.get(
+        ApiPath.hasUser,
+        queryParameters: hasUserParams,
+      );
+      if (result.statusCode == 200) {
+        final resultData = result.data;
+        final hasUser = resultData['data']?['hasUser'] as bool? ?? false;
+
+        if (purpose == GetSMSPurpose.register && hasUser) {
+          return LoginResponse(
+            success: false,
+            message: 'Account already exists',
+          );
+        } else if (purpose == GetSMSPurpose.forgetPassword && !hasUser) {
+          return LoginResponse(
+            success: false,
+            message: 'Account does not exist',
+          );
+        }
+      } else {
+        return LoginResponse(
+          success: false,
+          message: 'Server error: ${result.statusCode}',
+        );
+      }
 
       final response = await _apiClient.dio.post(
         ApiPath.sendSms,
@@ -241,20 +271,20 @@ class LoginProvider {
     String countryCode = 'us',
   }) async {
     try {
-      final data = {
-        'account': account,
-        'password': password,
-        'areaCode': areaCode,
-        'countryCode': countryCode,
-      };
-
-      final response = await login(
+      // 先调用登录接口验证短信验证码
+      final loginResponse = await login(
         account: account,
         password: "",
         smsCode: smsCode,
-        areaCode: '966',
-        countryCode: 'us',
+        areaCode: areaCode,
+        countryCode: countryCode,
       );
+
+      // 如果登录失败，直接返回错误
+      if (!loginResponse.success) {
+        return loginResponse;
+      }
+
       // 调用getMineUserInfo
       final userInfoResponse = await _apiClient.dio.post(
         ApiPath.getMineUserInfo,
