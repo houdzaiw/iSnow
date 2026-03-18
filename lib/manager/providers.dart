@@ -2,6 +2,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isar/isar.dart';
 
 import '../model/diary_entry.dart';
+import '../model/user_model.dart';
+import '../classes/oauth/provider/login_provider.dart';
 import 'app_Isar.dart';
 
 /// Provider to trigger diary list refresh
@@ -18,5 +20,11 @@ final diaryEntriesProvider = FutureProvider<List<DiaryEntry>>((ref) async {
   // Sort by date descending (most recent first)
   entries.sort((a, b) => b.date.compareTo(a.date));
   return entries;
+});
+
+/// Provider to fetch current logged-in user info
+final userInfoProvider = FutureProvider<UserModel?>((ref) async {
+  final loginProvider = ref.read(loginProviderProvider);
+  return loginProvider.getUserInfo();
 });
 

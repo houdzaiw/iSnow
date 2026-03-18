@@ -1,5 +1,6 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:project/model/login_response.dart';
+import 'package:project/model/user_model.dart';
 import 'package:project/manager/http/dio_provider.dart';
 import 'package:project/manager/http/api_path.dart';
 import 'package:project/manager/http/api_client.dart';
@@ -285,6 +286,19 @@ class LoginProvider {
         success: false,
         message: 'Unexpected error: $e',
       );
+    }
+  }
+
+  // 获取当前登录用户信息
+  Future<UserModel?> getUserInfo() async {
+    try {
+      final response = await _apiClient.get(ApiPath.getMineUserInfo);
+      if (!response.success || response.data == null) {
+        return null;
+      }
+      return UserModel.fromJson(response.data as Map<String, dynamic>);
+    } catch (e) {
+      return null;
     }
   }
 }

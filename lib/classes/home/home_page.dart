@@ -1,21 +1,45 @@
 // dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:project/model/diary_entry.dart';
+import 'package:project/manager/providers.dart';
 import 'dart:math';
 import 'dart:async';
 import '../../configs/consts.dart';
 
 import 'capture_finished_page.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends HookConsumerWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userInfoAsync = ref.watch(userInfoProvider);
+    return _HomePageBody(userInfoAsync: userInfoAsync);
+  }
 }
 
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+class _HomePageBody extends HookWidget {
+  const _HomePageBody({super.key, required this.userInfoAsync});
+
+  final AsyncValue userInfoAsync;
+
+  @override
+  Widget build(BuildContext context) {
+    return const _HomePageStateful();
+  }
+}
+
+class _HomePageStateful extends StatefulWidget {
+  const _HomePageStateful();
+
+  @override
+  State<_HomePageStateful> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<_HomePageStateful> with SingleTickerProviderStateMixin {
   // moodImages is defined in lib/consts.dart
 
   final Random _random = Random();
