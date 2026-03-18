@@ -1,7 +1,10 @@
 // dart
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:project/manager/user_manager.dart';
+import 'package:project/widgets/net_Image_view.dart';
 import '../../widgets/custom_scaffold.dart';
 import 'profile_menu_item.dart';
 
@@ -54,20 +57,16 @@ class ProfilePage extends HookConsumerWidget {
                       color: Colors.grey[300],
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
-                      Icons.person,
-                      size: 50,
-                      color: Colors.white,
-                    ),
+                    child: CachedNetworkImage(imageUrl: "https://img0.baidu.com/it/u=2448393511,2158991775&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500"),
                   ),
                   const SizedBox(height: 10),
                   // 昵称
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
-                        'Username',
-                        style: TextStyle(
+                      Text(
+                        UserManager.shared.nick ?? 'User Name',
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF212121),

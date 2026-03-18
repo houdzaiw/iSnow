@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:project/widgets/custom_scaffold.dart';
+import 'package:project/manager/user_manager.dart';
 
 class LaunchPage extends StatefulWidget {
   const LaunchPage({super.key});
@@ -17,34 +17,16 @@ class _LaunchPageState extends State<LaunchPage> {
   }
 
   Future<void> _checkLoginStatus() async {
-    // 模拟检查登录状态的异步操作
+    // 短暂停留展示启动图
     await Future.delayed(const Duration(seconds: 1));
-
     if (!mounted) return;
 
-    // TODO: 替换为真实的登录状态检查逻辑
-    // 例如：从 SharedPreferences、Riverpod Provider 或其他状态管理中获取
-    final bool isLoggedIn = await _isUserLoggedIn();
-
-    if (!mounted) return;
-
-    if (isLoggedIn) {
-      // 已登录，跳转到首页
+    // 使用 UserManager 检查登录状态（已在 AppConfig.run 中 restore）
+    if (UserManager.shared.isLoggedIn) {
       context.go('/home');
     } else {
-      // 未登录，跳转到登录页
       context.go('/login');
     }
-  }
-
-  Future<bool> _isUserLoggedIn() async {
-    // TODO: 实现真实的登录状态检查
-    // 例如：
-    // final prefs = await SharedPreferences.getInstance();
-    // return prefs.getString('token') != null;
-
-    // 目前返回 false，表示未登录
-    return false;
   }
 
   @override

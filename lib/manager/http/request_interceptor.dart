@@ -123,9 +123,9 @@ class RequestInterceptors extends Interceptor {
               🦊请求结果🦊 ${response.requestOptions.method}: ${response.requestOptions.path}
               header: ${jsonEncode(response.requestOptions.headers)}
               params: ${"POST" == response.requestOptions.method ? response.requestOptions.data : response.requestOptions.queryParameters}
-              traceId: ${response.data["traceId"] ?? ""}
+              response: ${const JsonEncoder.withIndent('').convert(response.data)}
               """,
-
+              // traceId: ${response.data["traceId"] ?? ""}
               //              response: ${const JsonEncoder.withIndent('').convert(response.data)}
             );
           }

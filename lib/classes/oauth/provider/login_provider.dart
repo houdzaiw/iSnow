@@ -1,9 +1,11 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:project/model/login_response.dart';
+import 'package:project/model/login_model.dart';
 import 'package:project/model/user_model.dart';
 import 'package:project/manager/http/dio_provider.dart';
 import 'package:project/manager/http/api_path.dart';
 import 'package:project/manager/http/api_client.dart';
+import 'package:project/manager/user_manager.dart';
 import 'package:project/configs/app_device.dart';
 import 'package:project/lib/crypt_util.dart';
 
@@ -115,11 +117,23 @@ class LoginProvider {
 
       // 成功，response.data 已经是纯净的业务数据
       final data = response.data;
+      if (data == null) {
+        return LoginResponse(
+          success: false,
+          message: 'Empty response data',
+        );
+      }
+
+      // 使用 LoginModel 解析登录数据
+      final loginModel = LoginModel.fromJson(data as Map<String, dynamic>);
+
+      // 持久化到 UserManager 单例（同时写入 sp_util 本地存储）
+      await UserManager.shared.saveLogin(loginModel);
+
       return LoginResponse(
         success: true,
         message: response.message ?? 'Login successful',
-        data: data != null ? UserData.fromJson(data) : null,
-        token: data?['token'] as String?,
+        token: loginModel.token,
       );
     } catch (e) {
       return LoginResponse(

@@ -4,6 +4,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:project/manager/providers.dart';
+import 'package:project/manager/user_manager.dart';
 import 'provider/login_provider.dart';
 
 class LoginDetailPage extends HookConsumerWidget {
@@ -85,14 +87,9 @@ class LoginDetailPage extends HookConsumerWidget {
         if (!context.mounted) return;
 
         if (response.success) {
-          // 登录成功
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(response.message ?? 'Login successful')),
-          );
-
-          // TODO: 保存 token 和用户信息到本地存储
-          final token = response.token;
-          print('Login Token: $token');
+          // 登录成功 — 将 UserManager 中已保存的 LoginModel 同步到 Riverpod
+          ref.read(userSessionProvider.notifier).state =
+              UserManager.shared.currentUser;
 
           // 跳转到首页
           if (context.mounted) {
