@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:project/classes/message/chat_page.dart';
 import 'package:project/classes/message/message_page.dart';
+import 'package:project/classes/profile/block_list_page.dart';
 import 'package:project/classes/profile/my_posts_page.dart';
+import 'package:project/classes/profile/setting_profile_page.dart';
 import 'package:project/classes/web/web_view_page.dart';
 
 import '../classes/calendar/calendar_page.dart';
@@ -100,6 +102,16 @@ final GoRouter goRouter = GoRouter(
       path: '/agree_policy-view',
       name: 'agree_policy-view',
       builder: (context, state) => AgreePolicyPage(),
+    ),
+    GoRoute(
+      path: '/setting-view',
+      name: 'setting-view',
+      builder: (context, state) => SettingProfilePage(),
+    ),
+    GoRoute(
+      path: '/block-list',
+      name: 'block-list',
+      builder: (context, state) => BlockListPage(),
     ),
     // 主应用页面（带底部导航）
     ShellRoute(

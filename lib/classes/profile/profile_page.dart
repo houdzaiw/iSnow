@@ -1,11 +1,9 @@
 // dart
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:project/manager/user_manager.dart';
-import 'package:project/widgets/net_Image_view.dart';
-import '../../widgets/custom_scaffold.dart';
+import 'package:project/widgets/app_network_image.dart';
 import 'profile_menu_item.dart';
 
 class ProfilePage extends HookConsumerWidget {
@@ -57,13 +55,19 @@ class ProfilePage extends HookConsumerWidget {
                       color: Colors.grey[300],
                       shape: BoxShape.circle,
                     ),
-                    child: CachedNetworkImage(imageUrl: "https://img0.baidu.com/it/u=2448393511,2158991775&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500"),
+                    child: AppNetworkImage(
+                      url: "https://img0.baidu.com/it/u=2448393511,2158991775&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500",
+                      width: 100,
+                      height: 100,
+                      radius: 50,
+                    ),
                   ),
                   const SizedBox(height: 10),
                   // 昵称
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      const SizedBox(width: 8),
                       Text(
                         UserManager.shared.nick ?? 'User Name',
                         style: const TextStyle(
@@ -104,7 +108,7 @@ class ProfilePage extends HookConsumerWidget {
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: ListTile(
-                      leading: Image.asset(item.icon, width: 27, height: 27),
+                      leading: Image.asset(item.icon ?? "", width: 27, height: 27),
                       title: Text(
                         item.name,
                         style: const TextStyle(
@@ -119,25 +123,11 @@ class ProfilePage extends HookConsumerWidget {
                         // 处理点击事件
                         print('点击了: ${item.name}');
                         //调用my posts 路由跳转
-                        if (item.name == 'My Posts') {
-                          context.push('/my-posts');
+                        if (item.router.isNotEmpty) {
+                          print('跳转到: ${item.router}');
+                          context.push(item.router);
                         }
-                        if (item.name == 'User Privacy') {
-                          context.push(
-                            '/web-view?title=User Privacy&uri=https://www.example.com/user-privacy',
-                          );
-                        }
-                        if (item.name == 'About Us') {
-                          context.push('/about-us');
-                        }
-                        if (item.name == 'Contact Us') {
-                          context.push(
-                            '/web-view?title=Contact Us&uri=https://www.example.com/contact',
-                          );
-                        }
-                        if (item.name == 'Settings') {
-                          context.push('/settings');
-                        }
+
                       },
                     ),
                   );
