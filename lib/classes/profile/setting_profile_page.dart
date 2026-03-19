@@ -35,22 +35,24 @@ class SettingProfilePage extends HookConsumerWidget {
                       context.push(item.router);
                     }
                   },
-                  child: Padding(padding: EdgeInsets.symmetric(horizontal: 17), child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.name,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          color: Color(0xFF212121),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      Spacer(flex: 1),
-                      // Icon(item.arrow, size: 16),
-                      Image.asset('assets/base/next_button.png', width: 24, height: 24),
-                    ],
-                  )
+                  child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 17),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.name,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              color: Color(0xFF212121),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Spacer(flex: 1),
+                          // Icon(item.arrow, size: 16),
+                          Image.asset('assets/base/next_button.png', width: 24, height: 24),
+                        ],
+                      )
                   ),
                 ),
               );
