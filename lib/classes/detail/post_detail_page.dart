@@ -42,6 +42,18 @@ class PostDetailPage extends HookConsumerWidget {
     // TODO: implement build
     return CustomScaffold(
       title: 'Edit Detail',
+      // rightIconPath: 'assets/base/more_button.png',
+      rightIconPath: "assets/message/delete_message_icon.png",
+      onRightIconTap: () {
+        showUserActionOptions(context,
+            onReportSelected: () async {
+
+            },
+            onBlockSelected: () async {
+
+            }
+        );
+      },
       body: Column(
         children: [
           _buildContainer(),
