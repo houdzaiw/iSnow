@@ -87,3 +87,4 @@ flutter:
     - assets/home/
     - assets/calendar/
     - assets/message/
+    - lib/model/moodcontent.json

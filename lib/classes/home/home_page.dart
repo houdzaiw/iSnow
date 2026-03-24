@@ -1,5 +1,7 @@
 // dart
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -95,15 +97,28 @@ class _HomePageState extends State<_HomePageStateful> with SingleTickerProviderS
   }
   void _onGoToMessageTap(BuildContext context) {
     _hideDialog();
-    final entry = DiaryEntry()
-      ..id = 100200
-      ..date = DateTime.parse("2024-01-01")
-      ..emoji = "😊"
-      ..content = "This is a captured voice entry."
-      ..description = "This is a captured voice entry."
-      ..type = "edit"
-      ..moodIndex = 0;
-    context.push("/post_detail-view", extra: entry);
+    _loadRandomMoodEntry().then((entry) {
+      if (context.mounted) {
+        context.push("/post_detail-view", extra: entry);
+      }
+    });
+  }
+
+  Future<DiaryEntry> _loadRandomMoodEntry() async {
+    final jsonString = await rootBundle.loadString('lib/model/moodcontent.json');
+    final List<dynamic> jsonList = json.decode(jsonString) as List<dynamic>;
+    final map = jsonList[_random.nextInt(jsonList.length)] as Map<String, dynamic>;
+
+    return DiaryEntry()
+      ..userId = (map['userId'] as num).toInt()
+      ..userNickname = map['userNickname'] as String? ?? ''
+      ..userAvatar = map['avatar'] as String? ?? ''
+      ..date = DateTime.now()
+      ..emoji = ''
+      ..content = map['description'] as String? ?? ''
+      ..description = map['description'] as String? ?? ''
+      ..type = 'edit'
+      ..moodIndex = (map['moodIndex'] as num?)?.toInt() ?? 0;
   }
 
   void _generateRandomMoodImages() {

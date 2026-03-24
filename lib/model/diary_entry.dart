@@ -20,7 +20,7 @@ class DiaryEntry {
   DateTime createdAt = DateTime.now();
   // 用户id
   int userId = 0;
-  String userNickname = '';
-  String userAvatar = '';
+  String? userNickname;
+  String? userAvatar;
   
 }
