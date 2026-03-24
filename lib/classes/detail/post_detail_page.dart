@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:project/manager/user_manager.dart';
 import 'package:project/widgets/content_view.dart';
 
 import '../../configs/consts.dart';
@@ -38,12 +39,11 @@ class PostDetailPage extends HookConsumerWidget {
 
     final sad = isSad.value ? 'assets/calendar/frustrated_icon_pre.png' : 'assets/calendar/frustrated_icon.png';
     final happy = isHappy.value ? 'assets/calendar/rejoice_icon_pre.png' : 'assets/calendar/rejoice_icon.png';
-
+    final isMySelf = entry.userId == UserManager.shared.userId ?? false;
     // TODO: implement build
     return CustomScaffold(
       title: 'Edit Detail',
-      // rightIconPath: 'assets/base/more_button.png',
-      rightIconPath: "assets/message/delete_message_icon.png",
+      rightIconPath:  isMySelf ? "assets/message/delete_message_icon.png" : 'assets/base/more_button.png',
       onRightIconTap: () {
         showUserActionOptions(context,
             onReportSelected: () async {
@@ -103,9 +103,9 @@ class PostDetailPage extends HookConsumerWidget {
     );
   }
   Widget _buildContainer() {
-    if (entry.type == 'voice') {
-      return VoiceView(entry: entry, isDetail: true);
-    }
+    // if (entry.type == 'voice') {
+    //   return VoiceView(entry: entry, isDetail: true);
+    // }
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10),
       padding: const EdgeInsets.all(12),

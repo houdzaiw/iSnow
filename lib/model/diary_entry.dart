@@ -18,4 +18,9 @@ class DiaryEntry {
   bool? sad;
   bool? happy;
   DateTime createdAt = DateTime.now();
+  // 用户id
+  int userId = 0;
+  String userNickname = '';
+  String userAvatar = '';
+  
 }

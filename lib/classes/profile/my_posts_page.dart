@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:project/manager/user_manager.dart';
 
 import '../../manager/providers.dart';
 import '../../model/diary_entry.dart';
@@ -295,7 +296,7 @@ class MyPostsPage extends HookConsumerWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                "This is my mood today",
+                UserManager.shared.nick ?? "This is my mood today",
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,

@@ -297,12 +297,12 @@ class CalendarPage extends HookConsumerWidget {
           itemCount: entriesForDay.length,
           itemBuilder: (_, index) {
             final entry = entriesForDay[index];
-            if (entry.type == 'voice' ) {
-              return GestureDetector(
-                onTap: () => context.push("/post_detail-view", extra: entry),
-                child: VoiceView(entry: entry),
-              );
-            }
+            // if (entry.type == 'voice' ) {
+            //   return GestureDetector(
+            //     onTap: () => context.push("/post_detail-view", extra: entry),
+            //     child: VoiceView(entry: entry),
+            //   );
+            // }
             return GestureDetector(
               onTap: () => context.push("/post_detail-view", extra: entry),
               child: Container(

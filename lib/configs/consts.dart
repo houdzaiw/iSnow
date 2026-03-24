@@ -35,7 +35,7 @@ const List<String> moodImages = [
   'assets/mood/model_020.png',
 ];
 
-
+String defaultAvatar = "https://img0.baidu.com/it/u=2448393511,2158991775&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500";
 String setDateFormatter(DateTime date) {
   final dateFormatter = DateFormat('yyyy-MM-dd HH:mm:ss');
   final formattedDate = dateFormatter.format(date);

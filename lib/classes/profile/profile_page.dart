@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:project/configs/consts.dart';
 import 'package:project/manager/user_manager.dart';
 import 'package:project/widgets/app_network_image.dart';
 import 'profile_menu_item.dart';
@@ -55,8 +56,8 @@ class ProfilePage extends HookConsumerWidget {
                       color: Colors.grey[300],
                       shape: BoxShape.circle,
                     ),
-                    child: AppNetworkImage(
-                      url: "https://img0.baidu.com/it/u=2448393511,2158991775&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500",
+                    child:  AppNetworkImage(
+                      url: UserManager.shared.avatar ?? defaultAvatar,
                       width: 100,
                       height: 100,
                       radius: 50,
