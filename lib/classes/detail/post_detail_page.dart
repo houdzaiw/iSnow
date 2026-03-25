@@ -51,7 +51,7 @@ class PostDetailPage extends HookConsumerWidget {
           : 'assets/base/more_button.png',
       onRightIconTap: () {
         if (isMySelf) {
-          _showBlockConfirmationDialog(context, ref);
+          _showDeleteConfirmationDialog(context, ref);
           return;
         }
         showUserActionOptions(
@@ -139,10 +139,10 @@ class PostDetailPage extends HookConsumerWidget {
     // Example: await ApiClient.post('/api/report', data: {'type': reportType, 'userId': entry.userId});
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(content: Text('Report submitted: $reportType')));
+    ).showSnackBar(SnackBar(content: Text('Report successfully')));
   }
-
-  void _showBlockConfirmationDialog(BuildContext context, WidgetRef ref) {
+  /// 显示删除确认对话框
+  void _showDeleteConfirmationDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -185,6 +185,41 @@ class PostDetailPage extends HookConsumerWidget {
     }
   }
 
+  /// 显示屏蔽确认对话框
+  void _showBlockConfirmationDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm block'),
+          content: const Text('Are you sure you want to block this user?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _submitBlock(context, ref);
+              },
+              child: const Text('Confirm'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+  void _submitBlock(BuildContext context, WidgetRef ref) async {
+    if (context.mounted) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Block successfully')));
+    }
+  }
   Widget _buildContainer() {
     // if (entry.type == 'voice') {
     //   return VoiceView(entry: entry, isDetail: true);
