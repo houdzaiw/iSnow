@@ -50,6 +50,10 @@ class PostDetailPage extends HookConsumerWidget {
           ? "assets/message/delete_message_icon.png"
           : 'assets/base/more_button.png',
       onRightIconTap: () {
+        if (isMySelf) {
+          _showBlockConfirmationDialog(context);
+          return;
+        }
         showUserActionOptions(
           context,
           onReportSelected: () async {
@@ -143,8 +147,8 @@ class PostDetailPage extends HookConsumerWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Confirm Block'),
-          content: const Text('Are you sure you want to block this user?'),
+          title: const Text('Confirm delete'),
+          content: const Text('Are you sure you want to delete it?'),
           actions: [
             TextButton(
               onPressed: () {
@@ -155,7 +159,7 @@ class PostDetailPage extends HookConsumerWidget {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                _submitBlock(context);
+                _submitDelete(context);
               },
               child: const Text('Confirm'),
             ),
@@ -165,15 +169,17 @@ class PostDetailPage extends HookConsumerWidget {
     );
   }
 
-  void _submitBlock(BuildContext context) {
+  void _submitDelete(BuildContext context) async {
     // TODO: Implement actual block API call
     // Example: await ApiClient.post('/api/block', data: {'userId': entry.userId});
     // For now, just show a confirmation message
-    //打印entry.userId
-    print('Blocking user with ID: ${entry.userId}');
+    final isar = await IsarDB.instance.db;
+    await isar.writeTxn(() async {
+      await isar.diaryEntrys.clear();
+    });
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(const SnackBar(content: Text('User has been blocked')));
+    ).showSnackBar(const SnackBar(content: Text('Delete successfully')));
   }
 
   Widget _buildContainer() {
