@@ -12,6 +12,17 @@ enum UserActionOption {
   final String label;
   const UserActionOption(this.label);
 }
+enum UserReportOption {
+  sexual('Sexual Content / Nudity'),
+  harassment('Harassment / Bullying'),
+  hate('Hate Speech'),
+  illegal('Illegal Activities'),
+  scam('Scam / Fraud'),
+  other('Other');
+
+  final String label;
+  const UserReportOption(this.label);
+}
 const List<String> moodImages = [
   'assets/mood/model_01.png',
   'assets/mood/model_02.png',
@@ -185,4 +196,85 @@ void showUserActionOptions(
       );
     },
   );
+}
+/// 显示用户举报选项的底部弹框（性内容/裸露、骚扰/欺凌、仇恨言论、非法活动、诈骗/欺诈、其他）
+void showUserReportActionOptions(
+    BuildContext context, {
+      VoidCallback? onSexualSelected,
+      VoidCallback? onHarassmentSelected,
+      VoidCallback? onHateSelected,
+      VoidCallback? onIllegalSelected,
+      VoidCallback? onScamSelected,
+      VoidCallback? onOtherSelected,
+    }) {
+  showModalBottomSheet(
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    backgroundColor: Colors.white,
+    builder: (context) {
+      return Container(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: UserReportOption.values.map((option) {
+            return GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+                switch (option) {
+                  case UserReportOption.sexual:
+                    if (onSexualSelected != null) {
+                      onSexualSelected();
+                    }
+                    break;
+                  case UserReportOption.harassment:
+                    if (onHarassmentSelected != null) {
+                      onHarassmentSelected();
+                    }
+                    break;
+                  case UserReportOption.hate:
+                    if (onHateSelected != null) {
+                      onHateSelected();
+                    }
+                    break;
+                  case UserReportOption.illegal:
+                    if (onIllegalSelected != null) {
+                      onIllegalSelected();
+                    }
+                    break;
+                  case UserReportOption.scam:
+                    if (onScamSelected != null) {
+                      onScamSelected();
+                    }
+                    break;
+                  case UserReportOption.other:
+                    if (onOtherSelected != null) {
+                      onOtherSelected();
+                    }
+                    break;
+                }
+              },
+              child: Container(
+                width: MediaQuery.of(context).size.width - 48,
+                height: 55,
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(28),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  option.label,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: const Color(0xFF212121),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      );
+  });
 }

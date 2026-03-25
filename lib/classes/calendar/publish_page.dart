@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:project/manager/user_manager.dart';
 
 import '../../manager/app_Isar.dart';
 import '../../manager/providers.dart';
@@ -33,7 +34,11 @@ class PublishPage extends HookConsumerWidget {
         ..emoji = '' // 可以根据 moodIndex 设置 emoji
         ..moodIndex = moodIndex
         ..type = currentType
+        ..userId = UserManager.shared.userId ?? 0
+        ..nick = UserManager.shared.nick
+        ..avatar = UserManager.shared.avatar
         ..createdAt = DateTime.now();
+
 
       if (currentType == 'edit') {
         // 编辑模式：保存描述和图片

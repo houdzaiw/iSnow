@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -37,21 +36,28 @@ class PostDetailPage extends HookConsumerWidget {
       });
     }
 
-    final sad = isSad.value ? 'assets/calendar/frustrated_icon_pre.png' : 'assets/calendar/frustrated_icon.png';
-    final happy = isHappy.value ? 'assets/calendar/rejoice_icon_pre.png' : 'assets/calendar/rejoice_icon.png';
+    final sad = isSad.value
+        ? 'assets/calendar/frustrated_icon_pre.png'
+        : 'assets/calendar/frustrated_icon.png';
+    final happy = isHappy.value
+        ? 'assets/calendar/rejoice_icon_pre.png'
+        : 'assets/calendar/rejoice_icon.png';
     final isMySelf = entry.userId == UserManager.shared.userId ?? false;
     // TODO: implement build
     return CustomScaffold(
       title: 'Edit Detail',
-      rightIconPath:  isMySelf ? "assets/message/delete_message_icon.png" : 'assets/base/more_button.png',
+      rightIconPath: isMySelf
+          ? "assets/message/delete_message_icon.png"
+          : 'assets/base/more_button.png',
       onRightIconTap: () {
-        showUserActionOptions(context,
-            onReportSelected: () async {
-
-            },
-            onBlockSelected: () async {
-
-            }
+        showUserActionOptions(
+          context,
+          onReportSelected: () async {
+            _showUserReportActionOptions(context);
+          },
+          onBlockSelected: () async {
+            _showBlockConfirmationDialog(context);
+          },
         );
       },
       body: Column(
@@ -64,10 +70,7 @@ class PostDetailPage extends HookConsumerWidget {
               children: [
                 Text(
                   setDateFormatter(entry.date),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFFB2B2B2),
-                  ),
+                  style: TextStyle(fontSize: 12, color: Color(0xFFB2B2B2)),
                 ),
                 Spacer(),
                 Row(
@@ -92,9 +95,9 @@ class PostDetailPage extends HookConsumerWidget {
                         updateDatabase();
                       },
                       child: Image.asset(happy, width: 20, height: 20),
-                    )
+                    ),
                   ],
-                )
+                ),
               ],
             ),
           ),
@@ -102,6 +105,77 @@ class PostDetailPage extends HookConsumerWidget {
       ),
     );
   }
+
+  void _showUserReportActionOptions(BuildContext context) {
+    showUserReportActionOptions(
+      context,
+      onSexualSelected: () {
+        _submitReport(context, 'sexual');
+      },
+      onHarassmentSelected: () {
+        _submitReport(context, 'harassment');
+      },
+      onHateSelected: () {
+        _submitReport(context, 'hate');
+      },
+      onIllegalSelected: () {
+        _submitReport(context, 'illegal');
+      },
+      onScamSelected: () {
+        _submitReport(context, 'scam');
+      },
+      onOtherSelected: () {
+        _submitReport(context, 'other');
+      },
+    );
+  }
+
+  void _submitReport(BuildContext context, String reportType) {
+    // TODO: Implement actual report API call
+    // Example: await ApiClient.post('/api/report', data: {'type': reportType, 'userId': entry.userId});
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Report submitted: $reportType')));
+  }
+
+  void _showBlockConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Block'),
+          content: const Text('Are you sure you want to block this user?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _submitBlock(context);
+              },
+              child: const Text('Confirm'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _submitBlock(BuildContext context) {
+    // TODO: Implement actual block API call
+    // Example: await ApiClient.post('/api/block', data: {'userId': entry.userId});
+    // For now, just show a confirmation message
+    //打印entry.userId
+    print('Blocking user with ID: ${entry.userId}');
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('User has been blocked')));
+  }
+
   Widget _buildContainer() {
     // if (entry.type == 'voice') {
     //   return VoiceView(entry: entry, isDetail: true);
@@ -113,7 +187,7 @@ class PostDetailPage extends HookConsumerWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: ContentView(entry: entry, isDetail: true)
+      child: ContentView(entry: entry, isDetail: true),
     );
   }
 }

@@ -111,8 +111,8 @@ class _HomePageState extends State<_HomePageStateful> with SingleTickerProviderS
 
     return DiaryEntry()
       ..userId = (map['userId'] as num).toInt()
-      ..userNickname = map['userNickname'] as String? ?? ''
-      ..userAvatar = map['avatar'] as String? ?? ''
+      ..nick = map['userNickname'] as String? ?? ''
+      ..avatar = map['avatar'] as String? ?? ''
       ..date = DateTime.now()
       ..emoji = ''
       ..content = map['description'] as String? ?? ''

@@ -45,7 +45,7 @@ class _DialogOverlayState extends State<DialogOverlay> {
     return FutureBuilder<DiaryEntry>(
       future: _entryFuture,
       builder: (context, snapshot) {
-        final url = snapshot.data?.userAvatar ?? '';
+        final url = snapshot.data?.avatar ?? '';
         return Container(
           color: const Color.fromRGBO(0, 0, 0, 0.5),
           child: Center(
@@ -147,8 +147,8 @@ class _DialogOverlayState extends State<DialogOverlay> {
 
     return DiaryEntry()
       ..userId = (map['userId'] as num).toInt()
-      ..userNickname = map['userNickname'] as String? ?? ''
-      ..userAvatar = map['avatar'] as String? ?? ''
+      ..nick = map['userNickname'] as String? ?? ''
+      ..avatar = map['avatar'] as String? ?? ''
       ..date = DateTime.now()
       ..emoji = ''
       ..content = map['description'] as String? ?? ''

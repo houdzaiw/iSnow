@@ -24,14 +24,14 @@ class ContentView extends StatelessWidget {
           Row(
             children: [
               AppNetworkImage(
-                url: entry.userAvatar ?? UserManager.shared.avatar ?? defaultAvatar,
+                url: entry.avatar ?? UserManager.shared.avatar ?? defaultAvatar,
                 width: 40,
                 height: 40,
                 radius: 20,
               ),
               const SizedBox(width: 8),
               Text(
-                entry.userNickname ?? UserManager.shared.nick ??"This is my mood today",
+                entry.nick ?? UserManager.shared.nick ??"This is my mood today",
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
