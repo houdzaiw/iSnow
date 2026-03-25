@@ -51,7 +51,7 @@ class PostDetailPage extends HookConsumerWidget {
           : 'assets/base/more_button.png',
       onRightIconTap: () {
         if (isMySelf) {
-          _showBlockConfirmationDialog(context);
+          _showBlockConfirmationDialog(context, ref);
           return;
         }
         showUserActionOptions(
@@ -60,7 +60,7 @@ class PostDetailPage extends HookConsumerWidget {
             _showUserReportActionOptions(context);
           },
           onBlockSelected: () async {
-            _showBlockConfirmationDialog(context);
+            _showBlockConfirmationDialog(context, ref);
           },
         );
       },
@@ -142,7 +142,7 @@ class PostDetailPage extends HookConsumerWidget {
     ).showSnackBar(SnackBar(content: Text('Report submitted: $reportType')));
   }
 
-  void _showBlockConfirmationDialog(BuildContext context) {
+  void _showBlockConfirmationDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -159,7 +159,7 @@ class PostDetailPage extends HookConsumerWidget {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                _submitDelete(context);
+                _submitDelete(context, ref);
               },
               child: const Text('Confirm'),
             ),
@@ -169,17 +169,20 @@ class PostDetailPage extends HookConsumerWidget {
     );
   }
 
-  void _submitDelete(BuildContext context) async {
-    // TODO: Implement actual block API call
-    // Example: await ApiClient.post('/api/block', data: {'userId': entry.userId});
-    // For now, just show a confirmation message
+  void _submitDelete(BuildContext context, WidgetRef ref) async {
     final isar = await IsarDB.instance.db;
+    // 删除对应数据
     await isar.writeTxn(() async {
-      await isar.diaryEntrys.clear();
+      await isar.diaryEntrys.delete(entry.id);
     });
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Delete successfully')));
+    // 刷新 calendar_page.dart 中的列表
+    ref.read(diaryRefreshProvider.notifier).state++;
+    if (context.mounted) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Delete successfully')));
+    }
   }
 
   Widget _buildContainer() {
