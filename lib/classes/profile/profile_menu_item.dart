@@ -31,7 +31,7 @@ class ProfileMenuData {
       ProfileMenuItem(
         icon: "assets/profile/contact_us_icon.png",
         name: 'Contact Us',
-        router: "/web-view?title=Contact Us&uri=https://www.example.com/contact",
+        router: "/about-us",
       ),
       ProfileMenuItem(
         icon: "assets/profile/setting_icon.png",
