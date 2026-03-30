@@ -66,7 +66,7 @@ class PublishPage extends HookConsumerWidget {
       // 显示成功提示
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('保存成功！')),
+          const SnackBar(content: Text('Saved successfully!')),
         );
         // 关闭弹框
         Navigator.pop(context);
@@ -155,7 +155,7 @@ class PublishPage extends HookConsumerWidget {
                       // 编辑模式：检查是否有内容
                       if (editDescription.value.isEmpty && editImagePaths.value.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('请输入内容或选择图片')),
+                          const SnackBar(content: Text('Please enter content or select images')),
                         );
                         return;
                       }
@@ -163,7 +163,7 @@ class PublishPage extends HookConsumerWidget {
                       // 语音模式：检查是否有语音
                       if (voicePath.value.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('请录制语音')),
+                          const SnackBar(content: Text('Please record a voice message')),
                         );
                         return;
                       }

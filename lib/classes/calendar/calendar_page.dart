@@ -285,7 +285,7 @@ class CalendarPage extends HookConsumerWidget {
         child: entriesForDay.isEmpty
             ? Center(
           child: Text(
-            '暂无心情记录',
+            'No entries for this day yet~',
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey[600],
@@ -327,7 +327,7 @@ class CalendarPage extends HookConsumerWidget {
       if (!normalizedSelected.isAtSameMomentAs(normalizedNow)) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('只能在当天发布心情哦~'),
+            content: Text('You can only post mood for today~'),
             duration: Duration(seconds: 2),
           ),
         );

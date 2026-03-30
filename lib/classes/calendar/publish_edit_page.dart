@@ -117,7 +117,7 @@ class PublishEditPage extends HookConsumerWidget {
                   // 检查是否已达到最大数量
                   if (selectedImages.value.length >= 4) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('最多只能选择4张图片')),
+                      const SnackBar(content: Text('You can only select up to 4 images')),
                     );
                     return;
                   }
@@ -137,7 +137,7 @@ class PublishEditPage extends HookConsumerWidget {
                         // 如果用户选择的图片超过剩余数量，提示用户
                         if (images.length > remainingSlots) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('最多只能选择4张图片，已添加${imagesToAdd.length}张')),
+                            SnackBar(content: Text('You can only select up to 4 images, added ${imagesToAdd.length} images')),
                           );
                         }
                       }
