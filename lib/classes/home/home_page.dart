@@ -1,16 +1,14 @@
 // dart
-import 'dart:convert';
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:project/model/diary_entry.dart';
 import 'package:project/manager/providers.dart';
-import 'dart:math';
-import 'dart:async';
-import '../../configs/consts.dart';
 
+import '../../configs/consts.dart';
 import 'capture_finished_page.dart';
 
 class HomePage extends HookConsumerWidget {

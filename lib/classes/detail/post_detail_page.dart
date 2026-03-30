@@ -213,7 +213,7 @@ class PostDetailPage extends HookConsumerWidget {
     );
   }
   void _submitBlock(BuildContext context, WidgetRef ref) async {
-
+    // 使用IsarDB保存拉黑用户
     if (context.mounted) {
       Navigator.pop(context);
       ScaffoldMessenger.of(

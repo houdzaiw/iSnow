@@ -45,7 +45,6 @@ class _DialogOverlayState extends State<DialogOverlay> {
       future: _entryFuture,
       builder: (context, snapshot) {
         final url = snapshot.data?.avatar ?? '';
-        print("url======$url.jpg");
         return Container(
           color: const Color.fromRGBO(0, 0, 0, 0.5),
           child: Center(
