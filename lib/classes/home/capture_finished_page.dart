@@ -46,6 +46,7 @@ class _DialogOverlayState extends State<DialogOverlay> {
       future: _entryFuture,
       builder: (context, snapshot) {
         final url = snapshot.data?.avatar ?? '';
+        print("url======$url.jpg");
         return Container(
           color: const Color.fromRGBO(0, 0, 0, 0.5),
           child: Center(
@@ -86,9 +87,7 @@ class _DialogOverlayState extends State<DialogOverlay> {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(30),
-                            child: url.isNotEmpty
-                                ? AppNetworkImage(url: url)
-                                : const SizedBox(),
+                            child: Image.asset("$url.jpg"),
                           ),
                         ),
                       ),

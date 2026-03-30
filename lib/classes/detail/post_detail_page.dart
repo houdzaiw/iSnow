@@ -213,6 +213,7 @@ class PostDetailPage extends HookConsumerWidget {
     );
   }
   void _submitBlock(BuildContext context, WidgetRef ref) async {
+
     if (context.mounted) {
       Navigator.pop(context);
       ScaffoldMessenger.of(

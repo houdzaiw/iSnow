@@ -23,6 +23,11 @@ class ContentView extends StatelessWidget {
             entry.moodIndex! < moodImages.length)
           Row(
             children: [
+              //entry.avatar包含assets路径，说明是本地图片，否则是网络图片
+              entry.avatar?.contains("assets") == true ? ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.asset("${entry.avatar}.jpg", width: 40, height: 40, fit: BoxFit.cover),
+              ) :
               AppNetworkImage(
                 url: entry.avatar ?? UserManager.shared.avatar ?? defaultAvatar,
                 width: 40,
