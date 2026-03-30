@@ -122,11 +122,69 @@ class ProfilePage extends HookConsumerWidget {
                       horizontalTitleGap: 0, // 设置leading和title之间的间距为8像素
                       onTap: () {
                         // 处理点击事件
-                        print('点击了: ${item.name}');
+
                         //调用my posts 路由跳转
                         if (item.router.isNotEmpty) {
                           print('跳转到: ${item.router}');
                           context.push(item.router);
+                        } else {
+                          print('点击了: ${item.name}');
+                          if (item.name == 'Delete Account') {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('Confirm Deletion'),
+                                content: const Text('Are you sure you want to delete your account? This action cannot be undone.'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context).pop(),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      // 这里可以添加删除账号的逻辑，例如调用API等
+                                      print('Account deleted');
+                                      Navigator.of(context).pop();
+                                      // 退出登录并跳转到登录页
+                                      UserManager.shared.logout();
+                                      context.push('/login');
+                                    },
+                                    child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                                  ),
+                                ],
+                              ),
+                            );
+                          } else if (item.name == 'Log Out') {
+                            // 这里可以添加退出登录的逻辑，例如清除用户数据等
+                            // UserManager.shared.logout();
+                            // context.push('/login');
+                            // 提示框
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('Confirm Logout'),
+                                content: const Text('Are you sure you want to log out?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context).pop(),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      // 这里可以添加删除账号的逻辑，例如调用API等
+                                      print('Logged out');
+                                      Navigator.of(context).pop();
+                                      // 退出登录并跳转到登录页
+                                      UserManager.shared.logout();
+                                      context.push('/login');
+                                    },
+                                    child: const Text('Log out', style: TextStyle(color: Colors.red)),
+                                  ),
+                                ],
+                              ),
+                            );
+
+                          }
                         }
 
                       },
