@@ -5,12 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:project/model/diary_entry.dart';
 import 'dart:math';
 
-import 'package:project/widgets/app_network_image.dart';
 
 // 弹框图层类
 class DialogOverlay extends StatefulWidget {
   final VoidCallback onClose;
-  final VoidCallback onOpen;
+  final void Function(DiaryEntry? entry) onOpen;
 
   const DialogOverlay({
     super.key,
@@ -109,7 +108,7 @@ class _DialogOverlayState extends State<DialogOverlay> {
                 ),
                 const SizedBox(height: 20),
                 GestureDetector(
-                  onTap: widget.onOpen,
+                  onTap: () => widget.onOpen(snapshot.data),
                   child: Container(
                     width: 153,
                     height: 53,

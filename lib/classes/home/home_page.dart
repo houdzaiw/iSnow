@@ -95,31 +95,32 @@ class _HomePageState extends State<_HomePageStateful> with SingleTickerProviderS
     _overlayEntry?.remove();
     _overlayEntry = null;
   }
-  void _onGoToMessageTap(BuildContext context) {
+  void _onGoToMessageTap(BuildContext context, entry) {
     _hideDialog();
-    _loadRandomMoodEntry().then((entry) {
-      if (context.mounted) {
-        context.push("/post_detail-view", extra: entry);
-      }
-    });
+    context.push("/post_detail-view", extra: entry);
+    // _loadRandomMoodEntry().then((entry) {
+    //   if (context.mounted) {
+    //     context.push("/post_detail-view", extra: entry);
+    //   }
+    // });
   }
 
-  Future<DiaryEntry> _loadRandomMoodEntry() async {
-    final jsonString = await rootBundle.loadString('lib/model/moodcontent.json');
-    final List<dynamic> jsonList = json.decode(jsonString) as List<dynamic>;
-    final map = jsonList[_random.nextInt(jsonList.length)] as Map<String, dynamic>;
-
-    return DiaryEntry()
-      ..userId = (map['userId'] as num).toInt()
-      ..nick = map['userNickname'] as String? ?? ''
-      ..avatar = map['avatar'] as String? ?? ''
-      ..date = DateTime.now()
-      ..emoji = ''
-      ..content = map['description'] as String? ?? ''
-      ..description = map['description'] as String? ?? ''
-      ..type = 'edit'
-      ..moodIndex = (map['moodIndex'] as num?)?.toInt() ?? 0;
-  }
+  // Future<DiaryEntry> _loadRandomMoodEntry() async {
+  //   final jsonString = await rootBundle.loadString('lib/model/moodcontent.json');
+  //   final List<dynamic> jsonList = json.decode(jsonString) as List<dynamic>;
+  //   final map = jsonList[_random.nextInt(jsonList.length)] as Map<String, dynamic>;
+  //
+  //   return DiaryEntry()
+  //     ..userId = (map['userId'] as num).toInt()
+  //     ..nick = map['userNickname'] as String? ?? ''
+  //     ..avatar = map['avatar'] as String? ?? ''
+  //     ..date = DateTime.now()
+  //     ..emoji = ''
+  //     ..content = map['description'] as String? ?? ''
+  //     ..description = map['description'] as String? ?? ''
+  //     ..type = 'edit'
+  //     ..moodIndex = (map['moodIndex'] as num?)?.toInt() ?? 0;
+  // }
 
   void _generateRandomMoodImages() {
     _randomMoodImages = moodImages.map((imagePath) {
@@ -198,7 +199,7 @@ class _HomePageState extends State<_HomePageStateful> with SingleTickerProviderS
         builder: (context) => Positioned.fill(
           child: DialogOverlay(
             onClose: _hideDialog,
-            onOpen: () => _onGoToMessageTap(context), // No-op for now
+            onOpen: (entry) => _onGoToMessageTap(context, entry), // No-op for now
           ),
         )
     );
