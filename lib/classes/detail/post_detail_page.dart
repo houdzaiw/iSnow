@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:isar/isar.dart';
 import 'package:project/manager/user_manager.dart';
 import 'package:project/widgets/content_view.dart';
 
 import '../../configs/consts.dart';
 import '../../manager/app_Isar.dart';
 import '../../manager/providers.dart';
+import '../../model/blocked_user.dart';
 import '../../model/diary_entry.dart';
 import '../../widgets/custom_scaffold.dart';
-import '../../widgets/voice_view.dart';
 
 class PostDetailPage extends HookConsumerWidget {
   final DiaryEntry entry;
@@ -42,7 +43,7 @@ class PostDetailPage extends HookConsumerWidget {
     final happy = isHappy.value
         ? 'assets/calendar/rejoice_icon_pre.png'
         : 'assets/calendar/rejoice_icon.png';
-    final isMySelf = entry.userId == UserManager.shared.userId ?? false;
+    final isMySelf = (entry.userId == UserManager.shared.userId) ?? false;
     // TODO: implement build
     return CustomScaffold(
       title: 'Edit Detail',
@@ -213,12 +214,28 @@ class PostDetailPage extends HookConsumerWidget {
     );
   }
   void _submitBlock(BuildContext context, WidgetRef ref) async {
-    // 使用IsarDB保存拉黑用户
+    final isar = await IsarDB.instance.db;
+
+    // 通过唯一索引直接查找，避免全表扫描
+    final existing = await isar.blockedUsers.getByBlockedUserId(entry.userId);
+    if (existing == null) {
+      // 未拉黑过，写入数据库（index replace:true，重复写入也安全）
+      final blocked = BlockedUser()
+        ..blockedUserId = entry.userId
+        ..nick = entry.nick
+        ..avatar = entry.avatar
+        ..blockedAt = DateTime.now();
+
+      await isar.writeTxn(() async {
+        await isar.blockedUsers.put(blocked);
+      });
+    }
+
     if (context.mounted) {
       Navigator.pop(context);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Block successfully')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Block successfully')),
+      );
     }
   }
   Widget _buildContainer() {
