@@ -11,7 +11,7 @@ class AppShell extends StatelessWidget {
 
   int _locationToIndex(String location) {
     final idx = _tabs.indexWhere((t) => location.startsWith(t));
-    return idx < 0 ? 0 : idx;
+    return idx < 0 ? 1 : idx;
   }
 
   @override

@@ -23,7 +23,7 @@ class _LaunchPageState extends State<LaunchPage> {
 
     // 使用 UserManager 检查登录状态（已在 AppConfig.run 中 restore）
     if (UserManager.shared.isLoggedIn) {
-      context.go('/home');
+      context.go('/calendar');
     } else {
       context.go('/login');
     }

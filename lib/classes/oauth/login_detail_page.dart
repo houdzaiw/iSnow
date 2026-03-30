@@ -93,7 +93,7 @@ class LoginDetailPage extends HookConsumerWidget {
 
           // 跳转到首页
           if (context.mounted) {
-            context.go('/home');
+            context.go('/calendar');
           }
         } else {
           // 登录失败
