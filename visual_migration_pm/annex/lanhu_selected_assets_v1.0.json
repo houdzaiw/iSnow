@@ -1,0 +1,58 @@
+[
+  {
+    "design_name": "登录",
+    "slice_name": "bg",
+    "asset_path": "assets/lanhu/base/login_background.png",
+    "scale": "2x",
+    "source_url": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNG74801809809a4851f7bb5c966954f1c6.png?x-oss-process=image/resize,w_750,h_1624/format,png"
+  },
+  {
+    "design_name": "登录",
+    "slice_name": "Rectangle_3465931",
+    "asset_path": "assets/lanhu/base/auth_button_primary.png",
+    "scale": "2x",
+    "source_url": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNG5158a5734cfbe983e3025b4cbf8a3314.png?x-oss-process=image/resize,w_596,h_122/format,png"
+  },
+  {
+    "design_name": "登录",
+    "slice_name": "Rectangle_3465932",
+    "asset_path": "assets/lanhu/base/auth_button_secondary.png",
+    "scale": "2x",
+    "source_url": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNG5158a5734cfbe983e3025b4cbf8a3314.png?x-oss-process=image/resize,w_596,h_122/format,png"
+  },
+  {
+    "design_name": "捞球弹窗",
+    "slice_name": "Rectangle_3465960",
+    "asset_path": "assets/lanhu/home/capture_result_card.png",
+    "scale": "2x",
+    "source_url": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNGc816d3cded6da5268e872fe25e003f83.png?x-oss-process=image/resize,w_548,h_548/format,png"
+  },
+  {
+    "design_name": "捞球弹窗",
+    "slice_name": "01-得意2_1",
+    "asset_path": "assets/lanhu/mood/proud_large.png",
+    "scale": "2x",
+    "source_url": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNGc46a707e13f4d296a6d850f1c827af49.png?x-oss-process=image/resize,w_240,h_240/format,png"
+  },
+  {
+    "design_name": "捞球弹窗",
+    "slice_name": "Frame_1312318829",
+    "asset_path": "assets/lanhu/base/close_circle.png",
+    "scale": "2x",
+    "source_url": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNG9f743115aaa73b92d069afb20c01618d.png?x-oss-process=image/resize,w_88,h_88/format,png"
+  },
+  {
+    "design_name": "日历 展开",
+    "slice_name": "Frame_1312318796",
+    "asset_path": "assets/lanhu/calendar/calendar_drag_handle.png",
+    "scale": "2x",
+    "source_url": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNGd81570d71c409e0a8f454437dbe35c9c.png?x-oss-process=image/resize,w_72,h_24/format,png"
+  },
+  {
+    "design_name": "编辑资料",
+    "slice_name": "返回_导航通用",
+    "asset_path": "assets/lanhu/base/nav_back.png",
+    "scale": "2x",
+    "source_url": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNG89cf7f344223694037e9a7a0f15e9055.png?x-oss-process=image/resize,w_40,h_40/format,png"
+  }
+]
