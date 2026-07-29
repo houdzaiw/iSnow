@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../widgets/custom_scaffold.dart';
 import '../../configs/consts.dart';
+import '../../theme/app_theme.dart';
+import '../../widgets/custom_scaffold.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -12,7 +13,7 @@ class EditProfilePage extends StatefulWidget {
 
 class _EditProfilePageState extends State<EditProfilePage> {
   final _formKey = GlobalKey<FormState>();
-  final _nicknameController = TextEditingController(text: 'Username');
+  final _nicknameController = TextEditingController(text: '用户昵称');
   final _bioController = TextEditingController();
   String? _selectedGender;
   DateTime? _selectedBirthday;
@@ -27,14 +28,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
-      title: 'Edit Profile',
-      rightText: 'Save',
+      title: '编辑资料',
+      rightText: '保存',
       onRightIconTap: () {
         if (_formKey.currentState!.validate()) {
           // 保存逻辑
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Save successful!')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('保存成功')));
           context.pop();
         }
       },
@@ -43,10 +44,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
         margin: const EdgeInsets.only(left: 16, right: 16, top: 20),
         height: 52 * 4 + 20, // 四个条目高度加间隔
         decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.all(
-            Radius.circular(10)
-          ),
+          color: AppColors.cardBackground,
+          borderRadius: AppRadius.fieldBorder,
         ),
         child: Form(
           key: _formKey,
@@ -56,44 +55,35 @@ class _EditProfilePageState extends State<EditProfilePage> {
             children: [
               _buildProfileItem(
                 context,
-                title: 'Avatar',
+                title: '头像',
                 onTap: () => showAvatarOptions(context),
                 showAvatar: true,
               ),
-              Container(
-                height: 0.5,
-                color: const Color(0xFFE0E0E0),
-              ),
+              Container(height: 0.5, color: AppColors.border),
               _buildProfileItem(
                 context,
-                title: 'Nickname',
+                title: '昵称',
                 onTap: () => _navigateToEditNickname(context),
               ),
-              Container(
-                height: 0.5,
-                color: const Color(0xFFE0E0E0),
-              ),
+              Container(height: 0.5, color: AppColors.border),
               _buildProfileItem(
                 context,
-                title: 'Gender',
+                title: '性别',
                 onTap: () => _showGenderPicker(context),
                 valueWidget: _selectedGender != null
                     ? Image.asset(
-                  _selectedGender == 'Male'
-                      ? 'assets/profile/male_icon.png'
-                      : 'assets/profile/female_icon.png',
-                  width: 20,
-                  height: 20,
-                )
+                        _selectedGender == '男'
+                            ? AppAssets.profileMaleIcon
+                            : AppAssets.profileFemaleIcon,
+                        width: 20,
+                        height: 20,
+                      )
                     : null,
               ),
-              Container(
-                height: 0.5,
-                color: const Color(0xFFE0E0E0),
-              ),
+              Container(height: 0.5, color: AppColors.border),
               _buildProfileItem(
                 context,
-                title: 'Birthday',
+                title: '生日',
                 onTap: () => _showBirthdayPicker(context),
                 valueText: _selectedBirthday != null
                     ? '${_selectedBirthday!.year}-${_selectedBirthday!.month.toString().padLeft(2, '0')}-${_selectedBirthday!.day.toString().padLeft(2, '0')}'
@@ -118,19 +108,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-        ),
+        decoration: const BoxDecoration(color: AppColors.cardBackground),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Color(0xFF212121),
-              ),
-            ),
+            Text(title, style: AppTextStyles.bodyStrong),
             Row(
               children: [
                 if (showAvatar)
@@ -139,31 +121,25 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     height: 36,
                     margin: const EdgeInsets.only(right: 8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE0E0E0),
+                      color: AppColors.avatarPlaceholder,
                       borderRadius: BorderRadius.circular(18),
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(18),
-                      child: Icon(
+                      child: const Icon(
                         Icons.person,
-                        color: Colors.white,
+                        color: AppColors.textInverse,
                         size: 20,
                       ),
                     ),
                   ),
                 if (valueText != null)
-                  Text(
-                    valueText,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF666666),
-                    ),
-                  ),
+                  Text(valueText, style: AppTextStyles.hint),
                 if (valueWidget != null) valueWidget,
                 const Icon(
                   Icons.arrow_forward_ios,
                   size: 16,
-                  color: Color(0xFFF9E707),
+                  color: AppColors.primaryPink,
                 ),
               ],
             ),
@@ -172,7 +148,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
       ),
     );
   }
-
 
   void _navigateToEditNickname(BuildContext context) {
     context.push('/edit-nickname');
@@ -183,32 +158,32 @@ class _EditProfilePageState extends State<EditProfilePage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Select Gender'),
+          title: const Text('选择性别'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                title: const Text('Male'),
+                title: const Text('男'),
                 onTap: () {
                   Navigator.pop(context);
                   setState(() {
-                    _selectedGender = 'Male';
+                    _selectedGender = '男';
                   });
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Male selected')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('已选择男')));
                 },
               ),
               ListTile(
-                title: const Text('Female'),
+                title: const Text('女'),
                 onTap: () {
                   Navigator.pop(context);
                   setState(() {
-                    _selectedGender = 'Female';
+                    _selectedGender = '女';
                   });
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Female selected')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('已选择女')));
                 },
               ),
             ],
@@ -220,7 +195,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   void _showBirthdayPicker(BuildContext context) async {
     final DateTime firstDate = DateTime(1950, 1, 1);
-    final DateTime lastDate = DateTime.now().subtract(const Duration(days: 365 * 18));
+    final DateTime lastDate = DateTime.now().subtract(
+      const Duration(days: 365 * 18),
+    );
     DateTime initial = _selectedBirthday ?? DateTime(2000, 1, 1);
     // Ensure initial is within allowed range
     if (initial.isBefore(firstDate)) initial = firstDate;
@@ -236,8 +213,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: Color(0xFFF9E707),
-              onPrimary: Color(0xFF212121),
+              primary: AppColors.primaryPink,
+              onPrimary: AppColors.textInverse,
             ),
           ),
           child: child!,

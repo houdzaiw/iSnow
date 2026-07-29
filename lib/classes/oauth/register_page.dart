@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../widgets/custom_scaffold.dart';
+import '../../theme/app_theme.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -13,7 +13,8 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   @override
   void dispose() {
@@ -28,40 +29,33 @@ class _RegisterPageState extends State<RegisterPage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: null,
-      backgroundColor: const Color(0xFFFDF5EB),
+      backgroundColor: AppColors.creamBackground,
       body: Container(
         width: double.infinity,
         height: double.infinity,
         alignment: Alignment.center,
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/base/base_bg_image.png'),
+            image: AssetImage(AppAssets.authBackground),
             fit: BoxFit.cover,
           ),
         ),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(AppSpacing.xxxl),
           child: Stack(
             children: [
               Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(40),
+                padding: const EdgeInsets.all(AppSpacing.xxxl),
+                decoration: const BoxDecoration(
+                  color: AppColors.cardBackground,
+                  borderRadius: AppRadius.dialogBorder,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 48),
-                    const Text(
-                      'Please enter your registration email',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF212121),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
+                    const Text('请输入注册邮箱', style: AppTextStyles.bodyStrong),
+                    const SizedBox(height: AppSpacing.sm),
                     // 邮箱输入框
                     SizedBox(
                       height: 43,
@@ -70,79 +64,72 @@ class _RegisterPageState extends State<RegisterPage> {
                         decoration: InputDecoration(
                           hintText: 'example@gmail.com',
                           filled: true,
-                          fillColor: const Color(0xFFFDF5EB),
+                          fillColor: AppColors.fieldBackground,
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: AppRadius.fieldBorder,
                             borderSide: BorderSide.none,
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 11,
+                          ),
                           isDense: true,
                         ),
                         keyboardType: TextInputType.emailAddress,
                       ),
                     ),
 
-                    const SizedBox(height: 20),
-                    // Please enter your password
-                    const Text(
-                      'Please enter your password',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF212121),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.xxl),
+                    const Text('请输入密码', style: AppTextStyles.bodyStrong),
+                    const SizedBox(height: AppSpacing.sm),
                     // 密码输入框
                     SizedBox(
                       height: 43,
                       child: TextField(
                         controller: _passwordController,
                         decoration: InputDecoration(
-                          hintText: 'Your password',
+                          hintText: '请输入密码',
                           filled: true,
-                          fillColor: const Color(0xFFFDF5EB),
+                          fillColor: AppColors.fieldBackground,
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: AppRadius.fieldBorder,
                             borderSide: BorderSide.none,
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 11,
+                          ),
                           isDense: true,
                         ),
                         obscureText: true,
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    // Please enter your password
-                    const Text(
-                      'Please re-enter your password to confirm',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF212121),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.xxl),
+                    const Text('请再次输入密码', style: AppTextStyles.bodyStrong),
+                    const SizedBox(height: AppSpacing.sm),
                     // 密码输入框
                     SizedBox(
                       height: 43,
                       child: TextField(
-                        controller: _passwordController,
+                        controller: _confirmPasswordController,
                         decoration: InputDecoration(
-                          hintText: 'Your password',
+                          hintText: '请再次输入密码',
                           filled: true,
-                          fillColor: const Color(0xFFFDF5EB),
+                          fillColor: AppColors.fieldBackground,
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: AppRadius.fieldBorder,
                             borderSide: BorderSide.none,
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 11,
+                          ),
                           isDense: true,
                         ),
                         obscureText: true,
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: AppSpacing.section),
                     // 登录按钮
                     GestureDetector(
                       onTap: () {
@@ -152,22 +139,21 @@ class _RegisterPageState extends State<RegisterPage> {
                         width: 280,
                         height: 53,
                         decoration: const BoxDecoration(
-                          //背景色#F9E707
-                          color: Color(0xFFF9E707),
-                          borderRadius: BorderRadius.all(Radius.circular(28)),
+                          color: AppColors.primaryPink,
+                          borderRadius: AppRadius.pillBorder,
                         ),
                         alignment: Alignment.center,
                         child: const Text(
-                          'Register',
+                          '注册',
                           style: TextStyle(
                             fontSize: 20,
-                            color: Color(0xFF212121),
+                            color: AppColors.textInverse,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.xl),
                   ],
                 ),
               ),
@@ -180,7 +166,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     context.pop();
                   },
                   child: Image.asset(
-                    'assets/base/close_button_image.png',
+                    AppAssets.lanhuCloseCircle,
                     width: 32,
                     height: 32,
                   ),
@@ -193,4 +179,3 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 }
-

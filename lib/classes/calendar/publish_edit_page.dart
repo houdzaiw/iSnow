@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -7,16 +6,13 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../configs/consts.dart';
+import '../../theme/app_theme.dart';
 
 class PublishEditPage extends HookConsumerWidget {
   final int? moodIndex;
   final Function(String description, List<String> imagePaths)? onSave;
 
-  const PublishEditPage({
-    super.key,
-    this.moodIndex,
-    this.onSave,
-  });
+  const PublishEditPage({super.key, this.moodIndex, this.onSave});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -56,56 +52,42 @@ class PublishEditPage extends HookConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 1. 标题
-          const Text(
-            'Input Mood',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF000000),
-            ),
-          ),
-          const SizedBox(height: 16),
+          const Text('填写心情', style: AppTextStyles.title),
+          const SizedBox(height: AppSpacing.xl),
           // 2. 输入框
           TextField(
             controller: textController,
             maxLines: 6,
             decoration: InputDecoration(
-              hintText: 'What Happened Today...',
-              hintStyle: const TextStyle(
-                color: Color(0xFFB2B2B2),
-                fontSize: 18,
-              ),
+              hintText: '今天发生了什么...',
+              hintStyle: AppTextStyles.hint.copyWith(fontSize: 18),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(
-                  color: Color(0xFFE0E0E0),
-                ),
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                borderSide: const BorderSide(color: AppColors.border),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(
-                  color: Color(0xFFE0E0E0),
-                ),
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                borderSide: const BorderSide(color: AppColors.border),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppRadius.md),
                 borderSide: const BorderSide(
-                  color: Color(0xFFF9E707),
+                  color: AppColors.primaryPink,
                   width: 2,
                 ),
               ),
               contentPadding: const EdgeInsets.all(12),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.xl),
           // 3. 图片选择按钮
           GestureDetector(
             onTap: () {
               // 检查是否已达到最大数量
               if (selectedImages.value.length >= 4) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('最多只能选择4张图片')),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('最多只能选择4张图片')));
                 return;
               }
 
@@ -115,16 +97,22 @@ class PublishEditPage extends HookConsumerWidget {
                   final ImagePicker picker = ImagePicker();
                   // 从相册选择多张图片
                   final List<XFile> images = await picker.pickMultiImage();
+                  if (!context.mounted) return;
                   if (images.isNotEmpty) {
                     // 计算还可以选择的数量
                     final remainingSlots = 4 - selectedImages.value.length;
                     final imagesToAdd = images.take(remainingSlots).toList();
-                    selectedImages.value = [...selectedImages.value, ...imagesToAdd];
+                    selectedImages.value = [
+                      ...selectedImages.value,
+                      ...imagesToAdd,
+                    ];
 
                     // 如果用户选择的图片超过剩余数量，提示用户
                     if (images.length > remainingSlots) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('最多只能选择4张图片，已添加${imagesToAdd.length}张')),
+                        SnackBar(
+                          content: Text('最多只能选择4张图片，已添加${imagesToAdd.length}张'),
+                        ),
                       );
                     }
                   }
@@ -132,8 +120,10 @@ class PublishEditPage extends HookConsumerWidget {
                 onCameraSelected: () async {
                   final ImagePicker picker = ImagePicker();
                   // 使用相机拍照
-                  final XFile? photo =
-                      await picker.pickImage(source: ImageSource.camera);
+                  final XFile? photo = await picker.pickImage(
+                    source: ImageSource.camera,
+                  );
+                  if (!context.mounted) return;
                   if (photo != null) {
                     selectedImages.value = [...selectedImages.value, photo];
                   }
@@ -141,13 +131,13 @@ class PublishEditPage extends HookConsumerWidget {
               );
             },
             child: Image.asset(
-              'assets/calendar/select_image_button.png',
+              AppAssets.calendarSelectImageButton,
               width: 60,
               height: 60,
               fit: BoxFit.contain,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.xl),
           // 4. 显示已选择的图片
           if (selectedImages.value.isNotEmpty)
             Wrap(

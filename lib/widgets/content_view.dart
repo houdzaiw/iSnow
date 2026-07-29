@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../configs/consts.dart';
 import '../model/diary_entry.dart';
+import '../theme/app_theme.dart';
 
 class ContentView extends StatelessWidget {
   final DiaryEntry entry;
@@ -20,29 +21,19 @@ class ContentView extends StatelessWidget {
             entry.moodIndex! < moodImages.length)
           Row(
             children: [
-              Image.asset(
-                moodImages[entry.moodIndex!],
-                width: 40,
-                height: 40,
-              ),
+              Image.asset(moodImages[entry.moodIndex!], width: 40, height: 40),
               const SizedBox(width: 8),
               Text(
-                "This is my mood today",
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF212121),
-                ),
+                "这是我今天的心情",
+                style: AppTextStyles.bodyStrong.copyWith(fontSize: 14),
               ),
               const Spacer(),
-              isDetail ? SizedBox.shrink() :
-              Text(
-                setDateFormatter(entry.date),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFFB2B2B2),
-                ),
-              ),
+              isDetail
+                  ? const SizedBox.shrink()
+                  : Text(
+                      setDateFormatter(entry.date),
+                      style: AppTextStyles.caption,
+                    ),
             ],
           ),
         const SizedBox(height: 8),
@@ -50,11 +41,7 @@ class ContentView extends StatelessWidget {
         if (entry.description != null && entry.description!.isNotEmpty)
           Text(
             entry.description!,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w400,
-              color: Color(0xFF212121),
-            ),
+            style: AppTextStyles.body.copyWith(fontSize: 14),
           ),
         // 显示图片
         if (entry.images != null && entry.images!.isNotEmpty)
@@ -76,10 +63,10 @@ class ContentView extends StatelessWidget {
                       return Container(
                         width: 60,
                         height: 60,
-                        color: Colors.grey[300],
+                        color: AppColors.avatarPlaceholder,
                         child: const Icon(
                           Icons.image_not_supported,
-                          color: Colors.grey,
+                          color: AppColors.textTertiary,
                         ),
                       );
                     },
@@ -92,4 +79,3 @@ class ContentView extends StatelessWidget {
     );
   }
 }
-

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../theme/app_theme.dart';
+
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
@@ -8,70 +10,54 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: null,
-      backgroundColor: const Color(0xFFFDF5EB),
+      backgroundColor: AppColors.cardBackground,
       body: Container(
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/base/launch_bg_image.png'),
+            image: AssetImage(AppAssets.lanhuLoginBackground),
             fit: BoxFit.cover,
           ),
         ),
         child: Column(
           children: [
             const Spacer(),
-            // Login 按钮
             GestureDetector(
               onTap: () {
                 // 跳转到登录详情页
                 context.push('/login-detail');
               },
               child: Container(
-                width: 280,
-                height: 56,
+                width: 298,
+                height: 61,
                 decoration: const BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage('assets/base/button_bg_image.png'),
+                    image: AssetImage(AppAssets.lanhuAuthButtonPrimary),
                     fit: BoxFit.fill,
                   ),
                 ),
                 alignment: Alignment.center,
-                child: const Text(
-                  'Login',
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Color(0xFF212121),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                child: const Text('登录', style: AppTextStyles.button),
               ),
             ),
-            const SizedBox(height: 24),
-            // Register 按钮
+            const SizedBox(height: 20),
             GestureDetector(
               onTap: () {
                 // 跳转到注册页
                 context.push('/register');
               },
               child: Container(
-                width: 280,
-                height: 56,
+                width: 298,
+                height: 61,
                 decoration: const BoxDecoration(
                   image: DecorationImage(
-                    image: AssetImage('assets/base/button_bg_image.png'),
+                    image: AssetImage(AppAssets.lanhuAuthButtonSecondary),
                     fit: BoxFit.fill,
                   ),
                 ),
                 alignment: Alignment.center,
-                child: const Text(
-                  'Register',
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Color(0xFF212121),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                child: const Text('注册', style: AppTextStyles.button),
               ),
             ),
             SizedBox(height: 126 + MediaQuery.of(context).padding.bottom),
@@ -81,4 +67,3 @@ class LoginPage extends StatelessWidget {
     );
   }
 }
-

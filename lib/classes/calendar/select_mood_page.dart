@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../configs/consts.dart';
+import '../../theme/app_theme.dart';
 import 'publish_page.dart';
 
 class SelectMoodPage extends HookConsumerWidget {
@@ -12,17 +13,12 @@ class SelectMoodPage extends HookConsumerWidget {
       height: MediaQuery.of(context).size.height * 0.64,
       child: Column(
         children: [
-          // Header: Select Mood
           const Padding(
-            padding: EdgeInsets.symmetric(vertical: 20.0),
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.xxl),
             child: Text(
-              'Select Mood',
+              '选择心情',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF212121),
-              ),
+              style: AppTextStyles.title,
             ),
           ),
           // GridView
@@ -45,9 +41,9 @@ class SelectMoodPage extends HookConsumerWidget {
                       // 打开新的 PublishPage 弹框
                       showModalBottomSheet<void>(
                         context: context,
-                        backgroundColor: Colors.white,
+                        backgroundColor: AppColors.cardBackground,
                         shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                          borderRadius: AppRadius.sheetBorder,
                         ),
                         builder: (ctx) {
                           return PublishPage(moodIndex: index);
@@ -56,10 +52,7 @@ class SelectMoodPage extends HookConsumerWidget {
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: Image.asset(
-                        imagePath,
-                        fit: BoxFit.contain,
-                      ),
+                      child: Image.asset(imagePath, fit: BoxFit.contain),
                     ),
                   );
                 }).toList(),

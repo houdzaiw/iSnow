@@ -1,7 +1,8 @@
-
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:project/widgets/custom_scaffold.dart';
+
+import '../../theme/app_theme.dart';
 
 class AboutUsPage extends HookConsumerWidget {
   const AboutUsPage({super.key});
@@ -9,7 +10,7 @@ class AboutUsPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return CustomScaffold(
-      title: 'About Us',
+      title: '关于我们',
       body: SingleChildScrollView(
         child: Center(
           child: Padding(
@@ -23,22 +24,16 @@ class AboutUsPage extends HookConsumerWidget {
                   height: 120,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFFF9E707),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+                    gradient: AppGradients.primary,
+                    boxShadow: AppShadows.soft,
                   ),
                   child: Center(
                     child: Text(
                       'IS',
                       style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                            color: const Color(0xFF212121),
-                            fontWeight: FontWeight.bold,
-                          ),
+                        color: AppColors.textInverse,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -48,10 +43,10 @@ class AboutUsPage extends HookConsumerWidget {
                 Column(
                   children: [
                     Text(
-                      'Version 1.0.0',
+                      '版本 1.0.0',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: const Color(0xFF999999),
-                          ),
+                        color: AppColors.textTertiary,
+                      ),
                     ),
                   ],
                 ),
@@ -61,12 +56,12 @@ class AboutUsPage extends HookConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Text(
-                    'A simple and elegant diary app to record your daily emotions and moments.',
+                    '记录每天的情绪和片刻，把心情好好收藏起来。',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: const Color(0xFF666666),
-                          height: 1.6,
-                        ),
+                      color: AppColors.textSecondary,
+                      height: 1.6,
+                    ),
                   ),
                 ),
               ],

@@ -7,15 +7,14 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:record/record.dart';
 
+import '../../configs/consts.dart';
+import '../../theme/app_theme.dart';
+
 class PublishVoicePage extends HookConsumerWidget {
   final int? moodIndex;
   final Function(String voicePath, String inSecond)? onSave;
 
-  const PublishVoicePage({
-    super.key,
-    this.moodIndex,
-    this.onSave,
-  });
+  const PublishVoicePage({super.key, this.moodIndex, this.onSave});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -36,9 +35,13 @@ class PublishVoicePage extends HookConsumerWidget {
     }, []);
 
     Future<void> startRecording() async {
-      if (await recorder.hasPermission()) {
+      final hasPermission = await recorder.hasPermission();
+      if (!context.mounted) return;
+
+      if (hasPermission) {
         final dir = Directory.systemTemp;
-        final filePath = '${dir.path}/isnow_record_${DateTime.now().millisecondsSinceEpoch}.m4a';
+        final filePath =
+            '${dir.path}/isnow_record_${DateTime.now().millisecondsSinceEpoch}.m4a';
         try {
           await recorder.start(
             RecordConfig(
@@ -52,17 +55,19 @@ class PublishVoicePage extends HookConsumerWidget {
           recordDuration.value = Duration.zero;
           isRecording.value = true;
 
-          timer.value = Timer.periodic(Duration(seconds: 1), (_) {
-            recordDuration.value = Duration(seconds: recordDuration.value.inSeconds + 1);
+          timer.value = Timer.periodic(const Duration(seconds: 1), (_) {
+            recordDuration.value = Duration(
+              seconds: recordDuration.value.inSeconds + 1,
+            );
           });
         } catch (e) {
           // ignore errors silently for now
         }
       } else {
         // show permission denied
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Recording permission denied')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('没有录音权限')));
       }
     }
 
@@ -75,7 +80,10 @@ class PublishVoicePage extends HookConsumerWidget {
         if (path != null) {
           recordedFilePath.value = path;
           if (onSave != null) {
-            onSave!(recordedFilePath.value!, _durationToSeconds(recordDuration.value));
+            onSave!(
+              recordedFilePath.value!,
+              _durationToSeconds(recordDuration.value),
+            );
           }
           // prepare player
           try {
@@ -117,33 +125,39 @@ class PublishVoicePage extends HookConsumerWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(width: 16),
+            const SizedBox(width: AppSpacing.xl),
             Image.asset(
-              moodIndex != null
-                ? 'assets/mood/model_${moodIndex.toString().padLeft(2, '0')}.png'
-                : 'assets/calendar/default_icon.png',
+              moodIndex != null &&
+                      moodIndex! >= 0 &&
+                      moodIndex! < moodImages.length
+                  ? moodImages[moodIndex!]
+                  : AppAssets.calendarDefaultMood,
               width: 45,
               height: 45,
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: AppSpacing.md),
             Container(
               width: 179,
               height: 41,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage('assets/calendar/speak_bg_image.png'),
+                  image: AssetImage(AppAssets.calendarSpeakBackground),
                   fit: BoxFit.contain,
                 ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  SizedBox(width: 18),
-                  Image.asset('assets/calendar/speak_icon.png', width: 10, height: 16),
-                  SizedBox(width: 4),
+                  const SizedBox(width: 18),
+                  Image.asset(
+                    AppAssets.calendarSpeakIcon,
+                    width: 10,
+                    height: 16,
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
                   Text(
                     _durationToSeconds(recordDuration.value),
-                    style: TextStyle(color: Color(0xFF212121)),
+                    style: const TextStyle(color: AppColors.textPrimary),
                   ),
                 ],
               ),
@@ -163,35 +177,39 @@ class PublishVoicePage extends HookConsumerWidget {
           children: [
             const SizedBox(height: 60),
             Text(
-              "Click to ${isRecording.value ? 'stop' : 'record'}",
-              style: TextStyle(color: Color(0xFF212121)),
+              isRecording.value ? '点击停止录音' : '点击开始录音',
+              style: const TextStyle(color: AppColors.textPrimary),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.lg),
             Container(
               width: 220,
               height: 116,
               // alignment: Alignment.center,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage('assets/calendar/speaker_button.png'),
+                  image: AssetImage(AppAssets.calendarSpeakerButton),
                   // fit: BoxFit.contain,
                 ),
               ),
-              // child: Text(isRecording.value ? 'Click to stop' : 'Click to record', style: TextStyle(color: Color(0xFF212121))),
             ),
-            const SizedBox(height: 12),
-            Text(_formatDuration(recordDuration.value), style: TextStyle(color: Color(0xFF212121), fontSize: 18),)
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              _formatDuration(recordDuration.value),
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 18,
+              ),
+            ),
           ],
         ),
       );
     }
+
     // 如果已经有录音文件，显示播放按钮
     if (recordedFilePath.value != null && !isRecording.value) {
       return Padding(padding: EdgeInsets.only(top: 42), child: playButton());
     }
-    return Center(
-      child: recordButton(),
-    );
+    return Center(child: recordButton());
   }
 
   String _formatDuration(Duration d) {
@@ -199,8 +217,9 @@ class PublishVoicePage extends HookConsumerWidget {
     final ss = d.inSeconds.remainder(60).toString().padLeft(2, '0');
     return '$mm:$ss';
   }
+
   // 将recordDuration.value转为总共秒数
- String _durationToSeconds(Duration d) {
+  String _durationToSeconds(Duration d) {
     return d.inSeconds.toString();
   }
 }

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 class HttpDioManager {
   static const String _baseUrl = 'http://simi2.w1.luyouxia.net/simi';
@@ -203,21 +204,23 @@ class HttpDioManager {
   void _handleError(DioException error) {
     switch (error.type) {
       case DioExceptionType.connectionTimeout:
-        print('Connection timeout: ${error.message}');
+        debugPrint('Connection timeout: ${error.message}');
       case DioExceptionType.sendTimeout:
-        print('Send timeout: ${error.message}');
+        debugPrint('Send timeout: ${error.message}');
       case DioExceptionType.receiveTimeout:
-        print('Receive timeout: ${error.message}');
+        debugPrint('Receive timeout: ${error.message}');
       case DioExceptionType.badResponse:
-        print('Bad response: ${error.response?.statusCode} - ${error.message}');
+        debugPrint(
+          'Bad response: ${error.response?.statusCode} - ${error.message}',
+        );
       case DioExceptionType.cancel:
-        print('Request cancelled: ${error.message}');
+        debugPrint('Request cancelled: ${error.message}');
       case DioExceptionType.connectionError:
-        print('Connection error: ${error.message}');
+        debugPrint('Connection error: ${error.message}');
       case DioExceptionType.unknown:
-        print('Unknown error: ${error.message}');
+        debugPrint('Unknown error: ${error.message}');
       case DioExceptionType.badCertificate:
-        print('Bad certificate: ${error.message}');
+        debugPrint('Bad certificate: ${error.message}');
     }
   }
 
@@ -231,4 +234,3 @@ class HttpDioManager {
     _dio.close();
   }
 }
-

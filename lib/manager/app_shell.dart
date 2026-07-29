@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../theme/app_theme.dart';
+
 class AppShell extends StatelessWidget {
   final Widget child;
   // accept location from ShellRoute's GoRouterState
   final String location;
   const AppShell({required this.location, required this.child, super.key});
 
-  static const List<String> _tabs = ['/home', '/calendar', '/profile'];
+  static const List<String> _tabs = [
+    '/home',
+    '/calendar',
+    '/messages',
+    '/profile',
+  ];
 
   int _locationToIndex(String location) {
     final idx = _tabs.indexWhere((t) => location.startsWith(t));
@@ -20,11 +27,11 @@ class AppShell extends StatelessWidget {
 
     return Scaffold(
       body: child,
-      backgroundColor: const Color(0xFFFDF5EB),
+      backgroundColor: AppColors.pageBackground,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
         type: BottomNavigationBarType.fixed,
-        backgroundColor: Color(0xFFF9E707),
+        backgroundColor: AppColors.cardBackground,
         selectedItemColor: Colors.transparent,
         unselectedItemColor: Colors.transparent,
         showSelectedLabels: false,
@@ -38,64 +45,62 @@ class AppShell extends StatelessWidget {
         },
         items: [
           BottomNavigationBarItem(
-            icon: Container(
-              padding: const EdgeInsets.only(top: 6),
-              child: Image.asset(
-                'assets/tabbar/home_normal.png',
-                width: 36,
-                height: 36,
-              ),
+            icon: _AssetTabIcon(asset: AppAssets.tabHomeNormal),
+            activeIcon: _AssetTabIcon(asset: AppAssets.tabHomeActive),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: const _IconTabIcon(
+              icon: Icons.calendar_month,
+              color: AppColors.tabInactive,
             ),
-            activeIcon: Container(
-              padding: const EdgeInsets.only(top: 6),
-              child: Image.asset(
-                'assets/tabbar/home_select.png',
-                width: 36,
-                height: 36,
-              ),
+            activeIcon: const _IconTabIcon(
+              icon: Icons.calendar_month,
+              color: AppColors.primaryPink,
             ),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Container(
-              padding: const EdgeInsets.only(top: 6),
-              child: Image.asset(
-                'assets/tabbar/message_normal.png',
-                width: 36,
-                height: 36,
-              ),
-            ),
-            activeIcon: Container(
-              padding: const EdgeInsets.only(top: 6),
-              child: Image.asset(
-                'assets/tabbar/message_select.png',
-                width: 36,
-                height: 36,
-              ),
-            ),
+            icon: _AssetTabIcon(asset: AppAssets.tabMessageNormal),
+            activeIcon: _AssetTabIcon(asset: AppAssets.tabMessageActive),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Container(
-              padding: const EdgeInsets.only(top: 6),
-              child: Image.asset(
-                'assets/tabbar/user_profile_normal.png',
-                width: 36,
-                height: 36,
-              ),
-            ),
-            activeIcon: Container(
-              padding: const EdgeInsets.only(top: 6),
-              child: Image.asset(
-                'assets/tabbar/user_profile_select.png',
-                width: 36,
-                height: 36,
-              ),
-            ),
+            icon: _AssetTabIcon(asset: AppAssets.tabProfileNormal),
+            activeIcon: _AssetTabIcon(asset: AppAssets.tabProfileActive),
             label: '',
           ),
         ],
       ),
+    );
+  }
+}
+
+class _AssetTabIcon extends StatelessWidget {
+  final String asset;
+
+  const _AssetTabIcon({required this.asset});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Image.asset(asset, width: 36, height: 36),
+    );
+  }
+}
+
+class _IconTabIcon extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+
+  const _IconTabIcon({required this.icon, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Icon(icon, size: 30, color: color),
     );
   }
 }

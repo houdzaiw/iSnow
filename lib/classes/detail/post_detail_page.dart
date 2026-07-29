@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -8,6 +7,7 @@ import '../../configs/consts.dart';
 import '../../manager/app_Isar.dart';
 import '../../manager/providers.dart';
 import '../../model/diary_entry.dart';
+import '../../theme/app_theme.dart';
 import '../../widgets/custom_scaffold.dart';
 import '../../widgets/voice_view.dart';
 
@@ -36,12 +36,15 @@ class PostDetailPage extends HookConsumerWidget {
       });
     }
 
-    final sad = isSad.value ? 'assets/calendar/frustrated_icon_pre.png' : 'assets/calendar/frustrated_icon.png';
-    final happy = isHappy.value ? 'assets/calendar/rejoice_icon_pre.png' : 'assets/calendar/rejoice_icon.png';
+    final sad = isSad.value
+        ? AppAssets.calendarFrustratedActive
+        : AppAssets.calendarFrustrated;
+    final happy = isHappy.value
+        ? AppAssets.calendarRejoiceActive
+        : AppAssets.calendarRejoice;
 
-    // TODO: implement build
     return CustomScaffold(
-      title: 'Edit Detail',
+      title: '心情详情',
       body: Column(
         children: [
           _buildContainer(),
@@ -52,10 +55,7 @@ class PostDetailPage extends HookConsumerWidget {
               children: [
                 Text(
                   setDateFormatter(entry.date),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFFB2B2B2),
-                  ),
+                  style: AppTextStyles.caption,
                 ),
                 Spacer(),
                 Row(
@@ -80,9 +80,9 @@ class PostDetailPage extends HookConsumerWidget {
                         updateDatabase();
                       },
                       child: Image.asset(happy, width: 20, height: 20),
-                    )
+                    ),
                   ],
-                )
+                ),
               ],
             ),
           ),
@@ -90,6 +90,7 @@ class PostDetailPage extends HookConsumerWidget {
       ),
     );
   }
+
   Widget _buildContainer() {
     if (entry.type == 'voice') {
       return VoiceView(entry: entry, isDetail: true);
@@ -98,10 +99,10 @@ class PostDetailPage extends HookConsumerWidget {
       margin: const EdgeInsets.symmetric(vertical: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(AppRadius.xl),
       ),
-      child: ContentView(entry: entry, isDetail: true)
+      child: ContentView(entry: entry, isDetail: true),
     );
   }
 }

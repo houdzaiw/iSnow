@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import '../../widgets/custom_scaffold.dart';
+import '../../theme/app_theme.dart';
 import 'profile_menu_item.dart';
 
 class ProfilePage extends HookConsumerWidget {
@@ -12,29 +12,20 @@ class ProfilePage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final menuItems = ProfileMenuData.getMenuItems();
     return Scaffold(
-      extendBodyBehindAppBar: true,  // ★ 关键：让 body 内容延伸到 AppBar 后面
+      extendBodyBehindAppBar: true, // ★ 关键：让 body 内容延伸到 AppBar 后面
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
           IconButton(
-            icon: Image.asset(
-              "assets/message/message_icon.png",
-              width: 24,
-              height: 24,
-            ),
+            icon: Image.asset(AppAssets.messageIcon, width: 24, height: 24),
             onPressed: () => onRightIconTap(context),
           ),
         ],
       ),
-      backgroundColor: const Color(0xFFFFF6E5),
+      backgroundColor: AppColors.pageBackground,
       body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/base/bg_image.png'),
-            fit: BoxFit.cover,
-          ),
-        ),
+        decoration: const BoxDecoration(gradient: AppGradients.pageBackground),
         child: Column(
           children: [
             // 头像和昵称部分
@@ -51,41 +42,34 @@ class ProfilePage extends HookConsumerWidget {
                     width: 100,
                     height: 100,
                     decoration: BoxDecoration(
-                      color: Colors.grey[300],
+                      color: AppColors.avatarPlaceholder,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
                       Icons.person,
                       size: 50,
-                      color: Colors.white,
+                      color: AppColors.textInverse,
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: AppSpacing.md),
                   // 昵称
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
-                        'Username',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF212121),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
+                      const Text('用户昵称', style: AppTextStyles.title),
+                      const SizedBox(width: AppSpacing.sm),
                       GestureDetector(
                         onTap: () {
                           context.push('/edit-profile');
                         },
                         child: Image.asset(
-                          'assets/profile/edit_icon.png',
+                          AppAssets.profileEditIcon,
                           width: 16,
                           height: 16,
                         ),
                       ),
                     ],
-                  )
+                  ),
                 ],
               ),
             ),
@@ -98,45 +82,44 @@ class ProfilePage extends HookConsumerWidget {
                   final item = menuItems[index];
                   return Container(
                     height: 54,
-                    margin: const EdgeInsets.only(left: 12, right: 12, bottom: 10),
+                    margin: const EdgeInsets.only(
+                      left: AppSpacing.lg,
+                      right: AppSpacing.lg,
+                      bottom: AppSpacing.md,
+                    ),
                     //圆角14
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
+                      color: AppColors.cardBackground,
+                      borderRadius: AppRadius.cardBorder,
                     ),
                     child: ListTile(
                       leading: Image.asset(item.icon, width: 27, height: 27),
-                      title: Text(
-                        item.name,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          color: Color(0xFF212121),
-                          fontWeight: FontWeight.w500,
-                        ),
+                      title: Text(item.name, style: AppTextStyles.menuItem),
+                      trailing: Icon(
+                        item.arrow,
+                        size: 16,
+                        color: AppColors.primaryPink,
                       ),
-                      trailing: Icon(item.arrow, size: 16),
                       horizontalTitleGap: 0, // 设置leading和title之间的间距为8像素
                       onTap: () {
-                        // 处理点击事件
-                        print('点击了: ${item.name}');
                         //调用my posts 路由跳转
-                        if (item.name == 'My Posts') {
+                        if (item.name == '我的帖子') {
                           context.push('/my-posts');
                         }
-                        if (item.name == 'User Privacy') {
+                        if (item.name == '用户隐私') {
                           context.push(
-                            '/web-view?title=User Privacy&uri=https://www.example.com/user-privacy',
+                            '/web-view?title=用户隐私&uri=https://www.example.com/user-privacy',
                           );
                         }
-                        if (item.name == 'About Us') {
+                        if (item.name == '关于我们') {
                           context.push('/about-us');
                         }
-                        if (item.name == 'Contact Us') {
+                        if (item.name == '联系我们') {
                           context.push(
-                            '/web-view?title=Contact Us&uri=https://www.example.com/contact',
+                            '/web-view?title=联系我们&uri=https://www.example.com/contact',
                           );
                         }
-                        if (item.name == 'Settings') {
+                        if (item.name == '设置') {
                           context.push('/settings');
                         }
                       },
@@ -153,7 +136,6 @@ class ProfilePage extends HookConsumerWidget {
 
   void onRightIconTap(BuildContext context) {
     // 跳转到消息页面
-    print('跳转到消息页面');
-    context.push('/messages');
+    context.go('/messages');
   }
 }

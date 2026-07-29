@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../theme/app_theme.dart';
 import '../../widgets/custom_scaffold.dart';
 
 class EditNicknamePage extends StatefulWidget {
@@ -10,7 +11,7 @@ class EditNicknamePage extends StatefulWidget {
 }
 
 class _EditNicknamePageState extends State<EditNicknamePage> {
-  final _nicknameController = TextEditingController(text: 'Username');
+  final _nicknameController = TextEditingController(text: '用户昵称');
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -22,13 +23,13 @@ class _EditNicknamePageState extends State<EditNicknamePage> {
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
-      title: 'Edit Nickname',
-      rightText: 'Save',
+      title: '编辑昵称',
+      rightText: '保存',
       onRightIconTap: () {
         if (_formKey.currentState!.validate()) {
           // 保存昵称逻辑
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Nickname saved: ${_nicknameController.text}')),
+            SnackBar(content: Text('昵称已保存：${_nicknameController.text}')),
           );
           context.pop();
         }
@@ -41,28 +42,31 @@ class _EditNicknamePageState extends State<EditNicknamePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: const BoxDecoration(
+                  color: AppColors.cardBackground,
+                  borderRadius: AppRadius.fieldBorder,
                 ),
                 child: TextFormField(
                   controller: _nicknameController,
                   decoration: const InputDecoration(
                     border: InputBorder.none,
-                    hintText: 'Enter your nickname',
-                    hintStyle: TextStyle(color: Color(0xFF999999)),
+                    hintText: '请输入昵称',
+                    hintStyle: TextStyle(color: AppColors.textTertiary),
                   ),
                   style: const TextStyle(
                     fontSize: 16,
-                    color: Color(0xFF212121),
+                    color: AppColors.textPrimary,
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Nickname cannot be empty';
+                      return '昵称不能为空';
                     }
                     if (value.length > 20) {
-                      return 'Nickname cannot exceed 20 characters';
+                      return '昵称不能超过20个字符';
                     }
                     return null;
                   },
@@ -72,11 +76,8 @@ class _EditNicknamePageState extends State<EditNicknamePage> {
               const Padding(
                 padding: EdgeInsets.only(left: 16),
                 child: Text(
-                  'Nickname should be 1-20 characters',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF999999),
-                  ),
+                  '昵称长度为1-20个字符',
+                  style: TextStyle(fontSize: 12, color: AppColors.textTertiary),
                 ),
               ),
             ],
@@ -86,4 +87,3 @@ class _EditNicknamePageState extends State<EditNicknamePage> {
     );
   }
 }
-

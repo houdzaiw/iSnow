@@ -11,6 +11,7 @@ import '../../configs/consts.dart';
 import '../../manager/app_Isar.dart';
 import '../../manager/providers.dart';
 import '../../model/diary_entry.dart';
+import '../../theme/app_theme.dart';
 import '../../widgets/content_view.dart';
 import '../../widgets/voice_view.dart';
 
@@ -69,7 +70,7 @@ class CalendarPage extends HookConsumerWidget {
 
         emotionMap.value = newEmotionMap;
       } catch (e) {
-        print('Error loading diary entries: $e');
+        debugPrint('Error loading diary entries: $e');
       }
     }
 
@@ -123,9 +124,9 @@ class CalendarPage extends HookConsumerWidget {
       return Container(
         decoration: selected
             ? BoxDecoration(
-          color: Colors.orange.shade100,
-          borderRadius: BorderRadius.circular(12),
-        )
+                color: AppColors.calendarBorder,
+                borderRadius: BorderRadius.circular(AppRadius.xl),
+              )
             : null,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -178,12 +179,12 @@ class CalendarPage extends HookConsumerWidget {
                 ),
               )
             else
-            // 无数据时显示默认图标
+              // 无数据时显示默认图标
               SizedBox(
                 height: 30,
                 child: Center(
                   child: Image.asset(
-                    'assets/calendar/default_icon.png',
+                    AppAssets.calendarDefaultMood,
                     width: 40,
                     height: 40,
                     fit: BoxFit.contain,
@@ -196,7 +197,7 @@ class CalendarPage extends HookConsumerWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                color: selected ? Colors.orange : Colors.black,
+                color: selected ? AppColors.primaryPink : AppColors.textPrimary,
               ),
             ),
           ],
@@ -209,7 +210,7 @@ class CalendarPage extends HookConsumerWidget {
         padding: const EdgeInsets.symmetric(vertical: 12),
         child: Text(
           "${focusedDay.value.year}.${focusedDay.value.month.toString().padLeft(2, '0')}",
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: AppTextStyles.title,
         ),
       );
     }
@@ -219,8 +220,10 @@ class CalendarPage extends HookConsumerWidget {
         margin: const EdgeInsets.symmetric(horizontal: 12),
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(AppRadius.calendar),
+          border: Border.all(color: AppColors.calendarBorder, width: 2),
+          boxShadow: AppShadows.soft,
         ),
         child: TableCalendar(
           firstDay: DateTime.utc(2020),
@@ -238,13 +241,12 @@ class CalendarPage extends HookConsumerWidget {
           headerVisible: false,
           daysOfWeekHeight: 24,
           rowHeight: 60,
-          calendarStyle: const CalendarStyle(
-            outsideDaysVisible: false,
-          ),
+          calendarStyle: const CalendarStyle(outsideDaysVisible: false),
           calendarBuilders: CalendarBuilders(
             defaultBuilder: (_, day, __) => buildDayCell(day, false),
             selectedBuilder: (_, day, __) => buildDayCell(day, true),
-            todayBuilder: (_, day, __) => buildDayCell(day, false, isToday: true),
+            todayBuilder: (_, day, __) =>
+                buildDayCell(day, false, isToday: true),
           ),
         ),
       );
@@ -267,9 +269,7 @@ class CalendarPage extends HookConsumerWidget {
           padding: const EdgeInsets.symmetric(vertical: 10),
           child: Center(
             child: Image.asset(
-              calendarFormat.value == CalendarFormat.week
-                  ? "assets/calendar/expand_button.png"
-                  : "assets/calendar/fold_button.png",
+              AppAssets.lanhuCalendarDragHandle,
               width: 36,
               height: 12,
             ),
@@ -284,41 +284,44 @@ class CalendarPage extends HookConsumerWidget {
       return Expanded(
         child: entriesForDay.isEmpty
             ? Center(
-          child: Text(
-            '暂无心情记录',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
-          ),
-        )
-            : ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          itemCount: entriesForDay.length,
-          itemBuilder: (_, index) {
-            final entry = entriesForDay[index];
-            if (entry.type == 'voice' ) {
-              return GestureDetector(
-                onTap: () => context.push("/post_detail-view", extra: entry),
-                child: VoiceView(entry: entry),
-              );
-            }
-            return GestureDetector(
-              onTap: () => context.push("/post_detail-view", extra: entry),
-              child: Container(
-                margin: const EdgeInsets.symmetric(vertical: 10),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
+                child: Text(
+                  '暂无心情记录',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
-                child: ContentView(entry: entry),
+              )
+            : ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                itemCount: entriesForDay.length,
+                itemBuilder: (_, index) {
+                  final entry = entriesForDay[index];
+                  if (entry.type == 'voice') {
+                    return GestureDetector(
+                      onTap: () =>
+                          context.push("/post_detail-view", extra: entry),
+                      child: VoiceView(entry: entry),
+                    );
+                  }
+                  return GestureDetector(
+                    onTap: () =>
+                        context.push("/post_detail-view", extra: entry),
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: 10),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.cardBackground,
+                        borderRadius: BorderRadius.circular(AppRadius.xl),
+                      ),
+                      child: ContentView(entry: entry),
+                    ),
+                  );
+                },
               ),
-            );
-          },
-        ),
       );
     }
+
     void onPublishPressed() async {
       // 判断选择日历日期是否为今天， 不为今天就toast提示
       final now = DateTime.now();
@@ -335,9 +338,9 @@ class CalendarPage extends HookConsumerWidget {
       }
       await showModalBottomSheet<void>(
         context: context,
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.cardBackground,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+          borderRadius: AppRadius.sheetBorder,
         ),
         builder: (ctx) {
           return const SelectMoodPage();
@@ -348,27 +351,18 @@ class CalendarPage extends HookConsumerWidget {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF6E5),
+      backgroundColor: AppColors.pageBackground,
       // 右下角悬浮发布按钮
       floatingActionButton: FloatingActionButton(
         onPressed: onPublishPressed,
-        backgroundColor: const Color(0xFFF9E707),
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-          size: 40,
-        ),
+        backgroundColor: AppColors.primaryPink,
+        child: const Icon(Icons.add, color: AppColors.textInverse, size: 40),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/base/bg_image.png'),
-            fit: BoxFit.cover,
-          ),
-        ),
+        decoration: const BoxDecoration(gradient: AppGradients.pageBackground),
         child: SafeArea(
           child: Column(
             children: [

@@ -3,38 +3,19 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../theme/app_theme.dart';
+
 enum UserActionOption {
-  delete('Delete'),
-  report('Report'),
-  block('Block'),
-  cancel('Cancel');
+  delete('删除'),
+  report('举报'),
+  block('拉黑'),
+  cancel('取消');
 
   final String label;
   const UserActionOption(this.label);
 }
-const List<String> moodImages = [
-  'assets/mood/model_01.png',
-  'assets/mood/model_02.png',
-  'assets/mood/model_03.png',
-  'assets/mood/model_04.png',
-  'assets/mood/model_05.png',
-  'assets/mood/model_06.png',
-  'assets/mood/model_07.png',
-  'assets/mood/model_08.png',
-  'assets/mood/model_09.png',
-  'assets/mood/model_010.png',
-  'assets/mood/model_011.png',
-  'assets/mood/model_012.png',
-  'assets/mood/model_013.png',
-  'assets/mood/model_014.png',
-  'assets/mood/model_015.png',
-  'assets/mood/model_016.png',
-  'assets/mood/model_017.png',
-  'assets/mood/model_018.png',
-  'assets/mood/model_019.png',
-  'assets/mood/model_020.png',
-];
 
+const List<String> moodImages = AppAssets.moodImages;
 
 String setDateFormatter(DateTime date) {
   final dateFormatter = DateFormat('yyyy-MM-dd HH:mm:ss');
@@ -43,57 +24,62 @@ String setDateFormatter(DateTime date) {
 }
 
 /// 显示选择头像的底部弹框（相册或相机）
-void showAvatarOptions(BuildContext context, {
+void showAvatarOptions(
+  BuildContext context, {
   VoidCallback? onAlbumSelected,
   VoidCallback? onCameraSelected,
 }) {
   showModalBottomSheet(
     context: context,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
+    shape: const RoundedRectangleBorder(borderRadius: AppRadius.sheetBorder),
     builder: (context) {
       return Container(
-        padding: const EdgeInsets.symmetric(vertical: 20),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Choose from Album'),
+              leading: const Icon(
+                Icons.photo_library,
+                color: AppColors.primaryPink,
+              ),
+              title: const Text('从相册选择'),
               onTap: () {
                 Navigator.pop(context);
                 if (onAlbumSelected != null) {
                   onAlbumSelected();
                 } else {
                   // 默认提示
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Album selected')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('已选择相册')));
                 }
               },
             ),
             ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: const Text('Take Photo'),
+              leading: const Icon(
+                Icons.camera_alt,
+                color: AppColors.primaryPink,
+              ),
+              title: const Text('拍照'),
               onTap: () {
                 Navigator.pop(context);
                 if (onCameraSelected != null) {
                   onCameraSelected();
                 } else {
                   // 默认提示
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Camera selected')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('已选择拍照')));
                 }
               },
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSpacing.md),
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: const Text(
-                'Cancel',
-                style: TextStyle(color: Color(0xFF999999)),
+                '取消',
+                style: TextStyle(color: AppColors.textTertiary),
               ),
             ),
           ],
@@ -121,10 +107,8 @@ void showUserActionOptions(
 
   showModalBottomSheet(
     context: context,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
-    backgroundColor: Colors.white,
+    shape: const RoundedRectangleBorder(borderRadius: AppRadius.sheetBorder),
+    backgroundColor: AppColors.cardBackground,
     builder: (context) {
       return Container(
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
@@ -132,10 +116,10 @@ void showUserActionOptions(
           mainAxisSize: MainAxisSize.min,
           children: options.map((option) {
             final isCancel = option == UserActionOption.cancel;
-            final isDelete = option == UserActionOption.delete;
             return Column(
               children: [
-                if (isCancel && options.length > 1) const SizedBox(height: 8),
+                if (isCancel && options.length > 1)
+                  const SizedBox(height: AppSpacing.sm),
                 GestureDetector(
                   onTap: () {
                     Navigator.pop(context);
@@ -164,17 +148,16 @@ void showUserActionOptions(
                     width: MediaQuery.of(context).size.width - 48,
                     height: 55,
                     decoration: BoxDecoration(
-                      color: isCancel ? const Color(0xFFF3F3F3) : Colors.transparent,
-                      borderRadius: BorderRadius.circular(28),
+                      color: isCancel
+                          ? AppColors.neutralLight
+                          : Colors.transparent,
+                      borderRadius: AppRadius.pillBorder,
                     ),
                     alignment: Alignment.center,
                     child: Text(
                       option.label,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: const Color(0xFF212121),
-                      ),
+                      style: AppTextStyles.title,
                     ),
                   ),
                 ),

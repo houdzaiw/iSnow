@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../manager/app_Isar.dart';
 import '../../manager/providers.dart';
 import '../../model/diary_entry.dart';
+import '../../theme/app_theme.dart';
 import 'publish_edit_page.dart';
 import 'publish_voice_page.dart';
 
@@ -30,7 +31,8 @@ class PublishPage extends HookConsumerWidget {
       // 创建日记条目
       final diaryEntry = DiaryEntry()
         ..date = DateTime.now()
-        ..emoji = '' // 可以根据 moodIndex 设置 emoji
+        ..emoji =
+            '' // 可以根据 moodIndex 设置 emoji
         ..moodIndex = moodIndex
         ..type = currentType
         ..createdAt = DateTime.now();
@@ -60,9 +62,9 @@ class PublishPage extends HookConsumerWidget {
 
       // 显示成功提示
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('保存成功！')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('保存成功！')));
         // 关闭弹框
         Navigator.pop(context);
       }
@@ -70,14 +72,11 @@ class PublishPage extends HookConsumerWidget {
       // ...existing code...
     }
   }
-  
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // 初始化图标数组
-    final tabIcons = [
-      Icons.edit,
-      Icons.mic,
-    ];
+    final tabIcons = [Icons.edit, Icons.mic];
 
     // 使用 useSingleTickerProvider 创建 TabController
     final tabController = useTabController(initialLength: tabIcons.length);
@@ -95,6 +94,7 @@ class PublishPage extends HookConsumerWidget {
       void listener() {
         currentTabIndex.value = tabController.index;
       }
+
       tabController.addListener(listener);
       return () => tabController.removeListener(listener);
     }, [tabController]);
@@ -108,7 +108,7 @@ class PublishPage extends HookConsumerWidget {
             // TabBar with icon tabs
             Row(
               children: [
-                const SizedBox(width: 24),
+                const SizedBox(width: AppSpacing.xxxl),
                 const SizedBox(width: 36),
                 Expanded(
                   child: TabBar(
@@ -118,22 +118,24 @@ class PublishPage extends HookConsumerWidget {
                     tabs: tabIcons.asMap().entries.map((entry) {
                       int index = entry.key;
                       IconData iconData = entry.value;
-                      bool isSelected = tabController.index == index;
+                      bool isSelected = currentTabIndex.value == index;
                       return Tab(
                         child: Container(
                           width: 99,
                           height: 32,
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? const Color(0xFFF9E707)
-                                : const Color(0xFFE3E3E3),
-                            borderRadius: BorderRadius.circular(16),
+                                ? AppColors.primaryPink
+                                : AppColors.neutralLight,
+                            borderRadius: AppRadius.pillBorder,
                           ),
                           child: Center(
                             child: Icon(
                               iconData,
                               size: 22,
-                              color: const Color(0xFFFFFFFF),
+                              color: isSelected
+                                  ? AppColors.textInverse
+                                  : AppColors.textTertiary,
                             ),
                           ),
                         ),
@@ -148,7 +150,8 @@ class PublishPage extends HookConsumerWidget {
                     // 判断当前是编辑还是语音模式，并保存数据
                     if (tabController.index == 0) {
                       // 编辑模式：检查是否有内容
-                      if (editDescription.value.isEmpty && editImagePaths.value.isEmpty) {
+                      if (editDescription.value.isEmpty &&
+                          editImagePaths.value.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('请输入内容或选择图片')),
                         );
@@ -157,9 +160,9 @@ class PublishPage extends HookConsumerWidget {
                     } else {
                       // 语音模式：检查是否有语音
                       if (voicePath.value.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('请录制语音')),
-                        );
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(const SnackBar(content: Text('请录制语音')));
                         return;
                       }
                     }
@@ -175,7 +178,7 @@ class PublishPage extends HookConsumerWidget {
                     );
                   },
                   child: Image.asset(
-                    'assets/calendar/send_post.png',
+                    AppAssets.calendarSendPost,
                     width: 24,
                     height: 24,
                     fit: BoxFit.contain,
@@ -214,6 +217,4 @@ class PublishPage extends HookConsumerWidget {
       ),
     );
   }
-
 }
-

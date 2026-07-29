@@ -1,0 +1,98 @@
+class AppAssets {
+  const AppAssets._();
+
+  static const String lanhuLoginBackground =
+      'assets/lanhu/base/login_background.png';
+  static const String lanhuAuthButtonPrimary =
+      'assets/lanhu/base/auth_button_primary.png';
+  static const String lanhuAuthButtonSecondary =
+      'assets/lanhu/base/auth_button_secondary.png';
+  static const String lanhuCloseCircle = 'assets/lanhu/base/close_circle.png';
+  static const String lanhuNavBack = 'assets/lanhu/base/nav_back.png';
+  static const String lanhuCaptureResultCard =
+      'assets/lanhu/home/capture_result_card.png';
+  static const String lanhuProudMood = 'assets/lanhu/mood/proud_large.png';
+  static const String lanhuCalendarDragHandle =
+      'assets/lanhu/calendar/calendar_drag_handle.png';
+
+  static const String launchBackground = 'assets/base/launch_bg_image.png';
+  static const String authBackground = 'assets/base/base_bg_image.png';
+  static const String pageBackground = 'assets/base/bg_image.png';
+  static const String backButton = 'assets/base/back_button.png';
+  static const String closeButton = 'assets/base/close_button_image.png';
+  static const String moreButton = 'assets/base/more_button.png';
+  static const String legacyButtonBackground =
+      'assets/base/button_bg_image.png';
+
+  static const String tabHomeNormal = 'assets/tabbar/home_normal.png';
+  static const String tabHomeActive = 'assets/tabbar/home_select.png';
+  static const String tabMessageNormal = 'assets/tabbar/message_normal.png';
+  static const String tabMessageActive = 'assets/tabbar/message_select.png';
+  static const String tabProfileNormal =
+      'assets/tabbar/user_profile_normal.png';
+  static const String tabProfileActive =
+      'assets/tabbar/user_profile_select.png';
+
+  static const String homeBottomCover = 'assets/home/bottom_cover_bg.png';
+  static const String homeCaptureButton = 'assets/home/capture_button.png';
+  static const String homeCaptureFinishedPop =
+      'assets/home/capture_finished_pop.png';
+
+  static const String calendarDefaultMood = 'assets/calendar/default_icon.png';
+  static const String calendarExpandButton =
+      'assets/calendar/expand_button.png';
+  static const String calendarFoldButton = 'assets/calendar/fold_button.png';
+  static const String calendarSelectImageButton =
+      'assets/calendar/select_image_button.png';
+  static const String calendarSendPost = 'assets/calendar/send_post.png';
+  static const String calendarSpeakBackground =
+      'assets/calendar/speak_bg_image.png';
+  static const String calendarSpeakIcon = 'assets/calendar/speak_icon.png';
+  static const String calendarSpeakerButton =
+      'assets/calendar/speaker_button.png';
+  static const String calendarFrustrated =
+      'assets/calendar/frustrated_icon.png';
+  static const String calendarFrustratedActive =
+      'assets/calendar/frustrated_icon_pre.png';
+  static const String calendarRejoice = 'assets/calendar/rejoice_icon.png';
+  static const String calendarRejoiceActive =
+      'assets/calendar/rejoice_icon_pre.png';
+
+  static const String messageIcon = 'assets/message/message_icon.png';
+  static const String messageSendButton = 'assets/message/send_button.png';
+  static const String messageDeleteIcon =
+      'assets/message/delete_message_icon.png';
+
+  static const String profileEditIcon = 'assets/profile/edit_icon.png';
+  static const String profileMaleIcon = 'assets/profile/male_icon.png';
+  static const String profileFemaleIcon = 'assets/profile/female_icon.png';
+  static const String profileMyPostsIcon = 'assets/profile/my_posts_icon.png';
+  static const String profilePrivacyIcon =
+      'assets/profile/user_privacy_icon.png';
+  static const String profileAboutIcon = 'assets/profile/about_us_icon.png';
+  static const String profileContactIcon = 'assets/profile/contact_us_icon.png';
+  static const String profileSettingIcon = 'assets/profile/setting_icon.png';
+
+  static const List<String> moodImages = [
+    'assets/mood/model_01.png',
+    'assets/mood/model_02.png',
+    'assets/mood/model_03.png',
+    'assets/mood/model_04.png',
+    'assets/mood/model_05.png',
+    'assets/mood/model_06.png',
+    'assets/mood/model_07.png',
+    'assets/mood/model_08.png',
+    'assets/mood/model_09.png',
+    'assets/mood/model_010.png',
+    'assets/mood/model_011.png',
+    'assets/mood/model_012.png',
+    'assets/mood/model_013.png',
+    'assets/mood/model_014.png',
+    'assets/mood/model_015.png',
+    'assets/mood/model_016.png',
+    'assets/mood/model_017.png',
+    'assets/mood/model_018.png',
+    'assets/mood/model_019.png',
+    'assets/mood/model_020.png',
+  ];
+}

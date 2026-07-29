@@ -1,6 +1,5 @@
-// filepath: /Users/admin/Documents/project/isnow/lib/classes/oauth/provider/login_provider.dart
-
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
 import '../../../manager/http_dio_manager.dart';
@@ -15,7 +14,7 @@ class LoginProvider {
   /// 生成请求 Header 公参
   Future<Map<String, String>> _getCommonHeaders() async {
     final startTime = DateTime.now().millisecondsSinceEpoch;
-    
+
     return {
       'Content-Type': 'application/json',
       'b': _appDevice.generateSignature(),
@@ -79,12 +78,13 @@ class LoginProvider {
         'os': _appDevice.os,
         'osVersion': _appDevice.osVersion,
         'deviceBrand': _appDevice.deviceBrand,
-        'appsflyerUID': '${DateTime.now().millisecondsSinceEpoch}-${_appDevice.deviceId.hashCode}',
+        'appsflyerUID':
+            '${DateTime.now().millisecondsSinceEpoch}-${_appDevice.deviceId.hashCode}',
       };
 
-      print('🦊登录请求🦊 POST: ${HttpApi.login}');
-      print('│ header: $headers');
-      print('│ params: $params');
+      debugPrint('登录请求 POST: ${HttpApi.login}');
+      debugPrint('│ header: $headers');
+      debugPrint('│ params: $params');
 
       // 发送 POST 请求
       final response = await _httpManager.post(
@@ -93,32 +93,26 @@ class LoginProvider {
         options: Options(headers: headers),
       );
 
-      print('🦊登录响应🦊 $response');
+      debugPrint('登录响应 $response');
 
       // 解析响应
       return LoginResponse.fromJson(response);
     } on DioException catch (e) {
-      print('🦊登录错误🦊 DioException: ${e.message}');
+      debugPrint('登录错误 DioException: ${e.message}');
       // 处理 Dio 异常
       if (e.response != null) {
-        print('🦊错误响应🦊 ${e.response?.data}');
+        debugPrint('错误响应 ${e.response?.data}');
         return LoginResponse(
           success: false,
-          message: e.response?.data['message'] ?? 'Login failed',
+          message: e.response?.data['message'] ?? '登录失败',
         );
       } else {
-        return LoginResponse(
-          success: false,
-          message: e.message ?? 'Network error',
-        );
+        return LoginResponse(success: false, message: e.message ?? '网络异常');
       }
     } catch (e) {
-      print('🦊登录错误🦊 Exception: $e');
+      debugPrint('登录错误 Exception: $e');
       // 处理其他异常
-      return LoginResponse(
-        success: false,
-        message: 'Unknown error: $e',
-      );
+      return LoginResponse(success: false, message: '未知错误：$e');
     }
   }
 
@@ -130,7 +124,7 @@ class LoginProvider {
   }) async {
     try {
       final headers = await _getCommonHeaders();
-      
+
       final response = await _httpManager.post(
         HttpApi.sendSms,
         data: {
@@ -154,14 +148,10 @@ class LoginProvider {
   }) async {
     try {
       final headers = await _getCommonHeaders();
-      
+
       final response = await _httpManager.post(
         HttpApi.verifyCode,
-        data: {
-          'phoneNumber': phoneNumber,
-          'code': code,
-          'areaCode': areaCode,
-        },
+        data: {'phoneNumber': phoneNumber, 'code': code, 'areaCode': areaCode},
         options: Options(headers: headers),
       );
       return response;
@@ -178,13 +168,10 @@ class LoginProvider {
     try {
       final headers = await _getCommonHeaders();
       final encryptedPassword = _encryptPassword(password);
-      
+
       final response = await _httpManager.post(
         HttpApi.setPassword,
-        data: {
-          'userId': userId,
-          'password': encryptedPassword,
-        },
+        data: {'userId': userId, 'password': encryptedPassword},
         options: Options(headers: headers),
       );
       return response;
@@ -197,7 +184,7 @@ class LoginProvider {
   Future<Map<String, dynamic>> logout() async {
     try {
       final headers = await _getCommonHeaders();
-      
+
       final response = await _httpManager.post(
         HttpApi.logout,
         options: Options(headers: headers),
@@ -212,7 +199,7 @@ class LoginProvider {
   Future<Map<String, dynamic>> hasUser(String email) async {
     try {
       final headers = await _getCommonHeaders();
-      
+
       final response = await _httpManager.get(
         HttpApi.hasUser,
         queryParameters: {'email': email},
@@ -224,4 +211,3 @@ class LoginProvider {
     }
   }
 }
-

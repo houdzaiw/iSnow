@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../theme/app_theme.dart';
 import 'provider/login_provider.dart';
 
 class LoginDetailPage extends HookConsumerWidget {
@@ -21,16 +22,16 @@ class LoginDetailPage extends HookConsumerWidget {
 
       // 验证输入
       if (account.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please enter your email or phone')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('请输入邮箱或手机号')));
         return;
       }
 
       if (password.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please enter your password')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('请输入密码')));
         return;
       }
 
@@ -53,12 +54,12 @@ class LoginDetailPage extends HookConsumerWidget {
           // 登录成功，保存token和用户信息
           if (response.token != null) {
             // TODO: 保存token到本地存储
-            print('Token: ${response.token}');
+            debugPrint('Token: ${response.token}');
           }
 
           if (response.data != null) {
             // TODO: 保存用户信息到本地存储
-            print('User: ${response.data?.email}');
+            debugPrint('User: ${response.data?.email}');
           }
 
           // 跳转到首页
@@ -68,16 +69,16 @@ class LoginDetailPage extends HookConsumerWidget {
         } else {
           // 登录失败，显示错误信息
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(response.message ?? 'Login failed')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(response.message ?? '登录失败')));
           }
         }
       } catch (e) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('登录异常：$e')));
       } finally {
         isLoading.value = false;
       }
@@ -86,92 +87,82 @@ class LoginDetailPage extends HookConsumerWidget {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: null,
-      backgroundColor: const Color(0xFFFDF5EB),
+      backgroundColor: AppColors.creamBackground,
       body: Container(
         width: double.infinity,
         height: double.infinity,
         alignment: Alignment.center,
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/base/base_bg_image.png'),
+            image: AssetImage(AppAssets.authBackground),
             fit: BoxFit.cover,
           ),
         ),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(AppSpacing.xxxl),
           child: Stack(
             children: [
               Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(40),
+                padding: const EdgeInsets.all(AppSpacing.xxxl),
+                decoration: const BoxDecoration(
+                  color: AppColors.cardBackground,
+                  borderRadius: AppRadius.dialogBorder,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 48),
-                    //Please enter your email
-                    const Text(
-                      'Please enter your email',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF212121),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
+                    const Text('请输入邮箱', style: AppTextStyles.bodyStrong),
+                    const SizedBox(height: AppSpacing.sm),
                     // 邮箱输入框
                     SizedBox(
                       height: 43,
                       child: TextField(
                         controller: emailController,
                         decoration: InputDecoration(
-                          hintText: 'Your Email address',
+                          hintText: '请输入邮箱地址',
                           filled: true,
-                          fillColor: const Color(0xFFFDF5EB),
+                          fillColor: AppColors.fieldBackground,
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: AppRadius.fieldBorder,
                             borderSide: BorderSide.none,
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 11,
+                          ),
                           isDense: true,
                         ),
                         keyboardType: TextInputType.emailAddress,
                       ),
                     ),
 
-                    const SizedBox(height: 20),
-                    // Please enter your password
-                    const Text(
-                      'Please enter your password',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF212121),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.xxl),
+                    const Text('请输入密码', style: AppTextStyles.bodyStrong),
+                    const SizedBox(height: AppSpacing.sm),
                     // 密码输入框
                     SizedBox(
                       height: 43,
                       child: TextField(
                         controller: passwordController,
                         decoration: InputDecoration(
-                          hintText: 'Your password',
+                          hintText: '请输入密码',
                           filled: true,
-                          fillColor: const Color(0xFFFDF5EB),
+                          fillColor: AppColors.fieldBackground,
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: AppRadius.fieldBorder,
                             borderSide: BorderSide.none,
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 11,
+                          ),
                           isDense: true,
                         ),
                         obscureText: true,
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: AppSpacing.section),
                     // 登录按钮
                     GestureDetector(
                       onTap: isLoading.value ? null : handleLogin,
@@ -179,9 +170,8 @@ class LoginDetailPage extends HookConsumerWidget {
                         width: 280,
                         height: 53,
                         decoration: const BoxDecoration(
-                          //背景色#F9E707
-                          color: Color(0xFFF9E707),
-                          borderRadius: BorderRadius.all(Radius.circular(28)),
+                          color: AppColors.primaryPink,
+                          borderRadius: AppRadius.pillBorder,
                         ),
                         alignment: Alignment.center,
                         child: isLoading.value
@@ -190,20 +180,20 @@ class LoginDetailPage extends HookConsumerWidget {
                                 height: 24,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  color: Color(0xFF212121),
+                                  color: AppColors.textInverse,
                                 ),
                               )
                             : const Text(
-                                'Login',
+                                '登录',
                                 style: TextStyle(
                                   fontSize: 20,
-                                  color: Color(0xFF212121),
+                                  color: AppColors.textInverse,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.xl),
                   ],
                 ),
               ),
@@ -216,7 +206,7 @@ class LoginDetailPage extends HookConsumerWidget {
                     context.pop();
                   },
                   child: Image.asset(
-                    'assets/base/close_button_image.png',
+                    AppAssets.lanhuCloseCircle,
                     width: 32,
                     height: 32,
                   ),
@@ -228,6 +218,4 @@ class LoginDetailPage extends HookConsumerWidget {
       ),
     );
   }
-
 }
-

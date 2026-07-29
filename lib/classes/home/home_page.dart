@@ -5,6 +5,7 @@ import 'package:project/model/diary_entry.dart';
 import 'dart:math';
 import 'dart:async';
 import '../../configs/consts.dart';
+import '../../theme/app_theme.dart';
 
 import 'capture_finished_page.dart';
 
@@ -15,7 +16,8 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   // moodImages is defined in lib/consts.dart
 
   final Random _random = Random();
@@ -69,14 +71,15 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     _overlayEntry?.remove();
     _overlayEntry = null;
   }
+
   void _onGoToMessageTap(BuildContext context) {
     _hideDialog();
     final entry = DiaryEntry()
       ..id = 100200
       ..date = DateTime.parse("2024-01-01")
       ..emoji = "😊"
-      ..content = "This is a captured voice entry."
-      ..description = "This is a captured voice entry."
+      ..content = "这是今天捕捞到的一条心情。"
+      ..description = "这是今天捕捞到的一条心情。"
       ..type = "edit"
       ..moodIndex = 0;
     context.push("/post_detail-view", extra: entry);
@@ -87,8 +90,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       // 70-90%的图片显示在下方，10-30%显示在上方
       final isInBottomArea = _random.nextDouble() < 0.8; // 80%概率在下方
       final top = isInBottomArea
-          ? 0.4 + _random.nextDouble() * 0.4  // 下方区域: 40%-80%
-          : _random.nextDouble() * 0.4;        // 上方区域: 0%-40%
+          ? 0.4 +
+                _random.nextDouble() *
+                    0.4 // 下方区域: 40%-80%
+          : _random.nextDouble() * 0.4; // 上方区域: 0%-40%
 
       return MoodImageData(
         imagePath: imagePath,
@@ -106,7 +111,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
     for (int i = 0; i < waypointCount; i++) {
       // 每次随机选择50-80%的图片进行移动
-      final animateCount = (moodImages.length * (0.5 + _random.nextDouble() * 0.3)).round();
+      final animateCount =
+          (moodImages.length * (0.5 + _random.nextDouble() * 0.3)).round();
       final animateIndices = <int>{};
 
       while (animateIndices.length < animateCount) {
@@ -156,12 +162,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     if (_overlayEntry != null) return Future.value();
 
     _overlayEntry = OverlayEntry(
-        builder: (context) => Positioned.fill(
-          child: DialogOverlay(
-            onClose: _hideDialog,
-            onOpen: () => _onGoToMessageTap(context), // No-op for now
-          ),
-        )
+      builder: (context) => Positioned.fill(
+        child: DialogOverlay(
+          onClose: _hideDialog,
+          onOpen: () => _onGoToMessageTap(context), // No-op for now
+        ),
+      ),
     );
     Overlay.of(context, rootOverlay: true).insert(_overlayEntry!);
 
@@ -216,7 +222,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         imagePath: start.imagePath,
         left: start.left + (end.left - start.left) * segmentProgress,
         top: start.top + (end.top - start.top) * segmentProgress,
-        rotation: start.rotation + (end.rotation - start.rotation) * segmentProgress,
+        rotation:
+            start.rotation + (end.rotation - start.rotation) * segmentProgress,
       );
     });
   }
@@ -224,78 +231,78 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9E707),
+      backgroundColor: AppColors.pageBackground,
       body: Container(
-        margin: EdgeInsets.only(
-          left: 22,
-          right: 22,
-          top: MediaQuery.of(context).padding.top + 20,
-          bottom: MediaQuery.of(context).padding.bottom + 20,
-        ),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(45),
-          border: Border.all(
-            color: const Color(0xFFFFB400),
-            width: 3,
+        decoration: const BoxDecoration(gradient: AppGradients.pageBackground),
+        child: Container(
+          margin: EdgeInsets.only(
+            left: 22,
+            right: 22,
+            top: MediaQuery.of(context).padding.top + 20,
+            bottom: MediaQuery.of(context).padding.bottom + 20,
           ),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(42),
-          child: Stack(
-            children: [
-              // 随机展示mood图片
-              ..._getInterpolatedMoodImages().map((moodData) {
-                return Positioned(
-                  left: moodData.left * MediaQuery.of(context).size.width,
-                  top: moodData.top * MediaQuery.of(context).size.height,
-                  child: Transform.rotate(
-                    angle: moodData.rotation,
+          decoration: BoxDecoration(
+            color: AppColors.cardBackground,
+            borderRadius: BorderRadius.circular(45),
+            border: Border.all(color: AppColors.calendarBorder, width: 3),
+            boxShadow: AppShadows.soft,
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(42),
+            child: Stack(
+              children: [
+                // 随机展示mood图片
+                ..._getInterpolatedMoodImages().map((moodData) {
+                  return Positioned(
+                    left: moodData.left * MediaQuery.of(context).size.width,
+                    top: moodData.top * MediaQuery.of(context).size.height,
+                    child: Transform.rotate(
+                      angle: moodData.rotation,
+                      child: Image.asset(
+                        moodData.imagePath,
+                        width: 120,
+                        height: 120,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  );
+                }),
+
+                // 底部背景图片
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Image.asset(
+                    AppAssets.homeBottomCover,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                // 右下角拍摄按钮
+                Positioned(
+                  right: 8,
+                  bottom: 8,
+                  child: GestureDetector(
+                    onTap: () {
+                      // ignore taps while animating or when overlay is already shown
+                      if (_isAnimating || _overlayEntry != null) return;
+                      _animateMoodImages();
+                    },
                     child: Image.asset(
-                      moodData.imagePath,
-                      width: 120,
-                      height: 120,
-                      fit: BoxFit.contain,
+                      AppAssets.homeCaptureButton,
+                      width: 97,
+                      height: 97,
                     ),
                   ),
-                );
-              }).toList(),
-
-              // 底部背景图片
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: Image.asset(
-                  'assets/home/bottom_cover_bg.png',
-                  fit: BoxFit.cover,
                 ),
-              ),
-              // 右下角拍摄按钮
-              Positioned(
-                right: 8,
-                bottom: 8,
-                child: GestureDetector(
-                  onTap: () {
-                    // ignore taps while animating or when overlay is already shown
-                    if (_isAnimating || _overlayEntry != null) return;
-                    _animateMoodImages();
-                  },
-                  child: Image.asset(
-                    'assets/home/capture_button.png',
-                    width: 97,
-                    height: 97,
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 }
-
 
 class MoodImageData {
   final String imagePath;

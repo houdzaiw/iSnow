@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:project/widgets/custom_scaffold.dart';
+
+import '../theme/app_theme.dart';
 
 class LaunchPage extends StatefulWidget {
   const LaunchPage({super.key});
@@ -51,13 +52,13 @@ class _LaunchPageState extends State<LaunchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: null,
-      backgroundColor: const Color(0xFFFDF5EB),
+      backgroundColor: AppColors.cardBackground,
       body: Container(
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/base/launch_bg_image.png'),
+            image: AssetImage(AppAssets.lanhuLoginBackground),
             fit: BoxFit.cover,
           ),
         ),

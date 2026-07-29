@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'configs/app_routers.dart';
+import 'theme/app_theme.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    Locale? locale = const Locale('en');
+    Locale? locale = const Locale('zh');
     return ProviderScope(
       child: ScreenUtilInit(
         designSize: const Size(375, 812),
@@ -19,16 +20,7 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           // 状态栏字体黑色
           themeMode: ThemeMode.light,
-          theme: ThemeData(
-            scaffoldBackgroundColor: Colors.black,
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
-            useMaterial3: false,
-            appBarTheme: AppBarTheme(
-              foregroundColor: Colors.black,
-              titleTextStyle: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600, color: Colors.black),
-              elevation: 0,
-            ),
-          ),
+          theme: AppTheme.light,
           locale: locale,
         ),
       ),
