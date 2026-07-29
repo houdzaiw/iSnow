@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>iSnow 视觉体系迁移原型 v1.0</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: '#202124',
+            muted: '#9B9BA0',
+            line: '#ECECF0',
+            brandPink: '#FF4F95',
+            brandPinkDeep: '#F53682',
+            brandYellow: '#FFE708',
+            cream: '#FFF7E8',
+            pageGray: '#F5F5F7'
+          },
+          boxShadow: {
+            soft: '0 18px 45px rgba(32, 33, 36, 0.10)',
+            pop: '0 14px 35px rgba(255, 79, 149, 0.28)'
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    :root {
+      --pink: #ff4f95;
+      --pink-deep: #f53682;
+      --yellow: #ffe708;
+      --soft-yellow: #fff5c1;
+      --soft-pink: #ffeaf3;
+      --text-primary: #202124;
+      --text-secondary: #9b9ba0;
+      --surface: #ffffff;
+      --page-gray: #f5f5f7;
+      --line: #ececf0;
+      --radius-card: 28px;
+      --radius-sheet: 28px;
+      --radius-pill: 999px;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      background:
+        radial-gradient(circle at 18% 14%, rgba(255, 231, 8, 0.18), transparent 26%),
+        radial-gradient(circle at 78% 16%, rgba(255, 79, 149, 0.16), transparent 28%),
+        linear-gradient(135deg, #fffaf0 0%, #f8fbff 48%, #fff0f6 100%);
+      color: var(--text-primary);
+    }
+
+    .phone {
+      width: 375px;
+      height: 812px;
+      overflow: hidden;
+      border-radius: 38px;
+      background: var(--surface);
+      position: relative;
+      box-shadow: 0 32px 90px rgba(15, 23, 42, 0.22);
+      border: 10px solid #111827;
+    }
+
+    .screen {
+      display: none;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .status-bar {
+      height: 44px;
+      padding: 0 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 800;
+      letter-spacing: 0;
+      color: #050505;
+    }
+
+    .home-indicator {
+      position: absolute;
+      left: 50%;
+      bottom: 9px;
+      width: 134px;
+      height: 5px;
+      transform: translateX(-50%);
+      border-radius: var(--radius-pill);
+      background: #050505;
+      z-index: 40;
+    }
+
+    .bottom-nav {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 88px;
+      background: rgba(255, 255, 255, 0.96);
+      border-top: 1px solid rgba(226, 232, 240, 0.85);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      align-items: start;
+      padding-top: 15px;
+      z-index: 30;
+    }
+
+    .nav-button {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .nav-button img {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      opacity: 0.35;
+    }
+
+    .nav-button.active img {
+      opacity: 1;
+      filter: drop-shadow(0 8px 16px rgba(255, 79, 149, 0.28));
+    }
+
+    .pink-button {
+      border-radius: var(--radius-pill);
+      background: linear-gradient(90deg, #f63fa1 0%, #ff5872 100%);
+      color: #fff;
+      font-weight: 800;
+      box-shadow: var(--tw-shadow, 0 12px 28px rgba(255, 79, 149, 0.24));
+    }
+
+    .white-pill {
+      border-radius: var(--radius-pill);
+      background: rgba(255, 255, 255, 0.94);
+      color: var(--text-primary);
+      font-weight: 800;
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.16);
+    }
+
+    .token-card {
+      border: 1px solid rgba(226, 232, 240, 0.92);
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(16px);
+      border-radius: 20px;
+      box-shadow: 0 16px 45px rgba(15, 23, 42, 0.08);
+    }
+
+    .mood-img {
+      width: 56px;
+      height: 56px;
+      object-fit: contain;
+      filter: drop-shadow(0 6px 12px rgba(15, 23, 42, 0.15));
+    }
+
+    .mood-cell {
+      width: 42px;
+      height: 42px;
+      object-fit: contain;
+      filter: drop-shadow(0 3px 8px rgba(15, 23, 42, 0.14));
+    }
+
+    .safe-panel {
+      position: absolute;
+      left: 22px;
+      right: 22px;
+      background: var(--surface);
+      border-radius: var(--radius-card);
+      box-shadow: var(--tw-shadow, 0 15px 38px rgba(15, 23, 42, 0.10));
+    }
+
+    .placeholder-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      background: #ef4444;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .focus-mode [data-focus-target] {
+      pointer-events: none;
+      opacity: 0.35;
+      filter: grayscale(0.25);
+    }
+
+    .focus-mode [data-focus-target].focus-active {
+      pointer-events: auto;
+      opacity: 1;
+      filter: none;
+      outline: 3px solid rgba(255, 79, 149, 0.35);
+      outline-offset: 4px;
+    }
+
+    .route-tab {
+      transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
+    }
+
+    .route-tab:hover {
+      transform: translateY(-1px);
+    }
+
+    .sheet {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #fff;
+      border-radius: 28px 28px 0 0;
+      border: 2px solid #ffc7dd;
+      box-shadow: 0 -18px 45px rgba(15, 23, 42, 0.18);
+      z-index: 35;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.62);
+      z-index: 32;
+    }
+
+    .hidden-state {
+      display: none;
+    }
+
+    .segmented {
+      background: #e5e5e8;
+      border-radius: var(--radius-pill);
+      padding: 5px;
+      display: inline-grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 4px;
+    }
+
+    .segmented button {
+      border-radius: var(--radius-pill);
+      padding: 7px 18px;
+      font-weight: 800;
+      border: 0;
+    }
+
+    .segmented button.active {
+      background: var(--pink);
+      color: #fff;
+    }
+
+    .switch {
+      width: 48px;
+      height: 26px;
+      border-radius: 999px;
+      background: #dedee2;
+      position: relative;
+    }
+
+    .switch::after {
+      content: "";
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #fff;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      box-shadow: 0 2px 5px rgba(15, 23, 42, 0.18);
+    }
+
+    .switch.on {
+      background: var(--pink);
+    }
+
+    .switch.on::after {
+      left: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="min-h-screen p-5 lg:p-8">
+    <div class="mx-auto flex max-w-7xl flex-col gap-6 xl:flex-row xl:items-start">
+      <aside class="token-card w-full p-4 xl:sticky xl:top-8 xl:w-80" data-focus-target="theme">
+        <div class="mb-4">
+          <p class="text-xs font-bold uppercase tracking-[0.18em] text-brandPink">Design Tokens</p>
+          <h1 class="mt-1 text-2xl font-black text-ink">视觉体系迁移</h1>
+          <p class="mt-2 text-sm text-slate-500">先统一资源和 Theme，再迁移页面视觉。</p>
+        </div>
+
+        <div class="mb-5 flex flex-wrap gap-2" id="routeTabs">
+          <button class="route-tab rounded-full bg-ink px-4 py-2 text-sm font-bold text-white" data-route="login" data-focus-target="login">登录</button>
+          <button class="route-tab rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-600" data-route="home" data-focus-target="home">首页</button>
+          <button class="route-tab rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-600" data-route="calendar" data-focus-target="calendar">日历</button>
+          <button class="route-tab rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-600" data-route="chat" data-focus-target="chat">聊天</button>
+          <button class="route-tab rounded-full bg-white px-4 py-2 text-sm font-bold text-slate-600" data-route="profile" data-focus-target="profile">我的</button>
+        </div>
+
+        <div class="space-y-4 text-sm">
+          <div>
+            <p class="mb-2 font-bold text-ink">Color</p>
+            <div class="grid grid-cols-4 gap-2">
+              <div class="h-10 rounded-xl bg-brandPink"></div>
+              <div class="h-10 rounded-xl bg-brandYellow"></div>
+              <div class="h-10 rounded-xl bg-cream"></div>
+              <div class="h-10 rounded-xl bg-pageGray"></div>
+            </div>
+          </div>
+          <div>
+            <p class="mb-2 font-bold text-ink">Gradient</p>
+            <div class="h-12 rounded-2xl bg-gradient-to-r from-brandPink to-[#ff5872]"></div>
+            <div class="mt-2 h-12 rounded-2xl bg-gradient-to-b from-[#fff5c1] to-[#ffeaf3]"></div>
+          </div>
+          <div>
+            <p class="mb-2 font-bold text-ink">Assets</p>
+            <div class="grid grid-cols-5 gap-2">
+              <img class="h-10 w-10 object-contain" src="../../assets/mood/model_01.png" alt="" />
+              <img class="h-10 w-10 object-contain" src="../../assets/mood/model_02.png" alt="" />
+              <img class="h-10 w-10 object-contain" src="../../assets/tabbar/home_select.png" alt="" />
+              <img class="h-10 w-10 object-contain" src="../../assets/message/send_button.png" alt="" />
+              <div class="placeholder-icon">TODO</div>
+            </div>
+          </div>
+          <div class="rounded-2xl bg-white p-3 text-xs leading-6 text-slate-500">
+            <p><strong class="text-ink">命名方向：</strong>AppAssets、AppColors、AppGradients、AppSpacing、AppRadius、AppTextStyles、AppShadows、AppTheme。</p>
+          </div>
+        </div>
+      </aside>
+
+      <main class="flex min-w-0 flex-1 justify-center">
+        <div class="phone" id="phone">
+          <section class="screen active" id="screen-login" data-module="login">
+            <div class="absolute inset-0 bg-gradient-to-b from-white via-[#fff6e7] to-[#ffe8ef]"></div>
+            <div class="status-bar relative z-10"><span>9:41</span><span>▮▮▮ ))) ▱</span></div>
+            <div class="relative z-10 h-[768px] overflow-hidden px-8">
+              <div class="absolute -right-28 top-16 h-96 w-96 rounded-full bg-gradient-to-b from-[#fff175] to-[#ff9500] blur-[1px]"></div>
+              <div class="absolute right-[-18px] top-24 h-24 w-40 rounded-full bg-gradient-to-r from-[#ffb48a] to-[#ff7c2f] opacity-90 blur-sm"></div>
+              <div class="absolute left-12 top-24 h-12 w-12 rotate-12 rounded-2xl bg-brandYellow"></div>
+              <div class="absolute bottom-48 left-16 h-10 w-10 -rotate-12 rounded-2xl bg-brandYellow"></div>
+              <div class="absolute left-9 top-48 h-24 w-24 rotate-12 rounded-[28px] bg-brandYellow"></div>
+              <div class="absolute bottom-60 left-20 right-20 flex flex-col gap-9">
+                <button class="white-pill h-14 text-2xl" data-action="home">登录</button>
+                <button class="white-pill h-14 text-2xl" data-action="register">注册</button>
+              </div>
+            </div>
+            <div class="home-indicator"></div>
+          </section>
+
+          <section class="screen" id="screen-register" data-module="login">
+            <div class="absolute inset-0 bg-gradient-to-b from-[#fff1bc] to-[#ffe9ee]"></div>
+            <div class="status-bar relative z-10"><span>9:41</span><span>▮▮▮ ))) ▱</span></div>
+            <div class="safe-panel top-[160px] p-10">
+              <button class="absolute -right-2 -top-4 h-12 w-12 rounded-full bg-[#ff6b72] text-2xl font-black text-white shadow-soft" data-action="login">×</button>
+              <label class="block text-[20px] font-black">注册邮箱</label>
+              <input class="mt-3 h-12 w-full rounded-2xl bg-[#f1f1f3] px-5 text-lg outline-none ring-brandPink focus:ring-2" placeholder="请输入邮箱地址" />
+              <label class="mt-8 block text-[20px] font-black">设置密码</label>
+              <input class="mt-3 h-12 w-full rounded-2xl bg-[#f1f1f3] px-5 text-lg outline-none ring-brandPink focus:ring-2" placeholder="请输入密码" type="password" />
+              <label class="mt-8 block text-[20px] font-black">确认密码</label>
+              <input class="mt-3 h-12 w-full rounded-2xl bg-[#f1f1f3] px-5 text-lg outline-none ring-brandPink focus:ring-2" placeholder="请再次输入密码" type="password" />
+              <button class="pink-button mt-9 h-14 w-full text-2xl" data-action="agreement">注册</button>
+            </div>
+            <div class="home-indicator"></div>
+          </section>
+
+          <section class="screen" id="screen-agreement" data-module="login">
+            <div class="absolute inset-0 bg-gradient-to-b from-[#fff1bc] to-[#ffe9ee]"></div>
+            <div class="status-bar relative z-10"><span>9:41</span><span>▮▮▮ ))) ▱</span></div>
+            <div class="safe-panel top-[210px] p-8 text-center">
+              <button class="absolute -right-2 -top-4 h-12 w-12 rounded-full bg-[#ff6b72] text-2xl font-black text-white shadow-soft" data-action="register">×</button>
+              <h2 class="text-2xl font-black">请阅读并同意</h2>
+              <p class="mt-8 text-xl font-bold leading-9">为了更好地保护你的权益，请阅读并同意</p>
+              <p class="text-xl font-black text-[#ff6b72] underline">服务条款与隐私政策</p>
+              <button class="pink-button mt-10 h-14 w-full text-2xl" data-action="home">同意并继续</button>
+              <button class="mt-8 text-xl font-black text-[#999]">不同意</button>
+            </div>
+            <div class="home-indicator"></div>
+          </section>
+
+          <section class="screen" id="screen-home" data-module="home">
+            <div class="h-full bg-white pb-24">
+              <div class="status-bar"><span>9:41</span><span>▮▮▮ ))) ▱</span></div>
+              <div class="px-4">
+                <div class="flex items-end justify-between">
+                  <div class="flex items-end gap-3">
+                    <button class="text-2xl font-black text-[#c7c7ca]">派对</button>
+                    <button class="text-[34px] font-black leading-none">首页</button>
+                  </div>
+                  <div class="flex items-center gap-5 text-[26px] font-black text-brandPink">
+                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#fff0f6]">榜</span>
+                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#fff0f6]">搜</span>
+                  </div>
+                </div>
+                <div class="mt-5 h-[106px] rounded-2xl bg-gradient-to-r from-[#074331] via-[#0f513c] to-[#0c382a] p-5 text-white shadow-soft">
+                  <p class="text-xl font-black">Ramazanınız</p>
+                  <p class="text-4xl font-black text-[#ffd33d]">Mübarek</p>
+                </div>
+                <div class="mt-4 flex items-center justify-between">
+                  <h2 class="text-lg font-bold">好友动态</h2>
+                  <button class="text-lg">全部 ›</button>
+                </div>
+                <div class="mt-3 flex gap-4 overflow-hidden">
+                  <div class="h-16 w-16 rounded-full bg-gradient-to-br from-[#96e7ff] to-[#fff]"></div>
+                  <div class="h-16 w-16 rounded-full bg-gradient-to-br from-[#ffd2e4] to-[#fff]"></div>
+                  <div class="h-16 w-16 rounded-full bg-gradient-to-br from-[#b7ffc6] to-[#fff]"></div>
+                  <div class="h-16 w-16 rounded-full bg-gradient-to-br from-[#a3d5ff] to-[#fff]"></div>
+                </div>
+                <div class="mt-4 flex items-center gap-3 overflow-hidden">
+                  <button class="pink-button h-12 px-6 text-xl">热门</button>
+                  <button class="h-10 w-16 rounded-2xl bg-[#e8e8e8] font-bold">IR</button>
+                  <button class="h-10 w-16 rounded-2xl bg-[#e8e8e8] font-bold">TR</button>
+                  <button class="h-10 w-16 rounded-2xl bg-[#e8e8e8] font-bold">MA</button>
+                </div>
+                <div class="mt-4 grid grid-cols-2 gap-4">
+                  <article class="relative h-[190px] overflow-hidden rounded-2xl bg-gradient-to-b from-[#f7d37a] to-[#9b301d] p-3 text-white shadow-soft">
+                    <span class="absolute right-3 top-3 rounded-full bg-brandPink px-3 py-1 font-bold">Big Win</span>
+                    <div class="absolute bottom-4 left-3 right-3">
+                      <p class="font-black">Super admin's Room</p>
+                      <p class="text-right font-bold">16200</p>
+                    </div>
+                  </article>
+                  <article class="relative h-[190px] overflow-hidden rounded-2xl bg-gradient-to-b from-[#31313b] to-[#d3b18f] p-3 text-white shadow-soft">
+                    <span class="absolute right-3 top-3 rounded-full bg-[#5579ff] px-3 py-1 font-bold">PK</span>
+                    <div class="absolute bottom-4 left-3 right-3">
+                      <p class="font-black">Super admin's Room</p>
+                      <p class="text-right font-bold">16200</p>
+                    </div>
+                  </article>
+                </div>
+              </div>
+              <button class="absolute bottom-[64px] left-1/2 z-40 flex h-20 w-20 -translate-x-1/2 items-center justify-center rounded-full bg-white text-5xl font-black text-brandPink shadow-soft" data-action="capture">+</button>
+              <div class="bottom-nav"></div>
+            </div>
+            <div class="home-indicator"></div>
+          </section>
+
+          <section class="screen" id="screen-capture" data-module="home">
+            <div class="absolute inset-0 bg-brandYellow">
+              <div class="status-bar"><span>9:41</span><span>▮▮▮ ))) ▱</span></div>
+              <div class="mx-6 mt-24 h-[590px] rounded-[36px] border-4 border-[#ffa900] bg-white p-10 shadow-soft">
+                <div class="mt-40 flex flex-wrap items-end justify-center gap-[-8px]">
+                  <img class="mood-img" src="../../assets/mood/model_01.png" alt="" />
+                  <img class="mood-img" src="../../assets/mood/model_02.png" alt="" />
+                  <img class="mood-img" src="../../assets/mood/model_03.png" alt="" />
+                  <img class="mood-img" src="../../assets/mood/model_04.png" alt="" />
+                  <img class="mood-img" src="../../assets/mood/model_05.png" alt="" />
+                  <img class="mood-img" src="../../assets/mood/model_06.png" alt="" />
+                  <img class="mood-img" src="../../assets/mood/model_07.png" alt="" />
+                  <img class="mood-img" src="../../assets/mood/model_08.png" alt="" />
+                </div>
+                <button class="pink-button mx-auto mt-16 block h-14 w-56 text-2xl" data-action="home">打开</button>
+              </div>
+            </div>
+            <div class="home-indicator"></div>
+          </section>
+
+          <section class="screen" id="screen-calendar" data-module="calendar">
+            <div class="h-full bg-gradient-to-b from-[#fffafa] to-[#f4f4f4] pb-24">
+              <div class="status-bar"><span>9:41</span><span>▮▮▮ ))) ▱</span></div>
+              <div class="px-3">
+                <div class="mt-8 flex items-center justify-center gap-6 text-3xl font-black">
+                  <button data-action="calendar">‹</button>
+                  <span>2026.10</span>
+                  <button data-action="calendar">›</button>
+                </div>
+                <div class="mt-5 rounded-[24px] border-2 border-[#ffc0d7] bg-white/60 px-3 pb-3 pt-4">
+                  <div class="grid grid-cols-7 text-center text-[16px] font-black">
+                    <span>Sun</span><span>Mon</span><span>Tues</span><span>Wed</span><span>Thur</span><span>Fri</span><span>Sat</span>
+                  </div>
+                  <div class="mt-3 grid grid-cols-7 gap-y-2 text-center text-sm">
+                    <span></span><span></span><span></span>
+                    <div><img class="mood-cell mx-auto" src="../../assets/mood/model_01.png" alt="" /><p>1</p></div>
+                    <div><img class="mood-cell mx-auto" src="../../assets/mood/model_02.png" alt="" /><p>2</p></div>
+                    <div><img class="mood-cell mx-auto" src="../../assets/mood/model_03.png" alt="" /><p>3</p></div>
+                    <div><img class="mood-cell mx-auto" src="../../assets/mood/model_04.png" alt="" /><p>4</p></div>
+                    <div><img class="mood-cell mx-auto" src="../../assets/mood/model_05.png" alt="" /><p>5</p></div>
+                    <div><img class="mood-cell mx-auto opacity-30" src="../../assets/mood/model_06.png" alt="" /><p>6</p></div>
+                    <div><img class="mood-cell mx-auto opacity-30" src="../../assets/mood/model_07.png" alt="" /><p>7</p></div>
+                    <div><img class="mood-cell mx-auto" src="../../assets/mood/model_08.png" alt="" /><p>8</p></div>
+                    <div><img class="mood-cell mx-auto" src="../../assets/mood/model_09.png" alt="" /><p>9</p></div>
+                    <div><img class="mood-cell mx-auto" src="../../assets/mood/model_010.png" alt="" /><p>10</p></div>
+                    <div><img class="mood-cell mx-auto" src="../../assets/mood/model_011.png" alt="" /><p>11</p></div>
+                    <div><img class="mood-cell mx-auto" src="../../assets/mood/model_012.png" alt="" /><p>12</p></div>
+                    <div><img class="mood-cell mx-auto" src="../../assets/mood/model_013.png" alt="" /><p>13</p></div>
+                    <div><img class="mood-cell mx-auto" src="../../assets/mood/model_014.png" alt="" /><p>14</p></div>
+                    <div><img class="mood-cell mx-auto" src="../../assets/mood/model_015.png" alt="" /><p>15</p></div>
+                    <div><img class="mood-cell mx-auto" src="../../assets/mood/model_016.png" alt="" /><p>16</p></div>
+                    <div><img class="mood-cell mx-auto opacity-30" src="../../assets/mood/model_017.png" alt="" /><p>17</p></div>
+                    <div><img class="mood-cell mx-auto" src="../../assets/mood/model_018.png" alt="" /><p>18</p></div>
+                  </div>
+                  <button class="mx-auto mt-2 flex h-6 w-14 items-center justify-center rounded-full bg-[#ffc1d8] text-white" data-action="calendarFold">⌄</button>
+                </div>
+                <article class="mt-6 rounded-[28px] bg-white p-5 shadow-soft">
+                  <div class="flex items-center gap-3">
+                    <img class="h-14 w-14 rounded-full object-cover" src="../../assets/mood/model_01.png" alt="" />
+                    <div class="flex-1">
+                      <h2 class="text-lg font-black">今天心情不错</h2>
+                      <p class="text-xs font-bold text-[#b1b1b7]">2026-10-25 22:15:36</p>
+                    </div>
+                  </div>
+                  <p class="mt-4 text-base leading-6">今天和朋友一起出门，天气很好，记录一下这个轻松的小瞬间。</p>
+                  <div class="mt-4 grid grid-cols-3 gap-3">
+                    <div class="h-20 rounded-2xl bg-[#dfe9ff]"></div>
+                    <div class="h-20 rounded-2xl bg-[#ffe2bc]"></div>
+                    <div class="h-20 rounded-2xl bg-[#e5ffe7]"></div>
+                  </div>
+                </article>
+              </div>
+              <button class="absolute bottom-[64px] left-1/2 z-40 flex h-20 w-20 -translate-x-1/2 items-center justify-center rounded-full bg-white text-5xl font-black text-brandPink shadow-soft" data-action="moodSheet">+</button>
+              <div class="bottom-nav"></div>
+            </div>
+            <div class="home-indicator"></div>
+          </section>
+
+          <section class="screen" id="screen-mood" data-module="calendar">
+            <div class="absolute inset-0 bg-gradient-to-b from-[#fffafa] to-[#f4f4f4]">
+              <div class="status-bar"><span>9:41</span><span>▮▮▮ ))) ▱</span></div>
+              <div class="mx-3 mt-20 rounded-[24px] border-2 border-[#ffc0d7] bg-white/60 px-3 pb-3 pt-4 opacity-40">
+                <div class="grid grid-cols-7 text-center text-[16px] font-black">
+                  <span>Sun</span><span>Mon</span><span>Tues</span><span>Wed</span><span>Thur</span><span>Fri</span><span>Sat</span>
+                </div>
+              </div>
+              <div class="overlay"></div>
+              <div class="sheet h-[510px] p-7">
+                <h2 class="mb-7 text-center text-3xl font-black">选择心情</h2>
+                <div class="grid grid-cols-4 gap-x-8 gap-y-8">
+                  <button data-action="publish"><img class="mood-img" src="../../assets/mood/model_01.png" alt="" /></button>
+                  <button data-action="publish"><img class="mood-img" src="../../assets/mood/model_02.png" alt="" /></button>
+                  <button data-action="publish"><img class="mood-img" src="../../assets/mood/model_03.png" alt="" /></button>
+                  <button data-action="publish"><img class="mood-img" src="../../assets/mood/model_04.png" alt="" /></button>
+                  <button data-action="publish"><img class="mood-img" src="../../assets/mood/model_05.png" alt="" /></button>
+                  <button data-action="publish"><img class="mood-img ring-4 ring-[#ffb000]" src="../../assets/mood/model_06.png" alt="" /></button>
+                  <button data-action="publish"><img class="mood-img" src="../../assets/mood/model_07.png" alt="" /></button>
+                  <button data-action="publish"><img class="mood-img" src="../../assets/mood/model_08.png" alt="" /></button>
+                  <button data-action="publish"><img class="mood-img" src="../../assets/mood/model_09.png" alt="" /></button>
+                  <button data-action="publish"><img class="mood-img" src="../../assets/mood/model_010.png" alt="" /></button>
+                  <button data-action="publish"><img class="mood-img" src="../../assets/mood/model_011.png" alt="" /></button>
+                  <button data-action="publish"><img class="mood-img" src="../../assets/mood/model_012.png" alt="" /></button>
+                </div>
+              </div>
+            </div>
+            <div class="home-indicator"></div>
+          </section>
+
+          <section class="screen" id="screen-publish" data-module="calendar">
+            <div class="absolute inset-0 bg-gradient-to-b from-[#fffafa] to-[#f4f4f4]">
+              <div class="status-bar"><span>9:41</span><span>▮▮▮ ))) ▱</span></div>
+              <div class="overlay"></div>
+              <div class="sheet h-[490px] p-6">
+                <div class="mb-8 flex items-center justify-between">
+                  <div class="segmented">
+                    <button class="active">文字</button>
+                    <button>语音</button>
+                  </div>
+                  <button class="text-4xl font-black text-brandPink" data-action="calendar">›</button>
+                </div>
+                <div class="flex items-center gap-4">
+                  <img class="h-14 w-14" src="../../assets/mood/model_010.png" alt="" />
+                  <div class="flex h-12 flex-1 items-center rounded-2xl bg-brandPink px-5 text-lg font-bold text-white">60"</div>
+                </div>
+                <textarea class="mt-7 h-48 w-full resize-none rounded-3xl bg-[#f6f6f8] p-5 text-lg outline-none ring-brandPink focus:ring-2" placeholder="写下今天的心情"></textarea>
+                <button class="pink-button mt-5 h-12 w-full text-xl" data-action="calendar">发布</button>
+              </div>
+            </div>
+            <div class="home-indicator"></div>
+          </section>
+
+          <section class="screen" id="screen-chat" data-module="chat">
+            <div class="h-full bg-pageGray">
+              <div class="status-bar bg-white"><span>9:41</span><span>▮▮▮ ))) ▱</span></div>
+              <div class="flex h-14 items-center justify-between bg-white px-5">
+                <button class="text-4xl font-black">‹</button>
+                <h2 class="text-2xl font-black">Username001</h2>
+                <button class="text-2xl font-black" data-action="chatSettings">...</button>
+              </div>
+              <div class="space-y-7 px-5 pt-8">
+                <div class="flex items-start gap-3">
+                  <div class="h-12 w-12 rounded-full bg-gradient-to-br from-[#ffe1ee] to-[#fff]"></div>
+                  <div class="max-w-[230px] rounded-[24px] bg-white px-5 py-3 text-lg leading-6">你好，今天过得怎么样？</div>
+                </div>
+                <div class="flex items-start gap-3">
+                  <div class="h-12 w-12 rounded-full bg-gradient-to-br from-[#ffe1ee] to-[#fff]"></div>
+                  <div class="max-w-[260px] rounded-[24px] bg-white px-5 py-3 text-lg leading-6">我看到你的心情日历，很可爱。</div>
+                </div>
+                <div class="flex items-start justify-end gap-3">
+                  <div class="max-w-[230px] rounded-[24px] bg-brandPink px-5 py-3 text-lg leading-6 text-white">谢谢，今天记录了一条新心情。</div>
+                  <div class="h-12 w-12 rounded-full bg-gradient-to-br from-[#b9efff] to-[#fff]"></div>
+                </div>
+              </div>
+              <div class="absolute bottom-[92px] left-5 right-5 flex items-center gap-4">
+                <input class="h-14 flex-1 rounded-2xl bg-white px-5 text-lg outline-none ring-brandPink focus:ring-2" placeholder="说点什么" />
+                <button class="flex h-14 w-14 items-center justify-center rounded-full bg-brandPink text-3xl font-black text-white">›</button>
+              </div>
+            </div>
+            <div class="home-indicator"></div>
+          </section>
+
+          <section class="screen" id="screen-chat-settings" data-module="chat">
+            <div class="h-full bg-pageGray">
+              <div class="status-bar bg-white"><span>9:41</span><span>▮▮▮ ))) ▱</span></div>
+              <div class="flex h-14 items-center justify-between bg-white px-5">
+                <button class="text-4xl font-black" data-action="chat">‹</button>
+                <h2 class="text-2xl font-black">聊天设置</h2>
+                <button class="text-2xl font-black">...</button>
+              </div>
+              <div class="mt-9 flex items-center gap-5 px-7">
+                <div class="h-20 w-20 rounded-full bg-gradient-to-br from-[#ffe1ee] to-white"></div>
+                <h2 class="text-2xl font-black">Username</h2>
+              </div>
+              <div class="mx-5 mt-12 overflow-hidden rounded-3xl bg-white">
+                <div class="flex h-24 items-center justify-between border-b border-line px-7">
+                  <span class="text-2xl font-black">拉黑聊天</span>
+                  <button class="switch on"></button>
+                </div>
+                <div class="flex h-24 items-center justify-between px-7">
+                  <span class="text-2xl font-black">消息免打扰</span>
+                  <button class="switch"></button>
+                </div>
+              </div>
+            </div>
+            <div class="home-indicator"></div>
+          </section>
+
+          <section class="screen" id="screen-profile" data-module="profile">
+            <div class="h-full bg-gradient-to-b from-[#fffafa] to-[#f4f4f4] pb-24">
+              <div class="status-bar"><span>9:41</span><span>▮▮▮ ))) ▱</span></div>
+              <div class="mt-20 flex flex-col items-center">
+                <div class="h-28 w-28 rounded-full bg-gradient-to-br from-[#ffe1ee] to-white shadow-soft"></div>
+                <button class="mt-5 flex items-center gap-2 text-2xl font-black" data-action="editProfile">Username <span class="text-brandPink">✎</span></button>
+              </div>
+              <div class="mx-5 mt-12 space-y-5">
+                <button class="flex h-20 w-full items-center rounded-3xl bg-white px-7 text-left text-2xl font-black shadow-soft">
+                  <span class="mr-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-brandPink text-white">•</span>我的帖子
+                </button>
+                <button class="flex h-20 w-full items-center rounded-3xl bg-white px-7 text-left text-2xl font-black shadow-soft">
+                  <span class="mr-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-brandPink text-white">▣</span>隐私设置
+                </button>
+                <button class="flex h-20 w-full items-center rounded-3xl bg-white px-7 text-left text-2xl font-black shadow-soft">
+                  <span class="mr-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-brandPink text-white">i</span>关于我们
+                </button>
+                <button class="flex h-20 w-full items-center rounded-3xl bg-white px-7 text-left text-2xl font-black shadow-soft">
+                  <span class="mr-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-brandPink text-white">设</span>设置
+                </button>
+              </div>
+              <div class="bottom-nav"></div>
+            </div>
+            <div class="home-indicator"></div>
+          </section>
+
+          <section class="screen" id="screen-edit-profile" data-module="profile">
+            <div class="h-full bg-pageGray">
+              <div class="status-bar bg-white"><span>9:41</span><span>▮▮▮ ))) ▱</span></div>
+              <div class="flex h-14 items-center justify-between bg-white px-5">
+                <button class="text-4xl font-black" data-action="profile">‹</button>
+                <h2 class="text-2xl font-black">编辑资料</h2>
+                <button class="text-2xl font-black">...</button>
+              </div>
+              <div class="mx-5 mt-9 overflow-hidden rounded-3xl bg-white">
+                <button class="flex h-24 w-full items-center justify-between border-b border-line px-7 text-left">
+                  <span class="text-2xl font-black">头像</span>
+                  <span class="h-14 w-14 rounded-full bg-gradient-to-br from-[#ffd45f] to-[#b16f00]"></span>
+                </button>
+                <button class="flex h-20 w-full items-center justify-between border-b border-line px-7 text-left">
+                  <span class="text-2xl font-black">昵称</span>
+                  <span class="text-2xl text-muted">Nickname ›</span>
+                </button>
+                <button class="flex h-20 w-full items-center justify-between border-b border-line px-7 text-left">
+                  <span class="text-2xl font-black">性别</span>
+                  <span class="text-4xl text-[#4b86dc]">♂ ›</span>
+                </button>
+                <button class="flex h-20 w-full items-center justify-between px-7 text-left">
+                  <span class="text-2xl font-black">生日</span>
+                  <span class="text-2xl text-muted">2025/03/25 ›</span>
+                </button>
+              </div>
+              <div class="absolute left-[250px] top-[440px] text-5xl font-black text-brandPink">♀</div>
+            </div>
+            <div class="home-indicator"></div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const routes = {
+      login: 'screen-login',
+      register: 'screen-register',
+      agreement: 'screen-agreement',
+      home: 'screen-home',
+      capture: 'screen-capture',
+      calendar: 'screen-calendar',
+      mood: 'screen-mood',
+      publish: 'screen-publish',
+      chat: 'screen-chat',
+      chatSettings: 'screen-chat-settings',
+      profile: 'screen-profile',
+      editProfile: 'screen-edit-profile'
+    };
+
+    const routeToModule = {
+      login: 'login',
+      register: 'login',
+      agreement: 'login',
+      home: 'home',
+      capture: 'home',
+      calendar: 'calendar',
+      mood: 'calendar',
+      publish: 'calendar',
+      chat: 'chat',
+      chatSettings: 'chat',
+      profile: 'profile',
+      editProfile: 'profile'
+    };
+
+    const bottomNavHtml = `
+      <button class="nav-button" data-action="home"><img src="../../assets/tabbar/home_select.png" alt=""></button>
+      <button class="nav-button" data-action="calendar"><img src="../../assets/calendar/edit_mood_icon.png" alt=""></button>
+      <button class="nav-button" data-action="chat"><img src="../../assets/tabbar/message_select.png" alt=""></button>
+      <button class="nav-button" data-action="profile"><img src="../../assets/tabbar/user_profile_select.png" alt=""></button>
+    `;
+
+    document.querySelectorAll('.bottom-nav').forEach((nav) => {
+      nav.innerHTML = bottomNavHtml;
+    });
+
+    function showRoute(route, replaceHash = true) {
+      const nextRoute = routes[route] ? route : 'login';
+      document.querySelectorAll('.screen').forEach((screen) => screen.classList.remove('active'));
+      document.getElementById(routes[nextRoute]).classList.add('active');
+
+      document.querySelectorAll('[data-route]').forEach((button) => {
+        const isActive = button.dataset.route === routeToModule[nextRoute];
+        button.classList.toggle('bg-ink', isActive);
+        button.classList.toggle('text-white', isActive);
+        button.classList.toggle('bg-white', !isActive);
+        button.classList.toggle('text-slate-600', !isActive);
+      });
+
+      document.querySelectorAll('.nav-button').forEach((button) => {
+        button.classList.toggle('active', routeToModule[nextRoute] === routeToModule[button.dataset.action]);
+      });
+
+      if (replaceHash) {
+        history.replaceState(null, '', `${location.pathname}${location.search}#${nextRoute}`);
+      }
+    }
+
+    document.addEventListener('click', (event) => {
+      const trigger = event.target.closest('[data-action], [data-route]');
+      if (!trigger) return;
+      const route = trigger.dataset.action || trigger.dataset.route;
+      if (routes[route]) showRoute(route);
+    });
+
+    function applyFocusMode() {
+      const params = new URLSearchParams(location.search);
+      const focus = params.get('focus');
+      if (!focus) return;
+      document.body.classList.add('focus-mode');
+      document.querySelectorAll('[data-focus-target]').forEach((node) => {
+        node.classList.toggle('focus-active', node.dataset.focusTarget === focus);
+      });
+      if (routes[focus]) {
+        showRoute(focus, false);
+      } else if (['login', 'home', 'calendar', 'chat', 'profile'].includes(focus)) {
+        showRoute(focus, false);
+      }
+    }
+
+    const initialRoute = location.hash.replace('#', '') || 'login';
+    showRoute(initialRoute, false);
+    applyFocusMode();
+  </script>
+</body>
+</html>

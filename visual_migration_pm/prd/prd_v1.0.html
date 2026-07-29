@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>iSnow 全局视觉体系迁移 PRD v1.0</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --panel: #ffffff;
+      --ink: #18202f;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --pink: #ff4f95;
+      --yellow: #ffe34d;
+      --soft-pink: #fff0f6;
+      --soft-yellow: #fff8d6;
+      --code: #0f172a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.68;
+    }
+    .layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 28px; max-width: 1320px; margin: 0 auto; padding: 32px; }
+    nav {
+      position: sticky;
+      top: 24px;
+      align-self: start;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.06);
+    }
+    nav h2 { margin: 0 0 12px; font-size: 16px; }
+    nav a { display: block; color: var(--muted); text-decoration: none; padding: 7px 0; font-size: 14px; }
+    nav a:hover { color: var(--pink); }
+    main { min-width: 0; }
+    header, section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 28px;
+      margin-bottom: 22px;
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.05);
+    }
+    h1 { margin: 0 0 12px; font-size: 32px; line-height: 1.2; }
+    h2 { margin: 0 0 16px; font-size: 24px; }
+    h3 { margin: 22px 0 10px; font-size: 18px; }
+    p { margin: 0 0 12px; }
+    .meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
+    .meta div, .callout, .note {
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+    .callout { background: linear-gradient(135deg, var(--soft-pink), var(--soft-yellow)); border-color: #ffd2e2; }
+    .tag { display: inline-block; padding: 3px 9px; border-radius: 999px; background: var(--soft-pink); color: #c62567; font-size: 12px; font-weight: 700; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0 18px; table-layout: fixed; }
+    th, td { border: 1px solid var(--line); padding: 10px 12px; vertical-align: top; text-align: left; }
+    th { background: #f1f5f9; font-weight: 700; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    code { background: #eef2f7; color: var(--code); border-radius: 6px; padding: 2px 5px; }
+    pre { overflow: auto; background: #0f172a; color: #e2e8f0; border-radius: 14px; padding: 16px; line-height: 1.55; }
+    ul { margin-top: 6px; }
+    li { margin-bottom: 6px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .status-ok { color: #047857; font-weight: 700; }
+    .status-gap { color: #b45309; font-weight: 700; }
+    .status-risk { color: #be123c; font-weight: 700; }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; padding: 18px; }
+      nav { position: static; }
+      .meta, .grid-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <nav>
+      <h2>目录</h2>
+      <a href="#info">项目信息</a>
+      <a href="#background">一、需求背景</a>
+      <a href="#goals">二、需求目标</a>
+      <a href="#users">三、用户与场景</a>
+      <a href="#journey">四、用户旅程</a>
+      <a href="#scope">五、功能清单</a>
+      <a href="#logic">六、基础逻辑</a>
+      <a href="#technical">七、工程方案</a>
+      <a href="#risks">八、风险边界</a>
+      <a href="#next">九、后续步骤</a>
+    </nav>
+
+    <main>
+      <header id="info">
+        <span class="tag">PRD v1.0</span>
+        <h1>iSnow 全局视觉体系迁移</h1>
+        <p>本需求用于指导当前 Flutter App 将已有 UI 视觉替换为蓝湖“心情日历白包”新设计，并同步建立可持续维护的颜色、资源、间距、圆角、字体和阴影体系。</p>
+        <div class="meta">
+          <div><strong>项目类型：</strong>Flutter 移动端 App</div>
+          <div><strong>设计来源：</strong>Lanhu 项目“心情日历白包”</div>
+          <div><strong>实施策略：</strong>先底层视觉体系，后多页面批量迁移</div>
+          <div><strong>一期范围：</strong>登录、首页、日历、聊天、我的及对应子页面</div>
+        </div>
+      </header>
+
+      <section id="background">
+        <h2>一、需求背景</h2>
+        <p>当前 Flutter 项目已经实现主要业务页面，但视觉表现与蓝湖新设计存在差距。代码层面也存在颜色、图片资源、文本样式直接分散在页面中的情况，例如页面中直接引用 <code>Color(0xFFF9E707)</code>、<code>assets/calendar/...</code>、<code>assets/tabbar/...</code>。这种实现方式短期能跑通，但当设计体系整体更新时，替换成本高，容易漏改，并且后续维护缺少统一入口。</p>
+        <div class="callout">
+          <strong>核心痛点：</strong>需要同时解决“视觉还原”和“工程规范”两个问题。只换图片不抽象资源，下一轮还会重复痛；只抽象 Theme 不对齐蓝湖，用户看到的界面仍然不像新版设计。
+        </div>
+        <h3>现状问题</h3>
+        <table>
+          <thead>
+            <tr><th>维度</th><th>当前表现</th><th>影响</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>颜色</td><td>页面中散落硬编码色值，黄色旧主色较多</td><td>全局换色难，容易出现新旧主题混杂</td></tr>
+            <tr><td>资源</td><td>图片按模块分目录，但引用直接写在页面中</td><td>替换 icon 时缺少统一映射，难以批量管理</td></tr>
+            <tr><td>组件</td><td>已有通用脚手架和部分通用组件，但视觉 token 不完整</td><td>页面间间距、圆角、字体、阴影容易不一致</td></tr>
+            <tr><td>设计来源</td><td>蓝湖可提供设计图、切图和 HTML/CSS 分析</td><td>可作为新视觉依据，但需要人工建立资源语义与代码映射</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="goals">
+        <h2>二、需求目标</h2>
+        <table>
+          <thead>
+            <tr><th>目标类型</th><th>描述</th><th>衡量指标</th><th>目标值</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>视觉还原</td>
+              <td>以蓝湖“心情日历白包”为基准，替换一期范围内页面的主视觉、主题色、icon、切图、间距、圆角、字体和阴影。</td>
+              <td>关键页面设计 token 一致度</td>
+              <td>颜色、资源、字号、圆角、主间距优先达到一致；具体像素级还原在后续页面验收中迭代</td>
+            </tr>
+            <tr>
+              <td>工程规范</td>
+              <td>建立公共视觉体系文件，减少页面内直接硬编码颜色和资源路径。</td>
+              <td>新增公共类覆盖范围</td>
+              <td>覆盖 AppAssets、AppColors、AppGradients、AppSpacing、AppRadius、AppTextStyles、AppShadows、AppTheme</td>
+            </tr>
+            <tr>
+              <td>资源治理</td>
+              <td>只下载和接入当前页面实际使用的蓝湖资源，避免 assets 失控膨胀。</td>
+              <td>资源接入策略</td>
+              <td>按一期页面最小可用资源集下载，使用语义化命名</td>
+            </tr>
+            <tr>
+              <td>逻辑稳定</td>
+              <td>旧项目业务逻辑保持不变，只允许修正明显错误文案和非中文文案。</td>
+              <td>业务回归范围</td>
+              <td>页面路径、数据流、核心交互不因视觉迁移改变</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="users">
+        <h2>三、用户与使用场景</h2>
+        <table>
+          <thead>
+            <tr><th>用户角色</th><th>具体场景</th><th>当前痛点</th><th>产品机会点</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>普通 App 用户</td>
+              <td>打开 App、登录注册、浏览首页、记录心情、聊天、查看个人中心</td>
+              <td>旧视觉与新设计不一致，情绪化、轻量、柔和的品牌感不足</td>
+              <td>通过粉色、黄色、柔和渐变、心情球资源提升产品识别度和情绪表达</td>
+            </tr>
+            <tr>
+              <td>开发者</td>
+              <td>根据蓝湖更新页面资源、替换 icon、调整样式</td>
+              <td>资源引用分散，缺少设计 token，维护成本高</td>
+              <td>建立统一公共类，后续资源替换只改映射和少量组件</td>
+            </tr>
+            <tr>
+              <td>设计/产品协作者</td>
+              <td>检查实现是否符合蓝湖新视觉</td>
+              <td>无法快速判断代码里的颜色和资源是否来自蓝湖</td>
+              <td>用语义化 token 和资源映射表建立可追溯关系</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="journey">
+        <h2>四、用户使用场景与旅程图</h2>
+        <table>
+          <thead>
+            <tr><th>阶段</th><th>用户触点</th><th>用户行为</th><th>痛点/情绪</th><th>产品机会点</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>首次进入</td>
+              <td>启动页、登录页、注册页、协议弹窗</td>
+              <td>用户选择登录或注册，阅读并同意服务条款和隐私政策</td>
+              <td>如果页面仍是旧黄底或文案混乱，会降低信任感</td>
+              <td>使用蓝湖的大心情球背景、柔和按钮、中文文案，强化轻松友好的第一印象</td>
+            </tr>
+            <tr>
+              <td>浏览首页</td>
+              <td>首页、捞球入口、底部 Tab</td>
+              <td>用户从首页进入主要功能，尝试随机打开一个心情卡片</td>
+              <td>旧图标和新图标混用会显得割裂</td>
+              <td>统一 Tab icon、主按钮、弹窗视觉，让“捞一个”成为首页核心动作</td>
+            </tr>
+            <tr>
+              <td>记录心情</td>
+              <td>日历页、选择心情弹窗、填写心情页</td>
+              <td>用户查看某月心情，点击加号选择心情，填写文本或录音后发布</td>
+              <td>日历状态多、心情图标多，若资源映射混乱会影响理解</td>
+              <td>统一心情球资源枚举，明确已记录/未记录、多条记录的展示规则</td>
+            </tr>
+            <tr>
+              <td>查看帖子</td>
+              <td>日历折叠页、帖子卡片、详情页</td>
+              <td>用户点击某天记录，查看文字、图片或语音内容</td>
+              <td>卡片圆角、阴影、图片间距如果不统一，页面质感会掉</td>
+              <td>抽出卡片圆角、阴影、九宫格间距和正文样式，保证列表和详情一致</td>
+            </tr>
+            <tr>
+              <td>聊天互动</td>
+              <td>消息页、聊天页、聊天设置页</td>
+              <td>用户发送消息、进入设置、拉黑或免打扰</td>
+              <td>发送按钮、气泡颜色、开关样式需要和新粉色体系一致</td>
+              <td>将气泡色、发送按钮、设置开关纳入 AppTheme 和 AppAssets</td>
+            </tr>
+            <tr>
+              <td>维护资料</td>
+              <td>我的页、编辑资料页、我的帖子、关于我们</td>
+              <td>用户查看个人信息，修改头像、昵称、性别、生日</td>
+              <td>菜单 icon 若沿用旧风格，会和蓝湖粉色视觉不一致</td>
+              <td>优先使用蓝湖菜单 icon；缺失时用 Flutter icon，并用红色占位标记待补</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="scope">
+        <h2>五、详细功能清单与基础逻辑</h2>
+        <h3>5.1 一期页面范围</h3>
+        <table>
+          <thead>
+            <tr><th>模块</th><th>现有工程页面</th><th>蓝湖参考页面</th><th>迁移重点</th><th>优先级</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>登录注册</td>
+              <td><code>login_page.dart</code>、<code>register_page.dart</code>、<code>login_detail_page.dart</code></td>
+              <td>登录、注册、用户同意协议</td>
+              <td>背景图、主按钮、输入框、协议弹窗、中文文案</td>
+              <td>P0</td>
+            </tr>
+            <tr>
+              <td>首页</td>
+              <td><code>home_page.dart</code>、<code>capture_finished_page.dart</code></td>
+              <td>首页-捞一个、捞球弹窗</td>
+              <td>首页主视觉、捞球按钮、随机卡片弹窗、底部 Tab 选中态</td>
+              <td>P0</td>
+            </tr>
+            <tr>
+              <td>日历</td>
+              <td><code>calendar_page.dart</code>、<code>select_mood_page.dart</code>、<code>publish_page.dart</code>、<code>publish_voice_page.dart</code></td>
+              <td>日历展开、日历折叠、选择心情、填写心情</td>
+              <td>日历边框、展开折叠按钮、心情球资源、发布弹窗、语音样式</td>
+              <td>P0</td>
+            </tr>
+            <tr>
+              <td>聊天</td>
+              <td><code>message_page.dart</code>、<code>chat_page.dart</code></td>
+              <td>聊天、聊天设置</td>
+              <td>聊天气泡、发送按钮、输入框、更多按钮、设置开关</td>
+              <td>P1</td>
+            </tr>
+            <tr>
+              <td>我的</td>
+              <td><code>profile_page.dart</code>、<code>edit_profile_page.dart</code>、<code>my_posts_page.dart</code>、<code>about_us_page.dart</code></td>
+              <td>我的、编辑资料</td>
+              <td>头像、编辑入口、菜单 icon、资料表单、卡片样式</td>
+              <td>P1</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>5.2 资源替换规则</h3>
+        <ul>
+          <li>蓝湖有可导出切图或 icon 时，优先使用蓝湖资源。</li>
+          <li>蓝湖没有对应资源时，使用 Flutter 内置 icon，统一由公共类或公共组件封装，不在页面中散落。</li>
+          <li>如果蓝湖和 Flutter 内置 icon 都无法表达，先使用红色背景占位，并在资源映射表中标记 <code>TODO_ICON</code>。</li>
+          <li>只下载一期页面实际使用资源，不全量下载 210 张设计图全部切图。</li>
+          <li>资源命名采用语义化命名，例如 <code>AppAssets.tabCalendarActive</code>、<code>AppAssets.moodHappy</code>、<code>AppAssets.buttonSend</code>。</li>
+        </ul>
+
+        <h3>5.3 允许调整的内容</h3>
+        <ul>
+          <li>明显错误文案可以修正，例如蓝湖注册页按钮显示为 Login 时，应按语义调整为“注册”。</li>
+          <li>非中文文案可以改为中文，例如 Login、Register、Select Mood、Edit Profile。</li>
+          <li>业务流程、路由、数据读写、发布逻辑、聊天逻辑保持现有项目逻辑，不因视觉迁移改变。</li>
+        </ul>
+      </section>
+
+      <section id="logic">
+        <h2>六、核心操作主线与数据流向</h2>
+        <h3>6.1 视觉迁移主线</h3>
+        <pre>蓝湖设计稿
+  -> 选择一期页面
+  -> 获取设计图和切图资源
+  -> 资源语义化命名
+  -> 写入 Flutter assets
+  -> 建立 AppAssets 映射
+  -> 抽取 AppColors / AppGradients / AppSpacing / AppRadius / AppTextStyles / AppShadows
+  -> 更新 AppTheme
+  -> 页面批量引用公共 token
+  -> 运行检查和视觉验收</pre>
+
+        <h3>6.2 页面运行主线</h3>
+        <table>
+          <thead>
+            <tr><th>主线</th><th>前置条件</th><th>页面行为</th><th>数据流向</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>登录/注册</td>
+              <td>用户未登录或登录态失效</td>
+              <td>展示新视觉登录页，注册时展示邮箱、密码、确认密码和协议确认</td>
+              <td>输入数据仍走现有登录注册 provider/API；视觉层只替换样式和资源</td>
+            </tr>
+            <tr>
+              <td>首页捞球</td>
+              <td>用户进入首页</td>
+              <td>展示新背景、新 Tab、捞球入口；完成捞取后展示弹窗卡片</td>
+              <td>保留现有 capture 数据和弹窗逻辑，只替换卡片、按钮、遮罩和 icon</td>
+            </tr>
+            <tr>
+              <td>日历记录</td>
+              <td>用户进入日历 Tab</td>
+              <td>展示展开或折叠日历，点击加号选择心情并发布</td>
+              <td>保留现有 diary entry 模型；心情资源路径改由 AppAssets 提供</td>
+            </tr>
+            <tr>
+              <td>聊天</td>
+              <td>用户进入聊天会话</td>
+              <td>展示新聊天气泡、输入框和发送按钮；设置页展示拉黑/免打扰</td>
+              <td>保留现有 chat message 模型和发送逻辑；设置状态按现有实现同步</td>
+            </tr>
+            <tr>
+              <td>我的资料</td>
+              <td>用户进入个人中心</td>
+              <td>展示头像、昵称、菜单列表和编辑资料表单</td>
+              <td>保留现有 profile/edit profile 页面跳转和数据更新逻辑</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="technical">
+        <h2>七、工程方案</h2>
+        <h3>7.1 建议新增公共文件</h3>
+        <table>
+          <thead>
+            <tr><th>文件</th><th>职责</th><th>示例内容</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>lib/theme/app_assets.dart</code></td><td>统一管理图片/icon 路径</td><td><code>static const tabHomeActive = 'assets/tabbar/home_active.png';</code></td></tr>
+            <tr><td><code>lib/theme/app_colors.dart</code></td><td>统一管理颜色</td><td><code>primaryPink</code>、<code>brandYellow</code>、<code>textPrimary</code></td></tr>
+            <tr><td><code>lib/theme/app_gradients.dart</code></td><td>统一管理渐变</td><td>登录注册背景、日历背景、按钮渐变</td></tr>
+            <tr><td><code>lib/theme/app_spacing.dart</code></td><td>统一管理间距</td><td><code>xs</code>、<code>sm</code>、<code>md</code>、<code>lg</code>、页面横向边距</td></tr>
+            <tr><td><code>lib/theme/app_radius.dart</code></td><td>统一管理圆角</td><td>按钮胶囊圆角、卡片圆角、弹窗圆角</td></tr>
+            <tr><td><code>lib/theme/app_text_styles.dart</code></td><td>统一管理字体样式</td><td>标题、正文、辅助文字、按钮文字</td></tr>
+            <tr><td><code>lib/theme/app_shadows.dart</code></td><td>统一管理阴影</td><td>弹窗阴影、卡片阴影、按钮阴影</td></tr>
+            <tr><td><code>lib/theme/app_theme.dart</code></td><td>统一输出 ThemeData</td><td>全局主题、AppBar、Scaffold、InputDecoration 等</td></tr>
+          </tbody>
+        </table>
+
+        <h3>7.2 资源目录建议</h3>
+        <p>保留当前按模块分目录方式，但新增资源应使用新命名规范。若蓝湖下载出的原始文件名不可读，需要在接入时重命名为语义化名称，并在附件中保留映射。</p>
+        <pre>assets/
+  base/
+  tabbar/
+  profile/
+  mood/
+  home/
+  calendar/
+  message/</pre>
+
+        <h3>7.3 验收重点</h3>
+        <ul>
+          <li>页面中新增代码不再直接写散落颜色和图片路径，优先引用公共 token。</li>
+          <li>主题粉色、黄色、柔和渐变、浅灰背景、主文本色应与蓝湖设计一致。</li>
+          <li>Tab icon、心情球、发送按钮、加号/发布相关资源优先使用蓝湖切图。</li>
+          <li>缺失 icon 必须显式红色占位，方便后续补资源，不允许静默遗漏。</li>
+          <li>迁移后 App 能正常运行，旧业务流程不改变。</li>
+        </ul>
+      </section>
+
+      <section id="risks">
+        <h2>八、异常与边界处理</h2>
+        <table>
+          <thead>
+            <tr><th>风险</th><th>说明</th><th>处理策略</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>蓝湖切图不完整</td>
+              <td>部分图标可能不是独立切图，或设计层未标记导出</td>
+              <td>优先用 Flutter 内置 icon；仍不合适则红色占位并进入待补清单</td>
+            </tr>
+            <tr>
+              <td>设计稿和旧逻辑不一致</td>
+              <td>蓝湖可能包含旧项目没有的直播间或新流程</td>
+              <td>一期不做直播间；除文案修正外，保持旧逻辑</td>
+            </tr>
+            <tr>
+              <td>资源命名冲突</td>
+              <td>蓝湖中存在多个重名设计图和切图</td>
+              <td>以模块+语义命名，必要时追加状态，例如 <code>tabCalendarActive</code></td>
+            </tr>
+            <tr>
+              <td>一次性多页面替换引入回归</td>
+              <td>用户期望集中替换底层资源和主题，再处理多个页面</td>
+              <td>先完成公共体系和资源映射，再按模块批量改；每个模块完成后运行静态检查</td>
+            </tr>
+            <tr>
+              <td>像素级还原成本过高</td>
+              <td>当前验收重点是 token 一致，不是逐像素完全一致</td>
+              <td>先保证颜色、icon、间距、圆角、字体、阴影，后续再做页面级微调</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="next">
+        <h2>九、后续步骤</h2>
+        <p>本 PRD 是第一版架构和业务逻辑确认稿。原型切片、Mermaid 流程图、最终版 PRD 中的详细方案将在后续步骤补充。</p>
+        <div class="grid-2">
+          <div class="note">
+            <strong>待补充：原型设计</strong>
+            <p>下一步将生成高保真 HTML 原型，用于确认视觉迁移后的页面和交互状态。</p>
+          </div>
+          <div class="note">
+            <strong>待补充：详细方案</strong>
+            <p>原型确认后，每个功能模块会补充 Mermaid 流程图、规则描述和 iframe 沙盒切片。</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
