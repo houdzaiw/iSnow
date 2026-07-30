@@ -7,6 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isar/isar.dart';
 
 import '../../manager/app_Isar.dart';
+import '../../localization/app_localizations.dart';
 import '../../model/chat_message.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/custom_scaffold.dart';
@@ -47,14 +48,14 @@ class MessagePage extends HookConsumerWidget {
 
     if (isLoading.value) {
       return CustomScaffold(
-        title: '消息',
+        title: context.l10n.t('message.title'),
         showBackButton: false,
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return CustomScaffold(
-      title: '消息',
+      title: context.l10n.t('message.title'),
       showBackButton: false,
       body: messages.value.isEmpty
           ? Center(
@@ -78,7 +79,10 @@ class MessagePage extends HookConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xl),
-                  const Text('暂无消息', style: AppTextStyles.bodyStrong),
+                  Text(
+                    context.l10n.t('message.empty'),
+                    style: AppTextStyles.bodyStrong,
+                  ),
                 ],
               ),
             )
@@ -146,11 +150,13 @@ class MessagePage extends HookConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        message.sender == 'user' ? '我' : '联系人',
+                        message.sender == 'user'
+                            ? context.l10n.t('message.me')
+                            : context.l10n.t('message.contact'),
                         style: AppTextStyles.bodyStrong,
                       ),
                       Text(
-                        _formatTime(message.createdAt),
+                        _formatTime(context, message.createdAt),
                         style: AppTextStyles.caption,
                       ),
                     ],
@@ -200,7 +206,7 @@ class MessagePage extends HookConsumerWidget {
     return completer.future;
   }
 
-  String _formatTime(DateTime dateTime) {
+  String _formatTime(BuildContext context, DateTime dateTime) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
@@ -209,7 +215,7 @@ class MessagePage extends HookConsumerWidget {
     if (messageDate.isAtSameMomentAs(today)) {
       return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
     } else if (messageDate.isAtSameMomentAs(yesterday)) {
-      return '昨天';
+      return context.l10n.t('message.yesterday');
     } else {
       return '${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}';
     }

@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:project/widgets/content_view.dart';
 
 import '../../configs/consts.dart';
+import '../../localization/app_localizations.dart';
 import '../../manager/app_Isar.dart';
 import '../../manager/providers.dart';
 import '../../model/diary_entry.dart';
@@ -44,7 +45,7 @@ class PostDetailPage extends HookConsumerWidget {
         : AppAssets.calendarRejoice;
 
     return CustomScaffold(
-      title: '心情详情',
+      title: context.l10n.t('detail.moodDetail'),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.xl),
         children: [

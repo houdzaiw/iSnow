@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../configs/consts.dart';
+import '../../localization/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import 'publish_page.dart';
 
@@ -29,8 +30,8 @@ class SelectMoodPage extends HookConsumerWidget {
                 fit: BoxFit.contain,
               ),
               const SizedBox(height: AppSpacing.xl),
-              const Text(
-                '选择心情',
+              Text(
+                context.l10n.t('publish.selectMood'),
                 textAlign: TextAlign.center,
                 style: AppTextStyles.title,
               ),

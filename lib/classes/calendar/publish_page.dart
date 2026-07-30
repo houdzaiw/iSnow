@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../localization/app_localizations.dart';
 import '../../manager/app_Isar.dart';
 import '../../manager/providers.dart';
 import '../../model/diary_entry.dart';
@@ -62,9 +63,9 @@ class PublishPage extends HookConsumerWidget {
 
       // 显示成功提示
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('保存成功！')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.t('publish.saveSuccess'))),
+        );
         // 关闭弹框
         Navigator.pop(context);
       }
@@ -180,16 +181,22 @@ class PublishPage extends HookConsumerWidget {
                       if (editDescription.value.isEmpty &&
                           editImagePaths.value.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('请输入内容或选择图片')),
+                          SnackBar(
+                            content: Text(
+                              context.l10n.t('publish.needContent'),
+                            ),
+                          ),
                         );
                         return;
                       }
                     } else {
                       // 语音模式：检查是否有语音
                       if (voicePath.value.isEmpty) {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(const SnackBar(content: Text('请录制语音')));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(context.l10n.t('publish.needVoice')),
+                          ),
+                        );
                         return;
                       }
                     }

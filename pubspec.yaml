@@ -53,6 +53,7 @@ dependencies:
   device_info_plus: ^12.3.0
   package_info_plus: ^9.0.0
   crypto: ^3.0.3
+  shared_preferences: ^2.5.4
 
 dev_dependencies:
   flutter_test:

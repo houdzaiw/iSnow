@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../localization/app_localizations.dart';
 import '../../theme/app_theme.dart';
 
 class LoginPage extends StatelessWidget {
@@ -38,7 +39,10 @@ class LoginPage extends StatelessWidget {
                   ),
                 ),
                 alignment: Alignment.center,
-                child: const Text('登录', style: AppTextStyles.button),
+                child: Text(
+                  context.l10n.t('auth.login'),
+                  style: AppTextStyles.button,
+                ),
               ),
             ),
             const SizedBox(height: 20),
@@ -57,7 +61,10 @@ class LoginPage extends StatelessWidget {
                   ),
                 ),
                 alignment: Alignment.center,
-                child: const Text('注册', style: AppTextStyles.button),
+                child: Text(
+                  context.l10n.t('auth.register'),
+                  style: AppTextStyles.button,
+                ),
               ),
             ),
             SizedBox(height: 126 + MediaQuery.of(context).padding.bottom),

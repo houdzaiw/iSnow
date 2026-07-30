@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import '../../localization/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import 'profile_menu_item.dart';
 
@@ -56,7 +57,10 @@ class ProfilePage extends HookConsumerWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('用户昵称', style: AppTextStyles.title),
+                      Text(
+                        context.l10n.t('profile.nickname'),
+                        style: AppTextStyles.title,
+                      ),
                       const SizedBox(width: AppSpacing.sm),
                       GestureDetector(
                         onTap: () {
@@ -112,7 +116,10 @@ class ProfilePage extends HookConsumerWidget {
                           color: AppColors.textInverse,
                         ),
                       ),
-                      title: Text(item.name, style: AppTextStyles.menuItem),
+                      title: Text(
+                        context.l10n.t(item.titleKey),
+                        style: AppTextStyles.menuItem,
+                      ),
                       trailing: Icon(
                         item.arrow,
                         size: 16,
@@ -121,24 +128,26 @@ class ProfilePage extends HookConsumerWidget {
                       horizontalTitleGap: 0, // 设置leading和title之间的间距为8像素
                       onTap: () {
                         //调用my posts 路由跳转
-                        if (item.name == '我的帖子') {
-                          context.push('/my-posts');
-                        }
-                        if (item.name == '用户隐私') {
-                          context.push(
-                            '/web-view?title=用户隐私&uri=https://www.example.com/user-privacy',
-                          );
-                        }
-                        if (item.name == '关于我们') {
-                          context.push('/about-us');
-                        }
-                        if (item.name == '联系我们') {
-                          context.push(
-                            '/web-view?title=联系我们&uri=https://www.example.com/contact',
-                          );
-                        }
-                        if (item.name == '设置') {
-                          context.push('/settings');
+                        switch (item.action) {
+                          case 'my-posts':
+                            context.push('/my-posts');
+                            break;
+                          case 'privacy':
+                            context.push(
+                              '/web-view?title=${Uri.encodeComponent(context.l10n.t('profile.privacy'))}&uri=https://www.example.com/user-privacy',
+                            );
+                            break;
+                          case 'about-us':
+                            context.push('/about-us');
+                            break;
+                          case 'contact-us':
+                            context.push(
+                              '/web-view?title=${Uri.encodeComponent(context.l10n.t('profile.contactUs'))}&uri=https://www.example.com/contact',
+                            );
+                            break;
+                          case 'settings':
+                            context.push('/settings');
+                            break;
                         }
                       },
                     ),

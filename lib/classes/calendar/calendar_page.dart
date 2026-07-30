@@ -8,6 +8,7 @@ import 'package:project/classes/calendar/select_mood_page.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../../configs/consts.dart';
+import '../../localization/app_localizations.dart';
 import '../../manager/app_Isar.dart';
 import '../../manager/providers.dart';
 import '../../model/diary_entry.dart';
@@ -225,7 +226,7 @@ class CalendarPage extends HookConsumerWidget {
           boxShadow: AppShadows.soft,
         ),
         child: TableCalendar(
-          locale: 'zh_CN',
+          locale: context.l10n.calendarLocale,
           firstDay: DateTime.utc(2020),
           lastDay: DateTime.utc(2030),
           focusedDay: focusedDay.value,
@@ -283,7 +284,12 @@ class CalendarPage extends HookConsumerWidget {
 
       return Expanded(
         child: entriesForDay.isEmpty
-            ? Center(child: Text('暂无心情记录', style: AppTextStyles.bodySmall))
+            ? Center(
+                child: Text(
+                  context.l10n.t('calendar.noMoodRecords'),
+                  style: AppTextStyles.bodySmall,
+                ),
+              )
             : ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 itemCount: entriesForDay.length,
@@ -321,8 +327,8 @@ class CalendarPage extends HookConsumerWidget {
       final normalizedNow = _normalize(now);
       if (!normalizedSelected.isAtSameMomentAs(normalizedNow)) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('只能在当天发布心情哦~'),
+          SnackBar(
+            content: Text(context.l10n.t('calendar.onlyToday')),
             duration: Duration(seconds: 2),
           ),
         );

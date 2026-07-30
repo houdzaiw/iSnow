@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../configs/consts.dart';
+import '../localization/app_localizations.dart';
 import '../model/diary_entry.dart';
 import '../theme/app_theme.dart';
 
@@ -23,7 +24,10 @@ class ContentView extends StatelessWidget {
             children: [
               Image.asset(moodImages[entry.moodIndex!], width: 40, height: 40),
               const SizedBox(width: 8),
-              Text("这是我今天的心情", style: AppTextStyles.bodyStrongSmall),
+              Text(
+                context.l10n.t('content.todayMood'),
+                style: AppTextStyles.bodyStrongSmall,
+              ),
               const Spacer(),
               isDetail
                   ? const SizedBox.shrink()

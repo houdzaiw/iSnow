@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../localization/app_localizations.dart';
 import '../../theme/app_theme.dart';
 
 // 弹框图层类
@@ -40,7 +41,7 @@ class DialogOverlay extends StatelessWidget {
                   right: 46,
                   bottom: 48,
                   child: Text(
-                    '今天也捕捞到一颗好心情',
+                    context.l10n.t('home.captureTitle'),
                     textAlign: TextAlign.center,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -104,7 +105,7 @@ class DialogOverlay extends StatelessWidget {
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  '打开',
+                  context.l10n.t('home.open'),
                   style: AppTextStyles.title.copyWith(
                     color: AppColors.textInverse,
                     decoration: TextDecoration.none,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../localization/app_localizations.dart';
 import '../../manager/providers.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/content_view.dart';
@@ -15,7 +16,7 @@ class MyPostsPage extends HookConsumerWidget {
     final diaryEntriesAsyncValue = ref.watch(diaryEntriesProvider);
 
     return CustomScaffold(
-      title: '我的帖子',
+      title: context.l10n.t('profile.myPosts'),
       body: diaryEntriesAsyncValue.when(
         data: (entries) {
           if (entries.isEmpty) {
@@ -40,7 +41,10 @@ class MyPostsPage extends HookConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.xl),
-                  const Text('暂无帖子', style: AppTextStyles.bodyStrong),
+                  Text(
+                    context.l10n.t('profile.noPosts'),
+                    style: AppTextStyles.bodyStrong,
+                  ),
                 ],
               ),
             );
@@ -82,7 +86,10 @@ class MyPostsPage extends HookConsumerWidget {
                   color: AppColors.danger,
                 ),
                 const SizedBox(height: AppSpacing.xl),
-                const Text('帖子加载失败', style: AppTextStyles.bodyStrong),
+                Text(
+                  context.l10n.t('profile.postsLoadFailed'),
+                  style: AppTextStyles.bodyStrong,
+                ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
                   error.toString(),

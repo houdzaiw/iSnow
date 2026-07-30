@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:project/widgets/custom_scaffold.dart';
 
+import '../../localization/app_localizations.dart';
 import '../../theme/app_theme.dart';
 
 class AboutUsPage extends HookConsumerWidget {
@@ -10,7 +11,7 @@ class AboutUsPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return CustomScaffold(
-      title: '关于我们',
+      title: context.l10n.t('profile.aboutUs'),
       body: SingleChildScrollView(
         child: Center(
           child: Padding(
@@ -42,10 +43,13 @@ class AboutUsPage extends HookConsumerWidget {
                 const SizedBox(height: AppSpacing.xxxl),
                 const Text('iSnow', style: AppTextStyles.title),
                 const SizedBox(height: AppSpacing.sm),
-                const Text('版本 1.0.0', style: AppTextStyles.caption),
+                Text(
+                  context.l10n.t('about.version'),
+                  style: AppTextStyles.caption,
+                ),
                 const SizedBox(height: AppSpacing.section),
                 Text(
-                  '记录每天的情绪和片刻，把心情好好收藏起来。',
+                  context.l10n.t('about.description'),
                   textAlign: TextAlign.center,
                   style: AppTextStyles.body.copyWith(height: 1.6),
                 ),

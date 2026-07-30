@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../configs/consts.dart';
+import '../../localization/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/custom_scaffold.dart';
 
@@ -13,7 +14,7 @@ class EditProfilePage extends StatefulWidget {
 
 class _EditProfilePageState extends State<EditProfilePage> {
   final _formKey = GlobalKey<FormState>();
-  final _nicknameController = TextEditingController(text: '用户昵称');
+  final _nicknameController = TextEditingController();
   final _bioController = TextEditingController();
   String? _selectedGender;
   DateTime? _selectedBirthday;
@@ -27,15 +28,19 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_nicknameController.text.isEmpty) {
+      _nicknameController.text = context.l10n.t('profile.nickname');
+    }
+
     return CustomScaffold(
-      title: '编辑资料',
-      rightText: '保存',
+      title: context.l10n.t('profile.editProfile'),
+      rightText: context.l10n.t('app.save'),
       onRightIconTap: () {
         if (_formKey.currentState!.validate()) {
           // 保存逻辑
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('保存成功')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.l10n.t('profile.saved'))),
+          );
           context.pop();
         }
       },
@@ -61,23 +66,23 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 final items = [
                   _buildProfileItem(
                     context,
-                    title: '头像',
+                    title: context.l10n.t('profile.avatar'),
                     onTap: () => showAvatarOptions(context),
                     showAvatar: true,
                   ),
                   _buildProfileItem(
                     context,
-                    title: '昵称',
+                    title: context.l10n.t('profile.nickname'),
                     onTap: () => _navigateToEditNickname(context),
                     valueText: _nicknameController.text,
                   ),
                   _buildProfileItem(
                     context,
-                    title: '性别',
+                    title: context.l10n.t('profile.gender'),
                     onTap: () => _showGenderPicker(context),
                     valueWidget: _selectedGender != null
                         ? Image.asset(
-                            _selectedGender == '男'
+                            _selectedGender == 'male'
                                 ? AppAssets.profileMaleIcon
                                 : AppAssets.profileFemaleIcon,
                             width: 20,
@@ -87,7 +92,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   ),
                   _buildProfileItem(
                     context,
-                    title: '生日',
+                    title: context.l10n.t('profile.birthday'),
                     onTap: () => _showBirthdayPicker(context),
                     valueText: _selectedBirthday != null
                         ? '${_selectedBirthday!.year}-${_selectedBirthday!.month.toString().padLeft(2, '0')}-${_selectedBirthday!.day.toString().padLeft(2, '0')}'
@@ -167,34 +172,47 @@ class _EditProfilePageState extends State<EditProfilePage> {
           shape: const RoundedRectangleBorder(
             borderRadius: AppRadius.cardBorder,
           ),
-          title: const Text('选择性别', style: AppTextStyles.title),
+          title: Text(
+            context.l10n.t('profile.chooseGender'),
+            style: AppTextStyles.title,
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
                 leading: const Icon(Icons.male, color: AppColors.primaryPink),
-                title: const Text('男', style: AppTextStyles.bodyStrong),
+                title: Text(
+                  context.l10n.t('profile.male'),
+                  style: AppTextStyles.bodyStrong,
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   setState(() {
-                    _selectedGender = '男';
+                    _selectedGender = 'male';
                   });
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('已选择男')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(context.l10n.t('profile.selectedMale')),
+                    ),
+                  );
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.female, color: AppColors.primaryPink),
-                title: const Text('女', style: AppTextStyles.bodyStrong),
+                title: Text(
+                  context.l10n.t('profile.female'),
+                  style: AppTextStyles.bodyStrong,
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   setState(() {
-                    _selectedGender = '女';
+                    _selectedGender = 'female';
                   });
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('已选择女')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(context.l10n.t('profile.selectedFemale')),
+                    ),
+                  );
                 },
               ),
             ],

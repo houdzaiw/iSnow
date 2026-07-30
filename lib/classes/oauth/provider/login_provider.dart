@@ -82,7 +82,7 @@ class LoginProvider {
             '${DateTime.now().millisecondsSinceEpoch}-${_appDevice.deviceId.hashCode}',
       };
 
-      debugPrint('登录请求 POST: ${HttpApi.login}');
+      debugPrint('Login request POST: ${HttpApi.login}');
       debugPrint('│ header: $headers');
       debugPrint('│ params: $params');
 
@@ -93,26 +93,26 @@ class LoginProvider {
         options: Options(headers: headers),
       );
 
-      debugPrint('登录响应 $response');
+      debugPrint('Login response $response');
 
       // 解析响应
       return LoginResponse.fromJson(response);
     } on DioException catch (e) {
-      debugPrint('登录错误 DioException: ${e.message}');
+      debugPrint('Login DioException: ${e.message}');
       // 处理 Dio 异常
       if (e.response != null) {
-        debugPrint('错误响应 ${e.response?.data}');
+        debugPrint('Error response ${e.response?.data}');
         return LoginResponse(
           success: false,
-          message: e.response?.data['message'] ?? '登录失败',
+          message: e.response?.data['message'] as String?,
         );
       } else {
-        return LoginResponse(success: false, message: e.message ?? '网络异常');
+        return LoginResponse(success: false, message: e.message);
       }
     } catch (e) {
-      debugPrint('登录错误 Exception: $e');
+      debugPrint('Login exception: $e');
       // 处理其他异常
-      return LoginResponse(success: false, message: '未知错误：$e');
+      return LoginResponse(success: false, message: 'Unknown error: $e');
     }
   }
 

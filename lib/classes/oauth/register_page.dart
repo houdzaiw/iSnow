@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../localization/app_localizations.dart';
 import '../../theme/app_theme.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -49,7 +50,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 48),
-                    const Text('请输入注册邮箱', style: AppTextStyles.bodyStrong),
+                    Text(
+                      context.l10n.t('auth.registerEmailLabel'),
+                      style: AppTextStyles.bodyStrong,
+                    ),
                     const SizedBox(height: AppSpacing.sm),
                     // 邮箱输入框
                     SizedBox(
@@ -75,7 +79,10 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
 
                     const SizedBox(height: AppSpacing.xxl),
-                    const Text('请输入密码', style: AppTextStyles.bodyStrong),
+                    Text(
+                      context.l10n.t('auth.passwordLabel'),
+                      style: AppTextStyles.bodyStrong,
+                    ),
                     const SizedBox(height: AppSpacing.sm),
                     // 密码输入框
                     SizedBox(
@@ -83,7 +90,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       child: TextField(
                         controller: _passwordController,
                         decoration: InputDecoration(
-                          hintText: '请输入密码',
+                          hintText: context.l10n.t('auth.passwordHint'),
                           filled: true,
                           fillColor: AppColors.fieldBackground,
                           border: OutlineInputBorder(
@@ -100,7 +107,10 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xxl),
-                    const Text('请再次输入密码', style: AppTextStyles.bodyStrong),
+                    Text(
+                      context.l10n.t('auth.confirmPasswordLabel'),
+                      style: AppTextStyles.bodyStrong,
+                    ),
                     const SizedBox(height: AppSpacing.sm),
                     // 密码输入框
                     SizedBox(
@@ -108,7 +118,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       child: TextField(
                         controller: _confirmPasswordController,
                         decoration: InputDecoration(
-                          hintText: '请再次输入密码',
+                          hintText: context.l10n.t('auth.confirmPasswordHint'),
                           filled: true,
                           fillColor: AppColors.fieldBackground,
                           border: OutlineInputBorder(
@@ -139,7 +149,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         alignment: Alignment.center,
                         child: Text(
-                          '注册',
+                          context.l10n.t('auth.register'),
                           style: AppTextStyles.button.copyWith(
                             color: AppColors.textInverse,
                           ),

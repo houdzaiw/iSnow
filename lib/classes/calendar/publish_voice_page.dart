@@ -8,6 +8,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:record/record.dart';
 
 import '../../configs/consts.dart';
+import '../../localization/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/voice_bubble.dart';
 
@@ -66,9 +67,9 @@ class PublishVoicePage extends HookConsumerWidget {
         }
       } else {
         // show permission denied
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('没有录音权限')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.t('publish.noRecordPermission'))),
+        );
       }
     }
 
@@ -160,7 +161,9 @@ class PublishVoicePage extends HookConsumerWidget {
           children: [
             const SizedBox(height: AppSpacing.section),
             Text(
-              isRecording.value ? '点击停止录音' : '点击开始录音',
+              isRecording.value
+                  ? context.l10n.t('publish.stopRecording')
+                  : context.l10n.t('publish.startRecording'),
               style: AppTextStyles.bodyStrong,
             ),
             const SizedBox(height: AppSpacing.lg),

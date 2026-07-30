@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../localization/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/custom_scaffold.dart';
 
@@ -11,7 +12,7 @@ class EditNicknamePage extends StatefulWidget {
 }
 
 class _EditNicknamePageState extends State<EditNicknamePage> {
-  final _nicknameController = TextEditingController(text: '用户昵称');
+  final _nicknameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -22,14 +23,24 @@ class _EditNicknamePageState extends State<EditNicknamePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_nicknameController.text.isEmpty) {
+      _nicknameController.text = context.l10n.t('profile.nickname');
+    }
+
     return CustomScaffold(
-      title: '编辑昵称',
-      rightText: '保存',
+      title: context.l10n.t('profile.editNickname'),
+      rightText: context.l10n.t('app.save'),
       onRightIconTap: () {
         if (_formKey.currentState!.validate()) {
           // 保存昵称逻辑
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('昵称已保存：${_nicknameController.text}')),
+            SnackBar(
+              content: Text(
+                context.l10n.t('profile.nicknameSaved', {
+                  'nickname': _nicknameController.text,
+                }),
+              ),
+            ),
           );
           context.pop();
         }
@@ -53,28 +64,31 @@ class _EditNicknamePageState extends State<EditNicknamePage> {
                 ),
                 child: TextFormField(
                   controller: _nicknameController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     filled: false,
                     border: InputBorder.none,
-                    hintText: '请输入昵称',
+                    hintText: context.l10n.t('profile.nicknameHint'),
                     hintStyle: AppTextStyles.hint,
                   ),
                   style: AppTextStyles.bodyStrong,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return '昵称不能为空';
+                      return context.l10n.t('profile.nicknameRequired');
                     }
                     if (value.length > 20) {
-                      return '昵称不能超过20个字符';
+                      return context.l10n.t('profile.nicknameTooLong');
                     }
                     return null;
                   },
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
-              const Padding(
-                padding: EdgeInsets.only(left: AppSpacing.xl),
-                child: Text('昵称长度为1-20个字符', style: AppTextStyles.caption),
+              Padding(
+                padding: const EdgeInsets.only(left: AppSpacing.xl),
+                child: Text(
+                  context.l10n.t('profile.nicknameRule'),
+                  style: AppTextStyles.caption,
+                ),
               ),
             ],
           ),

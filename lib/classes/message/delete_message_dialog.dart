@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../localization/app_localizations.dart';
 import '../../theme/app_theme.dart';
 
 // 弹框图层类
@@ -35,14 +36,14 @@ class DeleteMessageDialog extends StatelessWidget {
                 children: [
                   const SizedBox(height: 24),
                   Text(
-                    "提示",
+                    context.l10n.t('message.dialogTitle'),
                     style: AppTextStyles.title.copyWith(
                       decoration: TextDecoration.none,
                     ),
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    "删除对话",
+                    context.l10n.t('message.deleteConversation'),
                     style: AppTextStyles.menuItem.copyWith(
                       decoration: TextDecoration.none,
                     ),
@@ -69,7 +70,7 @@ class DeleteMessageDialog extends StatelessWidget {
                             ),
                             child: Center(
                               child: Text(
-                                "取消",
+                                context.l10n.t('app.cancel'),
                                 style: AppTextStyles.button.copyWith(
                                   decoration: TextDecoration.none,
                                 ),
@@ -90,7 +91,7 @@ class DeleteMessageDialog extends StatelessWidget {
                             ),
                             child: Center(
                               child: Text(
-                                "删除",
+                                context.l10n.t('app.delete'),
                                 style: AppTextStyles.button.copyWith(
                                   color: AppColors.textInverse,
                                   decoration: TextDecoration.none,

@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isar/isar.dart';
 
 import '../../configs/consts.dart';
+import '../../localization/app_localizations.dart';
 import '../../manager/app_Isar.dart';
 import '../../model/chat_message.dart';
 import '../../theme/app_theme.dart';
@@ -101,7 +102,7 @@ class ChatPage extends HookConsumerWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                _formatTime(message.createdAt),
+                _formatTime(context, message.createdAt),
                 style: AppTextStyles.timeTiny,
               ),
             ],
@@ -111,7 +112,7 @@ class ChatPage extends HookConsumerWidget {
     }
 
     return CustomScaffold(
-      title: '聊天',
+      title: context.l10n.t('chat.title'),
       rightIconPath: AppAssets.moreButton,
       onRightIconTap: () {
         // 更多选项逻辑
@@ -151,7 +152,10 @@ class ChatPage extends HookConsumerWidget {
                           ),
                         ),
                         const SizedBox(height: AppSpacing.xl),
-                        const Text('暂无消息', style: AppTextStyles.bodyStrong),
+                        Text(
+                          context.l10n.t('message.empty'),
+                          style: AppTextStyles.bodyStrong,
+                        ),
                       ],
                     ),
                   )
@@ -181,11 +185,13 @@ class ChatPage extends HookConsumerWidget {
                     ),
                     child: TextField(
                       controller: messageController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         filled: false,
-                        hintText: '说点什么...',
+                        hintText: context.l10n.t('chat.inputHint'),
                         border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 11),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 11,
+                        ),
                         hintStyle: AppTextStyles.hint,
                       ),
                       style: AppTextStyles.bodyStrongSmall,
@@ -219,7 +225,7 @@ class ChatPage extends HookConsumerWidget {
     );
   }
 
-  String _formatTime(DateTime dateTime) {
+  String _formatTime(BuildContext context, DateTime dateTime) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
@@ -228,7 +234,7 @@ class ChatPage extends HookConsumerWidget {
     if (messageDate.isAtSameMomentAs(today)) {
       return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
     } else if (messageDate.isAtSameMomentAs(yesterday)) {
-      return '昨天 ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+      return '${AppLocalizations.of(context).t('message.yesterday')} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
     } else {
       return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
     }

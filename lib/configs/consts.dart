@@ -3,16 +3,17 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../localization/app_localizations.dart';
 import '../theme/app_theme.dart';
 
 enum UserActionOption {
-  delete('删除'),
-  report('举报'),
-  block('拉黑'),
-  cancel('取消');
+  delete('app.delete'),
+  report('app.report'),
+  block('app.block'),
+  cancel('app.cancel');
 
-  final String label;
-  const UserActionOption(this.label);
+  final String labelKey;
+  const UserActionOption(this.labelKey);
 }
 
 const List<String> moodImages = AppAssets.moodImages;
@@ -54,16 +55,21 @@ void showAvatarOptions(
                 Icons.photo_library,
                 color: AppColors.primaryPink,
               ),
-              title: const Text('从相册选择', style: AppTextStyles.bodyStrong),
+              title: Text(
+                context.l10n.t('picker.album'),
+                style: AppTextStyles.bodyStrong,
+              ),
               onTap: () {
                 Navigator.pop(context);
                 if (onAlbumSelected != null) {
                   onAlbumSelected();
                 } else {
                   // 默认提示
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('已选择相册')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(context.l10n.t('picker.albumSelected')),
+                    ),
+                  );
                 }
               },
             ),
@@ -72,23 +78,31 @@ void showAvatarOptions(
                 Icons.camera_alt,
                 color: AppColors.primaryPink,
               ),
-              title: const Text('拍照', style: AppTextStyles.bodyStrong),
+              title: Text(
+                context.l10n.t('picker.camera'),
+                style: AppTextStyles.bodyStrong,
+              ),
               onTap: () {
                 Navigator.pop(context);
                 if (onCameraSelected != null) {
                   onCameraSelected();
                 } else {
                   // 默认提示
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('已选择拍照')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(context.l10n.t('picker.cameraSelected')),
+                    ),
+                  );
                 }
               },
             ),
             const SizedBox(height: AppSpacing.md),
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('取消', style: AppTextStyles.hint),
+              child: Text(
+                context.l10n.t('app.cancel'),
+                style: AppTextStyles.hint,
+              ),
             ),
           ],
         ),
@@ -183,7 +197,7 @@ void showUserActionOptions(
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      option.label,
+                      context.l10n.t(option.labelKey),
                       textAlign: TextAlign.center,
                       style: AppTextStyles.bodyStrong.copyWith(
                         color: isDelete

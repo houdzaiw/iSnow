@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../localization/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import 'provider/login_provider.dart';
 
@@ -22,16 +23,16 @@ class LoginDetailPage extends HookConsumerWidget {
 
       // 验证输入
       if (account.isEmpty) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('请输入邮箱或手机号')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.t('auth.accountRequired'))),
+        );
         return;
       }
 
       if (password.isEmpty) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('请输入密码')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.t('auth.passwordRequired'))),
+        );
         return;
       }
 
@@ -69,16 +70,24 @@ class LoginDetailPage extends HookConsumerWidget {
         } else {
           // 登录失败，显示错误信息
           if (context.mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(response.message ?? '登录失败')));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  response.message ?? context.l10n.t('auth.loginFailed'),
+                ),
+              ),
+            );
           }
         }
       } catch (e) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('登录异常：$e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.l10n.t('auth.loginException', {'error': '$e'}),
+            ),
+          ),
+        );
       } finally {
         isLoading.value = false;
       }
@@ -107,7 +116,10 @@ class LoginDetailPage extends HookConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 48),
-                    const Text('请输入邮箱', style: AppTextStyles.bodyStrong),
+                    Text(
+                      context.l10n.t('auth.emailLabel'),
+                      style: AppTextStyles.bodyStrong,
+                    ),
                     const SizedBox(height: AppSpacing.sm),
                     // 邮箱输入框
                     SizedBox(
@@ -115,7 +127,7 @@ class LoginDetailPage extends HookConsumerWidget {
                       child: TextField(
                         controller: emailController,
                         decoration: InputDecoration(
-                          hintText: '请输入邮箱地址',
+                          hintText: context.l10n.t('auth.emailHint'),
                           filled: true,
                           fillColor: AppColors.fieldBackground,
                           border: OutlineInputBorder(
@@ -133,7 +145,10 @@ class LoginDetailPage extends HookConsumerWidget {
                     ),
 
                     const SizedBox(height: AppSpacing.xxl),
-                    const Text('请输入密码', style: AppTextStyles.bodyStrong),
+                    Text(
+                      context.l10n.t('auth.passwordLabel'),
+                      style: AppTextStyles.bodyStrong,
+                    ),
                     const SizedBox(height: AppSpacing.sm),
                     // 密码输入框
                     SizedBox(
@@ -141,7 +156,7 @@ class LoginDetailPage extends HookConsumerWidget {
                       child: TextField(
                         controller: passwordController,
                         decoration: InputDecoration(
-                          hintText: '请输入密码',
+                          hintText: context.l10n.t('auth.passwordHint'),
                           filled: true,
                           fillColor: AppColors.fieldBackground,
                           border: OutlineInputBorder(
@@ -179,7 +194,7 @@ class LoginDetailPage extends HookConsumerWidget {
                                 ),
                               )
                             : Text(
-                                '登录',
+                                context.l10n.t('auth.login'),
                                 style: AppTextStyles.button.copyWith(
                                   color: AppColors.textInverse,
                                 ),

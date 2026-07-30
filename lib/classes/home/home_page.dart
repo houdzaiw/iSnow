@@ -5,6 +5,7 @@ import 'package:project/model/diary_entry.dart';
 import 'dart:math';
 import 'dart:async';
 import '../../configs/consts.dart';
+import '../../localization/app_localizations.dart';
 import '../../theme/app_theme.dart';
 
 import 'capture_finished_page.dart';
@@ -78,8 +79,8 @@ class _HomePageState extends State<HomePage>
       ..id = 100200
       ..date = DateTime.parse("2024-01-01")
       ..emoji = "😊"
-      ..content = "这是今天捕捞到的一条心情。"
-      ..description = "这是今天捕捞到的一条心情。"
+      ..content = context.l10n.t('home.captureDescription')
+      ..description = context.l10n.t('home.captureDescription')
       ..type = "edit"
       ..moodIndex = 0;
     context.push("/post_detail-view", extra: entry);

@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../configs/consts.dart';
+import '../../localization/app_localizations.dart';
 import '../../theme/app_theme.dart';
 
 class PublishEditPage extends HookConsumerWidget {
@@ -51,13 +52,13 @@ class PublishEditPage extends HookConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('填写心情', style: AppTextStyles.title),
+          Text(context.l10n.t('publish.writeMood'), style: AppTextStyles.title),
           const SizedBox(height: AppSpacing.lg),
           TextField(
             controller: textController,
             maxLines: 6,
             decoration: InputDecoration(
-              hintText: '今天发生了什么...',
+              hintText: context.l10n.t('publish.moodHint'),
               hintStyle: AppTextStyles.hintLarge,
               filled: true,
               fillColor: AppColors.cardBackground,
@@ -85,9 +86,9 @@ class PublishEditPage extends HookConsumerWidget {
             onTap: () {
               // 检查是否已达到最大数量
               if (selectedImages.value.length >= 4) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(content: Text('最多只能选择4张图片')));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(context.l10n.t('publish.maxImages'))),
+                );
                 return;
               }
 
@@ -111,7 +112,11 @@ class PublishEditPage extends HookConsumerWidget {
                     if (images.length > remainingSlots) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('最多只能选择4张图片，已添加${imagesToAdd.length}张'),
+                          content: Text(
+                            context.l10n.t('publish.maxImagesAdded', {
+                              'count': '${imagesToAdd.length}',
+                            }),
+                          ),
                         ),
                       );
                     }
