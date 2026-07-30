@@ -163,7 +163,7 @@ class PublishVoicePage extends HookConsumerWidget {
                     const SizedBox(width: AppSpacing.xs),
                     Text(
                       _durationToSeconds(recordDuration.value),
-                      style: AppTextStyles.bodyStrong.copyWith(fontSize: 14),
+                      style: AppTextStyles.bodyStrongSmall,
                     ),
                   ],
                 ),

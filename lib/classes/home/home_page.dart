@@ -243,12 +243,12 @@ class _HomePageState extends State<HomePage>
           ),
           decoration: BoxDecoration(
             color: AppColors.cardBackground,
-            borderRadius: BorderRadius.circular(45),
+            borderRadius: BorderRadius.circular(AppRadius.homeCard),
             border: Border.all(color: AppColors.calendarBorder, width: 3),
             boxShadow: AppShadows.soft,
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(42),
+            borderRadius: BorderRadius.circular(AppRadius.homeCardContent),
             child: Stack(
               children: [
                 // 随机展示mood图片

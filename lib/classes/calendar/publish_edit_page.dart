@@ -58,7 +58,7 @@ class PublishEditPage extends HookConsumerWidget {
             maxLines: 6,
             decoration: InputDecoration(
               hintText: '今天发生了什么...',
-              hintStyle: AppTextStyles.hint.copyWith(fontSize: 18),
+              hintStyle: AppTextStyles.hintLarge,
               filled: true,
               fillColor: AppColors.cardBackground,
               border: OutlineInputBorder(

@@ -29,9 +29,21 @@ class AppTextStyles {
     fontWeight: FontWeight.w400,
   );
 
+  static const TextStyle bodySmall = TextStyle(
+    color: AppColors.textBody,
+    fontSize: 14,
+    fontWeight: FontWeight.w400,
+  );
+
   static const TextStyle bodyStrong = TextStyle(
     color: AppColors.textPrimary,
     fontSize: 16,
+    fontWeight: FontWeight.w600,
+  );
+
+  static const TextStyle bodyStrongSmall = TextStyle(
+    color: AppColors.textPrimary,
+    fontSize: 14,
     fontWeight: FontWeight.w600,
   );
 
@@ -50,6 +62,24 @@ class AppTextStyles {
   static const TextStyle hint = TextStyle(
     color: AppColors.textPlaceholder,
     fontSize: 14,
+    fontWeight: FontWeight.w400,
+  );
+
+  static const TextStyle hintLarge = TextStyle(
+    color: AppColors.textPlaceholder,
+    fontSize: 18,
+    fontWeight: FontWeight.w400,
+  );
+
+  static const TextStyle timeTiny = TextStyle(
+    color: AppColors.textPlaceholder,
+    fontSize: 10,
+    fontWeight: FontWeight.w400,
+  );
+
+  static const TextStyle calendarDay = TextStyle(
+    color: AppColors.textPrimary,
+    fontSize: 12,
     fontWeight: FontWeight.w400,
   );
 }

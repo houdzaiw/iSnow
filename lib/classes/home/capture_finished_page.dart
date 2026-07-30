@@ -60,19 +60,16 @@ class DialogOverlay extends StatelessWidget {
                       height: 60,
                       decoration: BoxDecoration(
                         color: AppColors.avatarPlaceholder,
-                        borderRadius: BorderRadius.circular(30),
+                        shape: BoxShape.circle,
                         border: Border.all(
                           color: AppColors.cardBackground,
                           width: 2,
                         ),
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(30),
-                        child: const Icon(
-                          Icons.person,
-                          color: AppColors.textInverse,
-                          size: 30,
-                        ),
+                      child: const Icon(
+                        Icons.person,
+                        color: AppColors.textInverse,
+                        size: 30,
                       ),
                     ),
                   ),

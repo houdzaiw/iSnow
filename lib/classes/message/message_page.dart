@@ -122,9 +122,9 @@ class MessagePage extends HookConsumerWidget {
             Container(
               width: 50,
               height: 50,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: AppColors.avatarPlaceholder,
-                borderRadius: BorderRadius.circular(25),
+                shape: BoxShape.circle,
               ),
               child: Center(
                 child: Icon(

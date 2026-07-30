@@ -194,8 +194,7 @@ class CalendarPage extends HookConsumerWidget {
             const SizedBox(height: 4),
             Text(
               '${day.day}',
-              style: AppTextStyles.caption.copyWith(
-                fontSize: 12,
+              style: AppTextStyles.calendarDay.copyWith(
                 fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
                 color: selected ? AppColors.primaryPink : AppColors.textPrimary,
               ),
@@ -284,12 +283,7 @@ class CalendarPage extends HookConsumerWidget {
 
       return Expanded(
         child: entriesForDay.isEmpty
-            ? Center(
-                child: Text(
-                  '暂无心情记录',
-                  style: AppTextStyles.body.copyWith(fontSize: 14),
-                ),
-              )
+            ? Center(child: Text('暂无心情记录', style: AppTextStyles.bodySmall))
             : ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 itemCount: entriesForDay.length,

@@ -11,6 +11,8 @@ class AppRadius {
   static const double card = 14;
   static const double calendar = 20;
   static const double dialog = 40;
+  static const double homeCard = 45;
+  static const double homeCardContent = 42;
   static const double pill = 40;
 
   static const BorderRadius cardBorder = BorderRadius.all(

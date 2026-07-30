@@ -127,17 +127,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     width: 36,
                     height: 36,
                     margin: const EdgeInsets.only(right: AppSpacing.sm),
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppColors.avatarPlaceholder,
-                      borderRadius: BorderRadius.circular(18),
+                      shape: BoxShape.circle,
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(18),
-                      child: const Icon(
-                        Icons.person,
-                        color: AppColors.textInverse,
-                        size: 20,
-                      ),
+                    child: const Icon(
+                      Icons.person,
+                      color: AppColors.textInverse,
+                      size: 20,
                     ),
                   ),
                 if (valueText != null)

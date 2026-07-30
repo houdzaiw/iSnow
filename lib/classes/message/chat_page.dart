@@ -102,7 +102,7 @@ class ChatPage extends HookConsumerWidget {
               const SizedBox(height: 4),
               Text(
                 _formatTime(message.createdAt),
-                style: AppTextStyles.caption.copyWith(fontSize: 10),
+                style: AppTextStyles.timeTiny,
               ),
             ],
           ),
@@ -188,7 +188,7 @@ class ChatPage extends HookConsumerWidget {
                         contentPadding: EdgeInsets.symmetric(vertical: 11),
                         hintStyle: AppTextStyles.hint,
                       ),
-                      style: AppTextStyles.bodyStrong.copyWith(fontSize: 14),
+                      style: AppTextStyles.bodyStrongSmall,
                       maxLines: 1,
                     ),
                   ),

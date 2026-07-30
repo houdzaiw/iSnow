@@ -23,10 +23,7 @@ class ContentView extends StatelessWidget {
             children: [
               Image.asset(moodImages[entry.moodIndex!], width: 40, height: 40),
               const SizedBox(width: 8),
-              Text(
-                "这是我今天的心情",
-                style: AppTextStyles.bodyStrong.copyWith(fontSize: 14),
-              ),
+              Text("这是我今天的心情", style: AppTextStyles.bodyStrongSmall),
               const Spacer(),
               isDetail
                   ? const SizedBox.shrink()
@@ -39,10 +36,7 @@ class ContentView extends StatelessWidget {
         const SizedBox(height: 8),
         // 显示描述内容
         if (entry.description != null && entry.description!.isNotEmpty)
-          Text(
-            entry.description!,
-            style: AppTextStyles.body.copyWith(fontSize: 14),
-          ),
+          Text(entry.description!, style: AppTextStyles.bodySmall),
         // 显示图片
         if (entry.images != null && entry.images!.isNotEmpty)
           Padding(
