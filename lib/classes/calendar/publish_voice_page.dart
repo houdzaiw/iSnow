@@ -9,6 +9,7 @@ import 'package:record/record.dart';
 
 import '../../configs/consts.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/voice_bubble.dart';
 
 class PublishVoicePage extends HookConsumerWidget {
   final int? moodIndex;
@@ -142,32 +143,7 @@ class PublishVoicePage extends HookConsumerWidget {
                 height: 45,
               ),
               const SizedBox(width: AppSpacing.md),
-              Container(
-                width: 179,
-                height: 41,
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage(AppAssets.calendarSpeakBackground),
-                    fit: BoxFit.contain,
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    const SizedBox(width: 18),
-                    Image.asset(
-                      AppAssets.calendarSpeakIcon,
-                      width: 10,
-                      height: 16,
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Text(
-                      _durationToSeconds(recordDuration.value),
-                      style: AppTextStyles.bodyStrongSmall,
-                    ),
-                  ],
-                ),
-              ),
+              VoiceBubble(text: _durationToSeconds(recordDuration.value)),
             ],
           ),
         ),
@@ -188,15 +164,11 @@ class PublishVoicePage extends HookConsumerWidget {
               style: AppTextStyles.bodyStrong,
             ),
             const SizedBox(height: AppSpacing.lg),
-            Container(
-              width: 220,
+            Image.asset(
+              AppAssets.calendarSpeakerButton,
+              width: 116,
               height: 116,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage(AppAssets.calendarSpeakerButton),
-                  fit: BoxFit.contain,
-                ),
-              ),
+              fit: BoxFit.contain,
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(

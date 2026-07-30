@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../configs/consts.dart';
 import '../model/diary_entry.dart';
 import '../theme/app_theme.dart';
+import 'voice_bubble.dart';
 
 class VoiceView extends StatelessWidget {
   final DiaryEntry entry;
@@ -37,32 +38,7 @@ class VoiceView extends StatelessWidget {
                 entry.moodIndex! < moodImages.length)
               Image.asset(moodImages[entry.moodIndex!], width: 40, height: 40),
             const SizedBox(width: 8),
-            Container(
-              width: 179,
-              height: 41,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage(AppAssets.calendarSpeakBackground),
-                  fit: BoxFit.contain,
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const SizedBox(width: 18),
-                  Image.asset(
-                    AppAssets.calendarSpeakIcon,
-                    width: 10,
-                    height: 16,
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  Text(
-                    entry.description ?? '',
-                    style: AppTextStyles.bodyStrongSmall,
-                  ),
-                ],
-              ),
-            ),
+            VoiceBubble(text: entry.description ?? ''),
           ],
         ),
         const SizedBox(height: 10),

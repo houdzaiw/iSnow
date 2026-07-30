@@ -61,16 +61,9 @@ class SelectMoodPage extends HookConsumerWidget {
                           },
                         );
                       },
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: AppColors.cardBackground,
-                          borderRadius: AppRadius.cardBorder,
-                          border: Border.all(color: AppColors.calendarBorder),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(AppSpacing.sm),
-                          child: Image.asset(imagePath, fit: BoxFit.contain),
-                        ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(AppSpacing.sm),
+                        child: Image.asset(imagePath, fit: BoxFit.contain),
                       ),
                     );
                   }).toList(),

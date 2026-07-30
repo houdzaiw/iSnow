@@ -130,24 +130,11 @@ class PublishEditPage extends HookConsumerWidget {
                 },
               );
             },
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: AppColors.cardBackground,
-                borderRadius: AppRadius.cardBorder,
-                border: Border.all(color: AppColors.calendarBorder),
-              ),
-              child: SizedBox(
-                width: 64,
-                height: 64,
-                child: Center(
-                  child: Image.asset(
-                    AppAssets.calendarSelectImageButton,
-                    width: 46,
-                    height: 46,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
+            child: Image.asset(
+              AppAssets.calendarSelectImageButton,
+              width: 60,
+              height: 60,
+              fit: BoxFit.contain,
             ),
           ),
           const SizedBox(height: AppSpacing.xl),

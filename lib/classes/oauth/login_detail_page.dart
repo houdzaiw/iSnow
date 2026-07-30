@@ -92,12 +92,7 @@ class LoginDetailPage extends HookConsumerWidget {
         width: double.infinity,
         height: double.infinity,
         alignment: Alignment.center,
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage(AppAssets.authBackground),
-            fit: BoxFit.cover,
-          ),
-        ),
+        decoration: const BoxDecoration(gradient: AppGradients.authBackground),
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.xxxl),
           child: Stack(

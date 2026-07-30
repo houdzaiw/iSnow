@@ -129,6 +129,23 @@ class PublishPage extends HookConsumerWidget {
                       int index = entry.key;
                       IconData iconData = entry.value;
                       bool isSelected = currentTabIndex.value == index;
+                      final lanhuTabAsset = index == 0 && isSelected
+                          ? AppAssets.lanhuPublishTabEditActive
+                          : index == 1 && !isSelected
+                          ? AppAssets.lanhuPublishTabVoiceNormal
+                          : null;
+
+                      if (lanhuTabAsset != null) {
+                        return Tab(
+                          child: Image.asset(
+                            lanhuTabAsset,
+                            width: 99,
+                            height: 30,
+                            fit: BoxFit.contain,
+                          ),
+                        );
+                      }
+
                       return Tab(
                         child: Container(
                           width: 99,
@@ -187,21 +204,11 @@ class PublishPage extends HookConsumerWidget {
                       voicePath.value,
                     );
                   },
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: AppGradients.sendButton,
-                    ),
-                    child: Center(
-                      child: Image.asset(
-                        AppAssets.calendarSendPost,
-                        width: 22,
-                        height: 22,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
+                  child: Image.asset(
+                    AppAssets.calendarSendPost,
+                    width: 24,
+                    height: 24,
+                    fit: BoxFit.contain,
                   ),
                 ),
               ],

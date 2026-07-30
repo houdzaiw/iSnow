@@ -12,8 +12,21 @@ class AppAssets {
   static const String lanhuCaptureResultCard =
       'assets/lanhu/home/capture_result_card.png';
   static const String lanhuProudMood = 'assets/lanhu/mood/proud_large.png';
+  static const String lanhuShyMood = 'assets/lanhu/calender/default_icon.png';
   static const String lanhuCalendarDragHandle =
       'assets/lanhu/calendar/calendar_drag_handle.png';
+  static const String lanhuPublishTabEditActive =
+      'assets/lanhu/calendar/publish_tab_edit_active.png';
+  static const String lanhuPublishTabVoiceNormal =
+      'assets/lanhu/calendar/publish_tab_voice_normal.png';
+  static const String lanhuCalendarSelectImageButton =
+      'assets/lanhu/calendar/select_image_button.png';
+  static const String lanhuCalendarSendPost =
+      'assets/lanhu/calendar/publish_send.png';
+  static const String lanhuCalendarSpeakIcon =
+      'assets/lanhu/calendar/speak_icon.png';
+  static const String lanhuCalendarSpeakerButton =
+      'assets/lanhu/calendar/speaker_button.png';
 
   static const String launchBackground = 'assets/base/launch_bg_image.png';
   static const String authBackground = 'assets/base/base_bg_image.png';
@@ -26,6 +39,22 @@ class AppAssets {
 
   static const String tabHomeNormal = 'assets/tabbar/home_normal.png';
   static const String tabHomeActive = 'assets/tabbar/home_select.png';
+  static const String lanhuTabHomeNormal =
+      'assets/lanhu/tabbar/home_normal.png';
+  static const String lanhuTabHomeActive =
+      'assets/lanhu/tabbar/home_active.png';
+  static const String lanhuTabCalendarNormal =
+      'assets/lanhu/tabbar/calendar_normal.png';
+  static const String lanhuTabCalendarActive =
+      'assets/lanhu/tabbar/calendar_active.png';
+  static const String lanhuTabMessageNormal =
+      'assets/lanhu/tabbar/message_normal.png';
+  static const String lanhuTabMessageActive =
+      'assets/lanhu/tabbar/message_active.png';
+  static const String lanhuTabProfileNormal =
+      'assets/lanhu/tabbar/profile_normal.png';
+  static const String lanhuTabProfileActive =
+      'assets/lanhu/tabbar/profile_active.png';
   static const String tabMessageNormal = 'assets/tabbar/message_normal.png';
   static const String tabMessageActive = 'assets/tabbar/message_select.png';
   static const String tabProfileNormal =
@@ -38,18 +67,17 @@ class AppAssets {
   static const String homeCaptureFinishedPop =
       'assets/home/capture_finished_pop.png';
 
-  static const String calendarDefaultMood = 'assets/calendar/default_icon.png';
+  static const String calendarDefaultMood = lanhuShyMood;
   static const String calendarExpandButton =
       'assets/calendar/expand_button.png';
   static const String calendarFoldButton = 'assets/calendar/fold_button.png';
   static const String calendarSelectImageButton =
-      'assets/calendar/select_image_button.png';
-  static const String calendarSendPost = 'assets/calendar/send_post.png';
+      lanhuCalendarSelectImageButton;
+  static const String calendarSendPost = lanhuCalendarSendPost;
   static const String calendarSpeakBackground =
       'assets/calendar/speak_bg_image.png';
-  static const String calendarSpeakIcon = 'assets/calendar/speak_icon.png';
-  static const String calendarSpeakerButton =
-      'assets/calendar/speaker_button.png';
+  static const String calendarSpeakIcon = lanhuCalendarSpeakIcon;
+  static const String calendarSpeakerButton = lanhuCalendarSpeakerButton;
   static const String calendarFrustrated =
       'assets/calendar/frustrated_icon.png';
   static const String calendarFrustratedActive =
@@ -74,7 +102,7 @@ class AppAssets {
   static const String profileSettingIcon = 'assets/profile/setting_icon.png';
 
   static const List<String> moodImages = [
-    'assets/mood/model_01.png',
+    lanhuShyMood,
     'assets/mood/model_02.png',
     'assets/mood/model_03.png',
     'assets/mood/model_04.png',

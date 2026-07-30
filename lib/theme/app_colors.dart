@@ -6,6 +6,8 @@ class AppColors {
   static const Color primaryPink = Color(0xFFFF5390);
   static const Color primaryPinkDeep = Color(0xFFF8428D);
   static const Color primaryPinkLight = Color(0xFFFF80B1);
+  static const Color voiceBubbleStart = Color(0xFFFF5774);
+  static const Color voiceBubbleEnd = Color(0xFFFF4EAE);
   static const Color calendarBorder = Color(0xFFFEC9DC);
   static const Color brandYellow = Color(0xFFF9E707);
   static const Color accentYellow = Color(0xFFFFB400);

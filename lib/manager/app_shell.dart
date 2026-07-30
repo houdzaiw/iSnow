@@ -45,29 +45,23 @@ class AppShell extends StatelessWidget {
         },
         items: [
           BottomNavigationBarItem(
-            icon: _AssetTabIcon(asset: AppAssets.tabHomeNormal),
-            activeIcon: _AssetTabIcon(asset: AppAssets.tabHomeActive),
+            icon: _AssetTabIcon(asset: AppAssets.lanhuTabHomeNormal),
+            activeIcon: _AssetTabIcon(asset: AppAssets.lanhuTabHomeActive),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: const _IconTabIcon(
-              icon: Icons.calendar_month,
-              color: AppColors.tabInactive,
-            ),
-            activeIcon: const _IconTabIcon(
-              icon: Icons.calendar_month,
-              color: AppColors.primaryPink,
-            ),
+            icon: _AssetTabIcon(asset: AppAssets.lanhuTabCalendarNormal),
+            activeIcon: _AssetTabIcon(asset: AppAssets.lanhuTabCalendarActive),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: _AssetTabIcon(asset: AppAssets.tabMessageNormal),
-            activeIcon: _AssetTabIcon(asset: AppAssets.tabMessageActive),
+            icon: _AssetTabIcon(asset: AppAssets.lanhuTabMessageNormal),
+            activeIcon: _AssetTabIcon(asset: AppAssets.lanhuTabMessageActive),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: _AssetTabIcon(asset: AppAssets.tabProfileNormal),
-            activeIcon: _AssetTabIcon(asset: AppAssets.tabProfileActive),
+            icon: _AssetTabIcon(asset: AppAssets.lanhuTabProfileNormal),
+            activeIcon: _AssetTabIcon(asset: AppAssets.lanhuTabProfileActive),
             label: '',
           ),
         ],
@@ -86,21 +80,6 @@ class _AssetTabIcon extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 6),
       child: Image.asset(asset, width: 36, height: 36),
-    );
-  }
-}
-
-class _IconTabIcon extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-
-  const _IconTabIcon({required this.icon, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 6),
-      child: Icon(icon, size: 30, color: color),
     );
   }
 }
