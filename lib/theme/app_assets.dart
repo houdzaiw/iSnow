@@ -12,7 +12,7 @@ class AppAssets {
   static const String lanhuCaptureResultCard =
       'assets/lanhu/home/capture_result_card.png';
   static const String lanhuProudMood = 'assets/lanhu/mood/proud_large.png';
-  static const String lanhuShyMood = 'assets/lanhu/calender/default_icon.png';
+  static const String lanhuShyMood = 'assets/calendar/default_icon.png';
   static const String lanhuCalendarDragHandle =
       'assets/lanhu/calendar/calendar_drag_handle.png';
   static const String lanhuPublishTabEditActive =
@@ -102,7 +102,7 @@ class AppAssets {
   static const String profileSettingIcon = 'assets/profile/setting_icon.png';
 
   static const List<String> moodImages = [
-    lanhuShyMood,
+    'assets/mood/model_01.png',
     'assets/mood/model_02.png',
     'assets/mood/model_03.png',
     'assets/mood/model_04.png',
