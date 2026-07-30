@@ -20,8 +20,13 @@ import '../classes/oauth/login_detail_page.dart';
 import '../classes/oauth/register_page.dart';
 import '../manager/app_shell.dart';
 
+const String _initialRoute = String.fromEnvironment(
+  'INITIAL_ROUTE',
+  defaultValue: '/launch',
+);
+
 final GoRouter goRouter = GoRouter(
-  initialLocation: '/launch',
+  initialLocation: _initialRoute,
   routes: [
     // 启动页（不需要底部导航）
     GoRoute(

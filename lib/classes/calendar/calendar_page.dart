@@ -194,7 +194,7 @@ class CalendarPage extends HookConsumerWidget {
             const SizedBox(height: 4),
             Text(
               '${day.day}',
-              style: TextStyle(
+              style: AppTextStyles.caption.copyWith(
                 fontSize: 12,
                 fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
                 color: selected ? AppColors.primaryPink : AppColors.textPrimary,
@@ -226,6 +226,7 @@ class CalendarPage extends HookConsumerWidget {
           boxShadow: AppShadows.soft,
         ),
         child: TableCalendar(
+          locale: 'zh_CN',
           firstDay: DateTime.utc(2020),
           lastDay: DateTime.utc(2030),
           focusedDay: focusedDay.value,
@@ -286,10 +287,7 @@ class CalendarPage extends HookConsumerWidget {
             ? Center(
                 child: Text(
                   '暂无心情记录',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                  ),
+                  style: AppTextStyles.body.copyWith(fontSize: 14),
                 ),
               )
             : ListView.builder(

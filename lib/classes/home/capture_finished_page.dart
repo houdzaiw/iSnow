@@ -35,7 +35,7 @@ class DialogOverlay extends StatelessWidget {
                     height: 120,
                   ),
                 ),
-                const Positioned(
+                Positioned(
                   left: 46,
                   right: 46,
                   bottom: 48,
@@ -44,10 +44,7 @@ class DialogOverlay extends StatelessWidget {
                     textAlign: TextAlign.center,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
+                    style: AppTextStyles.body.copyWith(
                       decoration: TextDecoration.none,
                     ),
                   ),
@@ -109,11 +106,9 @@ class DialogOverlay extends StatelessWidget {
                   borderRadius: AppRadius.pillBorder,
                 ),
                 alignment: Alignment.center,
-                child: const Text(
+                child: Text(
                   '打开',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                  style: AppTextStyles.title.copyWith(
                     color: AppColors.textInverse,
                     decoration: TextDecoration.none,
                   ),

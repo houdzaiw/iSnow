@@ -39,57 +39,64 @@ class _EditProfilePageState extends State<EditProfilePage> {
           context.pop();
         }
       },
-      body: Container(
-        //圆角， 白色背景
-        margin: const EdgeInsets.only(left: 16, right: 16, top: 20),
-        height: 52 * 4 + 20, // 四个条目高度加间隔
-        decoration: const BoxDecoration(
-          color: AppColors.cardBackground,
-          borderRadius: AppRadius.fieldBorder,
-        ),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 17),
-            children: [
-              _buildProfileItem(
-                context,
-                title: '头像',
-                onTap: () => showAvatarOptions(context),
-                showAvatar: true,
-              ),
-              Container(height: 0.5, color: AppColors.border),
-              _buildProfileItem(
-                context,
-                title: '昵称',
-                onTap: () => _navigateToEditNickname(context),
-              ),
-              Container(height: 0.5, color: AppColors.border),
-              _buildProfileItem(
-                context,
-                title: '性别',
-                onTap: () => _showGenderPicker(context),
-                valueWidget: _selectedGender != null
-                    ? Image.asset(
-                        _selectedGender == '男'
-                            ? AppAssets.profileMaleIcon
-                            : AppAssets.profileFemaleIcon,
-                        width: 20,
-                        height: 20,
-                      )
-                    : null,
-              ),
-              Container(height: 0.5, color: AppColors.border),
-              _buildProfileItem(
-                context,
-                title: '生日',
-                onTap: () => _showBirthdayPicker(context),
-                valueText: _selectedBirthday != null
-                    ? '${_selectedBirthday!.year}-${_selectedBirthday!.month.toString().padLeft(2, '0')}-${_selectedBirthday!.day.toString().padLeft(2, '0')}'
-                    : null,
-              ),
-            ],
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: Container(
+          margin: const EdgeInsets.all(AppSpacing.xl),
+          decoration: BoxDecoration(
+            color: AppColors.cardBackground,
+            borderRadius: AppRadius.cardBorder,
+            boxShadow: AppShadows.soft,
+          ),
+          child: Form(
+            key: _formKey,
+            child: ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+              itemCount: 4,
+              separatorBuilder: (_, _) =>
+                  const Divider(height: 1, color: AppColors.divider),
+              itemBuilder: (context, index) {
+                final items = [
+                  _buildProfileItem(
+                    context,
+                    title: '头像',
+                    onTap: () => showAvatarOptions(context),
+                    showAvatar: true,
+                  ),
+                  _buildProfileItem(
+                    context,
+                    title: '昵称',
+                    onTap: () => _navigateToEditNickname(context),
+                    valueText: _nicknameController.text,
+                  ),
+                  _buildProfileItem(
+                    context,
+                    title: '性别',
+                    onTap: () => _showGenderPicker(context),
+                    valueWidget: _selectedGender != null
+                        ? Image.asset(
+                            _selectedGender == '男'
+                                ? AppAssets.profileMaleIcon
+                                : AppAssets.profileFemaleIcon,
+                            width: 20,
+                            height: 20,
+                          )
+                        : null,
+                  ),
+                  _buildProfileItem(
+                    context,
+                    title: '生日',
+                    onTap: () => _showBirthdayPicker(context),
+                    valueText: _selectedBirthday != null
+                        ? '${_selectedBirthday!.year}-${_selectedBirthday!.month.toString().padLeft(2, '0')}-${_selectedBirthday!.day.toString().padLeft(2, '0')}'
+                        : null,
+                  ),
+                ];
+                return items[index];
+              },
+            ),
           ),
         ),
       ),
@@ -107,7 +114,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
         decoration: const BoxDecoration(color: AppColors.cardBackground),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -119,7 +126,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   Container(
                     width: 36,
                     height: 36,
-                    margin: const EdgeInsets.only(right: 8),
+                    margin: const EdgeInsets.only(right: AppSpacing.sm),
                     decoration: BoxDecoration(
                       color: AppColors.avatarPlaceholder,
                       borderRadius: BorderRadius.circular(18),
@@ -136,6 +143,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 if (valueText != null)
                   Text(valueText, style: AppTextStyles.hint),
                 if (valueWidget != null) valueWidget,
+                const SizedBox(width: AppSpacing.sm),
                 const Icon(
                   Icons.arrow_forward_ios,
                   size: 16,
@@ -158,12 +166,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('选择性别'),
+          backgroundColor: AppColors.cardBackground,
+          shape: const RoundedRectangleBorder(
+            borderRadius: AppRadius.cardBorder,
+          ),
+          title: const Text('选择性别', style: AppTextStyles.title),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                title: const Text('男'),
+                leading: const Icon(Icons.male, color: AppColors.primaryPink),
+                title: const Text('男', style: AppTextStyles.bodyStrong),
                 onTap: () {
                   Navigator.pop(context);
                   setState(() {
@@ -175,7 +188,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 },
               ),
               ListTile(
-                title: const Text('女'),
+                leading: const Icon(Icons.female, color: AppColors.primaryPink),
+                title: const Text('女', style: AppTextStyles.bodyStrong),
                 onTap: () {
                   Navigator.pop(context);
                   setState(() {

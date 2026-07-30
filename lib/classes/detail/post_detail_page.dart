@@ -45,43 +45,51 @@ class PostDetailPage extends HookConsumerWidget {
 
     return CustomScaffold(
       title: '心情详情',
-      body: Column(
+      body: ListView(
+        padding: const EdgeInsets.all(AppSpacing.xl),
         children: [
           _buildContainer(),
-          const SizedBox(height: 20),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 23),
+          const SizedBox(height: AppSpacing.lg),
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xl,
+              vertical: AppSpacing.lg,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.cardBackground,
+              borderRadius: AppRadius.cardBorder,
+              boxShadow: AppShadows.soft,
+            ),
             child: Row(
               children: [
-                Text(
-                  setDateFormatter(entry.date),
-                  style: AppTextStyles.caption,
+                Expanded(
+                  child: Text(
+                    setDateFormatter(entry.date),
+                    style: AppTextStyles.caption,
+                  ),
                 ),
-                Spacer(),
-                Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        isSad.value = !isSad.value;
-                        if (isSad.value) {
-                          isHappy.value = false;
-                        }
-                        updateDatabase();
-                      },
-                      child: Image.asset(sad, width: 20, height: 20),
-                    ),
-                    SizedBox(width: 20),
-                    GestureDetector(
-                      onTap: () {
-                        isHappy.value = !isHappy.value;
-                        if (isHappy.value) {
-                          isSad.value = false;
-                        }
-                        updateDatabase();
-                      },
-                      child: Image.asset(happy, width: 20, height: 20),
-                    ),
-                  ],
+                _ReactionButton(
+                  asset: sad,
+                  selected: isSad.value,
+                  onTap: () {
+                    isSad.value = !isSad.value;
+                    if (isSad.value) {
+                      isHappy.value = false;
+                    }
+                    updateDatabase();
+                  },
+                ),
+                const SizedBox(width: AppSpacing.md),
+                _ReactionButton(
+                  asset: happy,
+                  selected: isHappy.value,
+                  onTap: () {
+                    isHappy.value = !isHappy.value;
+                    if (isHappy.value) {
+                      isSad.value = false;
+                    }
+                    updateDatabase();
+                  },
                 ),
               ],
             ),
@@ -93,16 +101,57 @@ class PostDetailPage extends HookConsumerWidget {
 
   Widget _buildContainer() {
     if (entry.type == 'voice') {
-      return VoiceView(entry: entry, isDetail: true);
+      return Container(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: AppRadius.cardBorder,
+          boxShadow: AppShadows.soft,
+        ),
+        child: VoiceView(entry: entry, isDetail: true),
+      );
     }
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(AppRadius.xl),
+        borderRadius: AppRadius.cardBorder,
+        boxShadow: AppShadows.soft,
       ),
       child: ContentView(entry: entry, isDetail: true),
+    );
+  }
+}
+
+class _ReactionButton extends StatelessWidget {
+  final String asset;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _ReactionButton({
+    required this.asset,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: selected
+              ? AppColors.fieldBackground
+              : AppColors.cardBackground,
+          borderRadius: AppRadius.pillBorder,
+          border: Border.all(
+            color: selected ? AppColors.primaryPink : AppColors.divider,
+          ),
+        ),
+        child: Center(child: Image.asset(asset, width: 22, height: 22)),
+      ),
     );
   }
 }

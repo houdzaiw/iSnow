@@ -64,7 +64,10 @@ class ChatPage extends HookConsumerWidget {
       return Align(
         alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
         child: Container(
-          margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          margin: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.xl,
+            vertical: AppSpacing.sm,
+          ),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
             color: isUser
@@ -83,6 +86,7 @@ class ChatPage extends HookConsumerWidget {
                     bottomLeft: Radius.circular(20),
                     bottomRight: Radius.circular(20),
                   ),
+            boxShadow: isUser ? null : AppShadows.soft,
           ),
           child: Column(
             crossAxisAlignment: isUser
@@ -91,18 +95,14 @@ class ChatPage extends HookConsumerWidget {
             children: [
               Text(
                 message.message,
-                style: TextStyle(
-                  fontSize: 15,
+                style: AppTextStyles.body.copyWith(
                   color: isUser ? AppColors.textInverse : AppColors.textBody,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 _formatTime(message.createdAt),
-                style: const TextStyle(
-                  fontSize: 10,
-                  color: AppColors.textPlaceholder,
-                ),
+                style: AppTextStyles.caption.copyWith(fontSize: 10),
               ),
             ],
           ),
@@ -132,10 +132,27 @@ class ChatPage extends HookConsumerWidget {
           // 消息列表
           Expanded(
             child: messages.value.isEmpty
-                ? const Center(
-                    child: Text(
-                      '暂无消息',
-                      style: TextStyle(color: AppColors.textSecondary),
+                ? Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 76,
+                          height: 76,
+                          decoration: const BoxDecoration(
+                            color: AppColors.cardBackground,
+                            shape: BoxShape.circle,
+                            boxShadow: AppShadows.soft,
+                          ),
+                          child: const Icon(
+                            Icons.chat_bubble_rounded,
+                            color: AppColors.primaryPink,
+                            size: 34,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xl),
+                        const Text('暂无消息', style: AppTextStyles.bodyStrong),
+                      ],
                     ),
                   )
                 : ListView.builder(
@@ -151,7 +168,7 @@ class ChatPage extends HookConsumerWidget {
             margin: EdgeInsets.only(
               bottom: MediaQuery.of(context).padding.bottom + 5,
             ),
-            decoration: const BoxDecoration(color: Colors.transparent),
+            decoration: const BoxDecoration(color: AppColors.transparent),
             child: Row(
               children: [
                 Expanded(
@@ -165,15 +182,13 @@ class ChatPage extends HookConsumerWidget {
                     child: TextField(
                       controller: messageController,
                       decoration: const InputDecoration(
+                        filled: false,
                         hintText: '说点什么...',
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.symmetric(vertical: 11),
-                        hintStyle: TextStyle(color: AppColors.textPlaceholder),
+                        hintStyle: AppTextStyles.hint,
                       ),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textPrimary,
-                      ),
+                      style: AppTextStyles.bodyStrong.copyWith(fontSize: 14),
                       maxLines: 1,
                     ),
                   ),

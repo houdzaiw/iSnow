@@ -37,30 +37,29 @@ class _EditNicknamePageState extends State<EditNicknamePage> {
       body: Form(
         key: _formKey,
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(AppSpacing.xl),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
+                  horizontal: AppSpacing.xl,
+                  vertical: AppSpacing.sm,
                 ),
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: AppColors.cardBackground,
-                  borderRadius: AppRadius.fieldBorder,
+                  borderRadius: AppRadius.cardBorder,
+                  boxShadow: AppShadows.soft,
                 ),
                 child: TextFormField(
                   controller: _nicknameController,
                   decoration: const InputDecoration(
+                    filled: false,
                     border: InputBorder.none,
                     hintText: '请输入昵称',
-                    hintStyle: TextStyle(color: AppColors.textTertiary),
+                    hintStyle: AppTextStyles.hint,
                   ),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: AppColors.textPrimary,
-                  ),
+                  style: AppTextStyles.bodyStrong,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return '昵称不能为空';
@@ -72,13 +71,10 @@ class _EditNicknamePageState extends State<EditNicknamePage> {
                   },
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.lg),
               const Padding(
-                padding: EdgeInsets.only(left: 16),
-                child: Text(
-                  '昵称长度为1-20个字符',
-                  style: TextStyle(fontSize: 12, color: AppColors.textTertiary),
-                ),
+                padding: EdgeInsets.only(left: AppSpacing.xl),
+                child: Text('昵称长度为1-20个字符', style: AppTextStyles.caption),
               ),
             ],
           ),

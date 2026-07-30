@@ -183,12 +183,10 @@ class LoginDetailPage extends HookConsumerWidget {
                                   color: AppColors.textInverse,
                                 ),
                               )
-                            : const Text(
+                            : Text(
                                 '登录',
-                                style: TextStyle(
-                                  fontSize: 20,
+                                style: AppTextStyles.button.copyWith(
                                   color: AppColors.textInverse,
-                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                       ),

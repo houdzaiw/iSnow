@@ -27,6 +27,7 @@ class AppColors {
   static const Color textTertiary = Color(0xFF999999);
   static const Color textPlaceholder = Color(0xFFB2B2B2);
   static const Color textInverse = Colors.white;
+  static const Color transparent = Colors.transparent;
 
   static const Color overlay = Color.fromRGBO(0, 0, 0, 0.5);
   static const Color avatarPlaceholder = Color(0xFFE0E0E0);

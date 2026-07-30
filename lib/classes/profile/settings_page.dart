@@ -8,12 +8,29 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const CustomScaffold(
+    return CustomScaffold(
       title: '设置',
       body: Center(
-        child: Text(
-          '暂无更多设置',
-          style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 72,
+              height: 72,
+              decoration: const BoxDecoration(
+                color: AppColors.cardBackground,
+                shape: BoxShape.circle,
+                boxShadow: AppShadows.soft,
+              ),
+              child: const Icon(
+                Icons.settings_rounded,
+                color: AppColors.primaryPink,
+                size: 34,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            const Text('暂无更多设置', style: AppTextStyles.bodyStrong),
+          ],
         ),
       ),
     );

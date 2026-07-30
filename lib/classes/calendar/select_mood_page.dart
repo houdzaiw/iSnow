@@ -11,55 +11,74 @@ class SelectMoodPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return SizedBox(
       height: MediaQuery.of(context).size.height * 0.64,
-      child: Column(
-        children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: AppSpacing.xxl),
-            child: Text(
-              '选择心情',
-              textAlign: TextAlign.center,
-              style: AppTextStyles.title,
-            ),
+      child: DecoratedBox(
+        decoration: const BoxDecoration(gradient: AppGradients.pageBackground),
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: AppSpacing.xl,
+            right: AppSpacing.xl,
+            top: AppSpacing.lg,
+            bottom: MediaQuery.of(context).padding.bottom + AppSpacing.lg,
           ),
-          // GridView
-          Expanded(
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width - 60,
-              child: GridView(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4, //横轴四个子widget
-                  childAspectRatio: 1.0, //宽高比为1时，子widget
-                ),
-                children: moodImages.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final imagePath = entry.value;
-                  return GestureDetector(
-                    onTap: () {
-                      // 关闭当前 SelectMoodPage 弹框
-                      Navigator.pop(context);
-
-                      // 打开新的 PublishPage 弹框
-                      showModalBottomSheet<void>(
-                        context: context,
-                        backgroundColor: AppColors.cardBackground,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: AppRadius.sheetBorder,
-                        ),
-                        builder: (ctx) {
-                          return PublishPage(moodIndex: index);
-                        },
-                      );
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: Image.asset(imagePath, fit: BoxFit.contain),
-                    ),
-                  );
-                }).toList(),
+          child: Column(
+            children: [
+              Image.asset(
+                AppAssets.lanhuCalendarDragHandle,
+                width: 44,
+                height: 4,
+                fit: BoxFit.contain,
               ),
-            ),
+              const SizedBox(height: AppSpacing.xl),
+              const Text(
+                '选择心情',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.title,
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              Expanded(
+                child: GridView(
+                  padding: EdgeInsets.zero,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    childAspectRatio: 1,
+                    crossAxisSpacing: AppSpacing.lg,
+                    mainAxisSpacing: AppSpacing.lg,
+                  ),
+                  children: moodImages.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final imagePath = entry.value;
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
+                        showModalBottomSheet<void>(
+                          context: context,
+                          backgroundColor: AppColors.cardBackground,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: AppRadius.sheetBorder,
+                          ),
+                          builder: (ctx) {
+                            return PublishPage(moodIndex: index);
+                          },
+                        );
+                      },
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: AppColors.cardBackground,
+                          borderRadius: AppRadius.cardBorder,
+                          border: Border.all(color: AppColors.calendarBorder),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(AppSpacing.sm),
+                          child: Image.asset(imagePath, fit: BoxFit.contain),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

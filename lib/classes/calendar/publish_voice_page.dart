@@ -122,47 +122,54 @@ class PublishVoicePage extends HookConsumerWidget {
         onTap: () async {
           await playOrPause();
         },
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(width: AppSpacing.xl),
-            Image.asset(
-              moodIndex != null &&
-                      moodIndex! >= 0 &&
-                      moodIndex! < moodImages.length
-                  ? moodImages[moodIndex!]
-                  : AppAssets.calendarDefaultMood,
-              width: 45,
-              height: 45,
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Container(
-              width: 179,
-              height: 41,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage(AppAssets.calendarSpeakBackground),
-                  fit: BoxFit.contain,
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          decoration: BoxDecoration(
+            color: AppColors.cardBackground,
+            borderRadius: AppRadius.cardBorder,
+            border: Border.all(color: AppColors.calendarBorder),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Image.asset(
+                moodIndex != null &&
+                        moodIndex! >= 0 &&
+                        moodIndex! < moodImages.length
+                    ? moodImages[moodIndex!]
+                    : AppAssets.calendarDefaultMood,
+                width: 45,
+                height: 45,
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Container(
+                width: 179,
+                height: 41,
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage(AppAssets.calendarSpeakBackground),
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    const SizedBox(width: 18),
+                    Image.asset(
+                      AppAssets.calendarSpeakIcon,
+                      width: 10,
+                      height: 16,
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      _durationToSeconds(recordDuration.value),
+                      style: AppTextStyles.bodyStrong.copyWith(fontSize: 14),
+                    ),
+                  ],
                 ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const SizedBox(width: 18),
-                  Image.asset(
-                    AppAssets.calendarSpeakIcon,
-                    width: 10,
-                    height: 16,
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  Text(
-                    _durationToSeconds(recordDuration.value),
-                    style: const TextStyle(color: AppColors.textPrimary),
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     }
@@ -175,39 +182,37 @@ class PublishVoicePage extends HookConsumerWidget {
         },
         child: Column(
           children: [
-            const SizedBox(height: 60),
+            const SizedBox(height: AppSpacing.section),
             Text(
               isRecording.value ? '点击停止录音' : '点击开始录音',
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: AppTextStyles.bodyStrong,
             ),
             const SizedBox(height: AppSpacing.lg),
             Container(
               width: 220,
               height: 116,
-              // alignment: Alignment.center,
               decoration: const BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage(AppAssets.calendarSpeakerButton),
-                  // fit: BoxFit.contain,
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
               _formatDuration(recordDuration.value),
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 18,
-              ),
+              style: AppTextStyles.title,
             ),
           ],
         ),
       );
     }
 
-    // 如果已经有录音文件，显示播放按钮
     if (recordedFilePath.value != null && !isRecording.value) {
-      return Padding(padding: EdgeInsets.only(top: 42), child: playButton());
+      return Padding(
+        padding: const EdgeInsets.only(top: AppSpacing.section),
+        child: playButton(),
+      );
     }
     return Center(child: recordButton());
   }

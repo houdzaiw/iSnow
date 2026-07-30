@@ -52,7 +52,7 @@ class ContentView extends StatelessWidget {
               runSpacing: 8,
               children: entry.images!.take(4).map((imagePath) {
                 return ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                   child: Image.file(
                     File(imagePath),
                     width: 60,

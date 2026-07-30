@@ -1,10 +1,8 @@
 // dart
 import 'package:flutter/material.dart';
 
-import '../../theme/app_theme.dart';
-
 class ProfileMenuItem {
-  final String icon;
+  final IconData icon;
   final String name;
   final IconData arrow;
 
@@ -18,11 +16,11 @@ class ProfileMenuItem {
 class ProfileMenuData {
   static List<ProfileMenuItem> getMenuItems() {
     return [
-      ProfileMenuItem(icon: AppAssets.profileMyPostsIcon, name: '我的帖子'),
-      ProfileMenuItem(icon: AppAssets.profilePrivacyIcon, name: '用户隐私'),
-      ProfileMenuItem(icon: AppAssets.profileAboutIcon, name: '关于我们'),
-      ProfileMenuItem(icon: AppAssets.profileContactIcon, name: '联系我们'),
-      ProfileMenuItem(icon: AppAssets.profileSettingIcon, name: '设置'),
+      ProfileMenuItem(icon: Icons.article_rounded, name: '我的帖子'),
+      ProfileMenuItem(icon: Icons.lock_rounded, name: '用户隐私'),
+      ProfileMenuItem(icon: Icons.info_rounded, name: '关于我们'),
+      ProfileMenuItem(icon: Icons.chat_bubble_rounded, name: '联系我们'),
+      ProfileMenuItem(icon: Icons.settings_rounded, name: '设置'),
     ];
   }
 }

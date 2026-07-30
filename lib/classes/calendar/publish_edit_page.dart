@@ -47,40 +47,40 @@ class PublishEditPage extends HookConsumerWidget {
     }, [selectedImages.value]);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. 标题
           const Text('填写心情', style: AppTextStyles.title),
-          const SizedBox(height: AppSpacing.xl),
-          // 2. 输入框
+          const SizedBox(height: AppSpacing.lg),
           TextField(
             controller: textController,
             maxLines: 6,
             decoration: InputDecoration(
               hintText: '今天发生了什么...',
               hintStyle: AppTextStyles.hint.copyWith(fontSize: 18),
+              filled: true,
+              fillColor: AppColors.cardBackground,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppRadius.md),
+                borderRadius: AppRadius.cardBorder,
                 borderSide: const BorderSide(color: AppColors.border),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppRadius.md),
-                borderSide: const BorderSide(color: AppColors.border),
+                borderRadius: AppRadius.cardBorder,
+                borderSide: const BorderSide(color: AppColors.calendarBorder),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppRadius.md),
+                borderRadius: AppRadius.cardBorder,
                 borderSide: const BorderSide(
                   color: AppColors.primaryPink,
                   width: 2,
                 ),
               ),
-              contentPadding: const EdgeInsets.all(12),
+              contentPadding: const EdgeInsets.all(AppSpacing.xl),
             ),
+            style: AppTextStyles.body,
           ),
           const SizedBox(height: AppSpacing.xl),
-          // 3. 图片选择按钮
           GestureDetector(
             onTap: () {
               // 检查是否已达到最大数量
@@ -130,24 +130,36 @@ class PublishEditPage extends HookConsumerWidget {
                 },
               );
             },
-            child: Image.asset(
-              AppAssets.calendarSelectImageButton,
-              width: 60,
-              height: 60,
-              fit: BoxFit.contain,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: AppColors.cardBackground,
+                borderRadius: AppRadius.cardBorder,
+                border: Border.all(color: AppColors.calendarBorder),
+              ),
+              child: SizedBox(
+                width: 64,
+                height: 64,
+                child: Center(
+                  child: Image.asset(
+                    AppAssets.calendarSelectImageButton,
+                    width: 46,
+                    height: 46,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
-          // 4. 显示已选择的图片
           if (selectedImages.value.isNotEmpty)
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
               children: selectedImages.value.map((image) {
                 return Stack(
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppRadius.md),
                       child: Image.file(
                         File(image.path),
                         width: 80,
@@ -166,15 +178,15 @@ class PublishEditPage extends HookConsumerWidget {
                               .toList();
                         },
                         child: Container(
-                          padding: const EdgeInsets.all(2),
+                          padding: const EdgeInsets.all(AppSpacing.xxs),
                           decoration: const BoxDecoration(
-                            color: Colors.black54,
+                            color: AppColors.overlay,
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
                             Icons.close,
                             size: 16,
-                            color: Colors.white,
+                            color: AppColors.textInverse,
                           ),
                         ),
                       ),

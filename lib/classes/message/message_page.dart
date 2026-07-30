@@ -56,26 +56,40 @@ class MessagePage extends HookConsumerWidget {
     return CustomScaffold(
       title: '消息',
       showBackButton: false,
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppGradients.pageBackground),
-        child: messages.value.isEmpty
-            ? Center(
-                child: Text(
-                  '暂无消息',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
+      body: messages.value.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 76,
+                    height: 76,
+                    decoration: const BoxDecoration(
+                      color: AppColors.cardBackground,
+                      shape: BoxShape.circle,
+                      boxShadow: AppShadows.soft,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.xxl),
+                      child: Image.asset(
+                        AppAssets.messageIcon,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
                   ),
-                ),
-              )
-            : ListView.builder(
-                itemCount: messages.value.length,
-                itemBuilder: (context, index) {
-                  final message = messages.value[index];
-                  return _buildMessageTile(context, message, overlayEntry);
-                },
+                  const SizedBox(height: AppSpacing.xl),
+                  const Text('暂无消息', style: AppTextStyles.bodyStrong),
+                ],
               ),
-      ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(AppSpacing.xl),
+              itemCount: messages.value.length,
+              itemBuilder: (context, index) {
+                final message = messages.value[index];
+                return _buildMessageTile(context, message, overlayEntry);
+              },
+            ),
     );
   }
 
@@ -95,11 +109,12 @@ class MessagePage extends HookConsumerWidget {
         _showDialogAsync(context, overlayEntry);
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
           color: AppColors.cardBackground,
           borderRadius: AppRadius.cardBorder,
+          boxShadow: AppShadows.soft,
         ),
         child: Row(
           children: [
@@ -112,18 +127,16 @@ class MessagePage extends HookConsumerWidget {
                 borderRadius: BorderRadius.circular(25),
               ),
               child: Center(
-                child: Text(
-                  message.sender == 'user' ? 'U' : 'O',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
+                child: Icon(
+                  message.sender == 'user'
+                      ? Icons.person_rounded
+                      : Icons.chat_bubble_rounded,
+                  color: AppColors.textInverse,
+                  size: 25,
                 ),
               ),
             ),
-            const SizedBox(width: 12),
-            // 消息内容
+            const SizedBox(width: AppSpacing.lg),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,23 +151,16 @@ class MessagePage extends HookConsumerWidget {
                       ),
                       Text(
                         _formatTime(message.createdAt),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textTertiary,
-                        ),
+                        style: AppTextStyles.caption,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  // 消息预览
+                  const SizedBox(height: AppSpacing.xs),
                   Text(
                     message.message,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: AppColors.textSecondary,
-                    ),
+                    style: AppTextStyles.body,
                   ),
                 ],
               ),

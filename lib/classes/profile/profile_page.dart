@@ -14,7 +14,7 @@ class ProfilePage extends HookConsumerWidget {
     return Scaffold(
       extendBodyBehindAppBar: true, // ★ 关键：让 body 内容延伸到 AppBar 后面
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.transparent,
         elevation: 0,
         actions: [
           IconButton(
@@ -62,10 +62,16 @@ class ProfilePage extends HookConsumerWidget {
                         onTap: () {
                           context.push('/edit-profile');
                         },
-                        child: Image.asset(
-                          AppAssets.profileEditIcon,
-                          width: 16,
-                          height: 16,
+                        child: ColorFiltered(
+                          colorFilter: const ColorFilter.mode(
+                            AppColors.primaryPink,
+                            BlendMode.srcIn,
+                          ),
+                          child: Image.asset(
+                            AppAssets.profileEditIcon,
+                            width: 16,
+                            height: 16,
+                          ),
                         ),
                       ),
                     ],
@@ -93,7 +99,19 @@ class ProfilePage extends HookConsumerWidget {
                       borderRadius: AppRadius.cardBorder,
                     ),
                     child: ListTile(
-                      leading: Image.asset(item.icon, width: 27, height: 27),
+                      leading: Container(
+                        width: 27,
+                        height: 27,
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryPink,
+                          borderRadius: BorderRadius.circular(AppRadius.sm),
+                        ),
+                        child: Icon(
+                          item.icon,
+                          size: 17,
+                          color: AppColors.textInverse,
+                        ),
+                      ),
                       title: Text(item.name, style: AppTextStyles.menuItem),
                       trailing: Icon(
                         item.arrow,

@@ -12,6 +12,7 @@ class CustomScaffold extends StatelessWidget {
   final bool showBackButton;
   final VoidCallback? onBackPressed;
   final bool extendBodyBehindAppBar;
+  final bool useGradientBackground;
 
   const CustomScaffold({
     super.key,
@@ -23,6 +24,7 @@ class CustomScaffold extends StatelessWidget {
     this.showBackButton = true,
     this.onBackPressed,
     this.extendBodyBehindAppBar = false,
+    this.useGradientBackground = true,
   });
 
   @override
@@ -61,7 +63,14 @@ class CustomScaffold extends StatelessWidget {
               ]
             : null,
       ),
-      body: body,
+      body: useGradientBackground
+          ? DecoratedBox(
+              decoration: const BoxDecoration(
+                gradient: AppGradients.pageBackground,
+              ),
+              child: SizedBox.expand(child: body),
+            )
+          : body,
     );
   }
 }

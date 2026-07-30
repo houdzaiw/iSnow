@@ -58,7 +58,7 @@ class VoiceView extends StatelessWidget {
                   const SizedBox(width: AppSpacing.xs),
                   Text(
                     entry.description ?? '',
-                    style: const TextStyle(color: AppColors.textPrimary),
+                    style: AppTextStyles.bodyStrong.copyWith(fontSize: 14),
                   ),
                 ],
               ),

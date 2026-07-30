@@ -14,11 +14,13 @@ class AboutUsPage extends HookConsumerWidget {
       body: SingleChildScrollView(
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 60),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xxxl,
+              vertical: 60,
+            ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // App Logo - 120 * 120
                 Container(
                   width: 120,
                   height: 120,
@@ -37,32 +39,15 @@ class AboutUsPage extends HookConsumerWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
-
-                // Version Info
-                Column(
-                  children: [
-                    Text(
-                      '版本 1.0.0',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textTertiary,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 40),
-
-                // Description
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Text(
-                    '记录每天的情绪和片刻，把心情好好收藏起来。',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                      height: 1.6,
-                    ),
-                  ),
+                const SizedBox(height: AppSpacing.xxxl),
+                const Text('iSnow', style: AppTextStyles.title),
+                const SizedBox(height: AppSpacing.sm),
+                const Text('版本 1.0.0', style: AppTextStyles.caption),
+                const SizedBox(height: AppSpacing.section),
+                Text(
+                  '记录每天的情绪和片刻，把心情好好收藏起来。',
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.body.copyWith(height: 1.6),
                 ),
               ],
             ),

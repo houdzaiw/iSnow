@@ -34,22 +34,16 @@ class DeleteMessageDialog extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(height: 24),
-                  const Text(
+                  Text(
                     "提示",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 20,
-                      color: AppColors.textPrimary,
+                    style: AppTextStyles.title.copyWith(
                       decoration: TextDecoration.none,
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Text(
+                  Text(
                     "删除对话",
-                    style: TextStyle(
-                      fontWeight: FontWeight.normal,
-                      fontSize: 18,
-                      color: AppColors.textPrimary,
+                    style: AppTextStyles.menuItem.copyWith(
                       decoration: TextDecoration.none,
                     ),
                   ),
@@ -73,13 +67,10 @@ class DeleteMessageDialog extends StatelessWidget {
                               color: AppColors.neutralLight,
                               borderRadius: AppRadius.pillBorder,
                             ),
-                            child: const Center(
+                            child: Center(
                               child: Text(
                                 "取消",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 20,
-                                  color: AppColors.textPrimary,
+                                style: AppTextStyles.button.copyWith(
                                   decoration: TextDecoration.none,
                                 ),
                               ),
@@ -97,12 +88,10 @@ class DeleteMessageDialog extends StatelessWidget {
                               color: AppColors.primaryPink,
                               borderRadius: AppRadius.pillBorder,
                             ),
-                            child: const Center(
+                            child: Center(
                               child: Text(
                                 "删除",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 20,
+                                style: AppTextStyles.button.copyWith(
                                   color: AppColors.textInverse,
                                   decoration: TextDecoration.none,
                                 ),

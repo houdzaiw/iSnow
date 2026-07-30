@@ -100,16 +100,26 @@ class PublishPage extends HookConsumerWidget {
     }, [tabController]);
 
     return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.64,
+      height: MediaQuery.of(context).size.height * 0.68,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.only(
+          left: AppSpacing.xl,
+          right: AppSpacing.xl,
+          top: AppSpacing.lg,
+          bottom: MediaQuery.of(context).padding.bottom + AppSpacing.lg,
+        ),
         child: Column(
           children: [
-            // TabBar with icon tabs
+            Image.asset(
+              AppAssets.lanhuCalendarDragHandle,
+              width: 44,
+              height: 4,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(height: AppSpacing.xl),
             Row(
               children: [
-                const SizedBox(width: AppSpacing.xxxl),
-                const SizedBox(width: 36),
+                const SizedBox(width: 40),
                 Expanded(
                   child: TabBar(
                     controller: tabController,
@@ -128,6 +138,7 @@ class PublishPage extends HookConsumerWidget {
                                 ? AppColors.primaryPink
                                 : AppColors.neutralLight,
                             borderRadius: AppRadius.pillBorder,
+                            boxShadow: isSelected ? AppShadows.button : null,
                           ),
                           child: Center(
                             child: Icon(
@@ -143,8 +154,7 @@ class PublishPage extends HookConsumerWidget {
                     }).toList(),
                   ),
                 ),
-                const SizedBox(width: 36),
-                // 右边增加发送按钮
+                const SizedBox(width: AppSpacing.sm),
                 GestureDetector(
                   onTap: () async {
                     // 判断当前是编辑还是语音模式，并保存数据
@@ -177,17 +187,26 @@ class PublishPage extends HookConsumerWidget {
                       voicePath.value,
                     );
                   },
-                  child: Image.asset(
-                    AppAssets.calendarSendPost,
-                    width: 24,
-                    height: 24,
-                    fit: BoxFit.contain,
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: AppGradients.sendButton,
+                    ),
+                    child: Center(
+                      child: Image.asset(
+                        AppAssets.calendarSendPost,
+                        width: 22,
+                        height: 22,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            // TabBarView with content
+            const SizedBox(height: AppSpacing.xl),
             Expanded(
               child: TabBarView(
                 physics: const AlwaysScrollableScrollPhysics(),

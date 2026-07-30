@@ -143,12 +143,10 @@ class _RegisterPageState extends State<RegisterPage> {
                           borderRadius: AppRadius.pillBorder,
                         ),
                         alignment: Alignment.center,
-                        child: const Text(
+                        child: Text(
                           '注册',
-                          style: TextStyle(
-                            fontSize: 20,
+                          style: AppTextStyles.button.copyWith(
                             color: AppColors.textInverse,
-                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),

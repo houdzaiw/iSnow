@@ -23,26 +23,31 @@ class MyPostsPage extends HookConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.note_outlined,
-                    size: 64,
-                    color: AppColors.textTertiary,
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  const Text(
-                    '暂无帖子',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: AppColors.textSecondary,
+                  Container(
+                    width: 88,
+                    height: 88,
+                    decoration: const BoxDecoration(
+                      color: AppColors.cardBackground,
+                      shape: BoxShape.circle,
+                      boxShadow: AppShadows.soft,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      child: Image.asset(
+                        AppAssets.lanhuProudMood,
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
+                  const SizedBox(height: AppSpacing.xl),
+                  const Text('暂无帖子', style: AppTextStyles.bodyStrong),
                 ],
               ),
             );
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            padding: const EdgeInsets.all(AppSpacing.xl),
             itemCount: entries.length,
             itemBuilder: (_, index) {
               final entry = entries[index];
@@ -51,11 +56,12 @@ class MyPostsPage extends HookConsumerWidget {
               }
 
               return Container(
-                margin: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                padding: const EdgeInsets.all(AppSpacing.lg),
+                margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+                padding: const EdgeInsets.all(AppSpacing.xl),
                 decoration: BoxDecoration(
                   color: AppColors.cardBackground,
-                  borderRadius: BorderRadius.circular(AppRadius.xl),
+                  borderRadius: AppRadius.cardBorder,
+                  boxShadow: AppShadows.soft,
                 ),
                 child: ContentView(entry: entry),
               );
@@ -76,15 +82,12 @@ class MyPostsPage extends HookConsumerWidget {
                   color: AppColors.danger,
                 ),
                 const SizedBox(height: AppSpacing.xl),
-                const Text(
-                  '帖子加载失败',
-                  style: TextStyle(fontSize: 18, color: AppColors.danger),
-                ),
+                const Text('帖子加载失败', style: AppTextStyles.bodyStrong),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
                   error.toString(),
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 14),
+                  style: AppTextStyles.caption,
                 ),
               ],
             ),

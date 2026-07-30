@@ -31,19 +31,30 @@ void showAvatarOptions(
 }) {
   showModalBottomSheet(
     context: context,
+    backgroundColor: AppColors.cardBackground,
     shape: const RoundedRectangleBorder(borderRadius: AppRadius.sheetBorder),
     builder: (context) {
-      return Container(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
+      return SafeArea(
+        top: false,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const SizedBox(height: AppSpacing.lg),
+            Container(
+              width: 44,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.neutralLight,
+                borderRadius: AppRadius.pillBorder,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
             ListTile(
               leading: const Icon(
                 Icons.photo_library,
                 color: AppColors.primaryPink,
               ),
-              title: const Text('从相册选择'),
+              title: const Text('从相册选择', style: AppTextStyles.bodyStrong),
               onTap: () {
                 Navigator.pop(context);
                 if (onAlbumSelected != null) {
@@ -61,7 +72,7 @@ void showAvatarOptions(
                 Icons.camera_alt,
                 color: AppColors.primaryPink,
               ),
-              title: const Text('拍照'),
+              title: const Text('拍照', style: AppTextStyles.bodyStrong),
               onTap: () {
                 Navigator.pop(context);
                 if (onCameraSelected != null) {
@@ -77,10 +88,7 @@ void showAvatarOptions(
             const SizedBox(height: AppSpacing.md),
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text(
-                '取消',
-                style: TextStyle(color: AppColors.textTertiary),
-              ),
+              child: const Text('取消', style: AppTextStyles.hint),
             ),
           ],
         ),
@@ -111,16 +119,33 @@ void showUserActionOptions(
     backgroundColor: AppColors.cardBackground,
     builder: (context) {
       return Container(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+        padding: EdgeInsets.only(
+          left: AppSpacing.xl,
+          right: AppSpacing.xl,
+          top: AppSpacing.lg,
+          bottom: MediaQuery.of(context).padding.bottom + AppSpacing.lg,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: options.map((option) {
-            final isCancel = option == UserActionOption.cancel;
-            return Column(
-              children: [
-                if (isCancel && options.length > 1)
-                  const SizedBox(height: AppSpacing.sm),
-                GestureDetector(
+          children: [
+            Container(
+              width: 44,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.neutralLight,
+                borderRadius: AppRadius.pillBorder,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            ...options.map((option) {
+              final isCancel = option == UserActionOption.cancel;
+              final isDelete = option == UserActionOption.delete;
+              return Padding(
+                padding: EdgeInsets.only(
+                  top: isCancel && options.length > 1 ? AppSpacing.sm : 0,
+                  bottom: AppSpacing.sm,
+                ),
+                child: GestureDetector(
                   onTap: () {
                     Navigator.pop(context);
                     switch (option) {
@@ -140,30 +165,37 @@ void showUserActionOptions(
                         }
                         break;
                       case UserActionOption.cancel:
-                        // Just close the modal
                         break;
                     }
                   },
                   child: Container(
-                    width: MediaQuery.of(context).size.width - 48,
-                    height: 55,
+                    height: 52,
                     decoration: BoxDecoration(
                       color: isCancel
                           ? AppColors.neutralLight
-                          : Colors.transparent,
+                          : AppColors.cardBackground,
                       borderRadius: AppRadius.pillBorder,
+                      border: Border.all(
+                        color: isDelete
+                            ? AppColors.primaryPink
+                            : AppColors.divider,
+                      ),
                     ),
                     alignment: Alignment.center,
                     child: Text(
                       option.label,
                       textAlign: TextAlign.center,
-                      style: AppTextStyles.title,
+                      style: AppTextStyles.bodyStrong.copyWith(
+                        color: isDelete
+                            ? AppColors.primaryPink
+                            : AppColors.textPrimary,
+                      ),
                     ),
                   ),
                 ),
-              ],
-            );
-          }).toList(),
+              );
+            }),
+          ],
         ),
       );
     },
