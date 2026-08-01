@@ -1,5 +1,8 @@
 class HttpApi {
   /// ==================== 国家相关 ====================
+  /// 按国家 ISO code 查询拨号码
+  static const queryCountryCode = '/api/user/country/query/code';
+
   /// 获取默认国家码
   static const defaultCountry = '/country-list/default-country';
 
@@ -12,6 +15,15 @@ class HttpApi {
   /// ==================== 用户相关 ====================
   /// 是否已存在用户
   static const hasUser = '/api/user/hasUser';
+
+  /// 注册完善资料
+  static const completeUser = '/api/user/complete';
+
+  /// 获取我的用户信息
+  static const myUserInfo = '/api/user/mine';
+
+  /// 更新用户资料
+  static const modifyUser = '/api/user/modifyUser';
 
   /// ==================== 认证 / 登录 ====================
   /// 登录
@@ -28,4 +40,7 @@ class HttpApi {
 
   /// 登出
   static const logout = '/oauth2/logout';
+
+  /// 获取头像上传参数
+  static const uploadParam = '/api/resource/header-upload-param';
 }

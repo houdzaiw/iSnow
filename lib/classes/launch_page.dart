@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../manager/auth_session.dart';
 import '../theme/app_theme.dart';
 
 class LaunchPage extends StatefulWidget {
@@ -23,8 +24,6 @@ class _LaunchPageState extends State<LaunchPage> {
 
     if (!mounted) return;
 
-    // TODO: 替换为真实的登录状态检查逻辑
-    // 例如：从 SharedPreferences、Riverpod Provider 或其他状态管理中获取
     final bool isLoggedIn = await _isUserLoggedIn();
 
     if (!mounted) return;
@@ -39,13 +38,7 @@ class _LaunchPageState extends State<LaunchPage> {
   }
 
   Future<bool> _isUserLoggedIn() async {
-    // TODO: 实现真实的登录状态检查
-    // 例如：
-    // final prefs = await SharedPreferences.getInstance();
-    // return prefs.getString('token') != null;
-
-    // 目前返回 false，表示未登录
-    return false;
+    return AuthSession.instance.isLoggedIn();
   }
 
   @override

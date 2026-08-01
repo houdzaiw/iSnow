@@ -8,6 +8,10 @@ class AppAssets {
   static const String lanhuAuthButtonSecondary =
       'assets/lanhu/base/auth_button_secondary.png';
   static const String lanhuCloseCircle = 'assets/lanhu/base/close_circle.png';
+  static const String lanhuLoginCountryFlag =
+      'assets/lanhu/base/login_country_flag.png';
+  static const String lanhuLoginDetailClose =
+      'assets/lanhu/base/login_detail_close.png';
   static const String lanhuNavBack = 'assets/lanhu/base/nav_back.png';
   static const String lanhuCaptureResultCard =
       'assets/lanhu/home/capture_result_card.png';

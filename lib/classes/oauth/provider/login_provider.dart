@@ -1,47 +1,151 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:convert/convert.dart';
+import 'package:crypto/crypto.dart' as crypto;
+import 'package:cryptography/cryptography.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:crypto/crypto.dart';
-import 'dart:convert';
-import '../../../manager/http_dio_manager.dart';
-import '../../../manager/http_api.dart';
+
 import '../../../configs/app_device.dart';
+import '../../../manager/auth_session.dart';
+import '../../../manager/http_api.dart';
+import '../../../manager/http_dio_manager.dart';
+import '../../../model/country_info.dart';
 import '../../../model/login_response.dart';
+import '../../../model/server_response.dart';
+import '../../../model/upload_param.dart';
+import '../../../model/user_profile.dart';
 
 class LoginProvider {
   final HttpDioManager _httpManager = HttpDioManager();
   final AppDevice _appDevice = AppDevice();
+  final AuthSession _authSession = AuthSession.instance;
 
-  /// 生成请求 Header 公参
-  Future<Map<String, String>> _getCommonHeaders() async {
-    final startTime = DateTime.now().millisecondsSinceEpoch;
+  Future<String> _encryptPassword(String password) async {
+    final algorithm = Chacha20.poly1305Aead();
+    final secretKey = await algorithm.newSecretKey();
+    final secretBox = await algorithm.encrypt(
+      utf8.encode(password),
+      secretKey: secretKey,
+    );
+    final secretKeyBytes = await secretKey.extractBytes();
+    return hex.encode(secretKeyBytes) +
+        hex.encode(secretBox.nonce) +
+        hex.encode(secretBox.mac.bytes) +
+        hex.encode(secretBox.cipherText);
+  }
 
+  Map<String, dynamic> _publicParams() {
+    final deviceId = _appDevice.deviceId;
     return {
-      'Content-Type': 'application/json',
-      'b': _appDevice.generateSignature(),
-      'v': startTime.toString(),
-      'systemLanguage': _appDevice.systemLanguage,
-      'timeZone': _appDevice.timeZone.toString(),
-      'storeCode': 'US',
+      'realDeviceId': deviceId,
+      'appsflyerUID':
+          '${DateTime.now().millisecondsSinceEpoch}-${deviceId.hashCode}',
+      'app': _appDevice.appName,
       'appVersion': _appDevice.appVersion,
+      'appVersionCode': _appDevice.appVersionCode,
+      'channel': 'DEV',
+      'systemLanguage': _appDevice.systemLanguage,
       'appLanguage': _appDevice.appLanguage,
-      'x-auth-token': _appDevice.generateAuthToken(),
-      'startTime': startTime.toString(),
+      'isp': '',
+      'model': _appDevice.model,
+      'os': _appDevice.os,
+      'osVersion': _appDevice.osVersion,
+      'deviceBrand': _appDevice.deviceBrand,
     };
   }
 
-  /// 加密密码 (使用 SHA256)
-  String _encryptPassword(String password) {
-    final bytes = utf8.encode(password);
-    final digest = sha256.convert(bytes);
-    return digest.toString();
+  Map<String, dynamic> _asMap(dynamic response) {
+    if (response is Map<String, dynamic>) return response;
+    if (response is Map) return response.cast<String, dynamic>();
+    throw const NadyApiException(message: 'Invalid server response');
   }
 
-  /// 登录
-  /// [account] - 账号 (手机号或邮箱)
-  /// [password] - 密码
-  /// [loginType] - 登录类型 (5: 密码登录)
-  /// [areaCode] - 区号 (如: 966, 86)
-  /// [countryCode] - 国家代码 (如: us, cn)
+  NadyServerResponse<T> _server<T>(
+    dynamic response,
+    T Function(Object? json)? fromJsonT,
+  ) {
+    return NadyServerResponse<T>.fromJson(_asMap(response), fromJsonT);
+  }
+
+  T _requireData<T>(dynamic response, T Function(Object? json) fromJsonT) {
+    final server = _server<T>(response, fromJsonT);
+    if (!server.isSuccess) {
+      throw server.toException();
+    }
+    final data = server.data;
+    if (data == null) {
+      throw NadyApiException(
+        message: server.message.isEmpty ? 'Empty server data' : server.message,
+        code: server.code,
+        traceId: server.traceId,
+      );
+    }
+    return data;
+  }
+
+  Future<CountryInfo> getDefaultCountry() async {
+    final response = await _httpManager.get(HttpApi.defaultCountry);
+    return _requireData(
+      response,
+      (json) => CountryInfo.fromJson((json as Map).cast<String, dynamic>()),
+    );
+  }
+
+  Future<String> queryCountryDialCode(String countryCode) async {
+    final response = await _httpManager.get(
+      HttpApi.queryCountryCode,
+      queryParameters: {'code': countryCode.toUpperCase()},
+    );
+    final dialCode = _requireData(response, (json) => json?.toString() ?? '');
+    final normalizedDialCode = dialCode.replaceFirst('+', '').trim();
+    if (normalizedDialCode.isEmpty) {
+      throw const NadyApiException(message: 'Empty country dial code');
+    }
+    return normalizedDialCode;
+  }
+
+  Future<List<CountryInfo>> getHotCountries() async {
+    final response = await _httpManager.get(HttpApi.hotCountry);
+    return _requireData(
+      response,
+      (json) => (json as List? ?? const [])
+          .map(
+            (item) =>
+                CountryInfo.fromJson((item as Map).cast<String, dynamic>()),
+          )
+          .toList(),
+    );
+  }
+
+  Future<List<CountryInfo>> getSupportedCountries() async {
+    final response = await _httpManager.get(HttpApi.supportedCountry);
+    return _requireData(
+      response,
+      (json) => (json as List? ?? const [])
+          .map(
+            (item) =>
+                CountryInfo.fromJson((item as Map).cast<String, dynamic>()),
+          )
+          .toList(),
+    );
+  }
+
+  Future<HasUserResponse> hasUser({
+    required String phone,
+    required String areaCode,
+  }) async {
+    final response = await _httpManager.get(
+      HttpApi.hasUser,
+      queryParameters: {'phone': phone, 'areaCode': areaCode},
+    );
+    return _requireData(
+      response,
+      (json) => HasUserResponse.fromJson((json as Map).cast<String, dynamic>()),
+    );
+  }
+
   Future<LoginResponse> login({
     required String account,
     required String password,
@@ -51,163 +155,268 @@ class LoginProvider {
     String smsCode = '',
   }) async {
     try {
-      // 获取公共 headers
-      final headers = await _getCommonHeaders();
-
-      // 加密密码
-      final encryptedPassword = _encryptPassword(password);
-
-      // 构建请求参数
+      final encryptedPassword = password.isEmpty
+          ? ''
+          : await _encryptPassword(password);
+      final normalizedCountryCode = countryCode.toUpperCase();
       final params = {
         'code': account,
         'loginType': loginType,
         'passwd': encryptedPassword,
         'smsCode': smsCode,
         'areaCode': areaCode,
-        'countryCode': countryCode,
+        'countryCode': normalizedCountryCode,
         'fbLimited': false,
-        'deviceId': _appDevice.deviceId,
-        'app': _appDevice.appName,
-        'appVersion': _appDevice.appVersion,
-        'appVersionCode': _appDevice.appVersionCode,
-        'channel': 'DEV',
-        'systemLanguage': _appDevice.systemLanguage,
-        'appLanguage': _appDevice.appLanguage,
-        'isp': '',
-        'model': _appDevice.model,
-        'os': _appDevice.os,
-        'osVersion': _appDevice.osVersion,
-        'deviceBrand': _appDevice.deviceBrand,
-        'appsflyerUID':
-            '${DateTime.now().millisecondsSinceEpoch}-${_appDevice.deviceId.hashCode}',
+        ..._publicParams(),
       };
 
       debugPrint('Login request POST: ${HttpApi.login}');
-      debugPrint('│ header: $headers');
-      debugPrint('│ params: $params');
 
-      // 发送 POST 请求
-      final response = await _httpManager.post(
-        HttpApi.login,
-        data: params,
-        options: Options(headers: headers),
+      final response = await _httpManager.post(HttpApi.login, data: params);
+      final server = _server<LoginResponse>(
+        response,
+        (json) => LoginResponse.fromJson((json as Map).cast<String, dynamic>()),
       );
+      if (!server.isSuccess) {
+        return LoginResponse.failure(server.message);
+      }
+      final loginResponse = server.data;
+      if (loginResponse == null) {
+        return LoginResponse.failure(server.message);
+      }
 
-      debugPrint('Login response $response');
-
-      // 解析响应
-      return LoginResponse.fromJson(response);
+      await _authSession.saveLogin(
+        loginResponse,
+        phone: account,
+        areaCode: areaCode,
+        countryCode: normalizedCountryCode,
+      );
+      return loginResponse;
     } on DioException catch (e) {
       debugPrint('Login DioException: ${e.message}');
-      // 处理 Dio 异常
-      if (e.response != null) {
-        debugPrint('Error response ${e.response?.data}');
-        return LoginResponse(
-          success: false,
-          message: e.response?.data['message'] as String?,
-        );
-      } else {
-        return LoginResponse(success: false, message: e.message);
+      final data = e.response?.data;
+      if (data is Map) {
+        return LoginResponse.failure(data['message']?.toString() ?? e.message);
       }
+      return LoginResponse.failure(e.message);
     } catch (e) {
       debugPrint('Login exception: $e');
-      // 处理其他异常
-      return LoginResponse(success: false, message: 'Unknown error: $e');
+      return LoginResponse.failure('$e');
     }
   }
 
-  /// 发送验证码
-  Future<Map<String, dynamic>> sendSms({
-    required String phoneNumber,
+  Future<LoginResponse> registerWithSmsPassword({
+    required String phone,
+    required String password,
+    required String smsCode,
+    required String areaCode,
     required String countryCode,
-    String areaCode = '1',
-  }) async {
-    try {
-      final headers = await _getCommonHeaders();
-
-      final response = await _httpManager.post(
-        HttpApi.sendSms,
-        data: {
-          'phoneNumber': phoneNumber,
-          'countryCode': countryCode,
-          'areaCode': areaCode,
-        },
-        options: Options(headers: headers),
-      );
-      return response;
-    } catch (e) {
-      rethrow;
-    }
+  }) {
+    return login(
+      account: phone,
+      password: password,
+      loginType: 5,
+      areaCode: areaCode,
+      countryCode: countryCode,
+      smsCode: smsCode,
+    );
   }
 
-  /// 校验验证码
-  Future<Map<String, dynamic>> verifyCode({
+  Future<void> sendSms({
+    required String phoneNumber,
+    required String areaCode,
+    int purpose = 1,
+    int type = 1,
+    String? language,
+  }) async {
+    final response = await _httpManager.post(
+      HttpApi.sendSms,
+      data: {
+        'phoneNo': phoneNumber,
+        'areaCode': areaCode,
+        'purpose': purpose,
+        'type': type,
+        'language': language ?? _appDevice.appLanguage,
+      },
+    );
+    final server = _server<dynamic>(response, null);
+    if (!server.isSuccess) throw server.toException();
+  }
+
+  Future<void> verifyCode({
     required String phoneNumber,
     required String code,
-    String areaCode = '1',
+    required String areaCode,
   }) async {
-    try {
-      final headers = await _getCommonHeaders();
-
-      final response = await _httpManager.post(
-        HttpApi.verifyCode,
-        data: {'phoneNumber': phoneNumber, 'code': code, 'areaCode': areaCode},
-        options: Options(headers: headers),
-      );
-      return response;
-    } catch (e) {
-      rethrow;
-    }
+    final response = await _httpManager.post(
+      HttpApi.verifyCode,
+      data: {'code': phoneNumber, 'areaCode': areaCode, 'smsCode': code},
+    );
+    final server = _server<dynamic>(response, null);
+    if (!server.isSuccess) throw server.toException();
   }
 
-  /// 设置密码
-  Future<Map<String, dynamic>> setPassword({
-    required String userId,
+  Future<void> setPassword({
+    required String phoneNumber,
     required String password,
+    required String areaCode,
   }) async {
-    try {
-      final headers = await _getCommonHeaders();
-      final encryptedPassword = _encryptPassword(password);
+    final encryptedPassword = await _encryptPassword(password);
+    final response = await _httpManager.post(
+      HttpApi.setPassword,
+      data: {
+        'phone': phoneNumber,
+        'password': encryptedPassword,
+        'areaCode': areaCode,
+      },
+    );
+    final server = _server<dynamic>(response, null);
+    if (!server.isSuccess) throw server.toException();
+  }
 
-      final response = await _httpManager.post(
-        HttpApi.setPassword,
-        data: {'userId': userId, 'password': encryptedPassword},
-        options: Options(headers: headers),
-      );
-      return response;
-    } catch (e) {
-      rethrow;
+  Future<UserData?> completeUser({
+    required int uid,
+    required String nick,
+    required String avatar,
+    required int gender,
+    required String birth,
+    required String countryCode,
+    String? inviteCode,
+  }) async {
+    final response = await _httpManager.post(
+      HttpApi.completeUser,
+      data: {
+        'nick': nick,
+        'avatar': avatar,
+        'gender': gender,
+        'birth': birth,
+        'uid': uid,
+        'code': countryCode,
+        'inviteCode': inviteCode,
+      },
+    );
+    final user = _requireData(
+      response,
+      (json) => UserData.fromJson((json as Map).cast<String, dynamic>()),
+    );
+    await _authSession.saveUser(user);
+    return user;
+  }
+
+  Future<UserData> getMyUserInfo() async {
+    final response = await _httpManager.get(HttpApi.myUserInfo);
+    final me = _requireData(
+      response,
+      (json) => MeModel.fromJson((json as Map).cast<String, dynamic>()),
+    );
+    final cachedPhone = await _authSession.phone();
+    final cachedAreaCode = await _authSession.areaCode();
+    final cachedCountryCode = await _authSession.countryCode();
+    final user = me.userBaseInfo.copyWith(
+      phone: cachedPhone,
+      areaCode: me.userBaseInfo.areaCode ?? cachedAreaCode,
+      countryCode: me.userBaseInfo.countryCode ?? cachedCountryCode,
+    );
+    await _authSession.saveUser(user);
+    return user;
+  }
+
+  Future<UserData> modifyUser({
+    required String nick,
+    required int gender,
+    required String avatar,
+    required String signature,
+    required Object birth,
+  }) async {
+    final response = await _httpManager.post(
+      HttpApi.modifyUser,
+      data: {
+        'nick': nick,
+        'gender': gender,
+        'avatar': avatar,
+        'signature': signature,
+        'birth': birth,
+      },
+    );
+    final user = _requireData(
+      response,
+      (json) => UserData.fromJson((json as Map).cast<String, dynamic>()),
+    );
+    await _authSession.saveUser(user);
+    return user;
+  }
+
+  Future<UploadParam> getUploadParam() async {
+    final response = await _httpManager.get(HttpApi.uploadParam);
+    return _requireData(
+      response,
+      (json) => UploadParam.fromJson((json as Map).cast<String, dynamic>()),
+    );
+  }
+
+  Future<String> uploadAvatarFile(String filePath) async {
+    final uploadParam = await getUploadParam();
+    final bytes = await File(filePath).readAsBytes();
+    final extension = filePath.split('.').last.toLowerCase();
+    final safeExtension = extension == filePath ? 'jpg' : extension;
+    final uploadPath = '${uploadParam.path}.$safeExtension';
+    final endpoint = uploadParam.endpoint.startsWith('http')
+        ? uploadParam.endpoint
+        : 'https://${uploadParam.endpoint}';
+    final endpointUri = Uri.parse(endpoint);
+    final objectUri = Uri(
+      scheme: endpointUri.scheme,
+      host: '${uploadParam.bucket}.${endpointUri.host}',
+      port: endpointUri.hasPort ? endpointUri.port : null,
+      path: '/$uploadPath',
+    );
+    const contentType = 'image/jpeg';
+    final date = HttpDate.format(DateTime.now().toUtc());
+    final canonicalizedHeaders =
+        'x-oss-security-token:${uploadParam.securityToken}\n';
+    final canonicalizedResource = '/${uploadParam.bucket}/$uploadPath';
+    final stringToSign =
+        'PUT\n\n$contentType\n$date\n$canonicalizedHeaders$canonicalizedResource';
+    final signature = base64Encode(
+      crypto.Hmac(
+        crypto.sha1,
+        utf8.encode(uploadParam.accessKeySecret),
+      ).convert(utf8.encode(stringToSign)).bytes,
+    );
+
+    final dio = Dio();
+    await dio.putUri(
+      objectUri,
+      data: Stream.fromIterable([bytes]),
+      options: Options(
+        headers: {
+          'Date': date,
+          'Content-Type': contentType,
+          'Authorization': 'OSS ${uploadParam.accessKeyId}:$signature',
+          'x-oss-security-token': uploadParam.securityToken,
+          'Content-Length': bytes.length,
+        },
+        responseType: ResponseType.plain,
+      ),
+    );
+    return uploadPath;
+  }
+
+  Future<void> logout() async {
+    try {
+      final response = await _httpManager.post(HttpApi.logout, data: {});
+      final server = _server<dynamic>(response, null);
+      if (!server.isSuccess) throw server.toException();
+    } finally {
+      await _authSession.clear();
     }
   }
 
-  /// 登出
-  Future<Map<String, dynamic>> logout() async {
-    try {
-      final headers = await _getCommonHeaders();
-
-      final response = await _httpManager.post(
-        HttpApi.logout,
-        options: Options(headers: headers),
-      );
-      return response;
-    } catch (e) {
-      rethrow;
-    }
+  Future<UserData?> cachedUser() {
+    return _authSession.user();
   }
 
-  /// 检查用户是否存在
-  Future<Map<String, dynamic>> hasUser(String email) async {
-    try {
-      final headers = await _getCommonHeaders();
-
-      final response = await _httpManager.get(
-        HttpApi.hasUser,
-        queryParameters: {'email': email},
-        options: Options(headers: headers),
-      );
-      return response;
-    } catch (e) {
-      rethrow;
-    }
+  Future<bool> isLoggedIn() {
+    return _authSession.isLoggedIn();
   }
 }

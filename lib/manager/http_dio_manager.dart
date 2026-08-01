@@ -1,23 +1,33 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
-class HttpDioManager {
-  static const String _baseUrl = 'http://simi2.w1.luyouxia.net/simi';
+import '../configs/app_configs.dart';
+import '../configs/app_device.dart';
+import '../configs/app_enum.dart';
+import 'auth_session.dart';
 
+class HttpDioManager {
   static final HttpDioManager _instance = HttpDioManager._internal();
+
   late Dio _dio;
 
-  // Private constructor
   HttpDioManager._internal() {
     _initDio();
   }
 
-  // Factory constructor for singleton pattern
   factory HttpDioManager() {
     return _instance;
   }
 
-  // Initialize Dio configuration
+  static const String devBaseUrl = 'http://simi2.w1.luyouxia.net/simi';
+  static const String qaBaseUrl = 'https://www.simijoy.com/simi';
+  static const String prodBaseUrl = 'https://www.simisoul.com/simi';
+  static const String devSecret = 'T4&pQ@9n';
+  static const String prodSecret = 'ji18^##710*(%Mhoaeqwe';
+
   void _initDio() {
     _dio = Dio(
       BaseOptions(
@@ -30,24 +40,111 @@ class HttpDioManager {
       ),
     );
 
-    // Add interceptors
     _dio.interceptors.add(
       InterceptorsWrapper(
-        onRequest: (options, handler) {
-          // Add custom headers or token here if needed
-          return handler.next(options);
+        onRequest: (options, handler) async {
+          final startedAt = DateTime.now();
+          options.extra['requestStartedAt'] = startedAt;
+
+          final requestParams = _requestParamsForSign(options);
+          final timestamp = DateTime.now()
+              .toUtc()
+              .millisecondsSinceEpoch
+              .toString();
+          requestParams['v'] = timestamp;
+
+          options.headers.addAll(await _commonHeaders());
+          options.headers['v'] = timestamp;
+          options.headers['b'] = generateSign(requestParams, _apiSecret);
+
+          _logRequest(options);
+          handler.next(options);
         },
         onResponse: (response, handler) {
-          return handler.next(response);
+          _logResponse(response);
+          handler.next(response);
         },
         onError: (DioException e, handler) {
-          return handler.next(e);
+          _logError(e);
+          handler.next(e);
         },
       ),
     );
   }
 
-  // GET request
+  String get _baseUrl {
+    return switch (AppConfig.shared.appEnv) {
+      AppEnv.product => prodBaseUrl,
+      AppEnv.qa => qaBaseUrl,
+      AppEnv.dev => devBaseUrl,
+    };
+  }
+
+  String get _apiSecret {
+    return AppConfig.shared.appEnv == AppEnv.product ? prodSecret : devSecret;
+  }
+
+  Future<Map<String, dynamic>> _commonHeaders() async {
+    final device = AppDevice();
+    final uid = await AuthSession.instance.uid();
+    final token = await AuthSession.instance.token();
+
+    return {
+      'Content-Type': Headers.jsonContentType,
+      if (uid != null && token != null) 'pub-uid': uid,
+      if (uid != null && token != null) 'oauth-token': token,
+      'systemLanguage': device.systemLanguage,
+      'timeZone': device.timeZone,
+      'storeCode': 'US',
+      'appVersion': device.appVersion,
+      'appLanguage': device.appLanguage,
+      'x-auth-token': device.generateAuthToken(),
+      'startTime': DateTime.now().millisecondsSinceEpoch,
+    };
+  }
+
+  Map<String, dynamic> _requestParamsForSign(RequestOptions options) {
+    final requestParams = <String, dynamic>{};
+    if (options.method.toUpperCase() == 'GET') {
+      requestParams.addAll(options.queryParameters);
+      return requestParams;
+    }
+
+    final data = options.data;
+    if (data is FormData) {
+      for (final field in data.fields) {
+        requestParams[field.key] = field.value;
+      }
+    } else if (data is Map<String, dynamic>) {
+      requestParams.addAll(data);
+    } else if (data is Map) {
+      data.forEach((key, value) {
+        requestParams[key.toString()] = value;
+      });
+    }
+    return requestParams;
+  }
+
+  @visibleForTesting
+  static String generateSign(Map<String, dynamic> requestParam, String secret) {
+    final params = Map<String, dynamic>.from(requestParam);
+    params['secret'] = secret;
+    final sortedKeys = params.keys.toList()..sort();
+    final buffer = StringBuffer();
+    for (var index = 0; index < sortedKeys.length; index++) {
+      final key = sortedKeys[index];
+      buffer.write('$key=${params[key]}');
+      if (index != sortedKeys.length - 1) {
+        buffer.write('&');
+      }
+    }
+    final normalized = buffer.toString().replaceAll(
+      RegExp(r'[^\p{L}\p{N}]', unicode: true),
+      '',
+    );
+    return md5.convert(utf8.encode(normalized)).toString();
+  }
+
   Future<dynamic> get(
     String path, {
     Map<String, dynamic>? queryParameters,
@@ -66,7 +163,6 @@ class HttpDioManager {
     }
   }
 
-  // POST request
   Future<dynamic> post(
     String path, {
     dynamic data,
@@ -87,7 +183,6 @@ class HttpDioManager {
     }
   }
 
-  // PUT request
   Future<dynamic> put(
     String path, {
     dynamic data,
@@ -108,7 +203,6 @@ class HttpDioManager {
     }
   }
 
-  // DELETE request
   Future<dynamic> delete(
     String path, {
     dynamic data,
@@ -129,7 +223,6 @@ class HttpDioManager {
     }
   }
 
-  // PATCH request
   Future<dynamic> patch(
     String path, {
     dynamic data,
@@ -150,7 +243,6 @@ class HttpDioManager {
     }
   }
 
-  // Download file
   Future<void> download(
     String urlPath,
     String savePath, {
@@ -172,7 +264,6 @@ class HttpDioManager {
     }
   }
 
-  // Upload file
   Future<dynamic> upload(
     String path, {
     required String filePath,
@@ -182,7 +273,7 @@ class HttpDioManager {
     Options? options,
   }) async {
     try {
-      FormData formData = FormData.fromMap({
+      final formData = FormData.fromMap({
         fileKey: await MultipartFile.fromFile(filePath),
         if (extraFields != null) ...extraFields,
       });
@@ -200,7 +291,74 @@ class HttpDioManager {
     }
   }
 
-  // Handle errors
+  void _logRequest(RequestOptions options) {
+    debugPrint(
+      '[NadyAPI] -> ${options.method} ${options.baseUrl}${options.path} '
+      'headers=${_headersSummary(options.headers)} '
+      'params=${_paramsSummary(options)}',
+    );
+  }
+
+  void _logResponse(Response<dynamic> response) {
+    final startedAt = response.requestOptions.extra['requestStartedAt'];
+    final durationMs = startedAt is DateTime
+        ? DateTime.now().difference(startedAt).inMilliseconds
+        : null;
+    final data = response.data;
+    if (data is Map) {
+      debugPrint(
+        '[NadyAPI] <- ${response.requestOptions.path} '
+        'http=${response.statusCode} code=${data['code']} '
+        'message=${data['message']} traceId=${data['traceId']} '
+        'durationMs=$durationMs',
+      );
+      return;
+    }
+    debugPrint(
+      '[NadyAPI] <- ${response.requestOptions.path} '
+      'http=${response.statusCode} durationMs=$durationMs',
+    );
+  }
+
+  void _logError(DioException error) {
+    final response = error.response;
+    debugPrint(
+      '[NadyAPI] !! ${error.requestOptions.path} '
+      'type=${error.type} http=${response?.statusCode} '
+      'message=${error.message} response=${response?.data}',
+    );
+  }
+
+  Map<String, dynamic> _headersSummary(Map<String, dynamic> headers) {
+    return {
+      'hasPubUid': headers['pub-uid'] != null,
+      'hasOauthToken': headers['oauth-token'] != null,
+      'hasSign': headers['b'] != null,
+      'v': headers['v'],
+      'appLanguage': headers['appLanguage'],
+    };
+  }
+
+  Map<String, dynamic> _paramsSummary(RequestOptions options) {
+    final params = _requestParamsForSign(options);
+    return params.map((key, value) {
+      if (key.toLowerCase().contains('passwd') ||
+          key.toLowerCase().contains('password') ||
+          key.toLowerCase().contains('sms')) {
+        return MapEntry(key, '******');
+      }
+      if (key == 'code' || key == 'phone' || key == 'phoneNo') {
+        return MapEntry(key, _maskPhone(value?.toString() ?? ''));
+      }
+      return MapEntry(key, value);
+    });
+  }
+
+  String _maskPhone(String value) {
+    if (value.length <= 5) return value;
+    return '${value.substring(0, 3)}****${value.substring(value.length - 2)}';
+  }
+
   void _handleError(DioException error) {
     switch (error.type) {
       case DioExceptionType.connectionTimeout:
@@ -224,12 +382,10 @@ class HttpDioManager {
     }
   }
 
-  // Get Dio instance
   Dio getDio() {
     return _dio;
   }
 
-  // Close Dio
   void close() {
     _dio.close();
   }

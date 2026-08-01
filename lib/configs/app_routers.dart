@@ -50,7 +50,11 @@ final GoRouter goRouter = GoRouter(
     GoRoute(
       path: '/register',
       name: 'register',
-      builder: (context, state) => const RegisterPage(),
+      builder: (context, state) => RegisterPage(
+        initialPhone: state.uri.queryParameters['phone'],
+        initialAreaCode: state.uri.queryParameters['areaCode'],
+        initialCountryCode: state.uri.queryParameters['countryCode'],
+      ),
     ),
     // 编辑资料页（不需要底部导航）
     GoRoute(

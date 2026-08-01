@@ -1,8 +1,11 @@
 // dart
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import '../../classes/oauth/provider/login_provider.dart';
 import '../../localization/app_localizations.dart';
+import '../../model/user_profile.dart';
 import '../../theme/app_theme.dart';
 import 'profile_menu_item.dart';
 
@@ -12,6 +15,45 @@ class ProfilePage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final menuItems = ProfileMenuData.getMenuItems();
+    final loginProvider = useMemoized(() => LoginProvider());
+    final user = useState<UserData?>(null);
+    final isLoading = useState(false);
+    final errorText = useState<String?>(null);
+
+    useEffect(() {
+      var cancelled = false;
+      final loadFailedText = context.l10n.t('profile.loadFailed');
+
+      Future<void> loadProfile() async {
+        user.value = await loginProvider.cachedUser();
+        isLoading.value = true;
+        try {
+          final remoteUser = await loginProvider.getMyUserInfo();
+          if (!cancelled) {
+            user.value = remoteUser;
+            errorText.value = null;
+          }
+        } catch (e) {
+          if (!cancelled) {
+            errorText.value = loadFailedText;
+          }
+        } finally {
+          if (!cancelled) {
+            isLoading.value = false;
+          }
+        }
+      }
+
+      loadProfile();
+      return () {
+        cancelled = true;
+      };
+    }, [loginProvider]);
+
+    final profileUser = user.value;
+    final displayName = profileUser?.nick?.isNotEmpty == true
+        ? profileUser!.nick!
+        : context.l10n.t('profile.nickname');
     return Scaffold(
       extendBodyBehindAppBar: true, // ★ 关键：让 body 内容延伸到 AppBar 后面
       appBar: AppBar(
@@ -39,27 +81,19 @@ class ProfilePage extends HookConsumerWidget {
               child: Column(
                 children: [
                   // 头像
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: AppColors.avatarPlaceholder,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.person,
-                      size: 50,
-                      color: AppColors.textInverse,
-                    ),
-                  ),
+                  _ProfileAvatar(avatar: profileUser?.avatar),
                   const SizedBox(height: AppSpacing.md),
                   // 昵称
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        context.l10n.t('profile.nickname'),
-                        style: AppTextStyles.title,
+                      Flexible(
+                        child: Text(
+                          displayName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.title,
+                        ),
                       ),
                       const SizedBox(width: AppSpacing.sm),
                       GestureDetector(
@@ -80,6 +114,39 @@ class ProfilePage extends HookConsumerWidget {
                       ),
                     ],
                   ),
+                  if (profileUser != null) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      [
+                        if (profileUser.uid != null) 'ID ${profileUser.uid}',
+                        if (profileUser.areaCode != null &&
+                            profileUser.phone != null)
+                          '+${profileUser.areaCode} ${profileUser.phone}',
+                      ].join('  ·  '),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                  if (isLoading.value) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ],
+                  if (errorText.value != null) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      errorText.value!,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.danger,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -164,5 +231,36 @@ class ProfilePage extends HookConsumerWidget {
   void onRightIconTap(BuildContext context) {
     // 跳转到消息页面
     context.go('/messages');
+  }
+}
+
+class _ProfileAvatar extends StatelessWidget {
+  const _ProfileAvatar({this.avatar});
+
+  final String? avatar;
+
+  @override
+  Widget build(BuildContext context) {
+    final imageUrl = avatar;
+    return Container(
+      width: 100,
+      height: 100,
+      clipBehavior: Clip.antiAlias,
+      decoration: const BoxDecoration(
+        color: AppColors.avatarPlaceholder,
+        shape: BoxShape.circle,
+      ),
+      child: imageUrl == null || imageUrl.isEmpty
+          ? const Icon(Icons.person, size: 50, color: AppColors.textInverse)
+          : Image.network(
+              imageUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => const Icon(
+                Icons.person,
+                size: 50,
+                color: AppColors.textInverse,
+              ),
+            ),
+    );
   }
 }
