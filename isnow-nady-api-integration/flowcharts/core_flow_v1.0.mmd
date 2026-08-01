@@ -1,0 +1,12 @@
+flowchart TD
+  A["用户提供蓝湖地址和功能描述"] --> B["AI 搜索 nady-api-inventory.md"]
+  B --> C{"是否找到明确接口证据"}
+  C -- "否" --> D["停止改代码并向用户确认"]
+  C -- "是" --> E["输出接口证据表"]
+  E --> F["定位 iSnow 最小改造范围"]
+  F --> G["更新接口层、model、provider、页面状态"]
+  G --> H["运行 flutter analyze 和 flutter test"]
+  H --> I{"验证是否通过"}
+  I -- "否" --> J["根据调试日志修复"]
+  J --> H
+  I -- "是" --> K["交付改动说明和验证结果"]

@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>iSnow Nady 接口接入原型 v1.0</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: '#1b1f2a',
+            rose: '#e9476d',
+            flame: '#ff6f57',
+            cream: '#fff0bd',
+            blush: '#ffe5e8',
+            field: '#f4f4f4'
+          },
+          boxShadow: {
+            phone: '0 26px 70px rgba(27, 31, 42, 0.22)',
+            soft: '0 14px 36px rgba(233, 71, 109, 0.16)'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #eef2f7;
+      color: #1b1f2a;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .phone {
+      width: min(100vw, 395px);
+      height: min(100vh, 852px);
+      max-height: 852px;
+      border: 10px solid #111827;
+      border-radius: 42px;
+      background: #fff;
+      overflow: hidden;
+      box-shadow: 0 26px 70px rgba(27, 31, 42, 0.22);
+    }
+
+    .screen {
+      display: none;
+      width: 100%;
+      height: 100%;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .phone-bg {
+      background:
+        radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.68), transparent 24%),
+        linear-gradient(160deg, #ffeab1 0%, #ffe7e5 58%, #ffffff 100%);
+    }
+
+    .field-shell {
+      height: 43px;
+      border-radius: 10px;
+      background: #f4f4f4;
+    }
+
+    .primary-button {
+      background: linear-gradient(180deg, #ff7f67 0%, #e9476d 100%);
+      box-shadow: 0 12px 22px rgba(233, 71, 109, 0.28);
+    }
+
+    .inactive-focus {
+      pointer-events: none;
+      opacity: 0.38;
+      filter: grayscale(0.3);
+    }
+
+    .tab-button.active {
+      background: #1b1f2a;
+      color: #fff;
+    }
+
+    .modal {
+      display: none;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .log-line {
+      border-left: 3px solid #e5e7eb;
+    }
+
+    .log-line.ok {
+      border-left-color: #16a34a;
+    }
+
+    .log-line.warn {
+      border-left-color: #d97706;
+    }
+
+    .log-line.fail {
+      border-left-color: #dc2626;
+    }
+
+    @media (max-width: 860px) {
+      .shell {
+        display: block;
+      }
+
+      .workspace {
+        min-height: 100vh;
+        padding: 0;
+      }
+
+      .phone {
+        width: 100vw;
+        height: 100vh;
+        max-height: none;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .side-panel {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell grid min-h-screen grid-cols-[minmax(0,1fr)_320px]">
+    <main class="workspace flex items-center justify-center p-8">
+      <div class="phone">
+        <section id="screen-login" class="screen phone-bg active" data-feature="login">
+          <div class="relative h-full px-[29px] pt-[32px]">
+            <button class="absolute right-[24px] top-[28px] flex h-8 w-8 items-center justify-center rounded-full bg-rose text-white shadow-soft" type="button" aria-label="close">×</button>
+
+            <div class="pt-[168px]">
+              <div class="relative rounded-[40px] bg-white px-5 pb-7 pt-[50px] shadow-soft">
+                <h1 class="sr-only">登录注册</h1>
+
+                <label class="block text-[15px] font-semibold text-ink">Please enter your phone number</label>
+                <div class="field-shell mt-2 flex items-center px-3">
+                  <button id="countryButton" class="mr-2 flex h-8 min-w-[82px] items-center gap-2 rounded-md px-1 text-left" type="button" aria-label="country code">
+                    <span id="countryFlag" class="grid h-[18px] w-[24px] place-items-center overflow-hidden rounded-sm bg-[#e53935] text-[10px] font-bold text-white">KG</span>
+                    <span id="countryDial" class="text-[13px] font-semibold text-ink">+996</span>
+                    <span class="h-0 w-0 border-l-[5px] border-r-[5px] border-t-[7px] border-l-transparent border-r-transparent border-t-rose"></span>
+                  </button>
+                  <input id="phoneInput" class="min-w-0 flex-1 bg-transparent text-[14px] text-ink outline-none placeholder:text-[#a3a8b2]" type="tel" value="13212345678" placeholder="13212345678">
+                </div>
+                <p id="phoneState" class="mt-2 h-5 text-[12px] text-[#697586]">Checking user status...</p>
+
+                <div id="passwordBlock" class="mt-4">
+                  <label class="block text-[15px] font-semibold text-ink">Please enter your password</label>
+                  <div class="field-shell mt-2 flex items-center px-3">
+                    <input id="passwordInput" class="min-w-0 flex-1 bg-transparent text-[14px] text-ink outline-none placeholder:text-[#a3a8b2]" type="password" placeholder="Your password" value="12345678">
+                    <span class="text-[12px] text-[#9aa3af]">Show</span>
+                  </div>
+                </div>
+
+                <div id="registerHint" class="mt-4 hidden rounded-lg border border-[#ffd3dc] bg-[#fff7f8] px-3 py-3">
+                  <p class="text-[13px] font-semibold text-ink">New phone number</p>
+                  <p class="mt-1 text-[12px] leading-5 text-[#667085]">SMS verification is required before setting a password.</p>
+                </div>
+
+                <label class="mt-5 flex items-start gap-2 text-[10px] leading-5 text-[#727986]">
+                  <input id="agreementInput" class="mt-[3px] h-4 w-4 rounded border-[#d0d5dd] accent-rose" type="checkbox" checked>
+                  <span>Logging in means you agree to the user <span class="font-semibold text-rose">service agreement</span> and <span class="font-semibold text-rose">private policy</span></span>
+                </label>
+
+                <button id="confirmButton" class="primary-button mt-5 h-[52px] w-full rounded-[26px] text-[18px] font-semibold text-white" type="button">Confirm</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="screen-register" class="screen phone-bg" data-feature="register">
+          <div class="relative h-full px-[24px] pt-[26px]">
+            <button class="absolute left-[20px] top-[26px] flex h-9 w-9 items-center justify-center rounded-full bg-white/70 text-[22px] text-ink" type="button" data-nav="#login" aria-label="back">‹</button>
+            <div class="pt-[104px]">
+              <div class="rounded-[32px] bg-white px-5 pb-6 pt-6 shadow-soft">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-[13px] font-semibold text-rose">Sign up</p>
+                    <h1 class="mt-1 text-[22px] font-bold leading-7 text-ink">Verify your phone</h1>
+                  </div>
+                  <div class="rounded-full bg-[#fff1f2] px-3 py-1 text-[12px] font-semibold text-rose">Step <span id="stepNo">1</span>/3</div>
+                </div>
+
+                <div class="mt-5 grid grid-cols-3 gap-2">
+                  <div id="stepPill1" class="h-1.5 rounded-full bg-rose"></div>
+                  <div id="stepPill2" class="h-1.5 rounded-full bg-[#e5e7eb]"></div>
+                  <div id="stepPill3" class="h-1.5 rounded-full bg-[#e5e7eb]"></div>
+                </div>
+
+                <div id="registerStepSms" class="mt-6">
+                  <label class="block text-[14px] font-semibold text-ink">SMS code</label>
+                  <div class="field-shell mt-2 flex items-center px-3">
+                    <input id="smsInput" class="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-[#a3a8b2]" type="text" maxlength="6" placeholder="6-digit code">
+                    <button id="sendSmsButton" class="text-[12px] font-semibold text-rose" type="button">Send</button>
+                  </div>
+                  <p id="smsState" class="mt-2 h-5 text-[12px] text-[#697586]">+996 13212345678</p>
+                </div>
+
+                <div id="registerStepPassword" class="mt-6 hidden">
+                  <label class="block text-[14px] font-semibold text-ink">Set password</label>
+                  <div class="field-shell mt-2 flex items-center px-3">
+                    <input id="newPasswordInput" class="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-[#a3a8b2]" type="password" placeholder="At least 8 characters" value="12345678">
+                  </div>
+                  <div class="field-shell mt-3 flex items-center px-3">
+                    <input id="confirmPasswordInput" class="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-[#a3a8b2]" type="password" placeholder="Confirm password" value="12345678">
+                  </div>
+                </div>
+
+                <div id="registerStepProfile" class="mt-6 hidden">
+                  <div class="flex items-center gap-4">
+                    <div class="grid h-[70px] w-[70px] place-items-center rounded-full bg-[#f1f5f9] text-[28px] font-bold text-[#94a3b8]">I</div>
+                    <div class="min-w-0 flex-1">
+                      <label class="block text-[14px] font-semibold text-ink">Nickname</label>
+                      <div class="field-shell mt-2 flex items-center px-3">
+                        <input id="defaultNickInput" class="min-w-0 flex-1 bg-transparent text-[15px] outline-none" type="text" value="iSnow User">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="mt-4 grid grid-cols-2 gap-3">
+                    <button class="genderButton rounded-xl border border-rose bg-[#fff5f7] px-3 py-3 text-[13px] font-semibold text-rose" type="button" data-gender="female">Female</button>
+                    <button class="genderButton rounded-xl border border-[#e5e7eb] px-3 py-3 text-[13px] font-semibold text-[#667085]" type="button" data-gender="male">Male</button>
+                  </div>
+                </div>
+
+                <button id="registerNextButton" class="primary-button mt-6 h-[52px] w-full rounded-[26px] text-[17px] font-semibold text-white" type="button">Verify</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="screen-profile" class="screen bg-[#f7f8fb]" data-feature="profile">
+          <div class="h-full overflow-auto">
+            <div class="phone-bg px-6 pb-8 pt-12">
+              <div class="flex items-center justify-between">
+                <h1 class="text-[26px] font-bold text-ink">Profile</h1>
+                <button id="logoutButton" class="rounded-full bg-white/75 px-4 py-2 text-[12px] font-semibold text-rose" type="button">Logout</button>
+              </div>
+              <div class="mt-7 flex items-center gap-4">
+                <div class="grid h-[86px] w-[86px] place-items-center overflow-hidden rounded-full bg-white shadow-soft">
+                  <div id="profileAvatar" class="grid h-[74px] w-[74px] place-items-center rounded-full bg-gradient-to-br from-rose to-flame text-[30px] font-bold text-white">I</div>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p id="profileNick" class="truncate text-[22px] font-bold text-ink">iSnow User</p>
+                  <p class="mt-1 text-[12px] font-semibold text-[#667085]">UID <span id="profileUid">100861</span></p>
+                  <p class="mt-1 text-[12px] text-[#667085]"><span id="profileArea">+996</span> <span id="profilePhone">13212345678</span></p>
+                </div>
+              </div>
+            </div>
+
+            <div class="-mt-4 px-5 pb-8">
+              <div class="rounded-2xl bg-white p-4 shadow-soft">
+                <div class="flex items-center justify-between border-b border-[#edf0f5] pb-3">
+                  <div>
+                    <p class="text-[13px] font-semibold text-[#667085]">Country / Region</p>
+                    <p id="profileCountry" class="mt-1 text-[15px] font-semibold text-ink">Kyrgyzstan</p>
+                  </div>
+                  <span class="rounded-full bg-[#f1f5f9] px-3 py-1 text-[12px] font-semibold text-[#64748b]">Read only</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3 py-4">
+                  <div class="rounded-xl bg-[#f8fafc] p-3">
+                    <p class="text-[12px] text-[#667085]">Gender</p>
+                    <p id="profileGender" class="mt-1 text-[15px] font-semibold">Female</p>
+                  </div>
+                  <div class="rounded-xl bg-[#f8fafc] p-3">
+                    <p class="text-[12px] text-[#667085]">Birthday</p>
+                    <p id="profileBirth" class="mt-1 text-[15px] font-semibold">2000-01-01</p>
+                  </div>
+                </div>
+                <div class="rounded-xl bg-[#f8fafc] p-3">
+                  <p class="text-[12px] text-[#667085]">Bio</p>
+                  <p id="profileBio" class="mt-1 text-[14px] leading-5 text-ink">A quiet place to record mood and moments.</p>
+                </div>
+                <button id="editProfileButton" class="primary-button mt-5 h-[48px] w-full rounded-[24px] text-[16px] font-semibold text-white" type="button">Edit profile</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="screen-debug" class="screen bg-[#0f172a] text-white" data-feature="debug">
+          <div class="flex h-full flex-col">
+            <div class="px-5 pb-4 pt-12">
+              <div class="flex items-center justify-between">
+                <h1 class="text-[22px] font-bold">Debug logs</h1>
+                <button id="clearLogsButton" class="rounded-full bg-white/10 px-3 py-1 text-[12px] font-semibold" type="button">Clear</button>
+              </div>
+              <p class="mt-2 text-[12px] leading-5 text-slate-300">DEV · http://simi2.w1.luyouxia.net/simi</p>
+            </div>
+            <div id="logList" class="flex-1 space-y-3 overflow-auto px-5 pb-6"></div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <aside class="side-panel border-l border-[#d8dee9] bg-white p-6">
+      <div>
+        <p class="text-[12px] font-semibold uppercase tracking-[0.16em] text-[#64748b]">iSnow</p>
+        <h2 class="mt-2 text-[22px] font-bold leading-7">Nady API Integration</h2>
+      </div>
+
+      <div class="mt-7 grid gap-2">
+        <button class="tab-button rounded-lg px-4 py-3 text-left text-[14px] font-semibold text-[#334155]" type="button" data-feature-nav="login" data-nav="#login">Login</button>
+        <button class="tab-button rounded-lg px-4 py-3 text-left text-[14px] font-semibold text-[#334155]" type="button" data-feature-nav="register" data-nav="#register">Register</button>
+        <button class="tab-button rounded-lg px-4 py-3 text-left text-[14px] font-semibold text-[#334155]" type="button" data-feature-nav="profile" data-nav="#profile">Profile</button>
+        <button class="tab-button rounded-lg px-4 py-3 text-left text-[14px] font-semibold text-[#334155]" type="button" data-feature-nav="debug" data-nav="#debug">Debug</button>
+      </div>
+
+      <div class="mt-8 rounded-xl border border-[#e2e8f0] bg-[#f8fafc] p-4">
+        <p class="text-[13px] font-bold text-ink">API evidence</p>
+        <div class="mt-3 space-y-2 text-[12px] leading-5 text-[#475569]">
+          <p><span class="font-semibold">Country</span><br><code>/country-list/default-country</code></p>
+          <p><span class="font-semibold">Has user</span><br><code>/api/user/hasUser</code></p>
+          <p><span class="font-semibold">Login</span><br><code>/oauth2/login</code></p>
+          <p><span class="font-semibold">Profile</span><br><code>/api/user/mine</code></p>
+          <p><span class="font-semibold">Modify</span><br><code>/api/user/modifyUser</code></p>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div id="countryModal" class="modal fixed inset-0 z-20 items-end justify-center bg-black/45">
+    <div class="w-full max-w-[395px] rounded-t-[28px] bg-white p-5 shadow-phone">
+      <div class="flex items-center justify-between">
+        <h2 class="text-[18px] font-bold">Country code</h2>
+        <button id="closeCountryModal" class="grid h-9 w-9 place-items-center rounded-full bg-[#f1f5f9] text-[20px]" type="button">×</button>
+      </div>
+      <div id="countryList" class="mt-4 max-h-[360px] overflow-auto"></div>
+    </div>
+  </div>
+
+  <div id="editProfileModal" class="modal fixed inset-0 z-30 items-end justify-center bg-black/45">
+    <div class="w-full max-w-[395px] rounded-t-[28px] bg-white p-5 shadow-phone">
+      <div class="flex items-center justify-between">
+        <h2 class="text-[18px] font-bold">Edit profile</h2>
+        <button id="closeEditModal" class="grid h-9 w-9 place-items-center rounded-full bg-[#f1f5f9] text-[20px]" type="button">×</button>
+      </div>
+
+      <div class="mt-5 space-y-4">
+        <div class="flex items-center gap-4">
+          <div id="editAvatarPreview" class="grid h-[68px] w-[68px] place-items-center rounded-full bg-gradient-to-br from-rose to-flame text-[26px] font-bold text-white">I</div>
+          <button id="uploadAvatarButton" class="rounded-full border border-rose px-4 py-2 text-[13px] font-semibold text-rose" type="button">Upload avatar</button>
+        </div>
+
+        <label class="block">
+          <span class="text-[13px] font-semibold">Nickname</span>
+          <input id="editNickInput" class="field-shell mt-2 w-full px-3 text-[15px] outline-none" type="text" value="iSnow User">
+        </label>
+
+        <label class="block">
+          <span class="text-[13px] font-semibold">Birthday</span>
+          <input id="editBirthInput" class="field-shell mt-2 w-full px-3 text-[15px] outline-none" type="date" value="2000-01-01">
+        </label>
+
+        <div>
+          <span class="text-[13px] font-semibold">Gender</span>
+          <div class="mt-2 grid grid-cols-2 gap-3">
+            <button class="editGenderButton rounded-xl border border-rose bg-[#fff5f7] px-3 py-3 text-[13px] font-semibold text-rose" type="button" data-gender="Female">Female</button>
+            <button class="editGenderButton rounded-xl border border-[#e5e7eb] px-3 py-3 text-[13px] font-semibold text-[#667085]" type="button" data-gender="Male">Male</button>
+          </div>
+        </div>
+
+        <label class="block">
+          <span class="text-[13px] font-semibold">Bio</span>
+          <textarea id="editBioInput" class="mt-2 h-[82px] w-full resize-none rounded-xl bg-field px-3 py-3 text-[14px] outline-none">A quiet place to record mood and moments.</textarea>
+        </label>
+      </div>
+
+      <button id="saveProfileButton" class="primary-button mt-5 h-[50px] w-full rounded-[25px] text-[16px] font-semibold text-white" type="button">Save</button>
+    </div>
+  </div>
+
+  <script>
+    const countries = [
+      { name: 'Kyrgyzstan', isoCode: 'KG', dialCode: '+996' },
+      { name: 'United States', isoCode: 'US', dialCode: '+1' },
+      { name: 'China', isoCode: 'CN', dialCode: '+86' },
+      { name: 'Saudi Arabia', isoCode: 'SA', dialCode: '+966' },
+      { name: 'India', isoCode: 'IN', dialCode: '+91' }
+    ];
+
+    const state = {
+      country: countries[0],
+      hasUser: true,
+      checking: false,
+      registerStep: 1,
+      gender: 'Female',
+      logs: []
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+    const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+
+    function maskPhone(value) {
+      const clean = String(value || '');
+      if (clean.length <= 4) return clean;
+      return `${clean.slice(0, 3)}****${clean.slice(-2)}`;
+    }
+
+    function addLog(stage, status, details) {
+      const now = new Date();
+      const traceId = `trace-${Math.floor(Math.random() * 900000 + 100000)}`;
+      state.logs.unshift({
+        time: now.toLocaleTimeString('zh-CN', { hour12: false }),
+        stage,
+        status,
+        traceId,
+        details
+      });
+      renderLogs();
+    }
+
+    function renderLogs() {
+      const list = $('#logList');
+      list.innerHTML = '';
+      const logs = state.logs.length ? state.logs : [{
+        time: new Date().toLocaleTimeString('zh-CN', { hour12: false }),
+        stage: 'debug.ready',
+        status: 'warn',
+        traceId: 'trace-pending',
+        details: '等待接口请求'
+      }];
+
+      logs.forEach((log) => {
+        const item = document.createElement('div');
+        item.className = `log-line ${log.status} rounded-lg bg-white/7 p-3 text-[12px] leading-5`;
+        item.innerHTML = `
+          <div class="flex items-center justify-between gap-3">
+            <span class="font-semibold">${log.stage}</span>
+            <span class="text-slate-300">${log.time}</span>
+          </div>
+          <p class="mt-1 text-slate-300">${log.details}</p>
+          <p class="mt-1 font-mono text-[11px] text-slate-400">${log.traceId}</p>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function navigate(hash) {
+      window.location.hash = hash;
+    }
+
+    function getFeatureFromHash() {
+      const hash = window.location.hash.replace('#', '');
+      return hash || 'login';
+    }
+
+    function applyRoute() {
+      const feature = getFeatureFromHash();
+      $$('.screen').forEach((screen) => {
+        screen.classList.toggle('active', screen.dataset.feature === feature);
+      });
+      $$('.tab-button').forEach((button) => {
+        button.classList.toggle('active', button.dataset.featureNav === feature);
+      });
+      if (feature === 'debug') renderLogs();
+    }
+
+    function applyFocusMode() {
+      const params = new URLSearchParams(window.location.search);
+      const focus = params.get('focus');
+      const sandbox = params.get('sandbox') === 'true';
+      if (!focus) return;
+
+      $$('.tab-button').forEach((button) => {
+        const active = button.dataset.featureNav === focus;
+        button.classList.toggle('inactive-focus', !active);
+      });
+
+      if (sandbox) {
+        $('.side-panel')?.classList.add('inactive-focus');
+      }
+
+      if (getFeatureFromHash() !== focus) {
+        window.location.hash = focus;
+      }
+    }
+
+    function renderCountryList() {
+      const list = $('#countryList');
+      list.innerHTML = '';
+      countries.forEach((country) => {
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'flex w-full items-center justify-between border-b border-[#edf0f5] px-1 py-4 text-left';
+        item.innerHTML = `
+          <span class="flex items-center gap-3">
+            <span class="grid h-[24px] w-[32px] place-items-center rounded bg-[#e53935] text-[11px] font-bold text-white">${country.isoCode}</span>
+            <span>
+              <span class="block text-[14px] font-semibold text-ink">${country.name}</span>
+              <span class="block text-[12px] text-[#667085]">${country.isoCode}</span>
+            </span>
+          </span>
+          <span class="text-[14px] font-semibold text-rose">${country.dialCode}</span>
+        `;
+        item.addEventListener('click', () => {
+          state.country = country;
+          $('#countryDial').textContent = country.dialCode;
+          $('#countryFlag').textContent = country.isoCode;
+          $('#profileArea').textContent = country.dialCode;
+          $('#profileCountry').textContent = country.name;
+          $('#countryModal').classList.remove('open');
+          addLog('country.select', 'ok', `GET /country-list/supported · selected ${country.isoCode}`);
+          triggerHasUserCheck();
+        });
+        list.appendChild(item);
+      });
+    }
+
+    let checkTimer;
+    function triggerHasUserCheck() {
+      clearTimeout(checkTimer);
+      const phone = $('#phoneInput').value.trim();
+      $('#profilePhone').textContent = phone || '13212345678';
+      if (phone.length < 6) {
+        state.checking = false;
+        $('#phoneState').textContent = 'Enter a valid phone number';
+        $('#passwordBlock').classList.add('hidden');
+        $('#registerHint').classList.add('hidden');
+        return;
+      }
+
+      state.checking = true;
+      $('#phoneState').textContent = 'Checking user status...';
+      $('#confirmButton').textContent = 'Checking';
+
+      checkTimer = setTimeout(() => {
+        state.checking = false;
+        state.hasUser = phone.endsWith('8') || phone === '13212345678';
+        if (state.hasUser) {
+          $('#phoneState').textContent = 'Account found. Continue with password.';
+          $('#passwordBlock').classList.remove('hidden');
+          $('#registerHint').classList.add('hidden');
+          $('#confirmButton').textContent = 'Confirm';
+          addLog('auth.hasUser', 'ok', `GET /api/user/hasUser · phone=${maskPhone(phone)} · hasUser=true`);
+        } else {
+          $('#phoneState').textContent = 'New account. Registration required.';
+          $('#passwordBlock').classList.add('hidden');
+          $('#registerHint').classList.remove('hidden');
+          $('#confirmButton').textContent = 'Sign up';
+          addLog('auth.hasUser', 'ok', `GET /api/user/hasUser · phone=${maskPhone(phone)} · hasUser=false`);
+        }
+      }, 650);
+    }
+
+    function handleConfirm() {
+      if (state.checking) return;
+      const phone = $('#phoneInput').value.trim();
+      const agreed = $('#agreementInput').checked;
+      if (!agreed) {
+        $('#phoneState').textContent = 'Please agree to the service agreement and privacy policy.';
+        addLog('auth.agreement', 'warn', 'Blocked before request · agreement=false');
+        return;
+      }
+      if (!phone) {
+        $('#phoneState').textContent = 'Please enter your phone number.';
+        return;
+      }
+      if (state.hasUser) {
+        $('#confirmButton').textContent = 'Loading';
+        addLog('auth.login', 'ok', `POST /oauth2/login · code=${maskPhone(phone)} · areaCode=${state.country.dialCode}`);
+        setTimeout(() => {
+          $('#confirmButton').textContent = 'Confirm';
+          $('#profilePhone').textContent = phone;
+          $('#profileArea').textContent = state.country.dialCode;
+          $('#profileCountry').textContent = state.country.name;
+          navigate('#profile');
+        }, 700);
+      } else {
+        state.registerStep = 1;
+        syncRegisterStep();
+        navigate('#register');
+      }
+    }
+
+    function syncRegisterStep() {
+      $('#stepNo').textContent = String(state.registerStep);
+      $('#registerStepSms').classList.toggle('hidden', state.registerStep !== 1);
+      $('#registerStepPassword').classList.toggle('hidden', state.registerStep !== 2);
+      $('#registerStepProfile').classList.toggle('hidden', state.registerStep !== 3);
+      $('#stepPill1').className = `h-1.5 rounded-full ${state.registerStep >= 1 ? 'bg-rose' : 'bg-[#e5e7eb]'}`;
+      $('#stepPill2').className = `h-1.5 rounded-full ${state.registerStep >= 2 ? 'bg-rose' : 'bg-[#e5e7eb]'}`;
+      $('#stepPill3').className = `h-1.5 rounded-full ${state.registerStep >= 3 ? 'bg-rose' : 'bg-[#e5e7eb]'}`;
+      $('#registerNextButton').textContent = state.registerStep === 1 ? 'Verify' : state.registerStep === 2 ? 'Set password' : 'Complete';
+      $('#smsState').textContent = `${state.country.dialCode} ${$('#phoneInput').value.trim() || '13212345678'}`;
+    }
+
+    function handleRegisterNext() {
+      const phone = $('#phoneInput').value.trim() || '13212345678';
+      if (state.registerStep === 1) {
+        addLog('auth.verifyCode', 'ok', `POST /oauth2/verify/code · code=${maskPhone(phone)} · smsCode=******`);
+        state.registerStep = 2;
+        syncRegisterStep();
+        return;
+      }
+      if (state.registerStep === 2) {
+        addLog('auth.setPassword', 'ok', `POST /oauth2/setPassword · phone=${maskPhone(phone)} · areaCode=${state.country.dialCode}`);
+        state.registerStep = 3;
+        syncRegisterStep();
+        return;
+      }
+      addLog('user.complete', 'ok', 'POST /api/user/complete · default profile saved');
+      addLog('auth.login', 'ok', `POST /oauth2/login · registered phone=${maskPhone(phone)}`);
+      $('#profilePhone').textContent = phone;
+      $('#profileArea').textContent = state.country.dialCode;
+      $('#profileCountry').textContent = state.country.name;
+      $('#profileNick').textContent = $('#defaultNickInput').value.trim() || 'iSnow User';
+      navigate('#profile');
+    }
+
+    function openEditProfile() {
+      $('#editNickInput').value = $('#profileNick').textContent.trim();
+      $('#editBirthInput').value = $('#profileBirth').textContent.trim();
+      $('#editBioInput').value = $('#profileBio').textContent.trim();
+      $('#editProfileModal').classList.add('open');
+    }
+
+    function saveProfile() {
+      $('#profileNick').textContent = $('#editNickInput').value.trim() || 'iSnow User';
+      $('#profileBirth').textContent = $('#editBirthInput').value || '2000-01-01';
+      $('#profileBio').textContent = $('#editBioInput').value.trim() || 'A quiet place to record mood and moments.';
+      $('#profileGender').textContent = state.gender;
+      $('#editProfileModal').classList.remove('open');
+      addLog('profile.modify', 'ok', 'POST /api/user/modifyUser · nick/gender/avatar/signature/birth');
+    }
+
+    function bindEvents() {
+      $$('[data-nav]').forEach((button) => {
+        button.addEventListener('click', () => navigate(button.dataset.nav));
+      });
+
+      $('#countryButton').addEventListener('click', () => $('#countryModal').classList.add('open'));
+      $('#closeCountryModal').addEventListener('click', () => $('#countryModal').classList.remove('open'));
+      $('#phoneInput').addEventListener('input', triggerHasUserCheck);
+      $('#confirmButton').addEventListener('click', handleConfirm);
+
+      $('#sendSmsButton').addEventListener('click', () => {
+        const phone = $('#phoneInput').value.trim() || '13212345678';
+        $('#smsState').textContent = 'SMS sent. Code expires in 60s.';
+        addLog('auth.sendSms', 'ok', `POST /oauth2/sendSms · phoneNo=${maskPhone(phone)} · purpose=register`);
+      });
+
+      $('#registerNextButton').addEventListener('click', handleRegisterNext);
+      $('#editProfileButton').addEventListener('click', openEditProfile);
+      $('#closeEditModal').addEventListener('click', () => $('#editProfileModal').classList.remove('open'));
+      $('#saveProfileButton').addEventListener('click', saveProfile);
+      $('#uploadAvatarButton').addEventListener('click', () => {
+        $('#editAvatarPreview').textContent = 'UP';
+        $('#profileAvatar').textContent = 'UP';
+        addLog('resource.uploadParam', 'ok', 'GET /api/resource/header-upload-param · OSS credential issued');
+      });
+      $('#clearLogsButton').addEventListener('click', () => {
+        state.logs = [];
+        renderLogs();
+      });
+      $('#logoutButton').addEventListener('click', () => {
+        addLog('auth.logout', 'ok', 'POST /oauth2/logout · local token cleared');
+        navigate('#login');
+      });
+
+      $$('.editGenderButton').forEach((button) => {
+        button.addEventListener('click', () => {
+          state.gender = button.dataset.gender;
+          $$('.editGenderButton').forEach((item) => {
+            const active = item === button;
+            item.className = active
+              ? 'editGenderButton rounded-xl border border-rose bg-[#fff5f7] px-3 py-3 text-[13px] font-semibold text-rose'
+              : 'editGenderButton rounded-xl border border-[#e5e7eb] px-3 py-3 text-[13px] font-semibold text-[#667085]';
+          });
+        });
+      });
+    }
+
+    window.addEventListener('hashchange', applyRoute);
+    renderCountryList();
+    bindEvents();
+    syncRegisterStep();
+    applyFocusMode();
+    applyRoute();
+    triggerHasUserCheck();
+    addLog('country.default', 'ok', 'GET /country-list/default-country · KG +996');
+  </script>
+</body>
+</html>

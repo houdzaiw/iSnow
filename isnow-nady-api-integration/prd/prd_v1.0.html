@@ -1,0 +1,1036 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>iSnow Nady 接口接入 PRD v1.0</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --paper: #ffffff;
+      --ink: #18202a;
+      --muted: #687386;
+      --line: #dfe5ef;
+      --accent: #e9476d;
+      --accent-2: #1267d8;
+      --ok: #15803d;
+      --warn: #b45309;
+      --risk: #b91c1c;
+      --code-bg: #f1f5f9;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      gap: 28px;
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    nav {
+      position: sticky;
+      top: 24px;
+      height: calc(100vh - 48px);
+      overflow: auto;
+      align-self: start;
+      padding: 20px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    nav h2 {
+      margin: 0 0 12px;
+      font-size: 16px;
+    }
+
+    nav a {
+      display: block;
+      padding: 8px 0;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      border-bottom: 1px solid #eef2f7;
+    }
+
+    main {
+      min-width: 0;
+      padding: 36px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      line-height: 1.25;
+    }
+
+    h2 {
+      margin: 44px 0 16px;
+      padding-top: 8px;
+      font-size: 22px;
+      border-top: 1px solid var(--line);
+    }
+
+    h3 {
+      margin: 28px 0 10px;
+      font-size: 18px;
+    }
+
+    p {
+      margin: 0 0 14px;
+    }
+
+    table {
+      width: 100%;
+      margin: 14px 0 22px;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      vertical-align: top;
+      border: 1px solid var(--line);
+      text-align: left;
+    }
+
+    th {
+      background: #f8fafc;
+      color: #334155;
+      font-weight: 700;
+    }
+
+    code {
+      padding: 2px 5px;
+      border-radius: 4px;
+      background: var(--code-bg);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.92em;
+    }
+
+    pre {
+      overflow: auto;
+      padding: 14px 16px;
+      background: var(--code-bg);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 18px;
+      margin: 20px 0 28px;
+      padding: 18px;
+      background: #fbfcff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .tag {
+      display: inline-block;
+      margin: 2px 6px 2px 0;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #3730a3;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .tag.ok {
+      background: #dcfce7;
+      color: var(--ok);
+    }
+
+    .tag.warn {
+      background: #ffedd5;
+      color: var(--warn);
+    }
+
+    .tag.risk {
+      background: #fee2e2;
+      color: var(--risk);
+    }
+
+    .callout {
+      margin: 18px 0;
+      padding: 14px 16px;
+      border-left: 4px solid var(--accent-2);
+      background: #eff6ff;
+      border-radius: 6px;
+    }
+
+    .callout.warning {
+      border-left-color: var(--warn);
+      background: #fff7ed;
+    }
+
+    .callout.risk {
+      border-left-color: var(--risk);
+      background: #fef2f2;
+    }
+
+    .checklist li {
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        display: block;
+        padding: 14px;
+      }
+
+      nav {
+        position: static;
+        height: auto;
+        margin-bottom: 16px;
+      }
+
+      main {
+        padding: 22px;
+      }
+
+      .meta {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <nav>
+      <h2>目录</h2>
+      <a href="#info">项目信息</a>
+      <a href="#background">一、需求背景</a>
+      <a href="#goals">二、需求目标</a>
+      <a href="#users">三、用户与场景</a>
+      <a href="#scope">四、功能清单</a>
+      <a href="#solution">五、详细方案</a>
+      <a href="#tech">六、技术接入说明</a>
+      <a href="#migration">七、接口迁移清单</a>
+      <a href="#logs">八、调试日志与排查</a>
+      <a href="#acceptance">九、验收标准</a>
+      <a href="#roadmap">十、后续演进</a>
+      <a href="#annex">十一、附件与证据</a>
+    </nav>
+
+    <main>
+      <section id="info">
+        <h1>iSnow Nady 接口接入 PRD v1.0</h1>
+        <p>面向 iSnow 当前 Flutter 项目的 Nady 接口接入基准文档，首期覆盖登录、注册、国家码和用户资料。本文同时包含接口接入 PRD、技术接入说明和接口迁移清单。</p>
+
+        <div class="meta">
+          <div><strong>版本：</strong>v1.0 初版</div>
+          <div><strong>日期：</strong>2026-08-01</div>
+          <div><strong>项目目录：</strong><code>/Users/liqihui/iSnow</code></div>
+          <div><strong>需求产出目录：</strong><code>/Users/liqihui/iSnow/isnow-nady-api-integration</code></div>
+          <div><strong>接口证据：</strong><code>/Users/liqihui/iSnow/nady-api-inventory.md</code></div>
+          <div><strong>当前状态：</strong><span class="tag warn">待业务确认</span><span class="tag">未进入原型</span></div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>版本</th>
+              <th>日期</th>
+              <th>变更内容</th>
+              <th>状态</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>v1.0</td>
+              <td>2026-08-01</td>
+              <td>整理首期登录、注册、国家码、用户资料的需求边界、接口证据、接入方案和迁移清单。</td>
+              <td>待确认</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="background">
+        <h2>一、需求背景</h2>
+        <p>iSnow 项目后续会持续基于蓝湖设计稿新增或调整功能。为了让 AI 在接到蓝湖地址和功能描述后能快速、严格、可追溯地接入接口，需要把其他项目整理出的 Nady 接口清单转化为 iSnow 可执行的接口接入基准。</p>
+        <p>当前 iSnow 已有部分登录、注册和接口调用雏形，例如 <code>HttpApi</code>、<code>HttpDioManager</code>、<code>LoginProvider</code>、登录页、注册页和用户资料页，但与 Nady 的统一响应结构、签名规则、登录态持久化、用户资料接口和调试日志要求还没有完全对齐。</p>
+
+        <div class="callout warning">
+          <strong>核心约束：</strong>后续每个蓝湖功能必须先在 <code>nady-api-inventory.md</code> 中找到明确接口证据。找不到证据时停止并向用户确认，不自动改代码。
+        </div>
+      </section>
+
+      <section id="goals">
+        <h2>二、需求目标</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>目标类型</th>
+              <th>描述</th>
+              <th>衡量指标</th>
+              <th>目标值</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>接口对齐</td>
+              <td>首期登录、注册、国家码、用户资料均严格沿用 Nady 的接口路径、baseUrl、headers、签名、响应结构和鉴权逻辑。</td>
+              <td>首期功能接口证据覆盖率</td>
+              <td>100%</td>
+            </tr>
+            <tr>
+              <td>开发提效</td>
+              <td>后续 AI 可依据蓝湖地址、功能描述和接口清单自动识别候选接口，并在证据充分时接入 iSnow。</td>
+              <td>无证据自动改代码次数</td>
+              <td>0 次</td>
+            </tr>
+            <tr>
+              <td>联调稳定</td>
+              <td>DEV 环境可完成国家码加载、手机号存在性判断、手机号密码登录、手机号注册、资料展示与编辑。</td>
+              <td>首期核心链路通过数</td>
+              <td>5/5</td>
+            </tr>
+            <tr>
+              <td>可排查</td>
+              <td>接口失败时能通过调试日志定位环境、签名、headers、参数、响应 wrapper 和后端 traceId。</td>
+              <td>失败日志字段完整率</td>
+              <td>100%</td>
+            </tr>
+            <tr>
+              <td>质量保障</td>
+              <td>自动改页面状态、路由跳转、token 持久化、错误提示、loading 状态后，需要有对应单元测试或 Widget 测试。</td>
+              <td>首期关键分支测试覆盖</td>
+              <td>登录/注册/资料核心分支均覆盖</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="users">
+        <h2>三、用户与使用场景</h2>
+        <h3>目标用户</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>用户</th>
+              <th>场景</th>
+              <th>诉求</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>iSnow 开发者</td>
+              <td>接到蓝湖功能修改，需要快速定位并接入接口。</td>
+              <td>知道应该改哪些文件、用哪些接口、如何验证。</td>
+            </tr>
+            <tr>
+              <td>AI 编程助手</td>
+              <td>收到蓝湖地址和自然语言需求，需要自动完成接口与 UI 接入。</td>
+              <td>必须先查接口证据，证据不足时停止确认。</td>
+            </tr>
+            <tr>
+              <td>测试/联调人员</td>
+              <td>验证登录、注册、用户资料和异常场景。</td>
+              <td>能通过日志判断失败发生在环境、签名、参数、鉴权还是业务规则。</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>用户旅程图</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>阶段</th>
+              <th>用户触点</th>
+              <th>用户行为</th>
+              <th>痛点/情绪</th>
+              <th>产品机会点</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>收到需求</td>
+              <td>蓝湖地址、功能描述、当前代码</td>
+              <td>说明要改的页面和功能。</td>
+              <td>担心接口不匹配、AI 误猜接口。</td>
+              <td>建立“蓝湖功能 -> 接口证据 -> 代码改造”的固定入口。</td>
+            </tr>
+            <tr>
+              <td>匹配接口</td>
+              <td><code>nady-api-inventory.md</code></td>
+              <td>按路径、业务描述、字段、模型搜索证据。</td>
+              <td>接口多，容易找错或遗漏鉴权规则。</td>
+              <td>每次改动前输出接口证据表，无证据则停止确认。</td>
+            </tr>
+            <tr>
+              <td>制定改造</td>
+              <td>iSnow Flutter 代码</td>
+              <td>按最小范围调整现有 provider、HTTP、页面状态、路由。</td>
+              <td>现有登录态和响应结构不完整，联调失败定位成本高。</td>
+              <td>统一 Nady wrapper、headers、签名、token 持久化和日志。</td>
+            </tr>
+            <tr>
+              <td>联调验证</td>
+              <td>DEV 环境、调试日志、测试用例</td>
+              <td>跑通登录注册和资料读写。</td>
+              <td>失败信息可能被 SnackBar 或 debugPrint 吃掉。</td>
+              <td>沉淀可复用失败排查说明，要求日志包含 traceId 和脱敏请求上下文。</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="scope">
+        <h2>四、需求功能清单</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>功能</th>
+              <th>优先级</th>
+              <th>基础逻辑</th>
+              <th>状态</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>F-01</td>
+              <td>接口证据匹配规则</td>
+              <td>P0</td>
+              <td>每个蓝湖功能接入前必须搜索 <code>nady-api-inventory.md</code>，输出路径、方法、参数、响应字段和当前代码落点。</td>
+              <td><span class="tag ok">首期必须</span></td>
+            </tr>
+            <tr>
+              <td>F-02</td>
+              <td>Nady HTTP 基础规则对齐</td>
+              <td>P0</td>
+              <td>沿用 DEV/QA/PROD baseUrl、JSON content type、登录态 headers、设备 headers、请求签名 <code>v/b</code>、统一 <code>ServerResponse&lt;T&gt;</code>。</td>
+              <td><span class="tag ok">首期必须</span></td>
+            </tr>
+            <tr>
+              <td>F-03</td>
+              <td>国家码加载与选择</td>
+              <td>P0</td>
+              <td>进入登录/注册页时获取默认国家码；国家码弹层使用热门/支持国家列表；失败时允许使用兜底默认值并展示错误提示。</td>
+              <td><span class="tag ok">首期必须</span></td>
+            </tr>
+            <tr>
+              <td>F-04</td>
+              <td>手机号存在性即时判断</td>
+              <td>P0</td>
+              <td>用户输入国家码和手机号后立即判断是否已注册；建议在手机号格式有效后 debounce 触发，避免频繁请求。</td>
+              <td><span class="tag ok">首期必须</span></td>
+            </tr>
+            <tr>
+              <td>F-05</td>
+              <td>手机号 + 密码登录</td>
+              <td>P0</td>
+              <td>用户存在时显示密码登录路径；提交后展示 loading；成功保存 token/uid/userBaseInfo 并跳转首页；失败展示后端 message。</td>
+              <td><span class="tag ok">首期必须</span></td>
+            </tr>
+            <tr>
+              <td>F-06</td>
+              <td>手机号注册</td>
+              <td>P0</td>
+              <td>用户不存在时进入注册路径：服务协议确认、发送短信、校验验证码、设置密码、登录、写入默认资料。</td>
+              <td><span class="tag ok">首期必须</span></td>
+            </tr>
+            <tr>
+              <td>F-07</td>
+              <td>登录态持久化与路由恢复</td>
+              <td>P0</td>
+              <td>沿用当前项目风格，在现有登录注册基础上补齐 token/uid/userBaseInfo 保存、启动页恢复、登出清理和 Dio 自动注入。</td>
+              <td><span class="tag ok">首期必须</span></td>
+            </tr>
+            <tr>
+              <td>F-08</td>
+              <td>用户资料展示与编辑</td>
+              <td>P0</td>
+              <td>个人页展示头像、昵称、性别、生日、国家/地区、手机号、用户 ID、个人简介；头像、昵称、性别、生日、个人简介可编辑。</td>
+              <td><span class="tag ok">首期必须</span></td>
+            </tr>
+            <tr>
+              <td>F-09</td>
+              <td>头像上传</td>
+              <td>P1</td>
+              <td>先获取 OSS 上传参数，客户端上传图片得到 URL，再通过修改用户资料接口保存 avatar 字段。</td>
+              <td><span class="tag warn">需联调验证</span></td>
+            </tr>
+            <tr>
+              <td>F-10</td>
+              <td>接口调试日志与失败排查说明</td>
+              <td>P0</td>
+              <td>每个接口输出脱敏日志，记录环境、方法、路径、参数摘要、状态码、业务 code、message、traceId、耗时和 UI 阶段。</td>
+              <td><span class="tag ok">首期必须</span></td>
+            </tr>
+            <tr>
+              <td>F-11</td>
+              <td>测试用例</td>
+              <td>P0</td>
+              <td>覆盖 provider、model 解析、登录/注册 UI 状态、路由跳转、资料展示编辑和异常提示。</td>
+              <td><span class="tag ok">首期必须</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="solution">
+        <h2>五、详细方案</h2>
+
+        <h3>5.1 接口证据匹配机制</h3>
+        <p>后续每次用户提供蓝湖地址和功能描述后，AI 必须先完成接口证据匹配，再决定是否改代码。匹配结果至少包含：接口路径、HTTP 方法、Nady API constant、Retrofit method、Facade usage、请求参数、响应字段、当前 iSnow 代码落点。</p>
+        <p>如果找不到明确接口，AI 必须停止并向用户确认；不得根据字段名或业务语义直接推断并改代码。</p>
+
+        <h3>5.2 国家码与手机号存在性判断</h3>
+        <p>登录/注册页加载时先请求默认国家码，页面显示默认 <code>dialCode</code> 和 <code>isoCode</code>。用户可从国家码选择器切换国家。用户输入手机号并满足基本格式后，页面立即触发用户存在性判断，进入以下状态：</p>
+        <table>
+          <thead>
+            <tr>
+              <th>状态</th>
+              <th>触发条件</th>
+              <th>页面反馈</th>
+              <th>下一步</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>待输入</td>
+              <td>手机号为空或格式不足</td>
+              <td>隐藏判断结果，不显示错误</td>
+              <td>继续输入</td>
+            </tr>
+            <tr>
+              <td>判断中</td>
+              <td>手机号和国家码有效，debounce 后请求 <code>/api/user/hasUser</code></td>
+              <td>手机号输入区或按钮进入 loading，不阻塞国家码切换</td>
+              <td>等待接口返回</td>
+            </tr>
+            <tr>
+              <td>用户存在</td>
+              <td><code>data.hasUser=true</code></td>
+              <td>展示密码输入和确认按钮</td>
+              <td>走手机号密码登录</td>
+            </tr>
+            <tr>
+              <td>用户不存在</td>
+              <td><code>data.hasUser=false</code></td>
+              <td>展示注册路径、协议、验证码入口、设置密码入口</td>
+              <td>走手机号注册</td>
+            </tr>
+            <tr>
+              <td>判断失败</td>
+              <td>网络、签名、参数或后端错误</td>
+              <td>保留手机号和国家码，展示可重试错误提示</td>
+              <td>用户手动重试或修改输入</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>5.3 手机号 + 密码登录</h3>
+        <p>用户存在时，提交手机号、国家码、密码和设备参数到 Nady 登录接口。成功后需要完成四件事：保存 <code>oauth-token</code>、保存 <code>pub-uid</code>、缓存 <code>userBaseInfo</code>、跳转到 <code>/home</code>。失败时展示后端 <code>message</code>，并在日志中保留 <code>traceId</code>。</p>
+
+        <h3>5.4 手机号注册</h3>
+        <p>用户不存在时，注册主流程为：</p>
+        <pre>国家码/手机号 -> 判断用户不存在 -> 确认服务协议 -> 发送短信验证码 -> 校验验证码 -> 设置密码 -> 登录 -> 写入默认用户资料 -> 进入首页</pre>
+        <p>注册路径必须复用 Nady 的短信、验证码、设置密码和登录接口。默认用户资料通过 <code>/api/user/complete</code> 或登录后资料编辑接口完成，具体调用顺序以联调返回的用户状态为准。若 Nady 返回状态无法判断是否需要完善资料，停止并向用户确认。</p>
+
+        <h3>5.5 用户资料展示与编辑</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>字段</th>
+              <th>Nady 字段</th>
+              <th>首期权限</th>
+              <th>页面要求</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>用户 ID</td>
+              <td><code>uid</code> 或 <code>userNo</code></td>
+              <td>只展示</td>
+              <td>个人资料页展示，不允许编辑。</td>
+            </tr>
+            <tr>
+              <td>手机号</td>
+              <td>登录账号 <code>code</code>、<code>areaCode</code>，或账号绑定接口返回值</td>
+              <td>只展示</td>
+              <td>如果当前资料接口未返回手机号，优先展示本地登录账号。</td>
+            </tr>
+            <tr>
+              <td>国家/地区</td>
+              <td><code>countryCode</code>、<code>region</code>、<code>areaCode</code></td>
+              <td>只展示</td>
+              <td>按国家码列表映射展示名称；映射失败时展示原始 code。</td>
+            </tr>
+            <tr>
+              <td>头像</td>
+              <td><code>avatar</code></td>
+              <td>可编辑</td>
+              <td>选择图片后上传，得到 URL，再保存资料。</td>
+            </tr>
+            <tr>
+              <td>昵称</td>
+              <td><code>nick</code></td>
+              <td>可编辑</td>
+              <td>本地校验非空、长度限制后提交。</td>
+            </tr>
+            <tr>
+              <td>性别</td>
+              <td><code>gender</code></td>
+              <td>可编辑</td>
+              <td>使用 Nady int 枚举值，UI 映射中文/英文展示。</td>
+            </tr>
+            <tr>
+              <td>生日</td>
+              <td><code>birth</code></td>
+              <td>可编辑</td>
+              <td>时间戳与日期选择器互转，保存后刷新资料。</td>
+            </tr>
+            <tr>
+              <td>个人简介</td>
+              <td><code>signature</code> 入参，返回可能为 <code>userDesc</code></td>
+              <td>可编辑</td>
+              <td>保存时使用 <code>signature</code>，展示时优先使用返回的 <code>userDesc</code>。</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>5.6 原型待补充</h3>
+        <p>本版本先确认业务逻辑和接口接入范围。原型将在下一步骤输出，届时需要覆盖登录存在性判断、注册验证码、资料展示编辑、loading、错误提示、上传失败等关键状态。</p>
+      </section>
+
+      <section id="tech">
+        <h2>六、技术接入说明</h2>
+
+        <h3>6.1 环境与请求基础配置</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>环境</th>
+              <th>baseUrl</th>
+              <th>用途</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>DEV</td>
+              <td><code>http://simi2.w1.luyouxia.net/simi</code></td>
+              <td>首期默认联调环境。</td>
+            </tr>
+            <tr>
+              <td>QA</td>
+              <td><code>https://www.simijoy.com/simi</code></td>
+              <td>测试环境，后续通过配置切换。</td>
+            </tr>
+            <tr>
+              <td>PROD</td>
+              <td><code>https://www.simisoul.com/simi</code></td>
+              <td>生产环境，不作为首期默认调试环境。</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>当前 <code>HttpDioManager</code> 已硬编码 DEV baseUrl，后续应保留默认 DEV，但把环境配置、公共 headers、签名和响应 wrapper 收敛到 HTTP 层，避免每个 Provider 自行拼 header。</p>
+
+        <h3>6.2 Headers 与签名</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>类别</th>
+              <th>字段</th>
+              <th>规则</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>基础</td>
+              <td><code>Content-Type</code></td>
+              <td>固定为 <code>application/json</code>。</td>
+            </tr>
+            <tr>
+              <td>登录态</td>
+              <td><code>pub-uid</code>、<code>oauth-token</code></td>
+              <td>登录后自动注入；未登录接口不注入或为空。</td>
+            </tr>
+            <tr>
+              <td>设备与运行时</td>
+              <td><code>systemLanguage</code>、<code>timeZone</code>、<code>storeCode</code>、<code>appVersion</code>、<code>appLanguage</code>、<code>x-auth-token</code>、<code>startTime</code></td>
+              <td>沿用 Nady 公参；由当前 <code>AppDevice</code> 能力补齐。</td>
+            </tr>
+            <tr>
+              <td>签名</td>
+              <td><code>v</code>、<code>b</code></td>
+              <td><code>v</code> 为时间戳；<code>b</code> 为 GET query 或 POST body/toJson 字段加 <code>v</code> 和 secret 后生成的 MD5 签名。</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout risk">
+          <strong>风险：</strong>当前 <code>LoginProvider._getCommonHeaders()</code> 中的 <code>b</code> 来源是 <code>AppDevice.generateSignature()</code>，需要按 Nady 的 <code>RequestParamsCryptoInterceptor</code> 规则改为基于真实请求参数签名，否则联调可能出现签名失败。
+        </div>
+
+        <h3>6.3 统一响应结构</h3>
+        <p>Nady 大多数接口返回 <code>ServerResponse&lt;T&gt;</code>，字段包括 <code>code</code>、<code>message</code>、<code>timestamp</code>、<code>traceId</code>、<code>data</code>。当前 iSnow 的 <code>LoginResponse</code> 仍按 <code>success/token/data</code> 解析，需要调整为先解析 wrapper，再解析业务 data。</p>
+
+        <h3>6.4 当前代码最小改造范围</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>文件/区域</th>
+              <th>调整方向</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>lib/manager/http_api.dart</code></td>
+              <td>补齐 <code>/api/user/mine</code>、<code>/api/user/modifyUser</code>、<code>/api/user/complete</code>、上传参数接口等常量。</td>
+            </tr>
+            <tr>
+              <td><code>lib/manager/http_dio_manager.dart</code></td>
+              <td>集中处理 baseUrl、headers、签名、登录态注入、响应 wrapper、脱敏日志。</td>
+            </tr>
+            <tr>
+              <td><code>lib/classes/oauth/provider/login_provider.dart</code></td>
+              <td>保留现有入口，调整参数名和响应解析，增加 hasUser、注册链路状态、token 保存。</td>
+            </tr>
+            <tr>
+              <td><code>lib/classes/oauth/login_detail_page.dart</code>、<code>register_page.dart</code></td>
+              <td>接入即时存在性判断、loading、错误提示、协议校验、验证码和设置密码状态。</td>
+            </tr>
+            <tr>
+              <td><code>lib/classes/launch_page.dart</code></td>
+              <td>从持久化登录态恢复路由，已登录去 <code>/home</code>，未登录去 <code>/login</code>。</td>
+            </tr>
+            <tr>
+              <td><code>lib/classes/profile/profile_page.dart</code>、<code>edit_profile_page.dart</code></td>
+              <td>从真实资料接口读取并展示，编辑后调用 <code>/api/user/modifyUser</code> 并刷新。</td>
+            </tr>
+            <tr>
+              <td><code>lib/manager/providers.dart</code></td>
+              <td>沿用 Riverpod 风格补充登录态、用户资料和刷新触发状态；不额外建立独立认证模块目录。</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>6.5 状态与持久化原则</h3>
+        <p>用户明确要求沿用当前项目已有方案，且不新增独立认证模块。建议原则如下：</p>
+        <ul>
+          <li>简单标量登录态使用 <code>SharedPreferences</code> 保存，例如 <code>oauth-token</code>、<code>pub-uid</code>、登录手机号、areaCode、countryCode。</li>
+          <li>运行时 UI 状态使用 Riverpod 暴露，例如登录态、国家码列表、资料加载状态、资料保存状态。</li>
+          <li>结构化离线数据仍按当前项目已有 Isar 风格处理；首期用户资料如果只用于登录态恢复，可先不落 Isar，避免扩大改造范围。</li>
+          <li>Dio 请求时从持久化或运行时状态读取 token/uid，自动注入 <code>oauth-token</code> 和 <code>pub-uid</code>。</li>
+        </ul>
+      </section>
+
+      <section id="migration">
+        <h2>七、接口迁移清单</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>模块</th>
+              <th>Nady 接口证据</th>
+              <th>用途</th>
+              <th>请求要点</th>
+              <th>iSnow 迁移动作</th>
+              <th>风险</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>默认国家码</td>
+              <td><code>GET /country-list/default-country</code><br><code>nady-api-inventory.md:8401</code></td>
+              <td>登录/注册页默认国家码。</td>
+              <td>无参数；返回 <code>CountryInfo</code>：<code>name</code>、<code>arName</code>、<code>isoCode</code>、<code>dialCode</code>。</td>
+              <td>替换当前硬编码默认值；失败时保留兜底默认国家码。</td>
+              <td>低</td>
+            </tr>
+            <tr>
+              <td>热门国家码</td>
+              <td><code>GET /country-list/hot</code><br><code>nady-api-inventory.md:8440</code></td>
+              <td>国家码选择器顶部热门列表。</td>
+              <td>无参数；返回 <code>List&lt;CountryInfo&gt;</code>。</td>
+              <td>国家码弹层展示热门国家；加载失败不阻塞登录。</td>
+              <td>低</td>
+            </tr>
+            <tr>
+              <td>支持国家码</td>
+              <td><code>GET /country-list/supported</code><br><code>nady-api-inventory.md:8460</code></td>
+              <td>国家码选择器完整列表。</td>
+              <td>无参数；返回 <code>List&lt;CountryInfo&gt;</code>。</td>
+              <td>替换本地写死的国家码数组。</td>
+              <td>低</td>
+            </tr>
+            <tr>
+              <td>用户是否存在</td>
+              <td><code>GET /api/user/hasUser</code><br><code>nady-api-inventory.md:6757</code></td>
+              <td>手机号和国家码输入后立即判断登录或注册路径。</td>
+              <td>Query：<code>phone</code>、<code>areaCode</code>；返回 <code>data.hasUser</code>、<code>data.status</code>。</td>
+              <td>当前 <code>hasUser</code> 使用 email，需要改为 phone + areaCode。</td>
+              <td>中</td>
+            </tr>
+            <tr>
+              <td>登录</td>
+              <td><code>POST /oauth2/login</code><br><code>nady-api-inventory.md:9295</code></td>
+              <td>手机号 + 密码登录；注册后自动登录。</td>
+              <td>Body：<code>code</code>、<code>loginType</code>、<code>passwd</code>、<code>smsCode</code>、<code>areaCode</code>、<code>countryCode</code>、设备字段。</td>
+              <td>按 <code>ServerResponse&lt;LoginResponse&gt;</code> 解析 <code>data.token</code>、<code>data.uid</code>、<code>data.userBaseInfo</code>。</td>
+              <td>中</td>
+            </tr>
+            <tr>
+              <td>发送短信</td>
+              <td><code>POST /oauth2/sendSms</code><br><code>nady-api-inventory.md:9564</code></td>
+              <td>注册验证码发送。</td>
+              <td>Body：<code>phoneNo</code>、<code>areaCode</code>、<code>purpose</code>、<code>type</code>、<code>language</code>。</td>
+              <td>当前 <code>sendSms</code> 参数名需从 <code>phoneNumber/countryCode</code> 改为 Nady 证据字段。</td>
+              <td>中：purpose/type 枚举值需从 Nady 源码或联调确认。</td>
+            </tr>
+            <tr>
+              <td>校验验证码</td>
+              <td><code>POST /oauth2/verify/code</code><br><code>nady-api-inventory.md:9604</code></td>
+              <td>设置密码前校验短信验证码。</td>
+              <td>Body：<code>code</code> 为手机号、<code>areaCode</code>、<code>smsCode</code> 为验证码。</td>
+              <td>当前 <code>verifyCode</code> 参数语义需修正，避免 <code>code</code> 字段混淆。</td>
+              <td>中</td>
+            </tr>
+            <tr>
+              <td>设置密码</td>
+              <td><code>POST /oauth2/setPassword</code><br><code>nady-api-inventory.md:9585</code></td>
+              <td>注册流程设置手机号密码。</td>
+              <td>Body：<code>phone</code>、<code>password</code>、<code>areaCode</code>。</td>
+              <td>当前 <code>setPassword</code> 使用 <code>userId</code>，需改为 phone + areaCode。</td>
+              <td>中</td>
+            </tr>
+            <tr>
+              <td>注册完善资料</td>
+              <td><code>POST /api/user/complete</code><br><code>nady-api-inventory.md:6181</code></td>
+              <td>新用户写入默认头像、昵称、性别、生日等资料。</td>
+              <td>Body：<code>nick</code>、<code>avatar</code>、<code>gender</code>、<code>birth</code>、<code>uid</code>、<code>code</code>、<code>inviteCode</code>。</td>
+              <td>注册成功后按返回用户状态判断是否调用；默认资料规则需产品确认或使用安全默认值。</td>
+              <td>中：调用时机需联调确认。</td>
+            </tr>
+            <tr>
+              <td>我的资料</td>
+              <td><code>GET /api/user/mine</code><br><code>nady-api-inventory.md:7070</code></td>
+              <td>个人页和编辑资料页加载当前用户资料。</td>
+              <td>无参数；需要登录态 headers；返回 <code>MeModel.userBaseInfo</code>。</td>
+              <td>新增当前用户资料 provider，替换静态昵称和头像。</td>
+              <td>低</td>
+            </tr>
+            <tr>
+              <td>修改资料</td>
+              <td><code>POST /api/user/modifyUser</code><br><code>nady-api-inventory.md:7305</code></td>
+              <td>保存头像、昵称、性别、生日、个人简介。</td>
+              <td>Body：<code>nick</code>、<code>gender</code>、<code>avatar</code>、<code>signature</code>、<code>birth</code>。</td>
+              <td>编辑资料页保存后调用并刷新个人资料。</td>
+              <td>中：<code>signature</code> 与返回 <code>userDesc</code> 的字段映射需验证。</td>
+            </tr>
+            <tr>
+              <td>头像上传参数</td>
+              <td><code>GET /api/resource/header-upload-param</code><br><code>nady-api-inventory.md:2634</code></td>
+              <td>获取 OSS 上传凭证。</td>
+              <td>无参数；返回 accessKey、securityToken、endpoint、bucket、path、domain。</td>
+              <td>头像选择后先拿上传参数，再上传文件，最后保存 avatar URL。</td>
+              <td>高：直传 OSS 的客户端实现需联调验证。</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="logs">
+        <h2>八、调试日志与失败排查</h2>
+        <h3>8.1 日志字段规范</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>字段</th>
+              <th>说明</th>
+              <th>是否脱敏</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>stage</code></td>
+              <td>UI 或业务阶段，如 <code>country.default</code>、<code>auth.hasUser</code>、<code>auth.login</code>、<code>profile.modify</code>。</td>
+              <td>否</td>
+            </tr>
+            <tr>
+              <td><code>env/baseUrl/method/path</code></td>
+              <td>请求环境和接口路径。</td>
+              <td>否</td>
+            </tr>
+            <tr>
+              <td><code>headersSummary</code></td>
+              <td>记录 headers 是否存在，不输出 token 全量。</td>
+              <td>是</td>
+            </tr>
+            <tr>
+              <td><code>paramsSummary</code></td>
+              <td>记录参数 key 和必要业务值；手机号、密码、验证码脱敏。</td>
+              <td>是</td>
+            </tr>
+            <tr>
+              <td><code>httpStatus/code/message/traceId</code></td>
+              <td>HTTP 状态和 Nady 业务响应。</td>
+              <td>否</td>
+            </tr>
+            <tr>
+              <td><code>durationMs</code></td>
+              <td>接口耗时。</td>
+              <td>否</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>8.2 失败排查说明</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>失败类型</th>
+              <th>判断依据</th>
+              <th>处理建议</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>环境错误</td>
+              <td>baseUrl 不符合 DEV/QA/PROD，或接口 404。</td>
+              <td>检查环境配置和 path 是否包含 <code>/simi</code>。</td>
+            </tr>
+            <tr>
+              <td>签名失败</td>
+              <td>后端返回签名、参数校验或鉴权类错误。</td>
+              <td>检查 <code>v/b</code> 是否按 GET query 或 POST body 真实字段生成。</td>
+            </tr>
+            <tr>
+              <td>登录态缺失</td>
+              <td>需要登录态接口返回 token empty/invalid。</td>
+              <td>检查 <code>oauth-token</code> 和 <code>pub-uid</code> 是否保存并注入。</td>
+            </tr>
+            <tr>
+              <td>参数名不匹配</td>
+              <td>请求成功到达后端，但返回缺少参数或业务失败。</td>
+              <td>对照迁移清单，重点检查 <code>phone</code>/<code>phoneNo</code>/<code>code</code>/<code>smsCode</code> 的语义。</td>
+            </tr>
+            <tr>
+              <td>响应解析失败</td>
+              <td>Dart model parse 报错或 <code>success</code> 字段不存在。</td>
+              <td>先解析 <code>ServerResponse&lt;T&gt;</code> wrapper，再解析 <code>data</code>。</td>
+            </tr>
+            <tr>
+              <td>头像上传失败</td>
+              <td>获取上传参数成功但 OSS 直传失败，或保存 avatar 后不展示。</td>
+              <td>确认上传参数有效期、domain 拼接、文件 key 和最终 avatar URL。</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="acceptance">
+        <h2>九、验收标准</h2>
+        <ul class="checklist">
+          <li>登录/注册页能从接口加载默认国家码、热门国家码和支持国家码；接口失败时有可见错误提示和兜底值。</li>
+          <li>手机号和国家码输入有效后自动判断用户是否存在；判断中、已存在、不存在、失败四类状态均有 UI 反馈。</li>
+          <li>已存在用户可用手机号 + 密码登录；成功后保存 <code>oauth-token</code>、<code>pub-uid</code>、用户基础资料，并跳转 <code>/home</code>。</li>
+          <li>不存在用户可完成协议确认、短信发送、验证码校验、设置密码、登录和默认资料写入。</li>
+          <li>启动页根据真实登录态恢复路由；登出后清理登录态并返回登录页。</li>
+          <li>个人页展示真实头像、昵称、性别、生日、国家/地区、手机号、用户 ID、个人简介。</li>
+          <li>编辑资料页可编辑头像、昵称、性别、生日、个人简介；保存成功后刷新展示。</li>
+          <li>所有首期接口日志均包含脱敏请求摘要、业务 code、message、traceId 和耗时。</li>
+          <li>单元测试或 Widget 测试覆盖核心成功和失败分支；代码需通过 <code>flutter analyze</code> 和 <code>flutter test</code>。</li>
+          <li>任一蓝湖功能缺少 <code>nady-api-inventory.md</code> 明确接口证据时，AI 必须停止并询问用户。</li>
+        </ul>
+      </section>
+
+      <section id="roadmap">
+        <h2>十、后续演进</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>阶段</th>
+              <th>内容</th>
+              <th>说明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>v1.0</td>
+              <td>登录、注册、国家码、用户资料</td>
+              <td>建立 Nady 接口接入基准和严格证据规则。</td>
+            </tr>
+            <tr>
+              <td>v1.1</td>
+              <td>蓝湖驱动的新页面功能接入</td>
+              <td>每次以蓝湖地址 + 功能描述为输入，先匹配接口证据，再改代码。</td>
+            </tr>
+            <tr>
+              <td>v1.2</td>
+              <td>接口证据索引优化</td>
+              <td>可按业务域沉淀接口映射表，提高 AI 搜索和审查效率。</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="annex">
+        <h2>十一、附件与证据</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>资料</th>
+              <th>路径</th>
+              <th>用途</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Nady API Inventory</td>
+              <td><code>/Users/liqihui/iSnow/nady-api-inventory.md</code></td>
+              <td>接口路径、参数、响应模型、baseUrl、headers、签名规则的唯一首期证据来源。</td>
+            </tr>
+            <tr>
+              <td>当前登录 Provider</td>
+              <td><code>/Users/liqihui/iSnow/lib/classes/oauth/provider/login_provider.dart</code></td>
+              <td>首期登录注册接入的主要改造入口。</td>
+            </tr>
+            <tr>
+              <td>当前 HTTP 管理器</td>
+              <td><code>/Users/liqihui/iSnow/lib/manager/http_dio_manager.dart</code></td>
+              <td>baseUrl、headers、签名、日志、响应解析的主要改造入口。</td>
+            </tr>
+            <tr>
+              <td>当前用户资料页面</td>
+              <td><code>/Users/liqihui/iSnow/lib/classes/profile/profile_page.dart</code>、<code>/Users/liqihui/iSnow/lib/classes/profile/edit_profile_page.dart</code></td>
+              <td>用户资料展示和编辑的主要改造入口。</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout">
+          <strong>下一步：</strong>待本初版 PRD 方向确认后，进入原型设计阶段。原型会补齐登录/注册/资料编辑的关键画面和异常状态，再反向同步详细 PRD。
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
