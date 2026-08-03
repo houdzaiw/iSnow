@@ -1,9 +1,8 @@
+
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:project/localization/app_localizations.dart';
 import 'package:project/widgets/custom_scaffold.dart';
-
-import '../../localization/app_localizations.dart';
-import '../../theme/app_theme.dart';
 
 class AboutUsPage extends HookConsumerWidget {
   const AboutUsPage({super.key});
@@ -12,51 +11,73 @@ class AboutUsPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return CustomScaffold(
       title: context.l10n.t('profile.aboutUs'),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.xxxl,
-              vertical: 60,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: AppGradients.primary,
-                    boxShadow: AppShadows.soft,
+      body: Column(
+        children: [
+          SizedBox(height: 30),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 60),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // App Logo - 120 * 120
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: const Color(0xFFF9E707),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Image.asset("assets/base/app_logo.png", width: 100, height: 100),
+                    ),
                   ),
-                  child: Center(
+                  const SizedBox(height: 24),
+                  // Version Info
+                  Text(
+                    'Version 1.0.0',
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: const Color(0xFF999999),
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  // 联系邮箱
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Text(
-                      'IS',
-                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        color: AppColors.textInverse,
-                        fontWeight: FontWeight.bold,
+                      'Contact email: moodenote666@163.com',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: const Color(0xFF666666),
+                        height: 1.6,
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: AppSpacing.xxxl),
-                const Text('iSnow', style: AppTextStyles.title),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  context.l10n.t('about.version'),
-                  style: AppTextStyles.caption,
-                ),
-                const SizedBox(height: AppSpacing.section),
-                Text(
-                  context.l10n.t('about.description'),
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.body.copyWith(height: 1.6),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
+
+          // Description 固定在底部
+          Padding(
+            padding: const EdgeInsets.only(left: 24, right: 24, bottom: 40),
+            child: Text(
+              'A simple and elegant diary app to record your daily emotions and moments.',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: const Color(0xFF666666),
+                    height: 1.6,
+                  ),
+            ),
+          ),
+        ],
       ),
     );
   }

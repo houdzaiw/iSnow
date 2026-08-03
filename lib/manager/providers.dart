@@ -2,6 +2,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isar/isar.dart';
 
 import '../model/diary_entry.dart';
+import '../model/login_model.dart';
+import '../model/user_profile.dart';
+import '../classes/oauth/provider/login_provider.dart';
+import '../manager/user_manager.dart';
 import 'app_Isar.dart';
 
 /// Provider to trigger diary list refresh
@@ -20,3 +24,15 @@ final diaryEntriesProvider = FutureProvider<List<DiaryEntry>>((ref) async {
   return entries;
 });
 
+/// Provider to fetch current logged-in user info
+final userInfoProvider = FutureProvider<UserData?>((ref) async {
+  return LoginProvider().getMyUserInfo();
+});
+
+/// Reactive session provider — holds the current [LoginModel].
+/// Update it after login:  ref.read(userSessionProvider.notifier).state = model;
+/// Clear it after logout:  ref.read(userSessionProvider.notifier).state = null;
+final userSessionProvider = StateProvider<LoginModel?>((ref) {
+  // Initialise from the singleton (already restored at app launch)
+  return UserManager.shared.currentUser;
+});

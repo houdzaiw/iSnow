@@ -1,0 +1,142 @@
+[
+  {
+    "userId": 1008801,
+    "userNickname": "Luna",
+    "moodIndex": 3,
+    "avatar": "assets/avatar/avatar_Luna",
+    "description": "Feeling a bit happy today. The weather is nice and I feel relaxed."
+  },
+  {
+    "userId": 1008802,
+    "userNickname": "Alex",
+    "moodIndex": 1,
+    "avatar": "assets/avatar/avatar_Alex",
+    "description": "I'm in such a cozy and loving mood right now. Everything feels warm and fuzzy."
+  },
+  {
+    "userId": 1008803,
+    "userNickname": "Sophie",
+    "moodIndex": 5,
+    "avatar": "assets/avatar/avatar_Sophie",
+    "description": "Totally shocked! Something unexpected just happened and my mind is blown."
+  },
+  {
+    "userId": 1008804,
+    "userNickname": "Ethan",
+    "moodIndex": 4,
+    "avatar": "assets/avatar/avatar_Ethan",
+    "description": "Feeling really anxious and nervous about the upcoming presentation."
+  },
+  {
+    "userId": 1008805,
+    "userNickname": "Mia",
+    "moodIndex": 2,
+    "avatar": "assets/avatar/avatar_Mia",
+    "description": "I'm so angry right now! This is incredibly frustrating and I'm about to explode."
+  },
+  {
+    "userId": 1008806,
+    "userNickname": "Noah",
+    "moodIndex": 7,
+    "avatar": "assets/avatar/avatar_Noah",
+    "description": "Feeling extremely sad and heartbroken. Tears won't stop falling today."
+  },
+  {
+    "userId": 1008807,
+    "userNickname": "Olivia",
+    "moodIndex": 6,
+    "avatar": "assets/avatar/avatar_Olivia",
+    "description": "Super cheerful and full of energy! Ready to take on the whole day with a big smile."
+  },
+  {
+    "userId": 1008808,
+    "userNickname": "Liam",
+    "moodIndex": 8,
+    "avatar": "assets/avatar/avatar_Liam",
+    "description": "So sleepy... I could fall asleep any second. Need a big nap right now."
+  },
+  {
+    "userId": 1008809,
+    "userNickname": "Emma",
+    "moodIndex": 10,
+    "avatar": "assets/avatar/avatar_Emma",
+    "description": "Feeling excited and celebratory! Something awesome just happened and I'm over the moon."
+  },
+  {
+    "userId": 10088010,
+    "userNickname": "James",
+    "moodIndex": 9,
+    "avatar": "assets/avatar/avatar_James",
+    "description": "Just feeling neutral and calm today. Nothing special, just going with the flow."
+  },
+  {
+    "userId": 10088011,
+    "userNickname": "Harper",
+    "moodIndex": 12,
+    "avatar": "assets/avatar/avatar_Harper",
+    "description": "Feeling really hurt and upset. My heart is aching and I just want to hide away."
+  },
+  {
+    "userId": 10088012,
+    "userNickname": "Mason",
+    "moodIndex": 11,
+    "avatar": "assets/avatar/avatar_Mason",
+    "description": "I'm sick and feeling miserable. My head hurts, I'm cold, and I just want to sleep it off."
+  },
+  {
+    "userId": 10088013,
+    "userNickname": "Isabella",
+    "moodIndex": 13,
+    "avatar": "assets/avatar/avatar_Isabella",
+    "description": "Quietly content and at peace. Nothing big is happening, but I'm genuinely okay today."
+  },
+  {
+    "userId": 10088014,
+    "userNickname": "Lucas",
+    "moodIndex": 14,
+    "avatar": "assets/avatar/avatar_Lucas",
+    "description": "Feeling down and a little blue. Everything seems a bit heavy right now."
+  },
+  {
+    "userId": 10088015,
+    "userNickname": "Charlotte",
+    "moodIndex": 15,
+    "avatar": "assets/avatar/avatar_Charlotte",
+    "description": "Confused and puzzled... I have no idea what's going on and I have so many questions."
+  },
+  {
+    "userId": 10088016,
+    "userNickname": "Benjamin",
+    "moodIndex": 17,
+    "avatar": "assets/avatar/avatar_Benjamin",
+    "description": "Feeling shy and a little embarrassed. I just want to hide my face right now."
+  },
+  {
+    "userId": 10088017,
+    "userNickname": "Amelia",
+    "moodIndex": 16,
+    "avatar": "assets/avatar/avatar_Amelia",
+    "description": "Surprised and a bit startled! Something caught me completely off guard."
+  },
+  {
+    "userId": 10088018,
+    "userNickname": "Henry",
+    "moodIndex": 20,
+    "avatar": "assets/avatar/avatar_Henry",
+    "description": "I have something to say and I'm thinking about how to express it clearly."
+  },
+  {
+    "userId": 10088019,
+    "userNickname": "Evelyn",
+    "moodIndex": 18,
+    "avatar": "assets/avatar/avatar_Evelyn",
+    "description": "Feeling cool, confident, and a little bit awesome. Life is good right now."
+  },
+  {
+    "userId": 10088020,
+    "userNickname": "Sebastian",
+    "moodIndex": 19,
+    "avatar": "assets/avatar/avatar_Sebastian",
+    "description": "Extremely tired and exhausted. I can barely keep my eyes open anymore."
+  }
+]

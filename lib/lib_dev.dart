@@ -3,16 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'configs/app_configs.dart';
 import 'configs/app_enum.dart';
-import 'configs/app_device.dart';
 import 'lib_main.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppConfig.shared.run(AppEnv.dev);
   await initializeDateFormatting('zh_CN');
-
-  // 初始化设备信息
-  await AppDevice().init();
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(

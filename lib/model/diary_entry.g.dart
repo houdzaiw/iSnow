@@ -17,55 +17,70 @@ const DiaryEntrySchema = CollectionSchema(
   name: r'DiaryEntry',
   id: -1043886744285152801,
   properties: {
-    r'content': PropertySchema(
+    r'avatar': PropertySchema(
       id: 0,
+      name: r'avatar',
+      type: IsarType.string,
+    ),
+    r'content': PropertySchema(
+      id: 1,
       name: r'content',
       type: IsarType.string,
     ),
     r'createdAt': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
     r'date': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'date',
       type: IsarType.dateTime,
     ),
     r'description': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'description',
       type: IsarType.string,
     ),
     r'emoji': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'emoji',
       type: IsarType.string,
     ),
     r'happy': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'happy',
       type: IsarType.bool,
     ),
     r'images': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'images',
       type: IsarType.stringList,
     ),
     r'moodIndex': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'moodIndex',
       type: IsarType.long,
     ),
+    r'nick': PropertySchema(
+      id: 9,
+      name: r'nick',
+      type: IsarType.string,
+    ),
     r'sad': PropertySchema(
-      id: 8,
+      id: 10,
       name: r'sad',
       type: IsarType.bool,
     ),
     r'type': PropertySchema(
-      id: 9,
+      id: 11,
       name: r'type',
       type: IsarType.string,
+    ),
+    r'userId': PropertySchema(
+      id: 12,
+      name: r'userId',
+      type: IsarType.long,
     )
   },
   estimateSize: _diaryEntryEstimateSize,
@@ -88,6 +103,12 @@ int _diaryEntryEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  {
+    final value = object.avatar;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   {
     final value = object.content;
     if (value != null) {
@@ -114,6 +135,12 @@ int _diaryEntryEstimateSize(
     }
   }
   {
+    final value = object.nick;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
     final value = object.type;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
@@ -128,16 +155,19 @@ void _diaryEntrySerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.content);
-  writer.writeDateTime(offsets[1], object.createdAt);
-  writer.writeDateTime(offsets[2], object.date);
-  writer.writeString(offsets[3], object.description);
-  writer.writeString(offsets[4], object.emoji);
-  writer.writeBool(offsets[5], object.happy);
-  writer.writeStringList(offsets[6], object.images);
-  writer.writeLong(offsets[7], object.moodIndex);
-  writer.writeBool(offsets[8], object.sad);
-  writer.writeString(offsets[9], object.type);
+  writer.writeString(offsets[0], object.avatar);
+  writer.writeString(offsets[1], object.content);
+  writer.writeDateTime(offsets[2], object.createdAt);
+  writer.writeDateTime(offsets[3], object.date);
+  writer.writeString(offsets[4], object.description);
+  writer.writeString(offsets[5], object.emoji);
+  writer.writeBool(offsets[6], object.happy);
+  writer.writeStringList(offsets[7], object.images);
+  writer.writeLong(offsets[8], object.moodIndex);
+  writer.writeString(offsets[9], object.nick);
+  writer.writeBool(offsets[10], object.sad);
+  writer.writeString(offsets[11], object.type);
+  writer.writeLong(offsets[12], object.userId);
 }
 
 DiaryEntry _diaryEntryDeserialize(
@@ -147,17 +177,20 @@ DiaryEntry _diaryEntryDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = DiaryEntry();
-  object.content = reader.readStringOrNull(offsets[0]);
-  object.createdAt = reader.readDateTime(offsets[1]);
-  object.date = reader.readDateTime(offsets[2]);
-  object.description = reader.readStringOrNull(offsets[3]);
-  object.emoji = reader.readString(offsets[4]);
-  object.happy = reader.readBoolOrNull(offsets[5]);
+  object.avatar = reader.readStringOrNull(offsets[0]);
+  object.content = reader.readStringOrNull(offsets[1]);
+  object.createdAt = reader.readDateTime(offsets[2]);
+  object.date = reader.readDateTime(offsets[3]);
+  object.description = reader.readStringOrNull(offsets[4]);
+  object.emoji = reader.readString(offsets[5]);
+  object.happy = reader.readBoolOrNull(offsets[6]);
   object.id = id;
-  object.images = reader.readStringList(offsets[6]);
-  object.moodIndex = reader.readLongOrNull(offsets[7]);
-  object.sad = reader.readBoolOrNull(offsets[8]);
-  object.type = reader.readStringOrNull(offsets[9]);
+  object.images = reader.readStringList(offsets[7]);
+  object.moodIndex = reader.readLongOrNull(offsets[8]);
+  object.nick = reader.readStringOrNull(offsets[9]);
+  object.sad = reader.readBoolOrNull(offsets[10]);
+  object.type = reader.readStringOrNull(offsets[11]);
+  object.userId = reader.readLong(offsets[12]);
   return object;
 }
 
@@ -171,23 +204,29 @@ P _diaryEntryDeserializeProp<P>(
     case 0:
       return (reader.readStringOrNull(offset)) as P;
     case 1:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 2:
       return (reader.readDateTime(offset)) as P;
     case 3:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 4:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 5:
-      return (reader.readBoolOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 6:
-      return (reader.readStringList(offset)) as P;
-    case 7:
-      return (reader.readLongOrNull(offset)) as P;
-    case 8:
       return (reader.readBoolOrNull(offset)) as P;
+    case 7:
+      return (reader.readStringList(offset)) as P;
+    case 8:
+      return (reader.readLongOrNull(offset)) as P;
     case 9:
       return (reader.readStringOrNull(offset)) as P;
+    case 10:
+      return (reader.readBoolOrNull(offset)) as P;
+    case 11:
+      return (reader.readStringOrNull(offset)) as P;
+    case 12:
+      return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -284,6 +323,154 @@ extension DiaryEntryQueryWhere
 
 extension DiaryEntryQueryFilter
     on QueryBuilder<DiaryEntry, DiaryEntry, QFilterCondition> {
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> avatarIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'avatar',
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition>
+      avatarIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'avatar',
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> avatarEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'avatar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> avatarGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'avatar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> avatarLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'avatar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> avatarBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'avatar',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> avatarStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'avatar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> avatarEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'avatar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> avatarContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'avatar',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> avatarMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'avatar',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> avatarIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'avatar',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition>
+      avatarIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'avatar',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> contentIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -1217,6 +1404,152 @@ extension DiaryEntryQueryFilter
     });
   }
 
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> nickIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'nick',
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> nickIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'nick',
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> nickEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'nick',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> nickGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'nick',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> nickLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'nick',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> nickBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'nick',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> nickStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'nick',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> nickEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'nick',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> nickContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'nick',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> nickMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'nick',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> nickIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'nick',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> nickIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'nick',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> sadIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -1388,6 +1721,59 @@ extension DiaryEntryQueryFilter
       ));
     });
   }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> userIdEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'userId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> userIdGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'userId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> userIdLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'userId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterFilterCondition> userIdBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'userId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension DiaryEntryQueryObject
@@ -1398,6 +1784,18 @@ extension DiaryEntryQueryLinks
 
 extension DiaryEntryQuerySortBy
     on QueryBuilder<DiaryEntry, DiaryEntry, QSortBy> {
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> sortByAvatar() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'avatar', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> sortByAvatarDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'avatar', Sort.desc);
+    });
+  }
+
   QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> sortByContent() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'content', Sort.asc);
@@ -1482,6 +1880,18 @@ extension DiaryEntryQuerySortBy
     });
   }
 
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> sortByNick() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'nick', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> sortByNickDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'nick', Sort.desc);
+    });
+  }
+
   QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> sortBySad() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'sad', Sort.asc);
@@ -1505,10 +1915,34 @@ extension DiaryEntryQuerySortBy
       return query.addSortBy(r'type', Sort.desc);
     });
   }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> sortByUserId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'userId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> sortByUserIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'userId', Sort.desc);
+    });
+  }
 }
 
 extension DiaryEntryQuerySortThenBy
     on QueryBuilder<DiaryEntry, DiaryEntry, QSortThenBy> {
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> thenByAvatar() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'avatar', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> thenByAvatarDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'avatar', Sort.desc);
+    });
+  }
+
   QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> thenByContent() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'content', Sort.asc);
@@ -1605,6 +2039,18 @@ extension DiaryEntryQuerySortThenBy
     });
   }
 
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> thenByNick() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'nick', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> thenByNickDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'nick', Sort.desc);
+    });
+  }
+
   QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> thenBySad() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'sad', Sort.asc);
@@ -1628,10 +2074,29 @@ extension DiaryEntryQuerySortThenBy
       return query.addSortBy(r'type', Sort.desc);
     });
   }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> thenByUserId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'userId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QAfterSortBy> thenByUserIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'userId', Sort.desc);
+    });
+  }
 }
 
 extension DiaryEntryQueryWhereDistinct
     on QueryBuilder<DiaryEntry, DiaryEntry, QDistinct> {
+  QueryBuilder<DiaryEntry, DiaryEntry, QDistinct> distinctByAvatar(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'avatar', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<DiaryEntry, DiaryEntry, QDistinct> distinctByContent(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1683,6 +2148,13 @@ extension DiaryEntryQueryWhereDistinct
     });
   }
 
+  QueryBuilder<DiaryEntry, DiaryEntry, QDistinct> distinctByNick(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'nick', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<DiaryEntry, DiaryEntry, QDistinct> distinctBySad() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'sad');
@@ -1695,6 +2167,12 @@ extension DiaryEntryQueryWhereDistinct
       return query.addDistinctBy(r'type', caseSensitive: caseSensitive);
     });
   }
+
+  QueryBuilder<DiaryEntry, DiaryEntry, QDistinct> distinctByUserId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'userId');
+    });
+  }
 }
 
 extension DiaryEntryQueryProperty
@@ -1702,6 +2180,12 @@ extension DiaryEntryQueryProperty
   QueryBuilder<DiaryEntry, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<DiaryEntry, String?, QQueryOperations> avatarProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'avatar');
     });
   }
 
@@ -1753,6 +2237,12 @@ extension DiaryEntryQueryProperty
     });
   }
 
+  QueryBuilder<DiaryEntry, String?, QQueryOperations> nickProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'nick');
+    });
+  }
+
   QueryBuilder<DiaryEntry, bool?, QQueryOperations> sadProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'sad');
@@ -1762,6 +2252,12 @@ extension DiaryEntryQueryProperty
   QueryBuilder<DiaryEntry, String?, QQueryOperations> typeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'type');
+    });
+  }
+
+  QueryBuilder<DiaryEntry, int, QQueryOperations> userIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'userId');
     });
   }
 }

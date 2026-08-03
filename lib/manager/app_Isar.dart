@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../model/diary_entry.dart';
 import '../model/chat_message.dart';
+import '../model/blocked_user.dart';
 
 class IsarDB {
   IsarDB._();
@@ -19,6 +20,7 @@ class IsarDB {
     _isar = await Isar.open([
       DiaryEntrySchema,
       ChatMessageSchema,
+      BlockedUserSchema,
     ], directory: dir.path);
     return _isar!;
   }
