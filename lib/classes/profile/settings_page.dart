@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../localization/app_localizations.dart';
@@ -8,6 +9,9 @@ import '../../widgets/custom_scaffold.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
+
+  static const _userAgreementUrl = 'https://www.simisoul.com/protocol.html';
+  static const _privacyPolicyUrl = 'https://www.simisoul.com/policy.html';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -28,32 +32,72 @@ class SettingsPage extends ConsumerWidget {
                 borderRadius: AppRadius.cardBorder,
                 boxShadow: AppShadows.soft,
               ),
-              child: ListTile(
-                leading: const Icon(
-                  Icons.language_rounded,
-                  color: AppColors.primaryPink,
-                ),
-                title: Text(
-                  context.l10n.t('app.language'),
-                  style: AppTextStyles.bodyStrong,
-                ),
-                subtitle: Text(
-                  '${context.l10n.t('app.currentLanguage')}: $selectedLanguage',
-                  style: AppTextStyles.caption,
-                ),
-                trailing: const Icon(
-                  Icons.arrow_forward_ios,
-                  color: AppColors.primaryPink,
-                  size: 16,
-                ),
-                onTap: () {
-                  _showLanguageSheet(context, ref, locale.languageCode);
-                },
+              child: Column(
+                children: [
+                  _SettingsTile(
+                    leading: Icons.language_rounded,
+                    title: context.l10n.t('app.language'),
+                    subtitle:
+                        '${context.l10n.t('app.currentLanguage')}: $selectedLanguage',
+                    onTap: () {
+                      _showLanguageSheet(context, ref, locale.languageCode);
+                    },
+                  ),
+                  const Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: AppColors.divider,
+                    indent: AppSpacing.xl,
+                    endIndent: AppSpacing.xl,
+                  ),
+                  _SettingsTile(
+                    leading: Icons.description_rounded,
+                    title: context.l10n.t('settings.userAgreement'),
+                    onTap: () {
+                      _openWebView(
+                        context,
+                        title: context.l10n.t('settings.userAgreement'),
+                        uri: _userAgreementUrl,
+                      );
+                    },
+                  ),
+                  const Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: AppColors.divider,
+                    indent: AppSpacing.xl,
+                    endIndent: AppSpacing.xl,
+                  ),
+                  _SettingsTile(
+                    leading: Icons.privacy_tip_rounded,
+                    title: context.l10n.t('settings.privacyPolicy'),
+                    onTap: () {
+                      _openWebView(
+                        context,
+                        title: context.l10n.t('settings.privacyPolicy'),
+                        uri: _privacyPolicyUrl,
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  void _openWebView(
+    BuildContext context, {
+    required String title,
+    required String uri,
+  }) {
+    context.push(
+      Uri(
+        path: '/web-view',
+        queryParameters: {'title': title, 'uri': uri},
+      ).toString(),
     );
   }
 
@@ -107,6 +151,37 @@ class SettingsPage extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _SettingsTile extends StatelessWidget {
+  const _SettingsTile({
+    required this.leading,
+    required this.title,
+    required this.onTap,
+    this.subtitle,
+  });
+
+  final IconData leading;
+  final String title;
+  final String? subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(leading, color: AppColors.primaryPink),
+      title: Text(title, style: AppTextStyles.bodyStrong),
+      subtitle: subtitle == null
+          ? null
+          : Text(subtitle!, style: AppTextStyles.caption),
+      trailing: const Icon(
+        Icons.arrow_forward_ios,
+        color: AppColors.primaryPink,
+        size: 16,
+      ),
+      onTap: onTap,
     );
   }
 }

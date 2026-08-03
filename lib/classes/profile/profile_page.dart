@@ -169,6 +169,9 @@ class ProfilePage extends HookConsumerWidget {
                           case 'my-posts':
                             context.push('/my-posts');
                             break;
+                          case 'block-list':
+                            context.push('/block-list');
+                            break;
                           case 'privacy':
                             context.push(
                               '/web-view?title=${Uri.encodeComponent(context.l10n.t('profile.privacy'))}&uri=https://www.example.com/user-privacy',
@@ -178,9 +181,7 @@ class ProfilePage extends HookConsumerWidget {
                             context.push('/about-us');
                             break;
                           case 'contact-us':
-                            context.push(
-                              '/web-view?title=${Uri.encodeComponent(context.l10n.t('profile.contactUs'))}&uri=https://www.example.com/contact',
-                            );
+                            context.push('/about-us');
                             break;
                           case 'settings':
                             context.push('/settings');

@@ -175,6 +175,8 @@ const Map<String, Map<String, String>> _localizedValues = {
         'Deleting your account is permanent. Are you sure you want to continue?',
     'profile.deleteAccountFailed': 'Failed to delete account',
     'profile.logoutFailed': 'Logout failed',
+    'settings.userAgreement': 'User Agreement',
+    'settings.privacyPolicy': 'Privacy Policy',
     'settings.empty': 'No more settings',
     'about.version': 'Version 1.0.0',
     'about.description':
@@ -307,6 +309,8 @@ const Map<String, Map<String, String>> _localizedValues = {
     'profile.deleteAccountMessage': '删除账号后将无法恢复，确定继续吗？',
     'profile.deleteAccountFailed': '删除账号失败',
     'profile.logoutFailed': '退出登录失败',
+    'settings.userAgreement': '用户协议',
+    'settings.privacyPolicy': '隐私政策',
     'settings.empty': '暂无更多设置',
     'about.version': '版本 1.0.0',
     'about.description': '记录每天的情绪和片刻，把心情好好收藏起来。',
