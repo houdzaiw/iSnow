@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>iSnow 全局视觉体系迁移最终 PRD v1.0</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --panel: #ffffff;
+      --ink: #162033;
+      --muted: #65758b;
+      --line: #e2e8f0;
+      --pink: #ff4f95;
+      --pink-deep: #f53682;
+      --yellow: #ffe708;
+      --soft-pink: #fff0f6;
+      --soft-yellow: #fff8d6;
+      --gray: #f5f5f7;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 8% 12%, rgba(255, 231, 8, 0.16), transparent 26%),
+        radial-gradient(circle at 92% 10%, rgba(255, 79, 149, 0.13), transparent 28%),
+        var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.65;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 270px minmax(0, 1fr);
+      gap: 28px;
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+    nav {
+      position: sticky;
+      top: 24px;
+      align-self: start;
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 18px 46px rgba(15, 23, 42, 0.07);
+      backdrop-filter: blur(18px);
+    }
+    nav h2 { margin: 0 0 12px; font-size: 16px; }
+    nav a {
+      display: block;
+      padding: 7px 0;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 650;
+    }
+    nav a:hover { color: var(--pink); }
+    main { min-width: 0; }
+    header, section {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 28px;
+      margin-bottom: 22px;
+      box-shadow: 0 18px 46px rgba(15, 23, 42, 0.055);
+    }
+    h1 { margin: 0 0 12px; font-size: 34px; line-height: 1.18; }
+    h2 { margin: 0 0 16px; font-size: 24px; }
+    h3 { margin: 22px 0 10px; font-size: 18px; }
+    h4 { margin: 16px 0 8px; font-size: 15px; }
+    p { margin: 0 0 12px; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 12px 0 18px; }
+    th, td { border: 1px solid var(--line); padding: 10px 12px; vertical-align: top; text-align: left; }
+    th { background: #f1f5f9; font-weight: 800; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    code { background: #eef2f7; border-radius: 6px; padding: 2px 5px; }
+    pre { background: #0f172a; color: #e2e8f0; border-radius: 14px; padding: 16px; overflow: auto; line-height: 1.55; }
+    ul { margin-top: 6px; padding-left: 22px; }
+    li { margin-bottom: 6px; }
+    .topbar { display: flex; justify-content: space-between; gap: 18px; align-items: flex-start; }
+    .tag { display: inline-block; padding: 4px 10px; border-radius: 999px; background: var(--soft-pink); color: #c62567; font-size: 12px; font-weight: 800; }
+    .select {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      color: var(--ink);
+      padding: 9px 12px;
+      font-weight: 700;
+    }
+    .meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
+    .meta div, .callout, .note {
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 14px;
+    }
+    .callout { background: linear-gradient(135deg, var(--soft-pink), var(--soft-yellow)); border-color: #ffd2e2; }
+    .feature-module {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+      padding: 18px;
+      margin: 18px 0;
+    }
+    .feature-content {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: 18px;
+      align-items: start;
+    }
+    .prototype-frame {
+      width: 375px;
+      height: 812px;
+      border: none;
+      background: transparent;
+      transform: scale(0.78);
+      transform-origin: top left;
+    }
+    .sandbox-preview {
+      width: 292px;
+      height: 634px;
+      overflow: hidden;
+      border-radius: 28px;
+      background: #111827;
+      box-shadow: 0 18px 42px rgba(15, 23, 42, 0.18);
+    }
+    .mermaid {
+      background: #fbfdff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      overflow: auto;
+    }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .swatches { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+    .swatch { height: 48px; border-radius: 14px; border: 1px solid rgba(15, 23, 42, 0.08); }
+    .muted { color: var(--muted); }
+    @media (max-width: 1100px) {
+      .layout { grid-template-columns: 1fr; padding: 18px; }
+      nav { position: static; }
+      .feature-content { grid-template-columns: 1fr; }
+      .sandbox-preview { width: 100%; max-width: 292px; }
+      .meta, .grid-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <nav>
+      <h2>目录导航</h2>
+      <a href="#info">项目信息</a>
+      <a href="#background">一、需求背景</a>
+      <a href="#goals">二、需求目标</a>
+      <a href="#users">三、用户与场景</a>
+      <a href="#scope">四、功能清单</a>
+      <a href="#solution">五、详细方案</a>
+      <a href="#flows">六、业务流程图</a>
+      <a href="#exceptions">七、异常与边界</a>
+      <a href="#tracking">八、埋点建议</a>
+      <a href="#roadmap">九、演进规划</a>
+      <a href="#annex">十、附件</a>
+    </nav>
+
+    <main>
+      <header id="info">
+        <div class="topbar">
+          <div>
+            <span class="tag">Final PRD v1.0</span>
+            <h1>iSnow 全局视觉体系迁移</h1>
+            <p class="muted">以蓝湖“心情日历白包”为新视觉来源，统一 Flutter App 的主题、资源、设计 token 和一期页面视觉。</p>
+          </div>
+          <select class="select" onchange="if (this.value) location.href=this.value">
+            <option value="">版本切换</option>
+            <option value="./prd_v1.0.html">v1.0 初步 PRD</option>
+            <option value="./prd_v1.0_final.html">v1.0 最终 PRD</option>
+          </select>
+        </div>
+        <div class="meta">
+          <div><strong>项目：</strong>iSnow Flutter App</div>
+          <div><strong>设计来源：</strong>Lanhu “心情日历白包”</div>
+          <div><strong>一期范围：</strong>登录、首页、日历、聊天、我的及子页面</div>
+          <div><strong>版本状态：</strong>最终需求稿，待工程实施</div>
+        </div>
+        <h3>版本记录</h3>
+        <table>
+          <thead><tr><th>版本</th><th>日期</th><th>变更说明</th><th>负责人</th></tr></thead>
+          <tbody>
+            <tr><td>v1.0</td><td>2026-07-29</td><td>确认全局视觉迁移范围，完成 PRD、原型、流程图和详细方案。</td><td>Codex + 用户</td></tr>
+          </tbody>
+        </table>
+      </header>
+
+      <section id="background">
+        <h2>一、需求背景</h2>
+        <p>当前项目已经实现登录、首页、日历、聊天、我的及相关子页面，但视觉仍停留在旧版本。代码中存在颜色、图片路径、样式直接写在页面里的情况，导致整体换肤成本高、容易漏改，也不利于后续设计迭代。</p>
+        <div class="callout">
+          <strong>核心判断：</strong>Lanhu 可以帮助下载和分析设计资源，但不能独立完成“代码引用自动替换”。本项目需要在 Flutter 中建立公共 token 和资源映射，再统一改造页面。
+        </div>
+      </section>
+
+      <section id="goals">
+        <h2>二、需求目标</h2>
+        <table>
+          <thead><tr><th>目标类型</th><th>描述</th><th>衡量指标</th><th>目标值</th></tr></thead>
+          <tbody>
+            <tr><td>视觉还原</td><td>将一期页面替换为蓝湖新视觉。</td><td>颜色、icon、间距、圆角、字体、阴影一致度</td><td>关键 token 优先一致，页面细节后续微调</td></tr>
+            <tr><td>资源规范</td><td>蓝湖有切图优先使用蓝湖资源，没有则用 Flutter 内置 icon。</td><td>资源引用方式</td><td>页面通过 <code>AppAssets</code> 引用，不直接散写路径</td></tr>
+            <tr><td>主题体系</td><td>抽出全局颜色、渐变、间距、圆角、文本和阴影。</td><td>公共 token 覆盖范围</td><td>新增 <code>AppTheme</code> 及相关 token 文件</td></tr>
+            <tr><td>业务稳定</td><td>除非中文和明显错误文案外，不改业务逻辑。</td><td>回归结果</td><td>旧流程和路由保持可用</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="users">
+        <h2>三、用户与使用场景</h2>
+        <table>
+          <thead><tr><th>角色</th><th>场景</th><th>痛点</th><th>机会点</th></tr></thead>
+          <tbody>
+            <tr><td>普通用户</td><td>登录、记录心情、聊天、查看个人中心</td><td>旧视觉和新品牌感不一致</td><td>用粉色、黄色、柔和渐变和心情球强化情绪表达</td></tr>
+            <tr><td>开发者</td><td>后续替换资源、调页面样式</td><td>硬编码和路径散落导致维护困难</td><td>用公共类降低替换成本</td></tr>
+            <tr><td>设计/产品</td><td>检查实现是否贴近蓝湖</td><td>缺少可追溯的设计 token</td><td>用资源映射和 token 表提升对齐效率</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="scope">
+        <h2>四、需求功能清单</h2>
+        <table>
+          <thead><tr><th>模块</th><th>页面范围</th><th>主要改造点</th><th>优先级</th></tr></thead>
+          <tbody>
+            <tr><td>视觉底座</td><td>全局</td><td>AppAssets、AppColors、AppGradients、AppSpacing、AppRadius、AppTextStyles、AppShadows、AppTheme</td><td>P0</td></tr>
+            <tr><td>登录注册</td><td>登录、注册、协议弹窗</td><td>背景、按钮、输入框、协议文案</td><td>P0</td></tr>
+            <tr><td>首页</td><td>首页、捞球弹窗</td><td>底部 Tab、首页主视觉、随机卡片弹窗</td><td>P0</td></tr>
+            <tr><td>日历</td><td>日历展开/折叠、选择心情、填写心情</td><td>心情球、日历样式、发布面板、语音样式</td><td>P0</td></tr>
+            <tr><td>聊天</td><td>聊天、聊天设置</td><td>气泡、输入框、发送按钮、开关控件</td><td>P1</td></tr>
+            <tr><td>我的</td><td>我的、编辑资料、我的帖子、关于我们</td><td>菜单 icon、头像、资料表单、卡片样式</td><td>P1</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="solution">
+        <h2>五、详细方案</h2>
+
+        <div class="feature-module">
+          <h3>功能一：视觉底座与资源治理</h3>
+          <div class="feature-content">
+            <div>
+              <h4>交互流程图</h4>
+              <div class="mermaid">
+flowchart TD
+  A["读取蓝湖一期页面"] --> B["下载实际使用资源"]
+  B --> C{"是否可语义化命名"}
+  C -->|是| D["写入 assets 对应目录"]
+  C -->|否| E["记录待确认名称"]
+  D --> F["生成 AppAssets 映射"]
+  F --> G["抽取颜色、渐变、间距、圆角、字体、阴影"]
+  G --> H["生成 AppTheme"]
+  H --> I["页面统一引用公共 token"]
+              </div>
+              <h4>详细规则</h4>
+              <ul>
+                <li>只下载一期实际使用资源，避免 assets 目录膨胀。</li>
+                <li>蓝湖有切图时优先使用蓝湖资源，缺失时使用 Flutter 内置 icon。</li>
+                <li>两者都不合适时，用红色 <code>TODO_ICON</code> 占位，并写入待补清单。</li>
+                <li>新增页面代码不得继续散写核心颜色和资源路径。</li>
+              </ul>
+            </div>
+            <div class="sandbox-preview">
+              <iframe class="prototype-frame" src="../prototype/prototype_v1.0.html?focus=theme#login" sandbox="allow-scripts allow-same-origin"></iframe>
+            </div>
+          </div>
+        </div>
+
+        <div class="feature-module">
+          <h3>功能二：登录注册视觉迁移</h3>
+          <div class="feature-content">
+            <div>
+              <h4>交互流程图</h4>
+              <div class="mermaid">
+flowchart TD
+  A["登录页"] --> B["点击登录"]
+  A --> C["点击注册"]
+  C --> D["填写邮箱和密码"]
+  D --> E{"校验通过"}
+  E -->|否| F["展示错误提示"]
+  E -->|是| G["协议弹窗"]
+  G --> H{"同意协议"}
+  H -->|否| A
+  H -->|是| I["进入首页"]
+  B --> I
+              </div>
+              <h4>详细规则</h4>
+              <ul>
+                <li>登录页使用蓝湖柔和背景和胶囊按钮。</li>
+                <li>注册页文案统一中文，蓝湖中错误的 Register/Login 语义需修正。</li>
+                <li>协议弹窗需包含服务条款和隐私政策入口。</li>
+                <li>保留现有登录注册数据流和路由，不新增业务流程。</li>
+              </ul>
+            </div>
+            <div class="sandbox-preview">
+              <iframe class="prototype-frame" src="../prototype/prototype_v1.0.html?focus=login#login" sandbox="allow-scripts allow-same-origin"></iframe>
+            </div>
+          </div>
+        </div>
+
+        <div class="feature-module">
+          <h3>功能三：首页与捞球弹窗视觉迁移</h3>
+          <div class="feature-content">
+            <div>
+              <h4>交互流程图</h4>
+              <div class="mermaid">
+flowchart TD
+  A["进入首页"] --> B["展示底部 Tab 和首页内容"]
+  B --> C["点击捞一个"]
+  C --> D["展示随机心情卡片弹窗"]
+  D --> E["点击打开"]
+  E --> F["进入心情详情或保留现有打开逻辑"]
+              </div>
+              <h4>详细规则</h4>
+              <ul>
+                <li>首页底部 Tab 优先使用蓝湖切图资源。</li>
+                <li>首页如果存在旧业务列表，保留数据逻辑，只替换卡片、背景、按钮和入口样式。</li>
+                <li>捞球弹窗保留旧项目触发逻辑，视觉对齐蓝湖卡片和粉色主按钮。</li>
+              </ul>
+            </div>
+            <div class="sandbox-preview">
+              <iframe class="prototype-frame" src="../prototype/prototype_v1.0.html?focus=home#home" sandbox="allow-scripts allow-same-origin"></iframe>
+            </div>
+          </div>
+        </div>
+
+        <div class="feature-module">
+          <h3>功能四：日历与发布心情视觉迁移</h3>
+          <div class="feature-content">
+            <div>
+              <h4>交互流程图</h4>
+              <div class="mermaid">
+flowchart TD
+  A["日历页"] --> B["月视图"]
+  B --> C["切换月份"]
+  B --> D["展开或折叠"]
+  B --> E["点击加号"]
+  E --> F["选择心情"]
+  F --> G["填写文字或语音"]
+  G --> H{"发布成功"}
+  H -->|否| I["提示失败并允许重试"]
+  H -->|是| J["刷新当天心情记录"]
+              </div>
+              <h4>详细规则</h4>
+              <ul>
+                <li>心情图标统一走 <code>AppAssets.mood*</code>，禁止页面拼接散路径。</li>
+                <li>同一天多条心情时，日历最多叠加展示 3 个。</li>
+                <li>语音发布保留现有 60 秒逻辑，视觉使用蓝湖粉色语音条。</li>
+                <li>发布失败要保留输入内容并允许重试。</li>
+              </ul>
+            </div>
+            <div class="sandbox-preview">
+              <iframe class="prototype-frame" src="../prototype/prototype_v1.0.html?focus=calendar#calendar" sandbox="allow-scripts allow-same-origin"></iframe>
+            </div>
+          </div>
+        </div>
+
+        <div class="feature-module">
+          <h3>功能五：聊天与我的视觉迁移</h3>
+          <div class="feature-content">
+            <div>
+              <h4>交互流程图</h4>
+              <div class="mermaid">
+flowchart TD
+  A["聊天 Tab"] --> B["进入会话"]
+  B --> C["发送消息"]
+  C --> D{"可发送"}
+  D -->|否| E["展示失败或不可发送提示"]
+  D -->|是| F["消息入列表"]
+  B --> G["聊天设置"]
+  G --> H["拉黑聊天或免打扰"]
+  I["我的 Tab"] --> J["查看菜单"]
+  J --> K["编辑资料"]
+  K --> L["保存头像、昵称、性别、生日"]
+              </div>
+              <h4>详细规则</h4>
+              <ul>
+                <li>聊天气泡、输入框、发送按钮使用粉色主视觉和统一圆角。</li>
+                <li>聊天设置中的拉黑、免打扰保留旧逻辑，只调整开关视觉。</li>
+                <li>我的菜单 icon 优先使用蓝湖切图，缺失时使用 Flutter 内置 icon 或红色待补占位。</li>
+                <li>编辑资料字段保留旧校验和保存逻辑。</li>
+              </ul>
+            </div>
+            <div class="sandbox-preview">
+              <iframe class="prototype-frame" src="../prototype/prototype_v1.0.html?focus=chat#chat" sandbox="allow-scripts allow-same-origin"></iframe>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="flows">
+        <h2>六、业务流程图</h2>
+        <h3>6.1 工程实施流程</h3>
+        <div class="mermaid">
+flowchart TD
+  A["开始 iSnow 视觉体系迁移"] --> B["确认一期页面范围"]
+  B --> C["从 Lanhu 获取设计图与切图资源"]
+  C --> D{"资源是否为一期页面实际需要"}
+  D -->|是| E["下载资源并语义化命名"]
+  D -->|否| F["跳过下载，避免 assets 膨胀"]
+  E --> G["建立 AppAssets 资源映射"]
+  G --> H["抽取设计 Token"]
+  H --> H1["AppColors"]
+  H --> H2["AppGradients"]
+  H --> H3["AppSpacing"]
+  H --> H4["AppRadius"]
+  H --> H5["AppTextStyles"]
+  H --> H6["AppShadows"]
+  H1 --> I["生成 AppTheme"]
+  H2 --> I
+  H3 --> I
+  H4 --> I
+  H5 --> I
+  H6 --> I
+  I --> J["替换页面内硬编码颜色与资源路径"]
+  J --> K["迁移登录注册视觉"]
+  J --> L["迁移首页与捞球弹窗视觉"]
+  J --> M["迁移日历与发布心情视觉"]
+  J --> N["迁移聊天与聊天设置视觉"]
+  J --> O["迁移我的与编辑资料视觉"]
+  K --> P["运行 Flutter 静态检查"]
+  L --> P
+  M --> P
+  N --> P
+  O --> P
+  P --> Q{"是否存在缺失图标"}
+  Q -->|有| R["使用红色 TODO 占位并登记待补清单"]
+  Q -->|无| S["进入视觉验收"]
+  R --> S
+  S --> T["检查颜色、icon、间距、圆角、字体、阴影"]
+  T --> U{"是否满足一期验收"}
+  U -->|否| V["回到对应 Token 或页面调整"]
+  V --> J
+  U -->|是| W["完成一期视觉体系迁移"]
+        </div>
+        <h3>6.2 用户核心流程</h3>
+        <div class="mermaid">
+flowchart TD
+  A["用户打开 App"] --> B{"是否已登录"}
+  B -->|否| C["登录页"]
+  C --> D["点击登录"]
+  C --> E["点击注册"]
+  E --> F["填写邮箱、密码、确认密码"]
+  F --> G{"字段校验是否通过"}
+  G -->|否| G1["展示错误提示并停留注册页"]
+  G -->|是| H["协议弹窗"]
+  H --> I{"是否同意服务条款与隐私政策"}
+  I -->|否| C
+  I -->|是| J["进入首页"]
+  D --> J
+  B -->|是| J
+  J --> J1["首页浏览"]
+  J1 --> J2["点击捞一个"]
+  J2 --> J3["展示随机心情卡片弹窗"]
+  J3 --> J4["点击打开进入心情详情"]
+  J --> K["切换到日历 Tab"]
+  K --> K1["查看月视图"]
+  K1 --> K2["切换月份"]
+  K1 --> K3["展开或折叠日历"]
+  K1 --> K4["点击加号"]
+  K4 --> K5["选择心情"]
+  K5 --> K6["填写文字或录音"]
+  K6 --> K7{"发布是否成功"}
+  K7 -->|否| K8["提示失败并允许重试"]
+  K7 -->|是| K9["刷新当天心情记录"]
+  K9 --> K1
+  J --> L["切换到聊天 Tab"]
+  L --> L1["进入会话"]
+  L1 --> L2["输入消息并发送"]
+  L2 --> L3{"是否被拉黑或网络异常"}
+  L3 -->|是| L4["展示发送失败或不可发送提示"]
+  L3 -->|否| L5["消息进入会话列表"]
+  L1 --> L6["进入聊天设置"]
+  L6 --> L7["设置拉黑聊天或免打扰"]
+  J --> M["切换到我的 Tab"]
+  M --> M1["查看个人资料与菜单"]
+  M1 --> M2["进入编辑资料"]
+  M2 --> M3["修改头像、昵称、性别、生日"]
+  M3 --> M4{"保存是否成功"}
+  M4 -->|否| M5["展示失败提示并保留输入"]
+  M4 -->|是| M6["返回我的并刷新资料"]
+        </div>
+      </section>
+
+      <section id="exceptions">
+        <h2>七、异常与边界处理</h2>
+        <table>
+          <thead><tr><th>场景</th><th>处理方式</th><th>备注</th></tr></thead>
+          <tbody>
+            <tr><td>蓝湖缺少切图</td><td>使用 Flutter 内置 icon；仍不合适则红色 TODO 占位。</td><td>必须进入待补资源清单</td></tr>
+            <tr><td>网络异常</td><td>登录、发布、聊天发送、资料保存均需展示失败提示并允许重试。</td><td>保留用户输入</td></tr>
+            <tr><td>文案非中文或明显错误</td><td>迁移时改为中文和正确语义。</td><td>只改表现文案，不改业务逻辑</td></tr>
+            <tr><td>设计稿包含直播间</td><td>一期不纳入实现。</td><td>避免扩大范围</td></tr>
+            <tr><td>页面细节无法一次性像素级还原</td><td>先以 token 一致作为一期验收标准。</td><td>后续逐页微调</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="tracking">
+        <h2>八、数据追踪与埋点</h2>
+        <table>
+          <thead><tr><th>事件</th><th>触发时机</th><th>建议参数</th></tr></thead>
+          <tbody>
+            <tr><td><code>visual_migration_page_view</code></td><td>进入迁移范围页面</td><td>page_name、theme_version</td></tr>
+            <tr><td><code>mood_publish_click</code></td><td>点击发布心情</td><td>mood_id、content_type</td></tr>
+            <tr><td><code>mood_publish_result</code></td><td>发布成功或失败</td><td>result、error_code</td></tr>
+            <tr><td><code>chat_send_result</code></td><td>发送聊天消息后</td><td>result、conversation_id</td></tr>
+            <tr><td><code>profile_save_result</code></td><td>保存资料后</td><td>field_name、result</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="roadmap">
+        <h2>九、未来演进规划</h2>
+        <ul>
+          <li>v1.0：完成一期页面视觉迁移和公共 token 体系。</li>
+          <li>v1.1：补齐缺失蓝湖切图，清理红色 TODO 占位。</li>
+          <li>v1.2：逐页做视觉对比验收，补充更细的页面级 spacing 和组件规范。</li>
+          <li>v2.0：如项目新增直播间，再从蓝湖直播间分组建立二期 PRD 和独立资源映射。</li>
+        </ul>
+      </section>
+
+      <section id="annex">
+        <h2>十、附件</h2>
+        <table>
+          <thead><tr><th>附件</th><th>路径</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>初步 PRD</td><td><code>visual_migration_pm/prd/prd_v1.0.html</code></td><td>第一版需求架构和业务逻辑</td></tr>
+            <tr><td>高保真原型</td><td><code>visual_migration_pm/prototype/prototype_v1.0.html</code></td><td>支持 Hash 路由和 Focus 模式</td></tr>
+            <tr><td>原型预览截图</td><td><code>visual_migration_pm/prototype/prototype_v1.0_preview.png</code></td><td>日历页渲染验证截图</td></tr>
+            <tr><td>工程实施流程图</td><td><code>visual_migration_pm/flowcharts/visual_migration_flow_v1.0.mmd</code></td><td>Mermaid 源文件</td></tr>
+            <tr><td>用户核心流程图</td><td><code>visual_migration_pm/flowcharts/user_core_flow_v1.0.mmd</code></td><td>Mermaid 源文件</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: 'default' });
+  </script>
+</body>
+</html>
