@@ -1,6 +1,7 @@
 import 'dart:convert';
-import 'dart:ffi';
+
 import 'package:sp_util/sp_util.dart';
+
 import '../model/login_model.dart';
 
 /// Key names used for SharedPreferences via sp_util
@@ -29,7 +30,8 @@ class UserManager {
   String? get avatar => _currentUser?.userBaseInfo?.avatar;
 
   /// Whether a user session is active.
-  bool get isLoggedIn => _currentUser != null && (_currentUser!.token.isNotEmpty);
+  bool get isLoggedIn =>
+      _currentUser != null && (_currentUser!.token.isNotEmpty);
 
   // ── Persist / restore ────────────────────────────────────────────────────
 
@@ -62,4 +64,3 @@ class UserManager {
     await SpUtil.remove(_kLoginModel);
   }
 }
-

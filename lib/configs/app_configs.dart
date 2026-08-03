@@ -13,10 +13,10 @@ class AppConfig with WidgetsBindingObserver {
   static final AppConfig shared = AppConfig.privateConstructor();
 
   /// 项目运行入口
-  run(AppEnv env) async {
+  Future<void> run(AppEnv env) async {
     WidgetsBinding.instance.addObserver(this);
     appEnv = env;
-    AppDevice().init();
+    await AppDevice().init();
 
     // 初始化本地存储
     await SpUtil.getInstance();

@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -15,10 +17,11 @@ class IsarDB {
     if (_isar != null) return _isar!;
 
     final dir = await getApplicationDocumentsDirectory();
-    _isar = await Isar.open(
-      [DiaryEntrySchema, ChatMessageSchema, BlockedUserSchema],
-      directory: dir.path,
-    );
+    _isar = await Isar.open([
+      DiaryEntrySchema,
+      ChatMessageSchema,
+      BlockedUserSchema,
+    ], directory: dir.path);
     return _isar!;
   }
 
@@ -27,4 +30,3 @@ class IsarDB {
     _isar = null;
   }
 }
-

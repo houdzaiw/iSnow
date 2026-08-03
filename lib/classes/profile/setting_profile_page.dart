@@ -36,31 +36,33 @@ class SettingProfilePage extends HookConsumerWidget {
                     }
                   },
                   child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 17),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Text(
-                            item.titleKey,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              color: Color(0xFF212121),
-                              fontWeight: FontWeight.w500,
-                            ),
+                    padding: EdgeInsets.symmetric(horizontal: 17),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.titleKey,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            color: Color(0xFF212121),
+                            fontWeight: FontWeight.w500,
                           ),
-                          Spacer(flex: 1),
-                          // Icon(item.arrow, size: 16),
-                          Image.asset('assets/base/next_button.png', width: 24, height: 24),
-                        ],
-                      )
+                        ),
+                        Spacer(flex: 1),
+                        // Icon(item.arrow, size: 16),
+                        Image.asset(
+                          'assets/base/next_button.png',
+                          width: 24,
+                          height: 24,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
             },
-            separatorBuilder: (context, index) => const Divider(
-              height: 1,
-              color: Color(0xFFF6F6F6),
-            ),
+            separatorBuilder: (context, index) =>
+                const Divider(height: 1, color: Color(0xFFF6F6F6)),
           ),
         ),
       ),
@@ -69,7 +71,7 @@ class SettingProfilePage extends HookConsumerWidget {
 
   void onRightIconTap(BuildContext context) {
     // 跳转到消息页面
-    print('跳转到消息页面');
+    debugPrint('跳转到消息页面');
     context.push('/messages');
   }
 }

@@ -1,11 +1,6 @@
 // filepath: /Users/admin/Documents/project/isnow/lib/model/get_sms_code_request.dart
 
-import '../classes/oauth/provider/login_provider.dart';
-enum GetSMSType {
-  none,
-  sms,
-  whatsapp,
-}
+enum GetSMSType { none, sms, whatsapp }
 
 enum GetSMSPurpose {
   register,
@@ -79,4 +74,3 @@ class GetSMSCodeRequest {
     return 'GetSMSCodeRequest(phone: $phone, areaCode: $areaCode, purpose: $purpose, type: $type, language: $language)';
   }
 }
-

@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../configs/app_device.dart';
 import '../../../manager/auth_session.dart';
-import '../../../manager/http/api_path.dart';
+import '../../../manager/http_api.dart';
 import '../../../manager/http_dio_manager.dart';
 import '../../../model/country_info.dart';
 import '../../../model/login_response.dart';
@@ -433,5 +433,4 @@ class LoginProvider {
   Future<bool> isLoggedIn() {
     return _authSession.isLoggedIn();
   }
-
 }
