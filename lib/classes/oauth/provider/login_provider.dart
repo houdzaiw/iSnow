@@ -39,16 +39,17 @@ class LoginProvider {
   Map<String, dynamic> _publicParams() {
     final deviceId = _appDevice.deviceId;
     return {
-      'realDeviceId': deviceId,
+      'deviceId': deviceId,
       'appsflyerUID':
           '${DateTime.now().millisecondsSinceEpoch}-${deviceId.hashCode}',
-      'app': _appDevice.appName,
+      'app': 'Nady',
       'appVersion': _appDevice.appVersion,
       'appVersionCode': _appDevice.appVersionCode,
       'channel': 'DEV',
-      'systemLanguage': _appDevice.systemLanguage,
+      'systemLanguage': _appDevice.systemLocale,
       'appLanguage': _appDevice.appLanguage,
       'isp': '',
+      'countryCode': '',
       'model': _appDevice.model,
       'os': _appDevice.os,
       'osVersion': _appDevice.osVersion,
@@ -151,7 +152,7 @@ class LoginProvider {
     required String password,
     int loginType = 5,
     String areaCode = '1',
-    String countryCode = 'us',
+    String countryCode = '',
     String smsCode = '',
   }) async {
     try {
@@ -159,16 +160,19 @@ class LoginProvider {
           ? ''
           : await _encryptPassword(password);
       final normalizedCountryCode = countryCode.toUpperCase();
-      final params = {
+      final params = <String, dynamic>{
         'code': account,
         'loginType': loginType,
         'passwd': encryptedPassword,
         'smsCode': smsCode,
         'areaCode': areaCode,
-        'countryCode': normalizedCountryCode,
+        'countryCode': '',
         'fbLimited': false,
         ..._publicParams(),
       };
+      if (normalizedCountryCode.isNotEmpty) {
+        params['countryCode'] = normalizedCountryCode;
+      }
 
       debugPrint('Login request POST: ${HttpApi.login}');
 

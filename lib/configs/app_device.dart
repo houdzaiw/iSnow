@@ -45,7 +45,7 @@ class AppDevice {
         '|${androidInfo.version.codename}|${androidInfo.version.sdkInt}|${androidInfo.version.incremental}|${androidInfo.version.baseOS}|';
     _deviceBrand = androidInfo.brand;
 
-    // 生成设备ID (使用 androidId 生成 MD5)
+    // 生成设备ID
     final androidId = androidInfo.id;
     _deviceId = _generateDeviceId(androidId);
   }
@@ -59,7 +59,7 @@ class AppDevice {
     _osVersion = iosInfo.systemVersion;
     _deviceBrand = 'Apple';
 
-    // 生成设备ID (使用 identifierForVendor 生成 MD5)
+    // 生成设备ID
     final vendorId = iosInfo.identifierForVendor ?? '';
     _deviceId = _generateDeviceId(vendorId);
   }
@@ -67,7 +67,7 @@ class AppDevice {
   /// 生成设备ID
   String _generateDeviceId(String input) {
     final bytes = utf8.encode(input);
-    final digest = md5.convert(bytes);
+    final digest = sha256.convert(bytes);
     return digest.toString();
   }
 
@@ -103,6 +103,11 @@ class AppDevice {
     return _localeParts.first; // 例如: en, zh
   }
 
+  /// 获取完整系统语言地区
+  String get systemLocale {
+    return _normalizedLocale.replaceAll('_', '-'); // 例如: en-US, zh-CN
+  }
+
   /// 获取应用语言 (简化版本)
   String get appLanguage {
     return _localeParts.first; // 例如: en, zh
@@ -116,15 +121,15 @@ class AppDevice {
   }
 
   List<String> get _localeParts {
-    final normalizedLocale = Platform.localeName
-        .split('.')
-        .first
-        .replaceAll('-', '_');
-    final parts = normalizedLocale
+    final parts = _normalizedLocale
         .split('_')
         .where((part) => part.trim().isNotEmpty)
         .toList();
     return parts.isEmpty ? const ['en'] : parts;
+  }
+
+  String get _normalizedLocale {
+    return Platform.localeName.split('.').first.replaceAll('-', '_');
   }
 
   /// 获取时区偏移 (小时)

@@ -185,7 +185,6 @@ class LoginDetailPage extends HookConsumerWidget {
           password: password,
           loginType: 5,
           areaCode: country.areaCode,
-          countryCode: country.countryCode,
         );
 
         if (!context.mounted) return;
