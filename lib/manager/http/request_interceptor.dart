@@ -2,18 +2,17 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:project/configs/app_device.dart';
-import 'package:project/lib/crypt_util.dart';
 import 'package:project/lib/logger.dart';
-
+import 'package:project/manager/auth_session.dart';
 
 import '../server_response.dart';
 import 'api_client.dart';
-import 'api_path.dart';
 
 class RequestInterceptors extends Interceptor {
+  static const String _sendGiftPath = '/api/gift/sendGift';
+
   final Ref ref;
   final bool? isBrowser;
 
@@ -28,7 +27,10 @@ class RequestInterceptors extends Interceptor {
   }
 
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+  void onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
     // if (!ref.read(hasNetworkProvider)) {
     //   //SmartDialog.dismiss(status: SmartStatus.loading);
     //   Logger.error("Network abnormality, please try again later");
@@ -58,24 +60,21 @@ class RequestInterceptors extends Interceptor {
     //   options.baseUrl = options.baseUrl.replaceAll('https://', 'http://');
     // }
 
-    // final language = ref.read(languageSettingProvider.notifier);
-    final language = "en";
-    //
-    // final uid = ref.read(authenticationUIDProvider).value ?? 0;
-    final uid = 0;
-    // final token = ref.read(authenticationTokenProvider).value ?? '';
-    final token = '';
     final deviceData = AppDevice();
+    final language = deviceData.appLanguage;
+    final uid = await AuthSession.instance.uid();
+    final token = await AuthSession.instance.token();
 
-    if (uid != 0 && token.isNotEmpty) {
+    if (uid != null && token != null) {
       options.headers['pub-uid'] = uid;
       options.headers['oauth-token'] = token;
     }
-      // options.headers['systemLanguage'] = deviceData.systemLanguage;
-      options.headers['systemLanguage'] = deviceData.systemLanguage;
-      options.headers['timeZone'] = DateTime.now().timeZoneOffset.inHours;
-      options.headers['storeCode'] = deviceData.countryCode;
-      options.headers['appVersion'] = deviceData.appVersion;
+    options.headers['systemLanguage'] = deviceData.systemLanguage;
+    options.headers['timeZone'] = deviceData.timeZone;
+    options.headers['storeCode'] = deviceData.countryCode.isEmpty
+        ? 'CN'
+        : deviceData.countryCode;
+    options.headers['appVersion'] = deviceData.appVersion;
 
     options.headers['appLanguage'] = language;
 
@@ -84,27 +83,17 @@ class RequestInterceptors extends Interceptor {
     options.headers['x-auth-token'] = xAuthToken;
 
     options.headers['startTime'] = DateTime.now().millisecondsSinceEpoch;
-    Logger.info(
-      """
+    Logger.info("""
               ${options.baseUrl}${options.path}
               🦊请求发起🦊 ${options.method}: ${options.path}
               header: ${jsonEncode(options.headers)}
               params: ${"POST" == options.method ? options.data : options.queryParameters}
-              """,
-    );
+              """);
     return super.onRequest(options, handler);
   }
 
   Future<String> _toString() async {
-    return await CryptUtil.encrypt(jsonEncode({
-      'simCountryCode': AppDevice().simCountryCode,
-      'systemLanguage': "en",
-      'fingerprint': AppDevice().fingerprint,
-      'deviceID': AppDevice().deviceId,
-      'timezone': AppDevice().timeZone,
-      'os': AppDevice().os,
-      'appVersionCode': AppDevice().appVersionCode,
-    }));
+    return AppDevice().generateAuthToken();
   }
 
   @override
@@ -113,7 +102,8 @@ class RequestInterceptors extends Interceptor {
       if (response.data is Map) {
         try {
           final reply = BaseServerResponse.fromJson(
-              response.data as Map<String, dynamic>);
+            response.data as Map<String, dynamic>,
+          );
 
           if (kDebugMode) {
             Logger.info(
@@ -134,12 +124,13 @@ class RequestInterceptors extends Interceptor {
               return super.onResponse(response, handler);
             } else {
               handler.reject(
-                  DioException(
-                    response: response,
-                    requestOptions: response.requestOptions,
-                    message: reply.message,
-                  ),
-                  false);
+                DioException(
+                  response: response,
+                  requestOptions: response.requestOptions,
+                  message: reply.message,
+                ),
+                false,
+              );
             }
             return;
           }
@@ -147,7 +138,8 @@ class RequestInterceptors extends Interceptor {
           /// 请求接口异常报错 记录
           if (reply.code != ServiceStatusCode.successCode) {
             Logger.error(
-                "请求报错接口1: ${response.requestOptions.baseUrl}${response.requestOptions.path} 错误码: ${reply.code} 错误信息: ${reply.message}");
+              "请求报错接口1: ${response.requestOptions.baseUrl}${response.requestOptions.path} 错误码: ${reply.code} 错误信息: ${reply.message}",
+            );
 
             // 计算请求耗时
             _infoRequestDurationTime(response.requestOptions);
@@ -155,28 +147,29 @@ class RequestInterceptors extends Interceptor {
 
           if (reply.code == ServiceStatusCode.successCode) {
             return super.onResponse(response, handler);
-          } else if (ServiceStatusCode.loginRestrictionCodes
-              .contains(reply.code)) {
+          } else if (ServiceStatusCode.loginRestrictionCodes.contains(
+            reply.code,
+          )) {
             // _onShowLoginRestrictionDialog(reply);
           } else if (reply.code == ServiceStatusCode.insufficientCoinBalanc) {
-            if (response.realUri.toString().contains(ApiPath.sendGift)) {
+            if (response.realUri.toString().contains(_sendGiftPath)) {
               return super.onResponse(response, handler);
             } else {
               // showToast(reply.message ?? "");
-              if (response.realUri
-                  .toString()
-                  .contains("/api/wheel/createLuckyWheel")) {
+              if (response.realUri.toString().contains(
+                "/api/wheel/createLuckyWheel",
+              )) {
                 //SmartDialog.dismiss(status: SmartStatus.loading);
               }
-              if (response.realUri
-                  .toString()
-                  .contains("/api/wheel/joinLuckyWheel")) {
+              if (response.realUri.toString().contains(
+                "/api/wheel/joinLuckyWheel",
+              )) {
                 //SmartDialog.dismiss(status: SmartStatus.loading);
               }
               //金币不足 发送弹幕
-              if (response.realUri
-                  .toString()
-                  .contains("api/bullet/sendBullet")) {
+              if (response.realUri.toString().contains(
+                "api/bullet/sendBullet",
+              )) {
                 //SmartDialog.dismiss(status: SmartStatus.loading);
               }
               if (response.realUri.toString().contains("api/vip/buy")) {
@@ -186,18 +179,18 @@ class RequestInterceptors extends Interceptor {
               //购买金币不足
               // if (response.realUri.toString().contains("api/shop/prop/purchaseOnSaleProp") ||
               //     response.realUri.path.contains(Apis.aristocracyBuy)) {
-                //SmartDialog.dismiss(status: SmartStatus.loading);
-                // NadyRechargeCoinsAlter.show();
-                // showBottomToast("Insufficient coins");
+              //SmartDialog.dismiss(status: SmartStatus.loading);
+              // NadyRechargeCoinsAlter.show();
+              // showBottomToast("Insufficient coins");
               // }
               // if (response.realUri.path.contains(Apis.aristocracyBuy)) {
-                //SmartDialog.dismiss(status: SmartStatus.loading);
+              //SmartDialog.dismiss(status: SmartStatus.loading);
               // }
               // if (response.realUri.toString().contains(Apis.luckyBagSend) ||
               //     response.realUri.path.contains(Apis.luckyBagSend)) {
-                //SmartDialog.dismiss(status: SmartStatus.loading);
-                // NadyRechargeCoinsAlter.show();
-                // showBottomToast("Insufficient coins");
+              //SmartDialog.dismiss(status: SmartStatus.loading);
+              // NadyRechargeCoinsAlter.show();
+              // showBottomToast("Insufficient coins");
               // }
             }
           } else if (reply.code ==
@@ -210,7 +203,7 @@ class RequestInterceptors extends Interceptor {
           } else if (reply.code == ServiceStatusCode.shutDownCode) {
             //SmartDialog.dismiss(status: SmartStatus.loading);
 
-            String messageStr = reply.message ?? "";
+            // String messageStr = reply.message ?? "";
             // UserShutDownModel shutDownModel = UserShutDownModel.fromJson(jsonDecode(messageStr));
             if (response.requestOptions.path == "/api/room/inRoom") {
               //房间被封禁
@@ -225,7 +218,7 @@ class RequestInterceptors extends Interceptor {
               return;
             }
 
-            String shutDownTypeStr = "user";
+            // String shutDownTypeStr = "user";
             // if (shutDownModel.blackType == 2) {
             //   shutDownTypeStr = "device";
             // } else if (shutDownModel.blackType == 3) {
@@ -278,37 +271,44 @@ class RequestInterceptors extends Interceptor {
             return super.onResponse(response, handler);
           } else {
             Logger.error(
-                'server response is biz error code error : ${response.data}');
+              'server response is biz error code error : ${response.data}',
+            );
             Logger.error(
-                '${response.requestOptions.baseUrl}${response.requestOptions.path}');
+              '${response.requestOptions.baseUrl}${response.requestOptions.path}',
+            );
             //SmartDialog.dismiss(status: SmartStatus.loading);
             // showCenterToast('${reply.message}');
             handler.reject(
-                DioException(
-                  response: response,
-                  requestOptions: response.requestOptions,
-                  message: reply.message,
-                ),
-                false);
+              DioException(
+                response: response,
+                requestOptions: response.requestOptions,
+                message: reply.message,
+              ),
+              false,
+            );
           }
         } catch (e, stack) {
           Logger.error('server response format error', e, stack);
           handler.reject(
-              DioException(
-                  response: response,
-                  requestOptions: response.requestOptions,
-                  message: 'server response format error',
-                  error: e),
-              false);
+            DioException(
+              response: response,
+              requestOptions: response.requestOptions,
+              message: 'server response format error',
+              error: e,
+            ),
+            false,
+          );
         }
       } else {
         Logger.error('server response is not map : ${response.data}');
         handler.reject(
-            DioException(
-                response: response,
-                requestOptions: response.requestOptions,
-                message: 'server response format error'),
-            false);
+          DioException(
+            response: response,
+            requestOptions: response.requestOptions,
+            message: 'server response format error',
+          ),
+          false,
+        );
       }
     } else {
       switch (response.statusCode) {
@@ -320,9 +320,12 @@ class RequestInterceptors extends Interceptor {
           break;
         default:
           handler.reject(
-              DioException(
-                  requestOptions: response.requestOptions, response: response),
-              false);
+            DioException(
+              requestOptions: response.requestOptions,
+              response: response,
+            ),
+            false,
+          );
           break;
       }
     }
@@ -336,7 +339,8 @@ class RequestInterceptors extends Interceptor {
         final endTime = DateTime.now().millisecondsSinceEpoch;
         int duration = endTime - startTime;
         Logger.error(
-            "请求接口耗时: ${requestOptions.baseUrl}${requestOptions.path} 请求耗时: ${duration}ms");
+          "请求接口耗时: ${requestOptions.baseUrl}${requestOptions.path} 请求耗时: ${duration}ms",
+        );
       }
     }
   }
@@ -344,7 +348,9 @@ class RequestInterceptors extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     Logger.error(err.requestOptions.baseUrl + err.requestOptions.path);
-    Logger.error('请求报错接口2: ${err.requestOptions.baseUrl}${err.requestOptions.path}');
+    Logger.error(
+      '请求报错接口2: ${err.requestOptions.baseUrl}${err.requestOptions.path}',
+    );
     _infoRequestDurationTime(err.requestOptions);
     //SmartDialog.dismiss(status: SmartStatus.loading);
     Logger.infoWrite("获取到了错误 err.message2： ${err.error.toString()}");
@@ -356,8 +362,9 @@ class RequestInterceptors extends Interceptor {
   }
 
   bool getOpenHttpNDSResult(DioException err) {
-
-    String messageStr = "${err.message ?? ""} ${err.error.toString()}" "${err.toString()}";
+    String messageStr =
+        "${err.message ?? ""} ${err.error.toString()}"
+        "${err.toString()}";
 
     bool result = false;
     if (messageStr.isNotEmpty) {
@@ -368,7 +375,8 @@ class RequestInterceptors extends Interceptor {
           messageStr.contains("ERR_ADDRESS_UNREACHABLE") ||
           messageStr.contains("ERR_CONNECTION_TIMED_OUT") ||
           messageStr.contains(
-              "This indicates an error which most likely cannot be solved by the library")) {
+            "This indicates an error which most likely cannot be solved by the library",
+          )) {
         Logger.infoWrite("/// 命中 获取到了错误  err.message： $messageStr");
         result = true;
       }
@@ -376,5 +384,4 @@ class RequestInterceptors extends Interceptor {
 
     return result;
   }
-  
 }

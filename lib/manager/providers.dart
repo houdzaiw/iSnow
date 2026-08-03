@@ -3,7 +3,7 @@ import 'package:isar/isar.dart';
 
 import '../model/diary_entry.dart';
 import '../model/login_model.dart';
-import '../model/user_model.dart';
+import '../model/user_profile.dart';
 import '../classes/oauth/provider/login_provider.dart';
 import '../manager/user_manager.dart';
 import 'app_Isar.dart';
@@ -25,9 +25,8 @@ final diaryEntriesProvider = FutureProvider<List<DiaryEntry>>((ref) async {
 });
 
 /// Provider to fetch current logged-in user info
-final userInfoProvider = FutureProvider<UserModel?>((ref) async {
-  final loginProvider = ref.read(loginProviderProvider);
-  return loginProvider.getUserInfo();
+final userInfoProvider = FutureProvider<UserData?>((ref) async {
+  return LoginProvider().getMyUserInfo();
 });
 
 /// Reactive session provider — holds the current [LoginModel].

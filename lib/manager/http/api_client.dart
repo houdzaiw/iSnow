@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
-import 'api_path.dart';
+
+import '../../configs/app_configs.dart';
 import '../../model/server_response.dart';
 
 // HTTP 状态码
@@ -11,7 +12,7 @@ class ApiClient {
 
   ApiClient({required this.dio}) {
     // 设置 baseUrl
-    dio.options.baseUrl = ApiPath.baseUrl;
+    dio.options.baseUrl = AppConfig.shared.appEnv.baseUrl;
   }
 
   /// 统一的 POST 请求处理
@@ -39,7 +40,7 @@ class ApiClient {
 
       // HTTP 请求成功，解析服务端响应
       if (response.data is Map<String, dynamic>) {
-        final serverResponse = ServerResponse.fromJson(
+        final serverResponse = NadyServerResponse.fromJson(
           response.data as Map<String, dynamic>,
           null,
         );
@@ -75,10 +76,7 @@ class ApiClient {
     } on DioException catch (e) {
       return _handleDioException(e);
     } catch (e) {
-      return ApiResponse(
-        success: false,
-        message: 'Unexpected error: $e',
-      );
+      return ApiResponse(success: false, message: 'Unexpected error: $e');
     }
   }
 
@@ -89,10 +87,7 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
   }) async {
     try {
-      final response = await dio.get(
-        path,
-        queryParameters: queryParameters,
-      );
+      final response = await dio.get(path, queryParameters: queryParameters);
 
       // HTTP 请求失败
       if (response.statusCode != _httpOk) {
@@ -105,7 +100,7 @@ class ApiClient {
 
       // HTTP 请求成功，解析服务端响应
       if (response.data is Map<String, dynamic>) {
-        final serverResponse = ServerResponse.fromJson(
+        final serverResponse = NadyServerResponse.fromJson(
           response.data as Map<String, dynamic>,
           null,
         );
@@ -141,10 +136,7 @@ class ApiClient {
     } on DioException catch (e) {
       return _handleDioException(e);
     } catch (e) {
-      return ApiResponse(
-        success: false,
-        message: 'Unexpected error: $e',
-      );
+      return ApiResponse(success: false, message: 'Unexpected error: $e');
     }
   }
 
@@ -221,7 +213,7 @@ class ServiceStatusCode {
     loginRestrictionSysLanguage,
     loginRestrictionSIM,
     loginRestrictionTimezone,
-    loginRestrictionStoreCode
+    loginRestrictionStoreCode,
   ];
 }
 
