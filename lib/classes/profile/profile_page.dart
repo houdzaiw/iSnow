@@ -185,6 +185,12 @@ class ProfilePage extends HookConsumerWidget {
                           case 'settings':
                             context.push('/settings');
                             break;
+                          case 'delete-account':
+                            _confirmDeleteAccount(context, loginProvider);
+                            break;
+                          case 'log-out':
+                            _confirmLogout(context, loginProvider);
+                            break;
                         }
                       },
                     ),
@@ -201,6 +207,87 @@ class ProfilePage extends HookConsumerWidget {
   void onRightIconTap(BuildContext context) {
     // 跳转到消息页面
     context.go('/messages');
+  }
+
+  Future<void> _confirmLogout(
+    BuildContext context,
+    LoginProvider loginProvider,
+  ) async {
+    final confirmed = await _showConfirmDialog(
+      context,
+      title: context.l10n.t('profile.logOut'),
+      message: context.l10n.t('profile.logOutMessage'),
+      confirmLabel: context.l10n.t('profile.logOut'),
+    );
+    if (!confirmed) return;
+
+    try {
+      await loginProvider.logout();
+      if (context.mounted) context.go('/login');
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.t('profile.logoutFailed'))),
+      );
+    }
+  }
+
+  Future<void> _confirmDeleteAccount(
+    BuildContext context,
+    LoginProvider loginProvider,
+  ) async {
+    final confirmed = await _showConfirmDialog(
+      context,
+      title: context.l10n.t('profile.deleteAccount'),
+      message: context.l10n.t('profile.deleteAccountMessage'),
+      confirmLabel: context.l10n.t('app.delete'),
+      destructive: true,
+    );
+    if (!confirmed) return;
+
+    try {
+      await loginProvider.logoff();
+      if (context.mounted) context.go('/login');
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.t('profile.deleteAccountFailed'))),
+      );
+    }
+  }
+
+  Future<bool> _showConfirmDialog(
+    BuildContext context, {
+    required String title,
+    required String message,
+    required String confirmLabel,
+    bool destructive = false,
+  }) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(context.l10n.t('app.cancel')),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(
+                confirmLabel,
+                style: destructive
+                    ? const TextStyle(color: AppColors.danger)
+                    : null,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+    return confirmed == true;
   }
 }
 

@@ -416,6 +416,16 @@ class LoginProvider {
     }
   }
 
+  Future<void> logoff() async {
+    try {
+      final response = await _httpManager.post(HttpApi.logoff);
+      final server = _server<dynamic>(response, null);
+      if (!server.isSuccess) throw server.toException();
+    } finally {
+      await _authSession.clear();
+    }
+  }
+
   Future<UserData?> cachedUser() {
     return _authSession.user();
   }

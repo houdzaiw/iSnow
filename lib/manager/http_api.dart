@@ -41,6 +41,9 @@ class HttpApi {
   /// 登出
   static const logout = '/oauth2/logout';
 
+  /// 注销账号
+  static const logoff = '/api/user/logoff';
+
   /// 获取头像上传参数
   static const uploadParam = '/api/resource/header-upload-param';
 }
