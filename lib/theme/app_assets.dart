@@ -96,6 +96,21 @@ class AppAssets {
       'assets/message/delete_message_icon.png';
 
   static const String profileEditIcon = 'assets/profile/edit_icon.png';
+  static const String profileAvatar = 'assets/profile/profile_avatar.png';
+  static const String profileEditPencil =
+      'assets/profile/profile_edit_pencil.png';
+  static const String profileMenuMyPosts =
+      'assets/profile/profile_menu_my_posts.png';
+  static const String profileMenuBlockList =
+      'assets/profile/profile_menu_block_list.png';
+  static const String profileMenuContactUs =
+      'assets/profile/profile_menu_contact_us.png';
+  static const String profileMenuSettings =
+      'assets/profile/profile_menu_settings.png';
+  static const String profileMenuDeleteAccount =
+      'assets/profile/profile_menu_delete_account.png';
+  static const String profileMenuLogOut =
+      'assets/profile/profile_menu_log_out.png';
   static const String profileMaleIcon = 'assets/profile/male_icon.png';
   static const String profileFemaleIcon = 'assets/profile/female_icon.png';
   static const String profileMyPostsIcon = 'assets/profile/my_posts_icon.png';

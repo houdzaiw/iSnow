@@ -178,7 +178,7 @@ class ProfilePage extends HookConsumerWidget {
                           borderRadius: BorderRadius.circular(AppRadius.sm),
                         ),
                         child: Icon(
-                          item.icon,
+                          Icons.person,
                           size: 17,
                           color: AppColors.textInverse,
                         ),
@@ -188,7 +188,7 @@ class ProfilePage extends HookConsumerWidget {
                         style: AppTextStyles.menuItem,
                       ),
                       trailing: Icon(
-                        item.arrow,
+                        Icons.person,
                         size: 16,
                         color: AppColors.primaryPink,
                       ),

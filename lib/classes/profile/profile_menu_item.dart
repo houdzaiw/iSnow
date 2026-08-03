@@ -1,17 +1,15 @@
 // dart
-import 'package:flutter/material.dart';
+import '../../theme/app_theme.dart';
 
 class ProfileMenuItem {
-  final IconData icon;
+  final String iconAsset;
   final String titleKey;
   final String action;
-  final IconData arrow;
 
   ProfileMenuItem({
-    required this.icon,
+    required this.iconAsset,
     required this.titleKey,
     required this.action,
-    this.arrow = Icons.arrow_forward_ios,
   });
 }
 
@@ -19,29 +17,34 @@ class ProfileMenuData {
   static List<ProfileMenuItem> getMenuItems() {
     return [
       ProfileMenuItem(
-        icon: Icons.article_rounded,
+        iconAsset: AppAssets.profileMenuMyPosts,
         titleKey: 'profile.myPosts',
         action: 'my-posts',
       ),
       ProfileMenuItem(
-        icon: Icons.lock_rounded,
-        titleKey: 'profile.privacy',
-        action: 'privacy',
+        iconAsset: AppAssets.profileMenuBlockList,
+        titleKey: 'profile.blockList',
+        action: 'block-list',
       ),
       ProfileMenuItem(
-        icon: Icons.info_rounded,
-        titleKey: 'profile.aboutUs',
-        action: 'about-us',
-      ),
-      ProfileMenuItem(
-        icon: Icons.chat_bubble_rounded,
+        iconAsset: AppAssets.profileMenuContactUs,
         titleKey: 'profile.contactUs',
         action: 'contact-us',
       ),
       ProfileMenuItem(
-        icon: Icons.settings_rounded,
+        iconAsset: AppAssets.profileMenuSettings,
         titleKey: 'profile.settings',
         action: 'settings',
+      ),
+      ProfileMenuItem(
+        iconAsset: AppAssets.profileMenuDeleteAccount,
+        titleKey: 'profile.deleteAccount',
+        action: 'delete-account',
+      ),
+      ProfileMenuItem(
+        iconAsset: AppAssets.profileMenuLogOut,
+        titleKey: 'profile.logOut',
+        action: 'log-out',
       ),
     ];
   }

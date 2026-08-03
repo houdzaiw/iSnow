@@ -310,14 +310,23 @@ class HttpDioManager {
         '[NadyAPI] <- ${response.requestOptions.path} '
         'http=${response.statusCode} code=${data['code']} '
         'message=${data['message']} traceId=${data['traceId']} '
-        'durationMs=$durationMs',
+        'durationMs=$durationMs data=${_formatResponseData(data)}',
       );
       return;
     }
     debugPrint(
       '[NadyAPI] <- ${response.requestOptions.path} '
-      'http=${response.statusCode} durationMs=$durationMs',
+      'http=${response.statusCode} durationMs=$durationMs '
+      'data=${_formatResponseData(data)}',
     );
+  }
+
+  String _formatResponseData(dynamic data) {
+    try {
+      return jsonEncode(data);
+    } catch (_) {
+      return data.toString();
+    }
   }
 
   void _logError(DioException error) {
