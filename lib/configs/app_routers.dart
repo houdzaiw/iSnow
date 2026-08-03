@@ -44,7 +44,10 @@ final GoRouter goRouter = GoRouter(
     GoRoute(
       path: '/login-detail',
       name: 'login-detail',
-      builder: (context, state) => const LoginDetailPage(),
+      builder: (context, state) => LoginDetailPage(
+        initialAreaCode: state.uri.queryParameters['areaCode'],
+        initialCountryCode: state.uri.queryParameters['countryCode'],
+      ),
     ),
     // 注册页（不需要底部导航）
     GoRoute(

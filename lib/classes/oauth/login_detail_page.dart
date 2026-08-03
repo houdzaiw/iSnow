@@ -10,10 +10,30 @@ import '../../localization/app_localizations.dart';
 import '../../model/country_info.dart';
 import '../../model/user_profile.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/country_picker_sheet.dart';
 import 'provider/login_provider.dart';
 
 class LoginDetailPage extends HookConsumerWidget {
-  const LoginDetailPage({super.key});
+  const LoginDetailPage({
+    super.key,
+    this.initialAreaCode,
+    this.initialCountryCode,
+  });
+
+  final String? initialAreaCode;
+  final String? initialCountryCode;
+
+  CountryDialOption _initialCountry() {
+    final initialIsoCode = initialCountryCode?.trim().toUpperCase();
+    final fallbackCountry = CountryInfo.fallbackList.firstWhere(
+      (country) => country.isoCode.toUpperCase() == initialIsoCode,
+      orElse: () => CountryInfo.saudiArabia,
+    );
+    final areaCode = initialAreaCode?.trim();
+    return CountryDialOption.fromCountryInfo(
+      fallbackCountry,
+    ).copyWith(areaCode: areaCode?.isNotEmpty == true ? areaCode : null);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,8 +43,10 @@ class LoginDetailPage extends HookConsumerWidget {
     final isLoading = useState(false);
     final isCheckingUser = useState(false);
     final agreementAccepted = useState(true);
-    final selectedCountry = useState(_countryOptions.first);
-    final countryOptions = useState(_countryOptions);
+    final selectedCountry = useState(_initialCountry());
+    final countryOptions = useState(
+      CountryInfo.fallbackList.map(CountryDialOption.fromCountryInfo).toList(),
+    );
     final hasUserResult = useState<HasUserResponse?>(null);
     final phoneStatusText = useState<String?>(null);
     final debounceRef = useRef<Timer?>(null);
@@ -65,22 +87,11 @@ class LoginDetailPage extends HookConsumerWidget {
 
       Future<void> loadCountries() async {
         try {
-          final defaultCountry = await loginProvider.getDefaultCountry();
-          if (!cancelled) {
-            selectedCountry.value = _CountryDialCode.fromCountryInfo(
-              defaultCountry,
-            );
-          }
-        } catch (_) {
-          // Keep local fallback when the country endpoint is unavailable.
-        }
-
-        try {
           final supportedCountries = await loginProvider
               .getSupportedCountries();
           if (!cancelled && supportedCountries.isNotEmpty) {
             countryOptions.value = supportedCountries
-                .map(_CountryDialCode.fromCountryInfo)
+                .map(CountryDialOption.fromCountryInfo)
                 .toList();
           }
         } catch (_) {
@@ -106,65 +117,10 @@ class LoginDetailPage extends HookConsumerWidget {
     }, [phoneController]);
 
     Future<void> showCountryPicker() async {
-      final country = await showModalBottomSheet<_CountryDialCode>(
-        context: context,
-        backgroundColor: AppColors.cardBackground,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        builder: (sheetContext) {
-          return SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(height: 8),
-                Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.neutralLight,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  context.l10n.t('auth.countryCode'),
-                  style: AppTextStyles.bodyStrong,
-                ),
-                const SizedBox(height: 8),
-                Flexible(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: countryOptions.value.length,
-                    itemBuilder: (context, index) {
-                      final country = countryOptions.value[index];
-                      final isSelected = country == selectedCountry.value;
-                      return ListTile(
-                        minLeadingWidth: 24,
-                        leading: _CountryFlag(country: country),
-                        title: Text(
-                          country.nameFor(context),
-                          style: AppTextStyles.body,
-                        ),
-                        trailing: Text(
-                          '+${country.areaCode}',
-                          style: AppTextStyles.bodyStrongSmall.copyWith(
-                            color: isSelected
-                                ? AppColors.primaryPink
-                                : AppColors.textPrimary,
-                          ),
-                        ),
-                        onTap: () {
-                          Navigator.of(sheetContext).pop(country);
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
+      final country = await CountryPickerSheet.show(
+        context,
+        countries: countryOptions.value,
+        selectedCountryCode: selectedCountry.value.countryCode,
       );
 
       if (country != null && context.mounted) {
@@ -343,7 +299,7 @@ class _LoginCard extends StatelessWidget {
 
   final TextEditingController phoneController;
   final TextEditingController passwordController;
-  final _CountryDialCode selectedCountry;
+  final CountryDialOption selectedCountry;
   final bool agreementAccepted;
   final bool isLoading;
   final bool isCheckingUser;
@@ -470,7 +426,7 @@ class _PhoneInput extends StatelessWidget {
   });
 
   final TextEditingController controller;
-  final _CountryDialCode selectedCountry;
+  final CountryDialOption selectedCountry;
   final VoidCallback onCountryTap;
 
   @override
@@ -492,7 +448,7 @@ class _PhoneInput extends StatelessWidget {
                 child: Row(
                   children: [
                     const SizedBox(width: 7),
-                    _CountryFlag(country: selectedCountry),
+                    CountryFlagIcon(countryCode: selectedCountry.countryCode),
                     const SizedBox(width: 4),
                     Text(
                       '+${selectedCountry.areaCode}',
@@ -789,110 +745,3 @@ class _ConfirmButton extends StatelessWidget {
     );
   }
 }
-
-class _CountryFlag extends StatelessWidget {
-  const _CountryFlag({required this.country});
-
-  final _CountryDialCode country;
-
-  @override
-  Widget build(BuildContext context) {
-    if (country.flagAsset != null) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(2),
-        child: Image.asset(
-          country.flagAsset!,
-          width: 20,
-          height: 15,
-          fit: BoxFit.cover,
-        ),
-      );
-    }
-
-    return Container(
-      width: 20,
-      height: 15,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFE7E7),
-        borderRadius: BorderRadius.circular(2),
-      ),
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Text(
-          country.countryCode.toUpperCase(),
-          style: const TextStyle(
-            color: Color(0xFFFF6B6B),
-            fontSize: 8,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CountryDialCode {
-  const _CountryDialCode({
-    required this.name,
-    required this.zhName,
-    required this.areaCode,
-    required this.countryCode,
-    this.flagAsset,
-  });
-
-  final String name;
-  final String zhName;
-  final String areaCode;
-  final String countryCode;
-  final String? flagAsset;
-
-  factory _CountryDialCode.fromCountryInfo(CountryInfo country) {
-    final isoCode = country.isoCode.toLowerCase();
-    return _CountryDialCode(
-      name: country.name,
-      zhName: country.name,
-      areaCode: country.areaCode,
-      countryCode: isoCode,
-      flagAsset: isoCode == 'kg' ? AppAssets.lanhuLoginCountryFlag : null,
-    );
-  }
-
-  String nameFor(BuildContext context) {
-    return context.l10n.isChinese ? zhName : name;
-  }
-}
-
-const List<_CountryDialCode> _countryOptions = [
-  _CountryDialCode(
-    name: 'Kyrgyzstan',
-    zhName: '吉尔吉斯斯坦',
-    areaCode: '996',
-    countryCode: 'kg',
-    flagAsset: AppAssets.lanhuLoginCountryFlag,
-  ),
-  _CountryDialCode(
-    name: 'United States',
-    zhName: '美国',
-    areaCode: '1',
-    countryCode: 'us',
-  ),
-  _CountryDialCode(
-    name: 'China',
-    zhName: '中国',
-    areaCode: '86',
-    countryCode: 'cn',
-  ),
-  _CountryDialCode(
-    name: 'Saudi Arabia',
-    zhName: '沙特阿拉伯',
-    areaCode: '966',
-    countryCode: 'sa',
-  ),
-  _CountryDialCode(
-    name: 'India',
-    zhName: '印度',
-    areaCode: '91',
-    countryCode: 'in',
-  ),
-];

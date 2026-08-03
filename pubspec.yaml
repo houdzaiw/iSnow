@@ -56,6 +56,7 @@ dependencies:
   convert: ^3.1.2
   cryptography: ^2.7.0
   shared_preferences: ^2.5.4
+  country_flags: ^4.1.2
 
 dev_dependencies:
   flutter_test:

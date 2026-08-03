@@ -1,10 +1,13 @@
 // filepath: /Users/admin/Documents/project/isnow/lib/configs/app_device.dart
 
+import 'dart:convert';
 import 'dart:io';
+
+import 'package:convert/convert.dart';
+import 'package:crypto/crypto.dart';
+import 'package:cryptography/cryptography.dart' as cryptography;
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'dart:convert';
-import 'package:crypto/crypto.dart';
 
 class AppDevice {
   static final AppDevice _instance = AppDevice._internal();
@@ -38,7 +41,8 @@ class AppDevice {
 
     _model = androidInfo.model;
     _os = 'android';
-    _osVersion = '|${androidInfo.version.codename}|${androidInfo.version.sdkInt}|${androidInfo.version.incremental}|${androidInfo.version.baseOS}|';
+    _osVersion =
+        '|${androidInfo.version.codename}|${androidInfo.version.sdkInt}|${androidInfo.version.incremental}|${androidInfo.version.baseOS}|';
     _deviceBrand = androidInfo.brand;
 
     // 生成设备ID (使用 androidId 生成 MD5)
@@ -96,13 +100,31 @@ class AppDevice {
 
   /// 获取系统语言
   String get systemLanguage {
-    return Platform.localeName; // 例如: en-US, zh-CN
+    return _localeParts.first; // 例如: en, zh
   }
 
   /// 获取应用语言 (简化版本)
   String get appLanguage {
-    final locale = Platform.localeName.split('_').first;
-    return locale; // 例如: en, zh
+    return _localeParts.first; // 例如: en, zh
+  }
+
+  /// 获取系统地区
+  String get countryCode {
+    final parts = _localeParts;
+    if (parts.length < 2) return '';
+    return parts[1].toUpperCase();
+  }
+
+  List<String> get _localeParts {
+    final normalizedLocale = Platform.localeName
+        .split('.')
+        .first
+        .replaceAll('-', '_');
+    final parts = normalizedLocale
+        .split('_')
+        .where((part) => part.trim().isNotEmpty)
+        .toList();
+    return parts.isEmpty ? const ['en'] : parts;
   }
 
   /// 获取时区偏移 (小时)
@@ -126,13 +148,36 @@ class AppDevice {
   }
 
   /// 生成 x-auth-token
-  String generateAuthToken() {
-    // 这里生成一个示例 token，实际应该根据服务端要求
-    final timestamp = currentTimestamp.toString();
-    final input = '$deviceId-$timestamp-$appVersion-secret';
-    final bytes = utf8.encode(input);
-    final digest = sha256.convert(bytes);
-    return digest.toString();
+  Future<String> generateAuthToken() async {
+    final payload = jsonEncode({
+      'simCountryCode': countryCode,
+      'systemLanguage': Platform.localeName,
+      'fingerprint': deviceId,
+      'deviceID': deviceId,
+      'timezone': DateTime.now().timeZoneName,
+      'os': _authTokenOS,
+      'appVersionCode': '$appVersion+$appVersionCode',
+    });
+    return _encrypt(payload);
+  }
+
+  String get _authTokenOS {
+    if (os.isEmpty && osVersion.isEmpty) return 'unknown';
+    if (osVersion.isEmpty) return os;
+    return '$os $osVersion';
+  }
+
+  Future<String> _encrypt(String data) async {
+    final algorithm = cryptography.Chacha20.poly1305Aead();
+    final secretKey = await algorithm.newSecretKey();
+    final secretBox = await algorithm.encrypt(
+      utf8.encode(data),
+      secretKey: secretKey,
+    );
+    final secretKeyBytes = await secretKey.extractBytes();
+    return hex.encode(secretKeyBytes) +
+        hex.encode(secretBox.nonce) +
+        hex.encode(secretBox.mac.bytes) +
+        hex.encode(secretBox.cipherText);
   }
 }
-

@@ -8,6 +8,7 @@ import '../../localization/app_localizations.dart';
 import '../../model/country_info.dart';
 import '../../model/user_profile.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/country_picker_sheet.dart';
 import 'provider/login_provider.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -45,9 +46,9 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _agreementAccepted = true;
   int _resendSeconds = 0;
 
-  late _CountryDialOption _selectedCountry;
-  final List<_CountryDialOption> _countryOptions = CountryInfo.fallbackList
-      .map(_CountryDialOption.fromCountryInfo)
+  late CountryDialOption _selectedCountry;
+  final List<CountryDialOption> _countryOptions = CountryInfo.fallbackList
+      .map(CountryDialOption.fromCountryInfo)
       .toList();
 
   String get _phone => _phoneController.text.trim();
@@ -75,14 +76,14 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-  _CountryDialOption _initialCountry() {
+  CountryDialOption _initialCountry() {
     final initialIsoCode = widget.initialCountryCode?.trim().toUpperCase();
     final fallbackCountry = CountryInfo.fallbackList.firstWhere(
       (country) => country.isoCode.toUpperCase() == initialIsoCode,
-      orElse: () => CountryInfo.kyrgyzstan,
+      orElse: () => CountryInfo.saudiArabia,
     );
     final areaCode = widget.initialAreaCode?.trim();
-    return _CountryDialOption.fromCountryInfo(
+    return CountryDialOption.fromCountryInfo(
       fallbackCountry,
     ).copyWith(areaCode: areaCode?.isNotEmpty == true ? areaCode : null);
   }
@@ -107,60 +108,10 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> _showCountryPicker() async {
-    final country = await showModalBottomSheet<_CountryDialOption>(
-      context: context,
-      backgroundColor: AppColors.cardBackground,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (sheetContext) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 8),
-              Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.neutralLight,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                context.l10n.t('auth.countryCode'),
-                style: AppTextStyles.bodyStrong,
-              ),
-              const SizedBox(height: 8),
-              Flexible(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: _countryOptions.length,
-                  itemBuilder: (context, index) {
-                    final country = _countryOptions[index];
-                    final selected =
-                        country.countryCode == _selectedCountry.countryCode;
-                    return ListTile(
-                      leading: _CountryFlag(country: country),
-                      title: Text(country.name, style: AppTextStyles.body),
-                      trailing: Text(
-                        '+${country.areaCode}',
-                        style: AppTextStyles.bodyStrongSmall.copyWith(
-                          color: selected
-                              ? AppColors.primaryPink
-                              : AppColors.textPrimary,
-                        ),
-                      ),
-                      onTap: () => Navigator.of(sheetContext).pop(country),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+    final country = await CountryPickerSheet.show(
+      context,
+      countries: _countryOptions,
+      selectedCountryCode: _selectedCountry.countryCode,
     );
 
     if (country == null || !mounted) return;
@@ -383,7 +334,7 @@ class _RegisterCard extends StatelessWidget {
   final TextEditingController smsController;
   final TextEditingController passwordController;
   final TextEditingController confirmPasswordController;
-  final _CountryDialOption selectedCountry;
+  final CountryDialOption selectedCountry;
   final bool agreementAccepted;
   final bool isLoading;
   final bool isSendingCode;
@@ -508,7 +459,7 @@ class _PhoneField extends StatelessWidget {
   });
 
   final TextEditingController controller;
-  final _CountryDialOption country;
+  final CountryDialOption country;
   final bool isQueryingCountryCode;
   final VoidCallback onCountryTap;
 
@@ -532,7 +483,12 @@ class _PhoneField extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _CountryFlag(country: country),
+                  CountryFlagIcon(
+                    countryCode: country.countryCode,
+                    width: 24,
+                    height: 24,
+                    circular: true,
+                  ),
                   const SizedBox(width: 6),
                   isQueryingCountryCode
                       ? const SizedBox(
@@ -827,72 +783,6 @@ class _SubmitButton extends StatelessWidget {
                 ),
               ),
       ),
-    );
-  }
-}
-
-class _CountryFlag extends StatelessWidget {
-  const _CountryFlag({required this.country});
-
-  final _CountryDialOption country;
-
-  @override
-  Widget build(BuildContext context) {
-    final flagAsset = country.countryCode == 'KG'
-        ? AppAssets.lanhuLoginCountryFlag
-        : null;
-    if (flagAsset != null) {
-      return ClipOval(
-        child: Image.asset(flagAsset, width: 24, height: 24, fit: BoxFit.cover),
-      );
-    }
-    return Container(
-      width: 24,
-      height: 24,
-      decoration: const BoxDecoration(
-        color: AppColors.neutralLight,
-        shape: BoxShape.circle,
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        country.countryCode,
-        style: AppTextStyles.timeTiny.copyWith(
-          color: AppColors.textSecondary,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-    );
-  }
-}
-
-class _CountryDialOption {
-  const _CountryDialOption({
-    required this.name,
-    required this.countryCode,
-    required this.areaCode,
-  });
-
-  final String name;
-  final String countryCode;
-  final String areaCode;
-
-  factory _CountryDialOption.fromCountryInfo(CountryInfo country) {
-    return _CountryDialOption(
-      name: country.name,
-      countryCode: country.isoCode.toUpperCase(),
-      areaCode: country.areaCode,
-    );
-  }
-
-  _CountryDialOption copyWith({
-    String? name,
-    String? countryCode,
-    String? areaCode,
-  }) {
-    return _CountryDialOption(
-      name: name ?? this.name,
-      countryCode: countryCode ?? this.countryCode,
-      areaCode: areaCode ?? this.areaCode,
     );
   }
 }

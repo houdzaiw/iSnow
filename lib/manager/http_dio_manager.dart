@@ -95,10 +95,10 @@ class HttpDioManager {
       if (uid != null && token != null) 'oauth-token': token,
       'systemLanguage': device.systemLanguage,
       'timeZone': device.timeZone,
-      'storeCode': 'US',
+      'storeCode': device.countryCode.isEmpty ? 'CN' : device.countryCode,
       'appVersion': device.appVersion,
       'appLanguage': device.appLanguage,
-      'x-auth-token': device.generateAuthToken(),
+      'x-auth-token': await device.generateAuthToken(),
       'startTime': DateTime.now().millisecondsSinceEpoch,
     };
   }
@@ -344,7 +344,11 @@ class HttpDioManager {
       'hasOauthToken': headers['oauth-token'] != null,
       'hasSign': headers['b'] != null,
       'v': headers['v'],
+      'systemLanguage': headers['systemLanguage'],
+      'storeCode': headers['storeCode'],
+      'appVersion': headers['appVersion'],
       'appLanguage': headers['appLanguage'],
+      'xAuthTokenLength': headers['x-auth-token']?.toString().length,
     };
   }
 
@@ -356,16 +360,8 @@ class HttpDioManager {
           key.toLowerCase().contains('sms')) {
         return MapEntry(key, '******');
       }
-      if (key == 'code' || key == 'phone' || key == 'phoneNo') {
-        return MapEntry(key, _maskPhone(value?.toString() ?? ''));
-      }
       return MapEntry(key, value);
     });
-  }
-
-  String _maskPhone(String value) {
-    if (value.length <= 5) return value;
-    return '${value.substring(0, 3)}****${value.substring(value.length - 2)}';
   }
 
   void _handleError(DioException error) {

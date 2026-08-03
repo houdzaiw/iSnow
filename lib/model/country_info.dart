@@ -39,7 +39,15 @@ class CountryInfo {
     dialCode: '+996',
   );
 
+  static const CountryInfo saudiArabia = CountryInfo(
+    name: 'Saudi Arabia',
+    arName: 'السعودية',
+    isoCode: 'SA',
+    dialCode: '+966',
+  );
+
   static const List<CountryInfo> fallbackList = [
+    saudiArabia,
     kyrgyzstan,
     CountryInfo(
       name: 'United States',
@@ -48,12 +56,6 @@ class CountryInfo {
       dialCode: '+1',
     ),
     CountryInfo(name: 'China', arName: 'الصين', isoCode: 'CN', dialCode: '+86'),
-    CountryInfo(
-      name: 'Saudi Arabia',
-      arName: 'السعودية',
-      isoCode: 'SA',
-      dialCode: '+966',
-    ),
     CountryInfo(name: 'India', arName: 'الهند', isoCode: 'IN', dialCode: '+91'),
   ];
 }
