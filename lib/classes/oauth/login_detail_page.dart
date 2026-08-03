@@ -10,6 +10,7 @@ import '../../localization/app_localizations.dart';
 import '../../model/country_info.dart';
 import '../../model/user_profile.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/agreement_links_text.dart';
 import '../../widgets/country_picker_sheet.dart';
 import 'provider/login_provider.dart';
 
@@ -667,29 +668,11 @@ class _AgreementRow extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             Expanded(
-              child: RichText(
+              child: AgreementLinksText(
+                normalStyle: normalStyle,
+                linkStyle: linkStyle,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: context.l10n.t('auth.agreementPrefix'),
-                      style: normalStyle,
-                    ),
-                    TextSpan(
-                      text: context.l10n.t('auth.serviceAgreement'),
-                      style: linkStyle,
-                    ),
-                    TextSpan(
-                      text: context.l10n.t('auth.agreementMiddle'),
-                      style: normalStyle,
-                    ),
-                    TextSpan(
-                      text: context.l10n.t('auth.privacyPolicy'),
-                      style: linkStyle,
-                    ),
-                  ],
-                ),
               ),
             ),
           ],
