@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../localization/app_localizations.dart';
+import '../../theme/app_theme.dart';
 import '../../widgets/custom_scaffold.dart';
 
 class EditNicknamePage extends StatefulWidget {
@@ -10,7 +12,7 @@ class EditNicknamePage extends StatefulWidget {
 }
 
 class _EditNicknamePageState extends State<EditNicknamePage> {
-  final _nicknameController = TextEditingController(text: 'Username');
+  final _nicknameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -21,14 +23,24 @@ class _EditNicknamePageState extends State<EditNicknamePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_nicknameController.text.isEmpty) {
+      _nicknameController.text = context.l10n.t('profile.nickname');
+    }
+
     return CustomScaffold(
-      title: 'Edit Nickname',
-      rightText: 'Save',
+      title: context.l10n.t('profile.editNickname'),
+      rightText: context.l10n.t('app.save'),
       onRightIconTap: () {
         if (_formKey.currentState!.validate()) {
           // 保存昵称逻辑
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Nickname saved: ${_nicknameController.text}')),
+            SnackBar(
+              content: Text(
+                context.l10n.t('profile.nicknameSaved', {
+                  'nickname': _nicknameController.text,
+                }),
+              ),
+            ),
           );
           context.pop();
         }
@@ -36,47 +48,46 @@ class _EditNicknamePageState extends State<EditNicknamePage> {
       body: Form(
         key: _formKey,
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(AppSpacing.xl),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.xl,
+                  vertical: AppSpacing.sm,
+                ),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
+                  color: AppColors.cardBackground,
+                  borderRadius: AppRadius.cardBorder,
+                  boxShadow: AppShadows.soft,
                 ),
                 child: TextFormField(
                   controller: _nicknameController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
+                    filled: false,
                     border: InputBorder.none,
-                    hintText: 'Enter your nickname',
-                    hintStyle: TextStyle(color: Color(0xFF999999)),
+                    hintText: context.l10n.t('profile.nicknameHint'),
+                    hintStyle: AppTextStyles.hint,
                   ),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Color(0xFF212121),
-                  ),
+                  style: AppTextStyles.bodyStrong,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Nickname cannot be empty';
+                      return context.l10n.t('profile.nicknameRequired');
                     }
                     if (value.length > 20) {
-                      return 'Nickname cannot exceed 20 characters';
+                      return context.l10n.t('profile.nicknameTooLong');
                     }
                     return null;
                   },
                 ),
               ),
-              const SizedBox(height: 12),
-              const Padding(
-                padding: EdgeInsets.only(left: 16),
+              const SizedBox(height: AppSpacing.lg),
+              Padding(
+                padding: const EdgeInsets.only(left: AppSpacing.xl),
                 child: Text(
-                  'Nickname should be 1-20 characters',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF999999),
-                  ),
+                  context.l10n.t('profile.nicknameRule'),
+                  style: AppTextStyles.caption,
                 ),
               ),
             ],
@@ -86,4 +97,3 @@ class _EditNicknamePageState extends State<EditNicknamePage> {
     );
   }
 }
-

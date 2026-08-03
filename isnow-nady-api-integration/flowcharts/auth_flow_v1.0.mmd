@@ -1,0 +1,26 @@
+flowchart TD
+  A["进入登录或注册入口"] --> B["加载默认国家码"]
+  B --> C["用户选择国家码并输入手机号"]
+  C --> D{"手机号格式是否有效"}
+  D -- "否" --> E["保持待输入状态"]
+  D -- "是" --> F["debounce 后请求 /api/user/hasUser"]
+  F --> G{"hasUser 返回结果"}
+  G -- "请求失败" --> H["保留输入并提示重试"]
+  G -- "true" --> I["展示密码登录"]
+  I --> J["请求 /oauth2/login"]
+  J --> K{"登录是否成功"}
+  K -- "否" --> L["展示后端 message 并记录 traceId"]
+  K -- "是" --> M["保存 token、uid、userBaseInfo"]
+  M --> N["跳转 /home"]
+  G -- "false" --> O["进入注册流程"]
+  O --> P{"是否同意服务协议"}
+  P -- "否" --> Q["提示先同意协议"]
+  P -- "是" --> R["请求 /oauth2/sendSms"]
+  R --> S["用户输入验证码"]
+  S --> T["请求 /oauth2/verify/code"]
+  T --> U{"验证码是否通过"}
+  U -- "否" --> V["提示验证码错误或过期"]
+  U -- "是" --> W["请求 /oauth2/setPassword"]
+  W --> X["请求 /oauth2/login"]
+  X --> Y["按状态请求 /api/user/complete"]
+  Y --> M

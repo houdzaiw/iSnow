@@ -1,25 +1,45 @@
-// filepath: /Users/admin/Documents/project/isnow/lib/model/login_response.dart
+import 'user_profile.dart';
 
 class LoginResponse {
-  final bool success;
-  final String? message;
-  final UserData? data;
-  final String? token;
-
-  LoginResponse({
+  const LoginResponse({
     required this.success,
     this.message,
     this.data,
     this.token,
+    this.uid,
+    this.status = NadyLoginStatus.unknown,
+    this.loginType,
+    this.userNo,
   });
 
+  final bool success;
+  final String? message;
+  final UserData? data;
+  final String? token;
+  final int? uid;
+  final NadyLoginStatus status;
+  final String? loginType;
+  final double? userNo;
+
   factory LoginResponse.fromJson(Map<String, dynamic> json) {
+    final userBaseInfo = (json['userBaseInfo'] as Map?)
+        ?.cast<String, dynamic>();
+    final uid = (json['uid'] as num?)?.toInt();
     return LoginResponse(
-      success: json['success'] ?? false,
-      message: json['message'] as String?,
-      token: json['token'] as String?,
-      data: json['data'] != null ? UserData.fromJson(json['data']) : null,
+      success: true,
+      token: json['token']?.toString(),
+      uid: uid,
+      status: nadyLoginStatusFromJson(json['status']),
+      loginType: json['loginType']?.toString(),
+      userNo: (json['userNo'] as num?)?.toDouble(),
+      data: userBaseInfo == null
+          ? null
+          : UserData.fromJson(userBaseInfo).copyWith(uid: uid),
     );
+  }
+
+  factory LoginResponse.failure(String? message) {
+    return LoginResponse(success: false, message: message);
   }
 
   Map<String, dynamic> toJson() {
@@ -27,44 +47,11 @@ class LoginResponse {
       'success': success,
       'message': message,
       'token': token,
+      'uid': uid,
+      'status': nadyLoginStatusToJson(status),
+      'loginType': loginType,
+      'userNo': userNo,
       'data': data?.toJson(),
     };
   }
 }
-
-class UserData {
-  final String? userId;
-  final String? email;
-  final String? nickname;
-  final String? avatar;
-  final String? phone;
-
-  UserData({
-    this.userId,
-    this.email,
-    this.nickname,
-    this.avatar,
-    this.phone,
-  });
-
-  factory UserData.fromJson(Map<String, dynamic> json) {
-    return UserData(
-      userId: json['userId'] as String?,
-      email: json['email'] as String?,
-      nickname: json['nickname'] as String?,
-      avatar: json['avatar'] as String?,
-      phone: json['phone'] as String?,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'userId': userId,
-      'email': email,
-      'nickname': nickname,
-      'avatar': avatar,
-      'phone': phone,
-    };
-  }
-}
-

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../configs/consts.dart';
+import '../../localization/app_localizations.dart';
+import '../../theme/app_theme.dart';
 import 'publish_page.dart';
 
 class SelectMoodPage extends HookConsumerWidget {
@@ -10,63 +12,67 @@ class SelectMoodPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return SizedBox(
       height: MediaQuery.of(context).size.height * 0.64,
-      child: Column(
-        children: [
-          // Header: Select Mood
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 20.0),
-            child: Text(
-              'Select Mood',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF212121),
-              ),
-            ),
+      child: DecoratedBox(
+        decoration: const BoxDecoration(gradient: AppGradients.pageBackground),
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: AppSpacing.xl,
+            right: AppSpacing.xl,
+            top: AppSpacing.lg,
+            bottom: MediaQuery.of(context).padding.bottom + AppSpacing.lg,
           ),
-          // GridView
-          Expanded(
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width - 60,
-              child: GridView(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4, //横轴四个子widget
-                  childAspectRatio: 1.0, //宽高比为1时，子widget
-                ),
-                children: moodImages.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final imagePath = entry.value;
-                  return GestureDetector(
-                    onTap: () {
-                      // 关闭当前 SelectMoodPage 弹框
-                      Navigator.pop(context);
-
-                      // 打开新的 PublishPage 弹框
-                      showModalBottomSheet<void>(
-                        context: context,
-                        backgroundColor: Colors.white,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-                        ),
-                        builder: (ctx) {
-                          return PublishPage(moodIndex: index);
-                        },
-                      );
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: Image.asset(
-                        imagePath,
-                        fit: BoxFit.contain,
+          child: Column(
+            children: [
+              Image.asset(
+                AppAssets.lanhuCalendarDragHandle,
+                width: 44,
+                height: 4,
+                fit: BoxFit.contain,
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              Text(
+                context.l10n.t('publish.selectMood'),
+                textAlign: TextAlign.center,
+                style: AppTextStyles.title,
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              Expanded(
+                child: GridView(
+                  padding: EdgeInsets.zero,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    childAspectRatio: 1,
+                    crossAxisSpacing: AppSpacing.lg,
+                    mainAxisSpacing: AppSpacing.lg,
+                  ),
+                  children: moodImages.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final imagePath = entry.value;
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
+                        showModalBottomSheet<void>(
+                          context: context,
+                          backgroundColor: AppColors.cardBackground,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: AppRadius.sheetBorder,
+                          ),
+                          builder: (ctx) {
+                            return PublishPage(moodIndex: index);
+                          },
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(AppSpacing.sm),
+                        child: Image.asset(imagePath, fit: BoxFit.contain),
                       ),
-                    ),
-                  );
-                }).toList(),
+                    );
+                  }).toList(),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

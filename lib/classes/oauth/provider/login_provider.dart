@@ -1,326 +1,436 @@
-import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:project/model/login_response.dart';
-import 'package:project/model/login_model.dart';
-import 'package:project/model/user_model.dart';
-import 'package:project/manager/http/dio_provider.dart';
-import 'package:project/manager/http/api_path.dart';
-import 'package:project/manager/http/api_client.dart';
-import 'package:project/manager/user_manager.dart';
-import 'package:project/configs/app_device.dart';
-import 'package:project/lib/crypt_util.dart';
+import 'dart:convert';
+import 'dart:io';
 
+import 'package:convert/convert.dart';
+import 'package:crypto/crypto.dart' as crypto;
+import 'package:cryptography/cryptography.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
-enum GetSMSType {
-  none,
-  sms,
-  whatsapp,
-}
-
-enum GetSMSPurpose {
-  register,
-  forgetPassword,
-  accountBinding,
-  accountChangeBinding,
-  verifyBinding,
-}
-
-extension GetSMSPurposeExt on GetSMSPurpose {
-  int get value {
-    switch (this) {
-      case GetSMSPurpose.register:
-        return 1;
-      case GetSMSPurpose.forgetPassword:
-        return 2;
-      case GetSMSPurpose.accountBinding:
-        return 3;
-      case GetSMSPurpose.accountChangeBinding:
-        return 4;
-      case GetSMSPurpose.verifyBinding:
-        return 5;
-    }
-  }
-
-  static GetSMSPurpose fromValue(int value) {
-    switch (value) {
-      case 1:
-        return GetSMSPurpose.register;
-      case 2:
-        return GetSMSPurpose.forgetPassword;
-      case 3:
-        return GetSMSPurpose.accountBinding;
-      case 4:
-        return GetSMSPurpose.accountChangeBinding;
-      case 5:
-        return GetSMSPurpose.verifyBinding;
-      default:
-        throw ArgumentError('Invalid GetSMSPurpose value: $value');
-    }
-  }
-}
+import '../../../configs/app_device.dart';
+import '../../../manager/auth_session.dart';
+import '../../../manager/http_api.dart';
+import '../../../manager/http_dio_manager.dart';
+import '../../../model/country_info.dart';
+import '../../../model/login_response.dart';
+import '../../../model/server_response.dart';
+import '../../../model/upload_param.dart';
+import '../../../model/user_profile.dart';
 
 class LoginProvider {
-  final ApiClient _apiClient;
+  final HttpDioManager _httpManager = HttpDioManager();
   final AppDevice _appDevice = AppDevice();
+  final AuthSession _authSession = AuthSession.instance;
 
-  LoginProvider(this._apiClient);
+  Future<String> _encryptPassword(String password) async {
+    final algorithm = Chacha20.poly1305Aead();
+    final secretKey = await algorithm.newSecretKey();
+    final secretBox = await algorithm.encrypt(
+      utf8.encode(password),
+      secretKey: secretKey,
+    );
+    final secretKeyBytes = await secretKey.extractBytes();
+    return hex.encode(secretKeyBytes) +
+        hex.encode(secretBox.nonce) +
+        hex.encode(secretBox.mac.bytes) +
+        hex.encode(secretBox.cipherText);
+  }
 
-  // 登录接口
+  Map<String, dynamic> _publicParams() {
+    final deviceId = _appDevice.deviceId;
+    return {
+      'deviceId': deviceId,
+      'appsflyerUID':
+          '${DateTime.now().millisecondsSinceEpoch}-${deviceId.hashCode}',
+      'app': 'Nady',
+      'appVersion': _appDevice.appVersion,
+      'appVersionCode': _appDevice.appVersionCode,
+      'channel': 'DEV',
+      'systemLanguage': _appDevice.systemLocale,
+      'appLanguage': _appDevice.appLanguage,
+      'isp': '',
+      'countryCode': '',
+      'model': _appDevice.model,
+      'os': _appDevice.os,
+      'osVersion': _appDevice.osVersion,
+      'deviceBrand': _appDevice.deviceBrand,
+    };
+  }
+
+  Map<String, dynamic> _asMap(dynamic response) {
+    if (response is Map<String, dynamic>) return response;
+    if (response is Map) return response.cast<String, dynamic>();
+    throw const NadyApiException(message: 'Invalid server response');
+  }
+
+  NadyServerResponse<T> _server<T>(
+    dynamic response,
+    T Function(Object? json)? fromJsonT,
+  ) {
+    return NadyServerResponse<T>.fromJson(_asMap(response), fromJsonT);
+  }
+
+  T _requireData<T>(dynamic response, T Function(Object? json) fromJsonT) {
+    final server = _server<T>(response, fromJsonT);
+    if (!server.isSuccess) {
+      throw server.toException();
+    }
+    final data = server.data;
+    if (data == null) {
+      throw NadyApiException(
+        message: server.message.isEmpty ? 'Empty server data' : server.message,
+        code: server.code,
+        traceId: server.traceId,
+      );
+    }
+    return data;
+  }
+
+  Future<CountryInfo> getDefaultCountry() async {
+    final response = await _httpManager.get(HttpApi.defaultCountry);
+    return _requireData(
+      response,
+      (json) => CountryInfo.fromJson((json as Map).cast<String, dynamic>()),
+    );
+  }
+
+  Future<String> queryCountryDialCode(String countryCode) async {
+    final response = await _httpManager.get(
+      HttpApi.queryCountryCode,
+      queryParameters: {'code': countryCode.toUpperCase()},
+    );
+    final dialCode = _requireData(response, (json) => json?.toString() ?? '');
+    final normalizedDialCode = dialCode.replaceFirst('+', '').trim();
+    if (normalizedDialCode.isEmpty) {
+      throw const NadyApiException(message: 'Empty country dial code');
+    }
+    return normalizedDialCode;
+  }
+
+  Future<List<CountryInfo>> getHotCountries() async {
+    final response = await _httpManager.get(HttpApi.hotCountry);
+    return _requireData(
+      response,
+      (json) => (json as List? ?? const [])
+          .map(
+            (item) =>
+                CountryInfo.fromJson((item as Map).cast<String, dynamic>()),
+          )
+          .toList(),
+    );
+  }
+
+  Future<List<CountryInfo>> getSupportedCountries() async {
+    final response = await _httpManager.get(HttpApi.supportedCountry);
+    return _requireData(
+      response,
+      (json) => (json as List? ?? const [])
+          .map(
+            (item) =>
+                CountryInfo.fromJson((item as Map).cast<String, dynamic>()),
+          )
+          .toList(),
+    );
+  }
+
+  Future<HasUserResponse> hasUser({
+    required String phone,
+    required String areaCode,
+  }) async {
+    final response = await _httpManager.get(
+      HttpApi.hasUser,
+      queryParameters: {'phone': phone, 'areaCode': areaCode},
+    );
+    return _requireData(
+      response,
+      (json) => HasUserResponse.fromJson((json as Map).cast<String, dynamic>()),
+    );
+  }
+
   Future<LoginResponse> login({
     required String account,
     required String password,
-    required String smsCode,
     int loginType = 5,
-    String areaCode = '966',
-    String countryCode = 'us',
+    String areaCode = '1',
+    String countryCode = '',
+    String smsCode = '',
   }) async {
     try {
-      // 加密密码
-      final encryptedPassword = await CryptUtil.encrypt(password);
-
-      // 构建登录参数
-      final params = {
-        "code": account,
-        "loginType": loginType,
-        "passwd": encryptedPassword,
-        "smsCode": smsCode,
-        "areaCode": areaCode,
-        "countryCode": countryCode,
-        "fbLimited": false,
-        "deviceId": _appDevice.deviceId,
-        "app": _appDevice.appName,
-        "appVersion": _appDevice.appVersion,
-        "appVersionCode": int.tryParse(_appDevice.appVersionCode) ?? 1,
-        "channel": "DEV",
-        "systemLanguage": _appDevice.systemLanguage,
-        "appLanguage": _appDevice.appLanguage,
-        "isp": "",
-        "model": _appDevice.model,
-        "os": _appDevice.os,
-        "osVersion": _appDevice.osVersion,
-        "deviceBrand": _appDevice.deviceBrand,
-        "appsflyerUID": _appDevice.fingerprint,
+      final encryptedPassword = password.isEmpty
+          ? ''
+          : await _encryptPassword(password);
+      final normalizedCountryCode = countryCode.toUpperCase();
+      final params = <String, dynamic>{
+        'code': account,
+        'loginType': loginType,
+        'passwd': encryptedPassword,
+        'smsCode': smsCode,
+        'areaCode': areaCode,
+        'countryCode': '',
+        'fbLimited': false,
+        ..._publicParams(),
       };
-
-      // 使用 ApiClient 统一处理 HTTP 请求
-      final response = await _apiClient.post(
-        ApiPath.login,
-        data: params,
-      );
-
-      // HTTP 或业务层面失败（ApiClient 已统一处理）
-      if (!response.success) {
-        return LoginResponse(
-          success: false,
-          message: response.message ?? 'Request failed',
-        );
+      if (normalizedCountryCode.isNotEmpty) {
+        params['countryCode'] = normalizedCountryCode;
       }
 
-      // 成功，response.data 已经是纯净的业务数据
-      final data = response.data;
-      if (data == null) {
-        return LoginResponse(
-          success: false,
-          message: 'Empty response data',
-        );
+      debugPrint('Login request POST: ${HttpApi.login}');
+
+      final response = await _httpManager.post(HttpApi.login, data: params);
+      final server = _server<LoginResponse>(
+        response,
+        (json) => LoginResponse.fromJson((json as Map).cast<String, dynamic>()),
+      );
+      if (!server.isSuccess) {
+        return LoginResponse.failure(server.message);
+      }
+      final loginResponse = server.data;
+      if (loginResponse == null) {
+        return LoginResponse.failure(server.message);
       }
 
-      // 使用 LoginModel 解析登录数据
-      final loginModel = LoginModel.fromJson(data as Map<String, dynamic>);
-
-      // 持久化到 UserManager 单例（同时写入 sp_util 本地存储）
-      await UserManager.shared.saveLogin(loginModel);
-
-      return LoginResponse(
-        success: true,
-        message: response.message ?? 'Login successful',
-        token: loginModel.token,
+      await _authSession.saveLogin(
+        loginResponse,
+        phone: account,
+        areaCode: areaCode,
+        countryCode: normalizedCountryCode,
       );
+      return loginResponse;
+    } on DioException catch (e) {
+      debugPrint('Login DioException: ${e.message}');
+      final data = e.response?.data;
+      if (data is Map) {
+        return LoginResponse.failure(data['message']?.toString() ?? e.message);
+      }
+      return LoginResponse.failure(e.message);
     } catch (e) {
-      return LoginResponse(
-        success: false,
-        message: 'Unexpected error: $e',
-      );
+      debugPrint('Login exception: $e');
+      return LoginResponse.failure('$e');
     }
   }
 
-  // 发送验证码
-  Future<LoginResponse> sendSms({
+  Future<LoginResponse> registerWithSmsPassword({
     required String phone,
-    String areaCode = '966',
-    GetSMSPurpose purpose = GetSMSPurpose.register,
-    GetSMSType type = GetSMSType.sms,
-  }) async {
-    try {
-      final hasUserParams = {
-        "phone": phone,
-        "areaCode": areaCode,
-      };
-      final params = {
-        "phone": phone,
-        "areaCode": areaCode,
-        "purpose": purpose.value,
-        "type": type == GetSMSType.sms ? 1 : 2,
-        "language": _appDevice.appLanguage,
-      };
-
-      // 检查用户是否存在
-      final result = await _apiClient.get(
-        ApiPath.hasUser,
-        queryParameters: hasUserParams,
-      );
-
-      // HTTP 或业务层面失败
-      if (!result.success) {
-        return LoginResponse(
-          success: false,
-          message: result.message ?? 'Request failed',
-        );
-      }
-
-      // 检查用户是否存在
-      final resultData = result.data;
-      final hasUser = resultData?['hasUser'] as bool? ?? false;
-
-      if (purpose == GetSMSPurpose.register && hasUser) {
-        return LoginResponse(
-          success: false,
-          message: 'Account already exists',
-        );
-      }
-
-      // 发送验证码
-      final response = await _apiClient.post(
-        ApiPath.sendSms,
-        data: params,
-      );
-
-      // HTTP 或业务层面失败
-      if (!response.success) {
-        return LoginResponse(
-          success: false,
-          message: response.message ?? 'Request failed',
-        );
-      }
-
-      // 成功
-      return LoginResponse(
-        success: true,
-        message: response.message ?? 'Verification code sent successfully',
-      );
-    } catch (e) {
-      return LoginResponse(
-        success: false,
-        message: 'Unexpected error: $e',
-      );
-    }
-  }
-
-  // 注册接口
-  Future<LoginResponse> register({
-    required String account,
     required String password,
     required String smsCode,
-    String areaCode = '966',
-    String countryCode = 'us',
+    required String areaCode,
+    required String countryCode,
+  }) {
+    return login(
+      account: phone,
+      password: password,
+      loginType: 5,
+      areaCode: areaCode,
+      countryCode: countryCode,
+      smsCode: smsCode,
+    );
+  }
+
+  Future<void> sendSms({
+    required String phoneNumber,
+    required String areaCode,
+    int purpose = 1,
+    int type = 1,
+    String? language,
   }) async {
-    try {
-      // 先调用登录接口验证短信验证码
-      final loginResponse = await login(
-        account: account,
-        password: "",
-        smsCode: smsCode,
-        areaCode: areaCode,
-        countryCode: countryCode,
-      );
+    final response = await _httpManager.post(
+      HttpApi.sendSms,
+      data: {
+        'phoneNo': phoneNumber,
+        'areaCode': areaCode,
+        'purpose': purpose,
+        'type': type,
+        'language': language ?? _appDevice.appLanguage,
+      },
+    );
+    final server = _server<dynamic>(response, null);
+    if (!server.isSuccess) throw server.toException();
+  }
 
-      // 如果登录失败，直接返回错误
-      if (!loginResponse.success) {
-        return loginResponse;
-      }
+  Future<void> verifyCode({
+    required String phoneNumber,
+    required String code,
+    required String areaCode,
+  }) async {
+    final response = await _httpManager.post(
+      HttpApi.verifyCode,
+      data: {'code': phoneNumber, 'areaCode': areaCode, 'smsCode': code},
+    );
+    final server = _server<dynamic>(response, null);
+    if (!server.isSuccess) throw server.toException();
+  }
 
-      // 调用getMineUserInfo
-      final userInfoResponse = await _apiClient.get(
-        ApiPath.getMineUserInfo,
-      );
+  Future<void> setPassword({
+    required String phoneNumber,
+    required String password,
+    required String areaCode,
+  }) async {
+    final encryptedPassword = await _encryptPassword(password);
+    final response = await _httpManager.post(
+      HttpApi.setPassword,
+      data: {
+        'phone': phoneNumber,
+        'password': encryptedPassword,
+        'areaCode': areaCode,
+      },
+    );
+    final server = _server<dynamic>(response, null);
+    if (!server.isSuccess) throw server.toException();
+  }
 
-      // HTTP 或业务层面失败
-      if (!userInfoResponse.success) {
-        return LoginResponse(
-          success: false,
-          message: userInfoResponse.message ?? 'Failed to get user info',
-        );
-      }
+  Future<UserData?> completeUser({
+    required int uid,
+    required String nick,
+    required String avatar,
+    required int gender,
+    required String birth,
+    required String countryCode,
+    String? inviteCode,
+  }) async {
+    final response = await _httpManager.post(
+      HttpApi.completeUser,
+      data: {
+        'nick': nick,
+        'avatar': avatar,
+        'gender': gender,
+        'birth': birth,
+        'uid': uid,
+        'code': countryCode,
+        'inviteCode': inviteCode,
+      },
+    );
+    final user = _requireData(
+      response,
+      (json) => UserData.fromJson((json as Map).cast<String, dynamic>()),
+    );
+    await _authSession.saveUser(user);
+    return user;
+  }
 
-      // 调用修改密码接口setPassword
-      final setPasswordResponse = await _apiClient.post(
-        ApiPath.setPassword,
-        data: {
-          'password': await CryptUtil.encrypt(password),
+  Future<UserData> getMyUserInfo() async {
+    final response = await _httpManager.get(HttpApi.myUserInfo);
+    final me = _requireData(
+      response,
+      (json) => MeModel.fromJson((json as Map).cast<String, dynamic>()),
+    );
+    final cachedPhone = await _authSession.phone();
+    final cachedAreaCode = await _authSession.areaCode();
+    final cachedCountryCode = await _authSession.countryCode();
+    final user = me.userBaseInfo.copyWith(
+      phone: cachedPhone,
+      areaCode: me.userBaseInfo.areaCode ?? cachedAreaCode,
+      countryCode: me.userBaseInfo.countryCode ?? cachedCountryCode,
+    );
+    await _authSession.saveUser(user);
+    return user;
+  }
+
+  Future<UserData> modifyUser({
+    required String nick,
+    required int gender,
+    required String avatar,
+    required String signature,
+    required Object birth,
+  }) async {
+    final response = await _httpManager.post(
+      HttpApi.modifyUser,
+      data: {
+        'nick': nick,
+        'gender': gender,
+        'avatar': avatar,
+        'signature': signature,
+        'birth': birth,
+      },
+    );
+    final user = _requireData(
+      response,
+      (json) => UserData.fromJson((json as Map).cast<String, dynamic>()),
+    );
+    await _authSession.saveUser(user);
+    return user;
+  }
+
+  Future<UploadParam> getUploadParam() async {
+    final response = await _httpManager.get(HttpApi.uploadParam);
+    return _requireData(
+      response,
+      (json) => UploadParam.fromJson((json as Map).cast<String, dynamic>()),
+    );
+  }
+
+  Future<String> uploadAvatarFile(String filePath) async {
+    final uploadParam = await getUploadParam();
+    final bytes = await File(filePath).readAsBytes();
+    final extension = filePath.split('.').last.toLowerCase();
+    final safeExtension = extension == filePath ? 'jpg' : extension;
+    final uploadPath = '${uploadParam.path}.$safeExtension';
+    final endpoint = uploadParam.endpoint.startsWith('http')
+        ? uploadParam.endpoint
+        : 'https://${uploadParam.endpoint}';
+    final endpointUri = Uri.parse(endpoint);
+    final objectUri = Uri(
+      scheme: endpointUri.scheme,
+      host: '${uploadParam.bucket}.${endpointUri.host}',
+      port: endpointUri.hasPort ? endpointUri.port : null,
+      path: '/$uploadPath',
+    );
+    const contentType = 'image/jpeg';
+    final date = HttpDate.format(DateTime.now().toUtc());
+    final canonicalizedHeaders =
+        'x-oss-security-token:${uploadParam.securityToken}\n';
+    final canonicalizedResource = '/${uploadParam.bucket}/$uploadPath';
+    final stringToSign =
+        'PUT\n\n$contentType\n$date\n$canonicalizedHeaders$canonicalizedResource';
+    final signature = base64Encode(
+      crypto.Hmac(
+        crypto.sha1,
+        utf8.encode(uploadParam.accessKeySecret),
+      ).convert(utf8.encode(stringToSign)).bytes,
+    );
+
+    final dio = Dio();
+    await dio.putUri(
+      objectUri,
+      data: Stream.fromIterable([bytes]),
+      options: Options(
+        headers: {
+          'Date': date,
+          'Content-Type': contentType,
+          'Authorization': 'OSS ${uploadParam.accessKeyId}:$signature',
+          'x-oss-security-token': uploadParam.securityToken,
+          'Content-Length': bytes.length,
         },
-      );
+        responseType: ResponseType.plain,
+      ),
+    );
+    return uploadPath;
+  }
 
-      // HTTP 或业务层面失败
-      if (!setPasswordResponse.success) {
-        return LoginResponse(
-          success: false,
-          message: setPasswordResponse.message ?? 'Failed to set password',
-        );
-      }
-
-      // 继续完善用户信息completeUserInfo
-      final completeParams = {
-        'nick': 'User${DateTime.now().millisecondsSinceEpoch}',
-        'gender': 0,
-        'birth': '2000-01-01',
-        'uid': 18416564,
-        'code': 'SA',
-        'inviteCode': '',
-      };
-
-      final completeInfoResponse = await _apiClient.post(
-        ApiPath.completeUserInfo,
-        data: completeParams,
-      );
-
-      // HTTP 或业务层面失败
-      if (!completeInfoResponse.success) {
-        return LoginResponse(
-          success: false,
-          message: completeInfoResponse.message ?? 'Failed to complete user info',
-        );
-      }
-
-      // 成功
-      return LoginResponse(
-        success: true,
-        message: completeInfoResponse.message ?? 'Registration successful',
-      );
-    } catch (e) {
-      return LoginResponse(
-        success: false,
-        message: 'Unexpected error: $e',
-      );
+  Future<void> logout() async {
+    try {
+      final response = await _httpManager.post(HttpApi.logout, data: {});
+      final server = _server<dynamic>(response, null);
+      if (!server.isSuccess) throw server.toException();
+    } finally {
+      await _authSession.clear();
     }
   }
 
-  // 获取当前登录用户信息
-  Future<UserModel?> getUserInfo() async {
+  Future<void> logoff() async {
     try {
-      final response = await _apiClient.get(ApiPath.getMineUserInfo);
-      if (!response.success || response.data == null) {
-        return null;
-      }
-      return UserModel.fromJson(response.data as Map<String, dynamic>);
-    } catch (e) {
-      return null;
+      final response = await _httpManager.post(HttpApi.logoff);
+      final server = _server<dynamic>(response, null);
+      if (!server.isSuccess) throw server.toException();
+    } finally {
+      await _authSession.clear();
     }
+  }
+
+  Future<UserData?> cachedUser() {
+    return _authSession.user();
+  }
+
+  Future<bool> isLoggedIn() {
+    return _authSession.isLoggedIn();
   }
 }
-
-// Riverpod provider
-final loginProviderProvider = Provider<LoginProvider>((ref) {
-  final dio = ref.read(dioProvider);
-  final apiClient = ApiClient(dio: dio);
-  return LoginProvider(apiClient);
-});
-

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../theme/app_theme.dart';
+
 class CustomScaffold extends StatelessWidget {
   final String title;
   final Widget body;
@@ -10,6 +12,7 @@ class CustomScaffold extends StatelessWidget {
   final bool showBackButton;
   final VoidCallback? onBackPressed;
   final bool extendBodyBehindAppBar;
+  final bool useGradientBackground;
 
   const CustomScaffold({
     super.key,
@@ -21,63 +24,53 @@ class CustomScaffold extends StatelessWidget {
     this.showBackButton = true,
     this.onBackPressed,
     this.extendBodyBehindAppBar = false,
+    this.useGradientBackground = true,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFDF5EB),
+      backgroundColor: AppColors.pageBackground,
       extendBodyBehindAppBar: extendBodyBehindAppBar,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF9E707),
+        automaticallyImplyLeading: showBackButton,
+        backgroundColor: AppColors.cardBackground,
         elevation: 0,
         leading: showBackButton
             ? IconButton(
                 icon: Image.asset(
-                  'assets/base/back_button.png',
-                  width: 24,
-                  height: 24,
+                  AppAssets.lanhuNavBack,
+                  width: 20,
+                  height: 20,
                 ),
                 onPressed: onBackPressed ?? () => context.pop(),
               )
             : null,
-        title: Text(
-          title,
-          style: const TextStyle(
-            color: Color(0xFF212121),
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: Text(title, style: AppTextStyles.navTitle),
         centerTitle: true,
         actions: rightIconPath != null || rightText != null
             ? [
                 if (rightText != null)
                   TextButton(
                     onPressed: onRightIconTap,
-                    child: Text(
-                      rightText!,
-                      style: const TextStyle(
-                        color: Color(0xFF212121),
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+                    child: Text(rightText!, style: AppTextStyles.bodyStrong),
                   )
                 else if (rightIconPath != null)
                   IconButton(
-                    icon: Image.asset(
-                      rightIconPath!,
-                      width: 24,
-                      height: 24,
-                    ),
+                    icon: Image.asset(rightIconPath!, width: 24, height: 24),
                     onPressed: onRightIconTap,
                   ),
               ]
             : null,
       ),
-      body: body,
+      body: useGradientBackground
+          ? DecoratedBox(
+              decoration: const BoxDecoration(
+                gradient: AppGradients.pageBackground,
+              ),
+              child: SizedBox.expand(child: body),
+            )
+          : body,
     );
   }
 }
-

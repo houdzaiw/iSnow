@@ -1,10 +1,12 @@
 // dart
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:project/configs/consts.dart';
-import 'package:project/manager/user_manager.dart';
-import 'package:project/widgets/app_network_image.dart';
+import '../../classes/oauth/provider/login_provider.dart';
+import '../../localization/app_localizations.dart';
+import '../../model/user_profile.dart';
+import '../../theme/app_theme.dart';
 import 'profile_menu_item.dart';
 
 class ProfilePage extends HookConsumerWidget {
@@ -13,30 +15,60 @@ class ProfilePage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final menuItems = ProfileMenuData.getMenuItems();
+    final loginProvider = useMemoized(() => LoginProvider());
+    final user = useState<UserData?>(null);
+    final isLoading = useState(false);
+    final errorText = useState<String?>(null);
+    final loadFailedText = context.l10n.t('profile.loadFailed');
+
+    useEffect(() {
+      var cancelled = false;
+
+      Future<void> loadProfile() async {
+        user.value = await loginProvider.cachedUser();
+        isLoading.value = true;
+        try {
+          final remoteUser = await loginProvider.getMyUserInfo();
+          if (!cancelled) {
+            user.value = remoteUser;
+            errorText.value = null;
+          }
+        } catch (e) {
+          if (!cancelled) {
+            errorText.value = loadFailedText;
+          }
+        } finally {
+          if (!cancelled) {
+            isLoading.value = false;
+          }
+        }
+      }
+
+      loadProfile();
+      return () {
+        cancelled = true;
+      };
+    }, [loginProvider, loadFailedText]);
+
+    final profileUser = user.value;
+    final displayName = profileUser?.nick?.isNotEmpty == true
+        ? profileUser!.nick!
+        : context.l10n.t('profile.nickname');
     return Scaffold(
-      extendBodyBehindAppBar: true,  // ★ 关键：让 body 内容延伸到 AppBar 后面
+      extendBodyBehindAppBar: true, // ★ 关键：让 body 内容延伸到 AppBar 后面
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.transparent,
         elevation: 0,
         actions: [
           IconButton(
-            icon: Image.asset(
-              "assets/message/message_icon.png",
-              width: 24,
-              height: 24,
-            ),
+            icon: Image.asset(AppAssets.messageIcon, width: 24, height: 24),
             onPressed: () => onRightIconTap(context),
           ),
         ],
       ),
-      backgroundColor: const Color(0xFFFFF6E5),
+      backgroundColor: AppColors.pageBackground,
       body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/base/bg_image.png'),
-            fit: BoxFit.cover,
-          ),
-        ),
+        decoration: const BoxDecoration(gradient: AppGradients.pageBackground),
         child: Column(
           children: [
             // 头像和昵称部分
@@ -44,149 +76,122 @@ class ProfilePage extends HookConsumerWidget {
               //安全区域适配
               padding: EdgeInsets.only(
                 top: MediaQuery.of(context).padding.top + 39,
-                bottom: MediaQuery.of(context).padding.bottom,
+                bottom: AppSpacing.section,
               ),
               child: Column(
                 children: [
                   // 头像
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      shape: BoxShape.circle,
-                    ),
-                    child:  AppNetworkImage(
-                      url: UserManager.shared.avatar ?? defaultAvatar,
-                      width: 100,
-                      height: 100,
-                      radius: 50,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
+                  _ProfileAvatar(avatar: profileUser?.avatar),
+                  const SizedBox(height: AppSpacing.md),
                   // 昵称
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const SizedBox(width: 8),
-                      Text(
-                        UserManager.shared.nick ?? 'User Name',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF212121),
+                      Flexible(
+                        child: Text(
+                          displayName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.title,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       GestureDetector(
                         onTap: () {
                           context.push('/edit-profile');
                         },
-                        child: Image.asset(
-                          'assets/profile/edit_icon.png',
-                          width: 16,
-                          height: 16,
+                        child: ColorFiltered(
+                          colorFilter: const ColorFilter.mode(
+                            AppColors.primaryPink,
+                            BlendMode.srcIn,
+                          ),
+                          child: Image.asset(
+                            AppAssets.profileEditIcon,
+                            width: 16,
+                            height: 16,
+                          ),
                         ),
                       ),
                     ],
-                  )
+                  ),
                 ],
               ),
             ),
             // ListView部分
             Expanded(
               child: ListView.builder(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).padding.bottom + AppSpacing.md,
+                ),
                 physics: const BouncingScrollPhysics(),
                 itemCount: menuItems.length,
                 itemBuilder: (context, index) {
                   final item = menuItems[index];
                   return Container(
                     height: 54,
-                    margin: const EdgeInsets.only(left: 12, right: 12, bottom: 10),
+                    margin: const EdgeInsets.only(
+                      left: AppSpacing.lg,
+                      right: AppSpacing.lg,
+                      bottom: AppSpacing.md,
+                    ),
                     //圆角14
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
+                      color: AppColors.cardBackground,
+                      borderRadius: AppRadius.cardBorder,
                     ),
                     child: ListTile(
-                      leading: Image.asset(item.icon ?? "", width: 27, height: 27),
-                      title: Text(
-                        item.name,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          color: Color(0xFF212121),
-                          fontWeight: FontWeight.w500,
+                      leading: Container(
+                        width: 27,
+                        height: 27,
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryPink,
+                          borderRadius: BorderRadius.circular(AppRadius.sm),
+                        ),
+                        child: Icon(
+                          Icons.person,
+                          size: 17,
+                          color: AppColors.textInverse,
                         ),
                       ),
-                      trailing: Icon(item.arrow, size: 16),
+                      title: Text(
+                        context.l10n.t(item.titleKey),
+                        style: AppTextStyles.menuItem,
+                      ),
+                      trailing: Icon(
+                        Icons.person,
+                        size: 16,
+                        color: AppColors.primaryPink,
+                      ),
                       horizontalTitleGap: 0, // 设置leading和title之间的间距为8像素
                       onTap: () {
-                        // 处理点击事件
-
                         //调用my posts 路由跳转
-                        if (item.router.isNotEmpty) {
-                          print('跳转到: ${item.router}');
-                          context.push(item.router);
-                        } else {
-                          print('点击了: ${item.name}');
-                          if (item.name == 'Delete Account') {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text('Confirm Deletion'),
-                                content: const Text('Are you sure you want to delete your account? This action cannot be undone.'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.of(context).pop(),
-                                    child: const Text('Cancel'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      // 这里可以添加删除账号的逻辑，例如调用API等
-                                      print('Account deleted');
-                                      Navigator.of(context).pop();
-                                      // 退出登录并跳转到登录页
-                                      UserManager.shared.logout();
-                                      context.push('/login');
-                                    },
-                                    child: const Text('Delete', style: TextStyle(color: Colors.red)),
-                                  ),
-                                ],
-                              ),
+                        switch (item.action) {
+                          case 'my-posts':
+                            context.push('/my-posts');
+                            break;
+                          case 'privacy':
+                            context.push(
+                              '/web-view?title=${Uri.encodeComponent(context.l10n.t('profile.privacy'))}&uri=https://www.example.com/user-privacy',
                             );
-                          } else if (item.name == 'Log Out') {
-                            // 这里可以添加退出登录的逻辑，例如清除用户数据等
-                            // UserManager.shared.logout();
-                            // context.push('/login');
-                            // 提示框
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text('Confirm Logout'),
-                                content: const Text('Are you sure you want to log out?'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.of(context).pop(),
-                                    child: const Text('Cancel'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      // 这里可以添加删除账号的逻辑，例如调用API等
-                                      print('Logged out');
-                                      Navigator.of(context).pop();
-                                      // 退出登录并跳转到登录页
-                                      UserManager.shared.logout();
-                                      context.push('/login');
-                                    },
-                                    child: const Text('Log out', style: TextStyle(color: Colors.red)),
-                                  ),
-                                ],
-                              ),
+                            break;
+                          case 'about-us':
+                            context.push('/about-us');
+                            break;
+                          case 'contact-us':
+                            context.push(
+                              '/web-view?title=${Uri.encodeComponent(context.l10n.t('profile.contactUs'))}&uri=https://www.example.com/contact',
                             );
-
-                          }
+                            break;
+                          case 'settings':
+                            context.push('/settings');
+                            break;
+                          case 'delete-account':
+                            _confirmDeleteAccount(context, loginProvider);
+                            break;
+                          case 'log-out':
+                            _confirmLogout(context, loginProvider);
+                            break;
                         }
-
                       },
                     ),
                   );
@@ -201,7 +206,118 @@ class ProfilePage extends HookConsumerWidget {
 
   void onRightIconTap(BuildContext context) {
     // 跳转到消息页面
-    print('跳转到消息页面');
-    context.push('/messages');
+    context.go('/messages');
+  }
+
+  Future<void> _confirmLogout(
+    BuildContext context,
+    LoginProvider loginProvider,
+  ) async {
+    final confirmed = await _showConfirmDialog(
+      context,
+      title: context.l10n.t('profile.logOut'),
+      message: context.l10n.t('profile.logOutMessage'),
+      confirmLabel: context.l10n.t('profile.logOut'),
+    );
+    if (!confirmed) return;
+
+    try {
+      await loginProvider.logout();
+      if (context.mounted) context.go('/login');
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.t('profile.logoutFailed'))),
+      );
+    }
+  }
+
+  Future<void> _confirmDeleteAccount(
+    BuildContext context,
+    LoginProvider loginProvider,
+  ) async {
+    final confirmed = await _showConfirmDialog(
+      context,
+      title: context.l10n.t('profile.deleteAccount'),
+      message: context.l10n.t('profile.deleteAccountMessage'),
+      confirmLabel: context.l10n.t('app.delete'),
+      destructive: true,
+    );
+    if (!confirmed) return;
+
+    try {
+      await loginProvider.logoff();
+      if (context.mounted) context.go('/login');
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.t('profile.deleteAccountFailed'))),
+      );
+    }
+  }
+
+  Future<bool> _showConfirmDialog(
+    BuildContext context, {
+    required String title,
+    required String message,
+    required String confirmLabel,
+    bool destructive = false,
+  }) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(context.l10n.t('app.cancel')),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(
+                confirmLabel,
+                style: destructive
+                    ? const TextStyle(color: AppColors.danger)
+                    : null,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+    return confirmed == true;
+  }
+}
+
+class _ProfileAvatar extends StatelessWidget {
+  const _ProfileAvatar({this.avatar});
+
+  final String? avatar;
+
+  @override
+  Widget build(BuildContext context) {
+    final imageUrl = avatar;
+    return Container(
+      width: 100,
+      height: 100,
+      clipBehavior: Clip.antiAlias,
+      decoration: const BoxDecoration(
+        color: AppColors.avatarPlaceholder,
+        shape: BoxShape.circle,
+      ),
+      child: imageUrl == null || imageUrl.isEmpty
+          ? const Icon(Icons.person, size: 50, color: AppColors.textInverse)
+          : Image.network(
+              imageUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => const Icon(
+                Icons.person,
+                size: 50,
+                color: AppColors.textInverse,
+              ),
+            ),
+    );
   }
 }

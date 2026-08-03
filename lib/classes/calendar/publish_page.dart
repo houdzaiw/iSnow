@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:project/manager/user_manager.dart';
 
+import '../../localization/app_localizations.dart';
 import '../../manager/app_Isar.dart';
 import '../../manager/providers.dart';
 import '../../model/diary_entry.dart';
+import '../../theme/app_theme.dart';
 import 'publish_edit_page.dart';
 import 'publish_voice_page.dart';
 
@@ -31,14 +32,11 @@ class PublishPage extends HookConsumerWidget {
       // 创建日记条目
       final diaryEntry = DiaryEntry()
         ..date = DateTime.now()
-        ..emoji = '' // 可以根据 moodIndex 设置 emoji
+        ..emoji =
+            '' // 可以根据 moodIndex 设置 emoji
         ..moodIndex = moodIndex
         ..type = currentType
-        ..userId = UserManager.shared.userId ?? 0
-        ..nick = UserManager.shared.nick
-        ..avatar = UserManager.shared.avatar
         ..createdAt = DateTime.now();
-
 
       if (currentType == 'edit') {
         // 编辑模式：保存描述和图片
@@ -66,7 +64,7 @@ class PublishPage extends HookConsumerWidget {
       // 显示成功提示
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Saved successfully!')),
+          SnackBar(content: Text(context.l10n.t('publish.saveSuccess'))),
         );
         // 关闭弹框
         Navigator.pop(context);
@@ -75,14 +73,11 @@ class PublishPage extends HookConsumerWidget {
       // ...existing code...
     }
   }
-  
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // 初始化图标数组
-    final tabIcons = [
-      Icons.edit,
-      Icons.mic,
-    ];
+    final tabIcons = [Icons.edit, Icons.mic];
 
     // 使用 useSingleTickerProvider 创建 TabController
     final tabController = useTabController(initialLength: tabIcons.length);
@@ -100,21 +95,32 @@ class PublishPage extends HookConsumerWidget {
       void listener() {
         currentTabIndex.value = tabController.index;
       }
+
       tabController.addListener(listener);
       return () => tabController.removeListener(listener);
     }, [tabController]);
 
     return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.64,
+      height: MediaQuery.of(context).size.height * 0.68,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.only(
+          left: AppSpacing.xl,
+          right: AppSpacing.xl,
+          top: AppSpacing.lg,
+          bottom: MediaQuery.of(context).padding.bottom + AppSpacing.lg,
+        ),
         child: Column(
           children: [
-            // TabBar with icon tabs
+            Image.asset(
+              AppAssets.lanhuCalendarDragHandle,
+              width: 44,
+              height: 4,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(height: AppSpacing.xl),
             Row(
               children: [
-                const SizedBox(width: 24),
-                const SizedBox(width: 36),
+                const SizedBox(width: 40),
                 Expanded(
                   child: TabBar(
                     controller: tabController,
@@ -123,22 +129,42 @@ class PublishPage extends HookConsumerWidget {
                     tabs: tabIcons.asMap().entries.map((entry) {
                       int index = entry.key;
                       IconData iconData = entry.value;
-                      bool isSelected = tabController.index == index;
+                      bool isSelected = currentTabIndex.value == index;
+                      final lanhuTabAsset = index == 0 && isSelected
+                          ? AppAssets.lanhuPublishTabEditActive
+                          : index == 1 && !isSelected
+                          ? AppAssets.lanhuPublishTabVoiceNormal
+                          : null;
+
+                      if (lanhuTabAsset != null) {
+                        return Tab(
+                          child: Image.asset(
+                            lanhuTabAsset,
+                            width: 99,
+                            height: 30,
+                            fit: BoxFit.contain,
+                          ),
+                        );
+                      }
+
                       return Tab(
                         child: Container(
                           width: 99,
                           height: 32,
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? const Color(0xFFF9E707)
-                                : const Color(0xFFE3E3E3),
-                            borderRadius: BorderRadius.circular(16),
+                                ? AppColors.primaryPink
+                                : AppColors.neutralLight,
+                            borderRadius: AppRadius.pillBorder,
+                            boxShadow: isSelected ? AppShadows.button : null,
                           ),
                           child: Center(
                             child: Icon(
                               iconData,
                               size: 22,
-                              color: const Color(0xFFFFFFFF),
+                              color: isSelected
+                                  ? AppColors.textInverse
+                                  : AppColors.textTertiary,
                             ),
                           ),
                         ),
@@ -146,16 +172,20 @@ class PublishPage extends HookConsumerWidget {
                     }).toList(),
                   ),
                 ),
-                const SizedBox(width: 36),
-                // 右边增加发送按钮
+                const SizedBox(width: AppSpacing.sm),
                 GestureDetector(
                   onTap: () async {
                     // 判断当前是编辑还是语音模式，并保存数据
                     if (tabController.index == 0) {
                       // 编辑模式：检查是否有内容
-                      if (editDescription.value.isEmpty && editImagePaths.value.isEmpty) {
+                      if (editDescription.value.isEmpty &&
+                          editImagePaths.value.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Please enter content or select images')),
+                          SnackBar(
+                            content: Text(
+                              context.l10n.t('publish.needContent'),
+                            ),
+                          ),
                         );
                         return;
                       }
@@ -163,7 +193,9 @@ class PublishPage extends HookConsumerWidget {
                       // 语音模式：检查是否有语音
                       if (voicePath.value.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Please record a voice message')),
+                          SnackBar(
+                            content: Text(context.l10n.t('publish.needVoice')),
+                          ),
                         );
                         return;
                       }
@@ -180,7 +212,7 @@ class PublishPage extends HookConsumerWidget {
                     );
                   },
                   child: Image.asset(
-                    'assets/calendar/send_post.png',
+                    AppAssets.calendarSendPost,
                     width: 24,
                     height: 24,
                     fit: BoxFit.contain,
@@ -188,8 +220,7 @@ class PublishPage extends HookConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            // TabBarView with content
+            const SizedBox(height: AppSpacing.xl),
             Expanded(
               child: TabBarView(
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -219,6 +250,4 @@ class PublishPage extends HookConsumerWidget {
       ),
     );
   }
-
 }
-

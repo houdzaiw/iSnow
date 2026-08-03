@@ -1,49 +1,57 @@
-// 服务端响应基础模型
-class ServerResponse<T> {
-  final int code;
-  final T? data;
-  final String timestamp;
-  final String message;
-  final String traceId;
-  final String msg;
-
-  ServerResponse({
+class NadyServerResponse<T> {
+  const NadyServerResponse({
     required this.code,
-    this.data,
-    required this.timestamp,
     required this.message,
-    required this.traceId,
-    required this.msg,
+    required this.timestamp,
+    this.traceId,
+    this.data,
   });
 
-  factory ServerResponse.fromJson(
+  static const int successCode = 200;
+
+  final int code;
+  final String message;
+  final String timestamp;
+  final String? traceId;
+  final T? data;
+
+  bool get isSuccess => code == successCode;
+
+  factory NadyServerResponse.fromJson(
     Map<String, dynamic> json,
-    T Function(dynamic)? fromJsonT,
+    T Function(Object? json)? fromJsonT,
   ) {
-    return ServerResponse<T>(
-      code: json['code'] as int,
-      data: json['data'] != null && fromJsonT != null
+    return NadyServerResponse<T>(
+      code: (json['code'] as num?)?.toInt() ?? 0,
+      message: json['message']?.toString() ?? '',
+      timestamp: json['timestamp']?.toString() ?? '',
+      traceId: json['traceId']?.toString(),
+      data: json.containsKey('data') && fromJsonT != null
           ? fromJsonT(json['data'])
-          : json['data'] as T?,
-      timestamp: json['timestamp'] as String? ?? '',
-      message: json['message'] as String? ?? '',
-      traceId: json['traceId'] as String? ?? '',
-      msg: json['msg'] as String? ?? '',
+          : null,
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'code': code,
-      'data': data,
-      'timestamp': timestamp,
-      'message': message,
-      'traceId': traceId,
-      'msg': msg,
-    };
+  NadyApiException toException() {
+    return NadyApiException(
+      message: message.isEmpty ? 'Request failed' : message,
+      code: code,
+      traceId: traceId,
+    );
   }
-
-  /// 判断业务是否成功
-  bool get isSuccess => code == 200;
 }
 
+class NadyApiException implements Exception {
+  const NadyApiException({required this.message, this.code, this.traceId});
+
+  final String message;
+  final int? code;
+  final String? traceId;
+
+  @override
+  String toString() {
+    final codeText = code == null ? '' : 'code=$code ';
+    final traceText = traceId == null ? '' : 'traceId=$traceId ';
+    return 'NadyApiException($codeText$traceText$message)';
+  }
+}

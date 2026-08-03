@@ -1,8 +1,8 @@
-class ApiPath {
-  // 基础路径
-  static const String baseUrl = 'http://simi2.w1.luyouxia.net/simi';
-
+class HttpApi {
   /// ==================== 国家相关 ====================
+  /// 按国家 ISO code 查询拨号码
+  static const queryCountryCode = '/api/user/country/query/code';
+
   /// 获取默认国家码
   static const defaultCountry = '/country-list/default-country';
 
@@ -16,6 +16,15 @@ class ApiPath {
   /// 是否已存在用户
   static const hasUser = '/api/user/hasUser';
 
+  /// 注册完善资料
+  static const completeUser = '/api/user/complete';
+
+  /// 获取我的用户信息
+  static const myUserInfo = '/api/user/mine';
+
+  /// 更新用户资料
+  static const modifyUser = '/api/user/modifyUser';
+
   /// ==================== 认证 / 登录 ====================
   /// 登录
   static const login = '/oauth2/login';
@@ -23,21 +32,18 @@ class ApiPath {
   /// 发送验证码
   static const sendSms = '/oauth2/sendSms';
 
-  /// 获取当前登录用户信息
-  static const getMineUserInfo = '/api/user/mine';
-
   /// 校验验证码
   static const verifyCode = '/oauth2/verify/code';
 
   /// 设置密码
   static const setPassword = '/oauth2/setPassword';
 
-  /// 完善用户信息
-  static const completeUserInfo = '/api/user/complete';
-
   /// 登出
   static const logout = '/oauth2/logout';
 
-  /// 礼物
-  static const sendGift = '/oauth2/logout';
+  /// 注销账号
+  static const logoff = '/api/user/logoff';
+
+  /// 获取头像上传参数
+  static const uploadParam = '/api/resource/header-upload-param';
 }

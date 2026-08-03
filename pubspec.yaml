@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.14.1+1
+version: 1.0.0+1
 
 environment:
   sdk: ^3.9.2
@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   cupertino_icons: ^1.0.8
   flutter_screenutil: ^5.9.3
@@ -42,6 +44,7 @@ dependencies:
   isar_flutter_libs: ^3.1.0
   path_provider: ^2.1.5
   image_picker: ^1.2.1
+  intl: ^0.20.2
   flutter_hooks: ^0.21.3+1
   record: ^6.1.2
   just_audio: ^0.9.34
@@ -58,10 +61,9 @@ dependencies:
   dio_smart_retry: ^7.0.1
   cryptography: ^2.9.0
   cached_network_image: ^3.4.1
-  fext_sim_util:
-    git: https://codeup.aliyun.com/675ee27a35730943ed49279d/app/fext-sim-util.git
-  fext_fingerprint:
-    git: https://codeup.aliyun.com/675ee27a35730943ed49279d/app/fext-fingerprint.git
+  convert: ^3.1.2
+  shared_preferences: ^2.5.4
+  country_flags: ^4.1.2
 
 dev_dependencies:
   flutter_test:
@@ -71,7 +73,6 @@ dev_dependencies:
   riverpod_generator: ^2.4.0
   isar_generator: ^3.1.0+1
   build_runner: ^2.4.13
-
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -87,5 +88,8 @@ flutter:
     - assets/home/
     - assets/calendar/
     - assets/message/
-    - assets/avatar/
-    - lib/model/moodcontent.json
+    - assets/lanhu/base/
+    - assets/lanhu/calendar/
+    - assets/lanhu/home/
+    - assets/lanhu/mood/
+    - assets/lanhu/tabbar/

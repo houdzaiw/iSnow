@@ -3,50 +3,21 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../localization/app_localizations.dart';
+import '../theme/app_theme.dart';
+
 enum UserActionOption {
-  delete('Delete'),
-  report('Report'),
-  block('Block'),
-  cancel('Cancel');
+  delete('app.delete'),
+  report('app.report'),
+  block('app.block'),
+  cancel('app.cancel');
 
-  final String label;
-  const UserActionOption(this.label);
+  final String labelKey;
+  const UserActionOption(this.labelKey);
 }
-enum UserReportOption {
-  sexual('Sexual Content / Nudity'),
-  harassment('Harassment / Bullying'),
-  hate('Hate Speech'),
-  illegal('Illegal Activities'),
-  scam('Scam / Fraud'),
-  other('Other');
 
-  final String label;
-  const UserReportOption(this.label);
-}
-const List<String> moodImages = [
-  'assets/mood/model_01.png',
-  'assets/mood/model_02.png',
-  'assets/mood/model_03.png',
-  'assets/mood/model_04.png',
-  'assets/mood/model_05.png',
-  'assets/mood/model_06.png',
-  'assets/mood/model_07.png',
-  'assets/mood/model_08.png',
-  'assets/mood/model_09.png',
-  'assets/mood/model_010.png',
-  'assets/mood/model_011.png',
-  'assets/mood/model_012.png',
-  'assets/mood/model_013.png',
-  'assets/mood/model_014.png',
-  'assets/mood/model_015.png',
-  'assets/mood/model_016.png',
-  'assets/mood/model_017.png',
-  'assets/mood/model_018.png',
-  'assets/mood/model_019.png',
-  'assets/mood/model_020.png',
-];
+const List<String> moodImages = AppAssets.moodImages;
 
-String defaultAvatar = "https://img0.baidu.com/it/u=2448393511,2158991775&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500";
 String setDateFormatter(DateTime date) {
   final dateFormatter = DateFormat('yyyy-MM-dd HH:mm:ss');
   final formattedDate = dateFormatter.format(date);
@@ -54,24 +25,40 @@ String setDateFormatter(DateTime date) {
 }
 
 /// 显示选择头像的底部弹框（相册或相机）
-void showAvatarOptions(BuildContext context, {
+void showAvatarOptions(
+  BuildContext context, {
   VoidCallback? onAlbumSelected,
   VoidCallback? onCameraSelected,
 }) {
   showModalBottomSheet(
     context: context,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
+    backgroundColor: AppColors.cardBackground,
+    shape: const RoundedRectangleBorder(borderRadius: AppRadius.sheetBorder),
     builder: (context) {
-      return Container(
-        padding: const EdgeInsets.symmetric(vertical: 20),
+      return SafeArea(
+        top: false,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const SizedBox(height: AppSpacing.lg),
+            Container(
+              width: 44,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.neutralLight,
+                borderRadius: AppRadius.pillBorder,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
             ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Choose from Album'),
+              leading: const Icon(
+                Icons.photo_library,
+                color: AppColors.primaryPink,
+              ),
+              title: Text(
+                context.l10n.t('picker.album'),
+                style: AppTextStyles.bodyStrong,
+              ),
               onTap: () {
                 Navigator.pop(context);
                 if (onAlbumSelected != null) {
@@ -79,14 +66,22 @@ void showAvatarOptions(BuildContext context, {
                 } else {
                   // 默认提示
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Album selected')),
+                    SnackBar(
+                      content: Text(context.l10n.t('picker.albumSelected')),
+                    ),
                   );
                 }
               },
             ),
             ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: const Text('Take Photo'),
+              leading: const Icon(
+                Icons.camera_alt,
+                color: AppColors.primaryPink,
+              ),
+              title: Text(
+                context.l10n.t('picker.camera'),
+                style: AppTextStyles.bodyStrong,
+              ),
               onTap: () {
                 Navigator.pop(context);
                 if (onCameraSelected != null) {
@@ -94,17 +89,19 @@ void showAvatarOptions(BuildContext context, {
                 } else {
                   // 默认提示
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Camera selected')),
+                    SnackBar(
+                      content: Text(context.l10n.t('picker.cameraSelected')),
+                    ),
                   );
                 }
               },
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSpacing.md),
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text(
-                'Cancel',
-                style: TextStyle(color: Color(0xFF999999)),
+              child: Text(
+                context.l10n.t('app.cancel'),
+                style: AppTextStyles.hint,
               ),
             ),
           ],
@@ -132,22 +129,37 @@ void showUserActionOptions(
 
   showModalBottomSheet(
     context: context,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
-    backgroundColor: Colors.white,
+    shape: const RoundedRectangleBorder(borderRadius: AppRadius.sheetBorder),
+    backgroundColor: AppColors.cardBackground,
     builder: (context) {
       return Container(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+        padding: EdgeInsets.only(
+          left: AppSpacing.xl,
+          right: AppSpacing.xl,
+          top: AppSpacing.lg,
+          bottom: MediaQuery.of(context).padding.bottom + AppSpacing.lg,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: options.map((option) {
-            final isCancel = option == UserActionOption.cancel;
-            final isDelete = option == UserActionOption.delete;
-            return Column(
-              children: [
-                if (isCancel && options.length > 1) const SizedBox(height: 8),
-                GestureDetector(
+          children: [
+            Container(
+              width: 44,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.neutralLight,
+                borderRadius: AppRadius.pillBorder,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            ...options.map((option) {
+              final isCancel = option == UserActionOption.cancel;
+              final isDelete = option == UserActionOption.delete;
+              return Padding(
+                padding: EdgeInsets.only(
+                  top: isCancel && options.length > 1 ? AppSpacing.sm : 0,
+                  bottom: AppSpacing.sm,
+                ),
+                child: GestureDetector(
                   onTap: () {
                     Navigator.pop(context);
                     switch (option) {
@@ -167,114 +179,39 @@ void showUserActionOptions(
                         }
                         break;
                       case UserActionOption.cancel:
-                        // Just close the modal
                         break;
                     }
                   },
                   child: Container(
-                    width: MediaQuery.of(context).size.width - 48,
-                    height: 55,
+                    height: 52,
                     decoration: BoxDecoration(
-                      color: isCancel ? const Color(0xFFF3F3F3) : Colors.transparent,
-                      borderRadius: BorderRadius.circular(28),
+                      color: isCancel
+                          ? AppColors.neutralLight
+                          : AppColors.cardBackground,
+                      borderRadius: AppRadius.pillBorder,
+                      border: Border.all(
+                        color: isDelete
+                            ? AppColors.primaryPink
+                            : AppColors.divider,
+                      ),
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      option.label,
+                      context.l10n.t(option.labelKey),
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: const Color(0xFF212121),
+                      style: AppTextStyles.bodyStrong.copyWith(
+                        color: isDelete
+                            ? AppColors.primaryPink
+                            : AppColors.textPrimary,
                       ),
                     ),
                   ),
                 ),
-              ],
-            );
-          }).toList(),
+              );
+            }),
+          ],
         ),
       );
     },
   );
-}
-/// 显示用户举报选项的底部弹框（性内容/裸露、骚扰/欺凌、仇恨言论、非法活动、诈骗/欺诈、其他）
-void showUserReportActionOptions(
-    BuildContext context, {
-      VoidCallback? onSexualSelected,
-      VoidCallback? onHarassmentSelected,
-      VoidCallback? onHateSelected,
-      VoidCallback? onIllegalSelected,
-      VoidCallback? onScamSelected,
-      VoidCallback? onOtherSelected,
-    }) {
-  showModalBottomSheet(
-    context: context,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
-    backgroundColor: Colors.white,
-    builder: (context) {
-      return Container(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: UserReportOption.values.map((option) {
-            return GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-                switch (option) {
-                  case UserReportOption.sexual:
-                    if (onSexualSelected != null) {
-                      onSexualSelected();
-                    }
-                    break;
-                  case UserReportOption.harassment:
-                    if (onHarassmentSelected != null) {
-                      onHarassmentSelected();
-                    }
-                    break;
-                  case UserReportOption.hate:
-                    if (onHateSelected != null) {
-                      onHateSelected();
-                    }
-                    break;
-                  case UserReportOption.illegal:
-                    if (onIllegalSelected != null) {
-                      onIllegalSelected();
-                    }
-                    break;
-                  case UserReportOption.scam:
-                    if (onScamSelected != null) {
-                      onScamSelected();
-                    }
-                    break;
-                  case UserReportOption.other:
-                    if (onOtherSelected != null) {
-                      onOtherSelected();
-                    }
-                    break;
-                }
-              },
-              child: Container(
-                width: MediaQuery.of(context).size.width - 48,
-                height: 55,
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(28),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  option.label,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: const Color(0xFF212121),
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-      );
-  });
 }

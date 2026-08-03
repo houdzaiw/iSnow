@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:project/manager/user_manager.dart';
+
+import '../manager/auth_session.dart';
+import '../theme/app_theme.dart';
 
 class LaunchPage extends StatefulWidget {
   const LaunchPage({super.key});
@@ -17,29 +19,39 @@ class _LaunchPageState extends State<LaunchPage> {
   }
 
   Future<void> _checkLoginStatus() async {
-    // 短暂停留展示启动图
+    // 模拟检查登录状态的异步操作
     await Future.delayed(const Duration(seconds: 1));
+
     if (!mounted) return;
 
-    // 使用 UserManager 检查登录状态（已在 AppConfig.run 中 restore）
-    if (UserManager.shared.isLoggedIn) {
-      context.go('/calendar');
+    final bool isLoggedIn = await _isUserLoggedIn();
+
+    if (!mounted) return;
+
+    if (isLoggedIn) {
+      // 已登录，跳转到首页
+      context.go('/home');
     } else {
+      // 未登录，跳转到登录页
       context.go('/login');
     }
+  }
+
+  Future<bool> _isUserLoggedIn() async {
+    return AuthSession.instance.isLoggedIn();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: null,
-      backgroundColor: const Color(0xFFFDF5EB),
+      backgroundColor: AppColors.cardBackground,
       body: Container(
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/base/launch_bg_image.png'),
+            image: AssetImage(AppAssets.lanhuLoginBackground),
             fit: BoxFit.cover,
           ),
         ),

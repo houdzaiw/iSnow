@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:project/localization/app_localizations.dart';
 import 'package:project/widgets/custom_scaffold.dart';
 
 class AboutUsPage extends HookConsumerWidget {
@@ -9,7 +10,7 @@ class AboutUsPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return CustomScaffold(
-      title: 'About Us',
+      title: context.l10n.t('profile.aboutUs'),
       body: Column(
         children: [
           SizedBox(height: 30),

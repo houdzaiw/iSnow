@@ -1,5 +1,3 @@
-
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -8,16 +6,14 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../configs/consts.dart';
+import '../../localization/app_localizations.dart';
+import '../../theme/app_theme.dart';
 
 class PublishEditPage extends HookConsumerWidget {
   final int? moodIndex;
   final Function(String description, List<String> imagePaths)? onSave;
 
-  const PublishEditPage({
-    super.key,
-    this.moodIndex,
-    this.onSave,
-  });
+  const PublishEditPage({super.key, this.moodIndex, this.onSave});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -28,12 +24,9 @@ class PublishEditPage extends HookConsumerWidget {
     useEffect(() {
       void listener() {
         if (onSave != null) {
-          // 使用 Future.microtask 延迟回调执行到下一帧
-          Future.microtask(() {
-            final description = textController.text;
-            final imagePaths = selectedImages.value.map((e) => e.path).toList();
-            onSave!(description, imagePaths);
-          });
+          final description = textController.text;
+          final imagePaths = selectedImages.value.map((e) => e.path).toList();
+          onSave!(description, imagePaths);
         }
       }
 
@@ -47,168 +40,154 @@ class PublishEditPage extends HookConsumerWidget {
     // 监听图片变化
     useEffect(() {
       if (onSave != null) {
-        // 使用 Future.microtask 延迟回调执行到下一帧
-        Future.microtask(() {
-          final description = textController.text;
-          final imagePaths = selectedImages.value.map((e) => e.path).toList();
-          onSave!(description, imagePaths);
-        });
+        final description = textController.text;
+        final imagePaths = selectedImages.value.map((e) => e.path).toList();
+        onSave!(description, imagePaths);
       }
       return null;
     }, [selectedImages.value]);
 
-    return GestureDetector(
-      onTap: () {
-        // 点击空白区域时关闭键盘
-        FocusScope.of(context).unfocus();
-      },
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 1. 标题
-              const Text(
-                'Input Mood',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF000000),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(context.l10n.t('publish.writeMood'), style: AppTextStyles.title),
+          const SizedBox(height: AppSpacing.lg),
+          TextField(
+            controller: textController,
+            maxLines: 6,
+            decoration: InputDecoration(
+              hintText: context.l10n.t('publish.moodHint'),
+              hintStyle: AppTextStyles.hintLarge,
+              filled: true,
+              fillColor: AppColors.cardBackground,
+              border: OutlineInputBorder(
+                borderRadius: AppRadius.cardBorder,
+                borderSide: const BorderSide(color: AppColors.border),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: AppRadius.cardBorder,
+                borderSide: const BorderSide(color: AppColors.calendarBorder),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: AppRadius.cardBorder,
+                borderSide: const BorderSide(
+                  color: AppColors.primaryPink,
+                  width: 2,
                 ),
               ),
-              const SizedBox(height: 16),
-              // 2. 输入框
-              TextField(
-                controller: textController,
-                maxLines: 6,
-                decoration: InputDecoration(
-                  hintText: 'What Happened Today...',
-                  hintStyle: const TextStyle(
-                    color: Color(0xFFB2B2B2),
-                    fontSize: 18,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(
-                      color: Color(0xFFE0E0E0),
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(
-                      color: Color(0xFFE0E0E0),
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(
-                      color: Color(0xFFF9E707),
-                      width: 2,
-                    ),
-                  ),
-                  contentPadding: const EdgeInsets.all(12),
-                ),
-              ),
-              const SizedBox(height: 16),
-              // 3. 图片选择按钮
-              GestureDetector(
-                onTap: () {
-                  // 检查是否已达到最大数量
-                  if (selectedImages.value.length >= 4) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('You can only select up to 4 images')),
-                    );
-                    return;
-                  }
-
-                  showAvatarOptions(
-                    context,
-                    onAlbumSelected: () async {
-                      final ImagePicker picker = ImagePicker();
-                      // 从相册选择多张图片
-                      final List<XFile> images = await picker.pickMultiImage();
-                      if (images.isNotEmpty) {
-                        // 计算还可以选择的数量
-                        final remainingSlots = 4 - selectedImages.value.length;
-                        final imagesToAdd = images.take(remainingSlots).toList();
-                        selectedImages.value = [...selectedImages.value, ...imagesToAdd];
-
-                        // 如果用户选择的图片超过剩余数量，提示用户
-                        if (images.length > remainingSlots) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('You can only select up to 4 images, added ${imagesToAdd.length} images')),
-                          );
-                        }
-                      }
-                    },
-                    onCameraSelected: () async {
-                      final ImagePicker picker = ImagePicker();
-                      // 使用相机拍照
-                      final XFile? photo =
-                          await picker.pickImage(source: ImageSource.camera);
-                      if (photo != null) {
-                        selectedImages.value = [...selectedImages.value, photo];
-                      }
-                    },
-                  );
-                },
-                child: Image.asset(
-                  'assets/calendar/select_image_button.png',
-                  width: 60,
-                  height: 60,
-                  fit: BoxFit.contain,
-                ),
-              ),
-              const SizedBox(height: 16),
-              // 4. 显示已选择的图片
-              if (selectedImages.value.isNotEmpty)
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: selectedImages.value.map((image) {
-                    return Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.file(
-                            File(image.path),
-                            width: 80,
-                            height: 80,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        // 删除按钮
-                        Positioned(
-                          top: 2,
-                          right: 2,
-                          child: GestureDetector(
-                            onTap: () {
-                              selectedImages.value = selectedImages.value
-                                  .where((img) => img.path != image.path)
-                                  .toList();
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.all(2),
-                              decoration: const BoxDecoration(
-                                color: Colors.black54,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.close,
-                                size: 16,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  }).toList(),
-                ),
-            ],
+              contentPadding: const EdgeInsets.all(AppSpacing.xl),
+            ),
+            style: AppTextStyles.body,
           ),
-        ),
+          const SizedBox(height: AppSpacing.xl),
+          GestureDetector(
+            onTap: () {
+              // 检查是否已达到最大数量
+              if (selectedImages.value.length >= 4) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(context.l10n.t('publish.maxImages'))),
+                );
+                return;
+              }
+
+              showAvatarOptions(
+                context,
+                onAlbumSelected: () async {
+                  final ImagePicker picker = ImagePicker();
+                  // 从相册选择多张图片
+                  final List<XFile> images = await picker.pickMultiImage();
+                  if (!context.mounted) return;
+                  if (images.isNotEmpty) {
+                    // 计算还可以选择的数量
+                    final remainingSlots = 4 - selectedImages.value.length;
+                    final imagesToAdd = images.take(remainingSlots).toList();
+                    selectedImages.value = [
+                      ...selectedImages.value,
+                      ...imagesToAdd,
+                    ];
+
+                    // 如果用户选择的图片超过剩余数量，提示用户
+                    if (images.length > remainingSlots) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            context.l10n.t('publish.maxImagesAdded', {
+                              'count': '${imagesToAdd.length}',
+                            }),
+                          ),
+                        ),
+                      );
+                    }
+                  }
+                },
+                onCameraSelected: () async {
+                  final ImagePicker picker = ImagePicker();
+                  // 使用相机拍照
+                  final XFile? photo = await picker.pickImage(
+                    source: ImageSource.camera,
+                  );
+                  if (!context.mounted) return;
+                  if (photo != null) {
+                    selectedImages.value = [...selectedImages.value, photo];
+                  }
+                },
+              );
+            },
+            child: Image.asset(
+              AppAssets.calendarSelectImageButton,
+              width: 60,
+              height: 60,
+              fit: BoxFit.contain,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          if (selectedImages.value.isNotEmpty)
+            Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: selectedImages.value.map((image) {
+                return Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      child: Image.file(
+                        File(image.path),
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    // 删除按钮
+                    Positioned(
+                      top: 2,
+                      right: 2,
+                      child: GestureDetector(
+                        onTap: () {
+                          selectedImages.value = selectedImages.value
+                              .where((img) => img.path != image.path)
+                              .toList();
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(AppSpacing.xxs),
+                          decoration: const BoxDecoration(
+                            color: AppColors.overlay,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.close,
+                            size: 16,
+                            color: AppColors.textInverse,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }).toList(),
+            ),
+        ],
       ),
     );
   }

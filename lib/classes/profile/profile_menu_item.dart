@@ -1,17 +1,15 @@
 // dart
-import 'package:flutter/material.dart';
+import '../../theme/app_theme.dart';
 
 class ProfileMenuItem {
-  final String? icon;
-  final String name;
-  final IconData arrow;
-  final String router;
+  final String iconAsset;
+  final String titleKey;
+  final String action;
 
   ProfileMenuItem({
-    this.icon,
-    required this.name,
-    this.arrow = Icons.arrow_forward_ios,
-    this.router = "",
+    required this.iconAsset,
+    required this.titleKey,
+    required this.action,
   });
 }
 
@@ -19,54 +17,35 @@ class ProfileMenuData {
   static List<ProfileMenuItem> getMenuItems() {
     return [
       ProfileMenuItem(
-        icon: "assets/profile/my_posts_icon.png",
-        name: 'My Posts',
-        router: "/my-posts",
+        iconAsset: AppAssets.profileMenuMyPosts,
+        titleKey: 'profile.myPosts',
+        action: 'my-posts',
       ),
       ProfileMenuItem(
-        icon: "assets/profile/block_us_icon.png",
-        name: 'Block List',
-        router: "/block-list",
+        iconAsset: AppAssets.profileMenuBlockList,
+        titleKey: 'profile.blockList',
+        action: 'block-list',
       ),
       ProfileMenuItem(
-        icon: "assets/profile/contact_us_icon.png",
-        name: 'Contact Us',
-        router: "/about-us",
+        iconAsset: AppAssets.profileMenuContactUs,
+        titleKey: 'profile.contactUs',
+        action: 'contact-us',
       ),
       ProfileMenuItem(
-        icon: "assets/profile/setting_icon.png",
-        name: 'Settings',
-        router: "/setting-view",
+        iconAsset: AppAssets.profileMenuSettings,
+        titleKey: 'profile.settings',
+        action: 'settings',
       ),
       ProfileMenuItem(
-        icon: "assets/profile/delete_account_icon.png",
-        name: 'Delete Account',
+        iconAsset: AppAssets.profileMenuDeleteAccount,
+        titleKey: 'profile.deleteAccount',
+        action: 'delete-account',
       ),
       ProfileMenuItem(
-        icon: "assets/profile/log_out_icon.png",
-        name: 'Log Out',
+        iconAsset: AppAssets.profileMenuLogOut,
+        titleKey: 'profile.logOut',
+        action: 'log-out',
       ),
     ];
   }
 }
-
-class SettingMenuData {
-  static List<ProfileMenuItem> getMenuItems() {
-    return [
-      ProfileMenuItem(
-        name: 'About Us',
-        router: "/about-us",
-      ),
-      ProfileMenuItem(
-        name: 'User Agreement',
-        router: "/web-view?title=User Agreement&uri=https://www.example.com/user-agreement",
-      ),
-      ProfileMenuItem(
-        name: 'Privacy Policy',
-        router: "/web-view?title=Privacy Policy&uri=https://www.example.com/privacy-policy",
-      ),
-
-    ];
-  }
-}
-

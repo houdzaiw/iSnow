@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -8,7 +7,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isar/isar.dart';
 
 import '../../manager/app_Isar.dart';
+import '../../localization/app_localizations.dart';
 import '../../model/chat_message.dart';
+import '../../theme/app_theme.dart';
 import '../../widgets/custom_scaffold.dart';
 import 'delete_message_dialog.dart';
 
@@ -25,7 +26,10 @@ class MessagePage extends HookConsumerWidget {
     Future<void> loadLatestMessages() async {
       try {
         final isar = await IsarDB.instance.db;
-        final allMessages = await isar.chatMessages.where().sortByCreatedAtDesc().findAll();
+        final allMessages = await isar.chatMessages
+            .where()
+            .sortByCreatedAtDesc()
+            .findAll();
 
         // 获取最新的 10 条消息作为对话列表的预览
         messages.value = allMessages.take(1).toList();
@@ -44,45 +48,60 @@ class MessagePage extends HookConsumerWidget {
 
     if (isLoading.value) {
       return CustomScaffold(
-        title: 'Messages',
-        body: const Center(
-          child: CircularProgressIndicator(),
-        ),
+        title: context.l10n.t('message.title'),
+        showBackButton: false,
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
-
     return CustomScaffold(
-      title: 'Messages',
-      body: Container(
-        decoration: BoxDecoration(
-          image: const DecorationImage(
-            image: AssetImage('assets/base/bg_image.png'),
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: messages.value.isEmpty
-            ? Center(
-          child: Text(
-            '暂无消息',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
+      title: context.l10n.t('message.title'),
+      showBackButton: false,
+      body: messages.value.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 76,
+                    height: 76,
+                    decoration: const BoxDecoration(
+                      color: AppColors.cardBackground,
+                      shape: BoxShape.circle,
+                      boxShadow: AppShadows.soft,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.xxl),
+                      child: Image.asset(
+                        AppAssets.messageIcon,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  Text(
+                    context.l10n.t('message.empty'),
+                    style: AppTextStyles.bodyStrong,
+                  ),
+                ],
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(AppSpacing.xl),
+              itemCount: messages.value.length,
+              itemBuilder: (context, index) {
+                final message = messages.value[index];
+                return _buildMessageTile(context, message, overlayEntry);
+              },
             ),
-          ),
-        )
-            : ListView.builder(
-          itemCount: messages.value.length,
-          itemBuilder: (context, index) {
-            final message = messages.value[index];
-            return _buildMessageTile(context, message, overlayEntry);
-          },
-        ),
-      ),
     );
   }
 
-  Widget _buildMessageTile(BuildContext context, ChatMessage message, ValueNotifier<OverlayEntry?> overlayEntry) {
+  Widget _buildMessageTile(
+    BuildContext context,
+    ChatMessage message,
+    ValueNotifier<OverlayEntry?> overlayEntry,
+  ) {
     return GestureDetector(
       onTap: () {
         // 进入聊天详情页
@@ -94,32 +113,34 @@ class MessagePage extends HookConsumerWidget {
         _showDialogAsync(context, overlayEntry);
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        padding: const EdgeInsets.all(12),
-        color: Colors.transparent,
+        margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: AppRadius.cardBorder,
+          boxShadow: AppShadows.soft,
+        ),
         child: Row(
           children: [
             // 头像占位符
             Container(
               width: 50,
               height: 50,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(25),
+              decoration: const BoxDecoration(
+                color: AppColors.avatarPlaceholder,
+                shape: BoxShape.circle,
               ),
               child: Center(
-                child: Text(
-                  message.sender == 'user' ? 'U' : 'O',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF212121),
-                  ),
+                child: Icon(
+                  message.sender == 'user'
+                      ? Icons.person_rounded
+                      : Icons.chat_bubble_rounded,
+                  color: AppColors.textInverse,
+                  size: 25,
                 ),
               ),
             ),
-            const SizedBox(width: 12),
-            // 消息内容
+            const SizedBox(width: AppSpacing.lg),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,32 +150,23 @@ class MessagePage extends HookConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        message.sender == 'user' ? 'You' : 'Contact',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF212121),
-                        ),
+                        message.sender == 'user'
+                            ? context.l10n.t('message.me')
+                            : context.l10n.t('message.contact'),
+                        style: AppTextStyles.bodyStrong,
                       ),
                       Text(
-                        _formatTime(message.createdAt),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Color(0x66000000),
-                        ),
+                        _formatTime(context, message.createdAt),
+                        style: AppTextStyles.caption,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  // 消息预览
+                  const SizedBox(height: AppSpacing.xs),
                   Text(
                     message.message,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFF777777),
-                    ),
+                    style: AppTextStyles.body,
                   ),
                 ],
               ),
@@ -165,22 +177,25 @@ class MessagePage extends HookConsumerWidget {
     );
   }
 
-  Future<void> _showDialogAsync(BuildContext context, ValueNotifier<OverlayEntry?> overlayEntry) {
+  Future<void> _showDialogAsync(
+    BuildContext context,
+    ValueNotifier<OverlayEntry?> overlayEntry,
+  ) {
     if (overlayEntry.value != null) return Future.value();
 
     overlayEntry.value = OverlayEntry(
-        builder: (overlayContext) => Positioned.fill(
-          child: DeleteMessageDialog(
-            onCancel: () {
-              overlayEntry.value?.remove();
-              overlayEntry.value = null;
-            },
-            onConfirm: () {
-              overlayEntry.value?.remove();
-              overlayEntry.value = null;
-            },
-          ),
-        )
+      builder: (overlayContext) => Positioned.fill(
+        child: DeleteMessageDialog(
+          onCancel: () {
+            overlayEntry.value?.remove();
+            overlayEntry.value = null;
+          },
+          onConfirm: () {
+            overlayEntry.value?.remove();
+            overlayEntry.value = null;
+          },
+        ),
+      ),
     );
     Overlay.of(context, rootOverlay: true).insert(overlayEntry.value!);
 
@@ -191,7 +206,7 @@ class MessagePage extends HookConsumerWidget {
     return completer.future;
   }
 
-  String _formatTime(DateTime dateTime) {
+  String _formatTime(BuildContext context, DateTime dateTime) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
@@ -200,7 +215,7 @@ class MessagePage extends HookConsumerWidget {
     if (messageDate.isAtSameMomentAs(today)) {
       return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
     } else if (messageDate.isAtSameMomentAs(yesterday)) {
-      return '昨天';
+      return context.l10n.t('message.yesterday');
     } else {
       return '${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}';
     }

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:isar/isar.dart';
-import 'package:project/manager/user_manager.dart';
 import 'package:project/widgets/content_view.dart';
 
 import '../../configs/consts.dart';
+import '../../localization/app_localizations.dart';
 import '../../manager/app_Isar.dart';
 import '../../manager/providers.dart';
-import '../../model/blocked_user.dart';
 import '../../model/diary_entry.dart';
+import '../../theme/app_theme.dart';
 import '../../widgets/custom_scaffold.dart';
+import '../../widgets/voice_view.dart';
 
 class PostDetailPage extends HookConsumerWidget {
   final DiaryEntry entry;
@@ -38,70 +38,59 @@ class PostDetailPage extends HookConsumerWidget {
     }
 
     final sad = isSad.value
-        ? 'assets/calendar/frustrated_icon_pre.png'
-        : 'assets/calendar/frustrated_icon.png';
+        ? AppAssets.calendarFrustratedActive
+        : AppAssets.calendarFrustrated;
     final happy = isHappy.value
-        ? 'assets/calendar/rejoice_icon_pre.png'
-        : 'assets/calendar/rejoice_icon.png';
-    final isMySelf = (entry.userId == UserManager.shared.userId) ?? false;
-    // TODO: implement build
+        ? AppAssets.calendarRejoiceActive
+        : AppAssets.calendarRejoice;
+
     return CustomScaffold(
-      title: 'Edit Detail',
-      rightIconPath: isMySelf
-          ? "assets/message/delete_message_icon.png"
-          : 'assets/base/more_button.png',
-      onRightIconTap: () {
-        if (isMySelf) {
-          _showDeleteConfirmationDialog(context, ref);
-          return;
-        }
-        showUserActionOptions(
-          context,
-          onReportSelected: () async {
-            _showUserReportActionOptions(context);
-          },
-          onBlockSelected: () async {
-            _showBlockConfirmationDialog(context, ref);
-          },
-        );
-      },
-      body: Column(
+      title: context.l10n.t('detail.moodDetail'),
+      body: ListView(
+        padding: const EdgeInsets.all(AppSpacing.xl),
         children: [
           _buildContainer(),
-          const SizedBox(height: 20),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 23),
+          const SizedBox(height: AppSpacing.lg),
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xl,
+              vertical: AppSpacing.lg,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.cardBackground,
+              borderRadius: AppRadius.cardBorder,
+              boxShadow: AppShadows.soft,
+            ),
             child: Row(
               children: [
-                Text(
-                  setDateFormatter(entry.date),
-                  style: TextStyle(fontSize: 12, color: Color(0xFFB2B2B2)),
+                Expanded(
+                  child: Text(
+                    setDateFormatter(entry.date),
+                    style: AppTextStyles.caption,
+                  ),
                 ),
-                Spacer(),
-                Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        isSad.value = !isSad.value;
-                        if (isSad.value) {
-                          isHappy.value = false;
-                        }
-                        updateDatabase();
-                      },
-                      child: Image.asset(sad, width: 20, height: 20),
-                    ),
-                    SizedBox(width: 20),
-                    GestureDetector(
-                      onTap: () {
-                        isHappy.value = !isHappy.value;
-                        if (isHappy.value) {
-                          isSad.value = false;
-                        }
-                        updateDatabase();
-                      },
-                      child: Image.asset(happy, width: 20, height: 20),
-                    ),
-                  ],
+                _ReactionButton(
+                  asset: sad,
+                  selected: isSad.value,
+                  onTap: () {
+                    isSad.value = !isSad.value;
+                    if (isSad.value) {
+                      isHappy.value = false;
+                    }
+                    updateDatabase();
+                  },
+                ),
+                const SizedBox(width: AppSpacing.md),
+                _ReactionButton(
+                  asset: happy,
+                  selected: isHappy.value,
+                  onTap: () {
+                    isHappy.value = !isHappy.value;
+                    if (isHappy.value) {
+                      isSad.value = false;
+                    }
+                    updateDatabase();
+                  },
                 ),
               ],
             ),
@@ -111,145 +100,59 @@ class PostDetailPage extends HookConsumerWidget {
     );
   }
 
-  void _showUserReportActionOptions(BuildContext context) {
-    showUserReportActionOptions(
-      context,
-      onSexualSelected: () {
-        _submitReport(context, 'sexual');
-      },
-      onHarassmentSelected: () {
-        _submitReport(context, 'harassment');
-      },
-      onHateSelected: () {
-        _submitReport(context, 'hate');
-      },
-      onIllegalSelected: () {
-        _submitReport(context, 'illegal');
-      },
-      onScamSelected: () {
-        _submitReport(context, 'scam');
-      },
-      onOtherSelected: () {
-        _submitReport(context, 'other');
-      },
-    );
-  }
-
-  void _submitReport(BuildContext context, String reportType) {
-    // TODO: Implement actual report API call
-    // Example: await ApiClient.post('/api/report', data: {'type': reportType, 'userId': entry.userId});
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Report successfully')));
-  }
-  /// 显示删除确认对话框
-  void _showDeleteConfirmationDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirm delete'),
-          content: const Text('Are you sure you want to delete it?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                _submitDelete(context, ref);
-              },
-              child: const Text('Confirm'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _submitDelete(BuildContext context, WidgetRef ref) async {
-    final isar = await IsarDB.instance.db;
-    // 删除对应数据
-    await isar.writeTxn(() async {
-      await isar.diaryEntrys.delete(entry.id);
-    });
-    // 刷新 calendar_page.dart 中的列表
-    ref.read(diaryRefreshProvider.notifier).state++;
-    if (context.mounted) {
-      Navigator.pop(context);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Delete successfully')));
-    }
-  }
-
-  /// 显示屏蔽确认对话框
-  void _showBlockConfirmationDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirm block'),
-          content: const Text('Are you sure you want to block this user?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                _submitBlock(context, ref);
-              },
-              child: const Text('Confirm'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-  void _submitBlock(BuildContext context, WidgetRef ref) async {
-    final isar = await IsarDB.instance.db;
-
-    // 通过唯一索引直接查找，避免全表扫描
-    final existing = await isar.blockedUsers.getByBlockedUserId(entry.userId);
-    if (existing == null) {
-      // 未拉黑过，写入数据库（index replace:true，重复写入也安全）
-      final blocked = BlockedUser()
-        ..blockedUserId = entry.userId
-        ..nick = entry.nick
-        ..avatar = entry.avatar
-        ..blockedAt = DateTime.now();
-
-      await isar.writeTxn(() async {
-        await isar.blockedUsers.put(blocked);
-      });
-    }
-
-    if (context.mounted) {
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Block successfully')),
+  Widget _buildContainer() {
+    if (entry.type == 'voice') {
+      return Container(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: AppRadius.cardBorder,
+          boxShadow: AppShadows.soft,
+        ),
+        child: VoiceView(entry: entry, isDetail: true),
       );
     }
-  }
-  Widget _buildContainer() {
-    // if (entry.type == 'voice') {
-    //   return VoiceView(entry: entry, isDetail: true);
-    // }
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        color: AppColors.cardBackground,
+        borderRadius: AppRadius.cardBorder,
+        boxShadow: AppShadows.soft,
       ),
       child: ContentView(entry: entry, isDetail: true),
+    );
+  }
+}
+
+class _ReactionButton extends StatelessWidget {
+  final String asset;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _ReactionButton({
+    required this.asset,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: selected
+              ? AppColors.fieldBackground
+              : AppColors.cardBackground,
+          borderRadius: AppRadius.pillBorder,
+          border: Border.all(
+            color: selected ? AppColors.primaryPink : AppColors.divider,
+          ),
+        ),
+        child: Center(child: Image.asset(asset, width: 22, height: 22)),
+      ),
     );
   }
 }

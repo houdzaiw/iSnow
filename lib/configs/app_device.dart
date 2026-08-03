@@ -1,12 +1,13 @@
 // filepath: /Users/admin/Documents/project/isnow/lib/configs/app_device.dart
 
-import 'dart:io';
-import 'package:device_info_plus/device_info_plus.dart';
-import 'package:fext_fingerprint/fext_fingerprint.dart';
-import 'package:fext_sim_util/fext_sim_util.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:convert';
+import 'dart:io';
+
+import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
+import 'package:cryptography/cryptography.dart' as cryptography;
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class AppDevice {
   static final AppDevice _instance = AppDevice._internal();
@@ -22,24 +23,16 @@ class AppDevice {
   String? _os;
   String? _osVersion;
   String? _deviceBrand;
-  String? _simCountryCode;
-  String? _fingerprint;
 
   /// 初始化设备信息
   Future<void> init() async {
     _packageInfo = await PackageInfo.fromPlatform();
-    print("device init PackageInfo");
+
     if (Platform.isAndroid) {
       await _initAndroidInfo();
     } else if (Platform.isIOS) {
       await _initIOSInfo();
     }
-
-    final simUtilPlugin = FextSimUtil();
-    _simCountryCode = await simUtilPlugin.getCountryCodeWithSimInfo() ?? '';
-
-    final fingerprintPlugin = FextFingerprint();
-    _fingerprint = await fingerprintPlugin.getFingerprint();
   }
 
   /// 初始化 Android 设备信息
@@ -48,10 +41,11 @@ class AppDevice {
 
     _model = androidInfo.model;
     _os = 'android';
-    _osVersion = '|${androidInfo.version.codename}|${androidInfo.version.sdkInt}|${androidInfo.version.incremental}|${androidInfo.version.baseOS}|';
+    _osVersion =
+        '|${androidInfo.version.codename}|${androidInfo.version.sdkInt}|${androidInfo.version.incremental}|${androidInfo.version.baseOS}|';
     _deviceBrand = androidInfo.brand;
 
-    // 生成设备ID (使用 androidId 生成 MD5)
+    // 生成设备ID
     final androidId = androidInfo.id;
     _deviceId = _generateDeviceId(androidId);
   }
@@ -65,16 +59,15 @@ class AppDevice {
     _osVersion = iosInfo.systemVersion;
     _deviceBrand = 'Apple';
 
-    // 生成设备ID (使用 identifierForVendor 生成 MD5)
+    // 生成设备ID
     final vendorId = iosInfo.identifierForVendor ?? '';
     _deviceId = _generateDeviceId(vendorId);
-
   }
 
   /// 生成设备ID
   String _generateDeviceId(String input) {
     final bytes = utf8.encode(input);
-    final digest = md5.convert(bytes);
+    final digest = sha256.convert(bytes);
     return digest.toString();
   }
 
@@ -107,13 +100,36 @@ class AppDevice {
 
   /// 获取系统语言
   String get systemLanguage {
-    return Platform.localeName; // 例如: en-US, zh-CN
+    return _localeParts.first; // 例如: en, zh
+  }
+
+  /// 获取完整系统语言地区
+  String get systemLocale {
+    return _normalizedLocale.replaceAll('_', '-'); // 例如: en-US, zh-CN
   }
 
   /// 获取应用语言 (简化版本)
   String get appLanguage {
-    final locale = Platform.localeName.split('_').first;
-    return locale; // 例如: en, zh
+    return _localeParts.first; // 例如: en, zh
+  }
+
+  /// 获取系统地区
+  String get countryCode {
+    final parts = _localeParts;
+    if (parts.length < 2) return '';
+    return parts[1].toUpperCase();
+  }
+
+  List<String> get _localeParts {
+    final parts = _normalizedLocale
+        .split('_')
+        .where((part) => part.trim().isNotEmpty)
+        .toList();
+    return parts.isEmpty ? const ['en'] : parts;
+  }
+
+  String get _normalizedLocale {
+    return Platform.localeName.split('.').first.replaceAll('-', '_');
   }
 
   /// 获取时区偏移 (小时)
@@ -124,24 +140,6 @@ class AppDevice {
 
   /// 获取当前时间戳 (毫秒)
   int get currentTimestamp => DateTime.now().millisecondsSinceEpoch;
-
-  /// 国家地区
-  String get countryCode {
-    final localeParts = Platform.localeName.split('_');
-    if (localeParts.length > 1) {
-      return localeParts[1];
-    }
-    return 'US'; // 默认值
-  }
-
-  /// 获取 SIM 卡国家代码，优先使用 SIM 卡信息;
-  String get simCountryCode {
-    return _simCountryCode ?? countryCode;
-  }
-  /// 获取设备指纹
-  String get fingerprint {
-    return _fingerprint ?? '';
-  }
 
   /// 生成请求签名 b 参数
   String generateSignature() {
@@ -155,13 +153,36 @@ class AppDevice {
   }
 
   /// 生成 x-auth-token
-  String generateAuthToken() {
-    // 这里生成一个示例 token，实际应该根据服务端要求
-    final timestamp = currentTimestamp.toString();
-    final input = '$deviceId-$timestamp-$appVersion-secret';
-    final bytes = utf8.encode(input);
-    final digest = sha256.convert(bytes);
-    return digest.toString();
+  Future<String> generateAuthToken() async {
+    final payload = jsonEncode({
+      'simCountryCode': countryCode,
+      'systemLanguage': Platform.localeName,
+      'fingerprint': deviceId,
+      'deviceID': deviceId,
+      'timezone': DateTime.now().timeZoneName,
+      'os': _authTokenOS,
+      'appVersionCode': '$appVersion+$appVersionCode',
+    });
+    return _encrypt(payload);
+  }
+
+  String get _authTokenOS {
+    if (os.isEmpty && osVersion.isEmpty) return 'unknown';
+    if (osVersion.isEmpty) return os;
+    return '$os $osVersion';
+  }
+
+  Future<String> _encrypt(String data) async {
+    final algorithm = cryptography.Chacha20.poly1305Aead();
+    final secretKey = await algorithm.newSecretKey();
+    final secretBox = await algorithm.encrypt(
+      utf8.encode(data),
+      secretKey: secretKey,
+    );
+    final secretKeyBytes = await secretKey.extractBytes();
+    return hex.encode(secretKeyBytes) +
+        hex.encode(secretBox.nonce) +
+        hex.encode(secretBox.mac.bytes) +
+        hex.encode(secretBox.cipherText);
   }
 }
-

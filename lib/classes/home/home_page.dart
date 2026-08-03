@@ -1,45 +1,24 @@
 // dart
-import 'dart:async';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:project/manager/providers.dart';
-
+import 'package:project/model/diary_entry.dart';
+import 'dart:math';
+import 'dart:async';
 import '../../configs/consts.dart';
+import '../../localization/app_localizations.dart';
+import '../../theme/app_theme.dart';
+
 import 'capture_finished_page.dart';
 
-class HomePage extends HookConsumerWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final userInfoAsync = ref.watch(userInfoProvider);
-    return _HomePageBody(userInfoAsync: userInfoAsync);
-  }
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageBody extends HookWidget {
-  const _HomePageBody({super.key, required this.userInfoAsync});
-
-  final AsyncValue userInfoAsync;
-
-  @override
-  Widget build(BuildContext context) {
-    return const _HomePageStateful();
-  }
-}
-
-class _HomePageStateful extends StatefulWidget {
-  const _HomePageStateful();
-
-  @override
-  State<_HomePageStateful> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<_HomePageStateful> with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   // moodImages is defined in lib/consts.dart
 
   final Random _random = Random();
@@ -93,40 +72,29 @@ class _HomePageState extends State<_HomePageStateful> with SingleTickerProviderS
     _overlayEntry?.remove();
     _overlayEntry = null;
   }
-  void _onGoToMessageTap(BuildContext context, entry) {
-    _hideDialog();
-    context.push("/post_detail-view", extra: entry);
-    // _loadRandomMoodEntry().then((entry) {
-    //   if (context.mounted) {
-    //     context.push("/post_detail-view", extra: entry);
-    //   }
-    // });
-  }
 
-  // Future<DiaryEntry> _loadRandomMoodEntry() async {
-  //   final jsonString = await rootBundle.loadString('lib/model/moodcontent.json');
-  //   final List<dynamic> jsonList = json.decode(jsonString) as List<dynamic>;
-  //   final map = jsonList[_random.nextInt(jsonList.length)] as Map<String, dynamic>;
-  //
-  //   return DiaryEntry()
-  //     ..userId = (map['userId'] as num).toInt()
-  //     ..nick = map['userNickname'] as String? ?? ''
-  //     ..avatar = map['avatar'] as String? ?? ''
-  //     ..date = DateTime.now()
-  //     ..emoji = ''
-  //     ..content = map['description'] as String? ?? ''
-  //     ..description = map['description'] as String? ?? ''
-  //     ..type = 'edit'
-  //     ..moodIndex = (map['moodIndex'] as num?)?.toInt() ?? 0;
-  // }
+  void _onGoToMessageTap(BuildContext context) {
+    _hideDialog();
+    final entry = DiaryEntry()
+      ..id = 100200
+      ..date = DateTime.parse("2024-01-01")
+      ..emoji = "😊"
+      ..content = context.l10n.t('home.captureDescription')
+      ..description = context.l10n.t('home.captureDescription')
+      ..type = "edit"
+      ..moodIndex = 0;
+    context.push("/post_detail-view", extra: entry);
+  }
 
   void _generateRandomMoodImages() {
     _randomMoodImages = moodImages.map((imagePath) {
       // 70-90%的图片显示在下方，10-30%显示在上方
       final isInBottomArea = _random.nextDouble() < 0.8; // 80%概率在下方
       final top = isInBottomArea
-          ? 0.4 + _random.nextDouble() * 0.4  // 下方区域: 40%-80%
-          : _random.nextDouble() * 0.4;        // 上方区域: 0%-40%
+          ? 0.4 +
+                _random.nextDouble() *
+                    0.4 // 下方区域: 40%-80%
+          : _random.nextDouble() * 0.4; // 上方区域: 0%-40%
 
       return MoodImageData(
         imagePath: imagePath,
@@ -144,7 +112,8 @@ class _HomePageState extends State<_HomePageStateful> with SingleTickerProviderS
 
     for (int i = 0; i < waypointCount; i++) {
       // 每次随机选择50-80%的图片进行移动
-      final animateCount = (moodImages.length * (0.5 + _random.nextDouble() * 0.3)).round();
+      final animateCount =
+          (moodImages.length * (0.5 + _random.nextDouble() * 0.3)).round();
       final animateIndices = <int>{};
 
       while (animateIndices.length < animateCount) {
@@ -194,12 +163,12 @@ class _HomePageState extends State<_HomePageStateful> with SingleTickerProviderS
     if (_overlayEntry != null) return Future.value();
 
     _overlayEntry = OverlayEntry(
-        builder: (context) => Positioned.fill(
-          child: DialogOverlay(
-            onClose: _hideDialog,
-            onOpen: (entry) => _onGoToMessageTap(context, entry), // No-op for now
-          ),
-        )
+      builder: (context) => Positioned.fill(
+        child: DialogOverlay(
+          onClose: _hideDialog,
+          onOpen: () => _onGoToMessageTap(context), // No-op for now
+        ),
+      ),
     );
     Overlay.of(context, rootOverlay: true).insert(_overlayEntry!);
 
@@ -254,7 +223,8 @@ class _HomePageState extends State<_HomePageStateful> with SingleTickerProviderS
         imagePath: start.imagePath,
         left: start.left + (end.left - start.left) * segmentProgress,
         top: start.top + (end.top - start.top) * segmentProgress,
-        rotation: start.rotation + (end.rotation - start.rotation) * segmentProgress,
+        rotation:
+            start.rotation + (end.rotation - start.rotation) * segmentProgress,
       );
     });
   }
@@ -262,78 +232,78 @@ class _HomePageState extends State<_HomePageStateful> with SingleTickerProviderS
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9E707),
+      backgroundColor: AppColors.pageBackground,
       body: Container(
-        margin: EdgeInsets.only(
-          left: 22,
-          right: 22,
-          top: MediaQuery.of(context).padding.top + 20,
-          bottom: MediaQuery.of(context).padding.bottom + 20,
-        ),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(45),
-          border: Border.all(
-            color: const Color(0xFFFFB400),
-            width: 3,
+        decoration: const BoxDecoration(gradient: AppGradients.pageBackground),
+        child: Container(
+          margin: EdgeInsets.only(
+            left: 22,
+            right: 22,
+            top: MediaQuery.of(context).padding.top + 20,
+            bottom: MediaQuery.of(context).padding.bottom + 20,
           ),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(42),
-          child: Stack(
-            children: [
-              // 随机展示mood图片
-              ..._getInterpolatedMoodImages().map((moodData) {
-                return Positioned(
-                  left: moodData.left * MediaQuery.of(context).size.width,
-                  top: moodData.top * MediaQuery.of(context).size.height,
-                  child: Transform.rotate(
-                    angle: moodData.rotation,
+          decoration: BoxDecoration(
+            color: AppColors.cardBackground,
+            borderRadius: BorderRadius.circular(AppRadius.homeCard),
+            border: Border.all(color: AppColors.calendarBorder, width: 3),
+            boxShadow: AppShadows.soft,
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppRadius.homeCardContent),
+            child: Stack(
+              children: [
+                // 随机展示mood图片
+                ..._getInterpolatedMoodImages().map((moodData) {
+                  return Positioned(
+                    left: moodData.left * MediaQuery.of(context).size.width,
+                    top: moodData.top * MediaQuery.of(context).size.height,
+                    child: Transform.rotate(
+                      angle: moodData.rotation,
+                      child: Image.asset(
+                        moodData.imagePath,
+                        width: 120,
+                        height: 120,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  );
+                }),
+
+                // 底部背景图片
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Image.asset(
+                    AppAssets.homeBottomCover,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                // 右下角拍摄按钮
+                Positioned(
+                  right: 8,
+                  bottom: 8,
+                  child: GestureDetector(
+                    onTap: () {
+                      // ignore taps while animating or when overlay is already shown
+                      if (_isAnimating || _overlayEntry != null) return;
+                      _animateMoodImages();
+                    },
                     child: Image.asset(
-                      moodData.imagePath,
-                      width: 120,
-                      height: 120,
-                      fit: BoxFit.contain,
+                      AppAssets.homeCaptureButton,
+                      width: 97,
+                      height: 97,
                     ),
                   ),
-                );
-              }).toList(),
-
-              // 底部背景图片
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: Image.asset(
-                  'assets/home/bottom_cover_bg.png',
-                  fit: BoxFit.cover,
                 ),
-              ),
-              // 右下角拍摄按钮
-              Positioned(
-                right: 8,
-                bottom: 8,
-                child: GestureDetector(
-                  onTap: () {
-                    // ignore taps while animating or when overlay is already shown
-                    if (_isAnimating || _overlayEntry != null) return;
-                    _animateMoodImages();
-                  },
-                  child: Image.asset(
-                    'assets/home/capture_button.png',
-                    width: 97,
-                    height: 97,
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 }
-
 
 class MoodImageData {
   final String imagePath;

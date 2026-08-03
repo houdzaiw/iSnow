@@ -17,13 +17,19 @@ import '../classes/profile/about_us_page.dart';
 import '../classes/profile/edit_profile_page.dart';
 import '../classes/profile/edit_nickname_page.dart';
 import '../classes/profile/profile_page.dart';
+import '../classes/profile/settings_page.dart';
 import '../classes/launch_page.dart';
 import '../classes/oauth/login_detail_page.dart';
 import '../classes/oauth/register_page.dart';
 import '../manager/app_shell.dart';
 
+const String _initialRoute = String.fromEnvironment(
+  'INITIAL_ROUTE',
+  defaultValue: '/launch',
+);
+
 final GoRouter goRouter = GoRouter(
-  initialLocation: '/launch',
+  initialLocation: _initialRoute,
   routes: [
     // 启动页（不需要底部导航）
     GoRoute(
@@ -41,13 +47,20 @@ final GoRouter goRouter = GoRouter(
     GoRoute(
       path: '/login-detail',
       name: 'login-detail',
-      builder: (context, state) => const LoginDetailPage(),
+      builder: (context, state) => LoginDetailPage(
+        initialAreaCode: state.uri.queryParameters['areaCode'],
+        initialCountryCode: state.uri.queryParameters['countryCode'],
+      ),
     ),
     // 注册页（不需要底部导航）
     GoRoute(
       path: '/register',
       name: 'register',
-      builder: (context, state) => const RegisterPage(),
+      builder: (context, state) => RegisterPage(
+        initialPhone: state.uri.queryParameters['phone'],
+        initialAreaCode: state.uri.queryParameters['areaCode'],
+        initialCountryCode: state.uri.queryParameters['countryCode'],
+      ),
     ),
     // 编辑资料页（不需要底部导航）
     GoRoute(
@@ -72,10 +85,7 @@ final GoRouter goRouter = GoRouter(
       builder: (context, state) {
         final title = state.uri.queryParameters['title'] ?? 'WebView';
         final uri = state.uri.queryParameters['uri'] ?? '';
-        return WebViewPage(
-          title: title,
-          uri: uri,
-        );
+        return WebViewPage(title: title, uri: uri);
       },
     ),
     GoRoute(
@@ -84,9 +94,9 @@ final GoRouter goRouter = GoRouter(
       builder: (context, state) => const AboutUsPage(),
     ),
     GoRoute(
-      path: '/messages',
-      name: 'messages',
-      builder: (context, state) => const MessagePage(),
+      path: '/settings',
+      name: 'settings',
+      builder: (context, state) => const SettingsPage(),
     ),
     GoRoute(
       path: '/chat-view',
@@ -96,7 +106,8 @@ final GoRouter goRouter = GoRouter(
     GoRoute(
       path: '/post_detail-view',
       name: 'post_detail-view',
-      builder: (context, state) => PostDetailPage(entry: state.extra as dynamic),
+      builder: (context, state) =>
+          PostDetailPage(entry: state.extra as dynamic),
     ),
     GoRoute(
       path: '/agree_policy-view',
@@ -134,7 +145,11 @@ final GoRouter goRouter = GoRouter(
           name: 'profile',
           builder: (context, state) => const ProfilePage(),
         ),
-
+        GoRoute(
+          path: '/messages',
+          name: 'messages',
+          builder: (context, state) => const MessagePage(),
+        ),
       ],
     ),
   ],

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../configs/consts.dart';
 import '../model/diary_entry.dart';
+import '../theme/app_theme.dart';
+import 'voice_bubble.dart';
 
 class VoiceView extends StatelessWidget {
   final DiaryEntry entry;
@@ -17,15 +19,13 @@ class VoiceView extends StatelessWidget {
         // 显示心情图标
         Row(
           children: [
-            Spacer(),
-            isDetail ? SizedBox.shrink() :
-            Text(
-              setDateFormatter(entry.date),
-              style: TextStyle(
-                fontSize: 12,
-                color: Color(0xFFB2B2B2),
-              ),
-            ),
+            const Spacer(),
+            isDetail
+                ? const SizedBox.shrink()
+                : Text(
+                    setDateFormatter(entry.date),
+                    style: AppTextStyles.caption,
+                  ),
           ],
         ),
         const SizedBox(height: 8),
@@ -36,40 +36,13 @@ class VoiceView extends StatelessWidget {
             if (entry.moodIndex != null &&
                 entry.moodIndex! >= 0 &&
                 entry.moodIndex! < moodImages.length)
-              Image.asset(
-                moodImages[entry.moodIndex!],
-                width: 40,
-                height: 40,
-              ),
+              Image.asset(moodImages[entry.moodIndex!], width: 40, height: 40),
             const SizedBox(width: 8),
-            Container(
-              width: 179,
-              height: 41,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/calendar/speak_bg_image.png'),
-                  fit: BoxFit.contain,
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  SizedBox(width: 18),
-                  Image.asset('assets/calendar/speak_icon.png', width: 10, height: 16),
-                  SizedBox(width: 4),
-                  Text(
-                    entry.description ?? '',
-                    style: TextStyle(color: Color(0xFF212121)),
-                  ),
-                ],
-              ),
-            ),
+            VoiceBubble(text: entry.description ?? ''),
           ],
         ),
         const SizedBox(height: 10),
       ],
     );
   }
-
 }
-

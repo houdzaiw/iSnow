@@ -1,6 +1,22 @@
 enum AppEnv {
-  dev("https://www", "socket://im.xxx.net", "https://res.xxx.net", false),
-  product("https://www", "socket://im.xxxx.net", "https://res.xxxxx.net", true);
+  dev(
+    "http://simi2.w1.luyouxia.net/simi",
+    "https://www.simijoy.com",
+    "https://analytics-preview.habilive.net",
+    false,
+  ),
+  qa(
+    "https://www.simijoy.com/simi",
+    "https://www.simijoy.com",
+    "https://analytics-preview.habilive.net",
+    false,
+  ),
+  product(
+    "https://www.simisoul.com/simi",
+    "https://www.simisoul.com",
+    "https://analytics.habilive.net",
+    true,
+  );
 
   final String baseUrl;
   final String socketHost;
@@ -10,19 +26,28 @@ enum AppEnv {
 }
 
 enum ErrorCode {
-  normal(code:0),
-  tokenInvalid(code:1100103),
-  tokenEmpty(code:10010301),
-  tokenFormatError(code:10010302),
-  tokenTimeOut(code:10010303),
-  deviceLogin(code:10010304),
-  blockUser(code:10010003);
+  normal(code: 0),
+  tokenInvalid(code: 1100103),
+  tokenEmpty(code: 10010301),
+  tokenFormatError(code: 10010302),
+  tokenTimeOut(code: 10010303),
+  deviceLogin(code: 10010304),
+  blockUser(code: 10010003);
+
   final int code;
   const ErrorCode({required this.code});
 }
 
 enum OauthType {
-  google(1), facebook(2), twitter(3), apple(4), smsCode(5), password(6), register(7), smsRegister(8);
+  google(1),
+  facebook(2),
+  twitter(3),
+  apple(4),
+  smsCode(5),
+  password(6),
+  register(7),
+  smsRegister(8);
+
   final int value;
   const OauthType(this.value);
 }
