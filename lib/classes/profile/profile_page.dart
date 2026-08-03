@@ -19,10 +19,10 @@ class ProfilePage extends HookConsumerWidget {
     final user = useState<UserData?>(null);
     final isLoading = useState(false);
     final errorText = useState<String?>(null);
+    final loadFailedText = context.l10n.t('profile.loadFailed');
 
     useEffect(() {
       var cancelled = false;
-      final loadFailedText = context.l10n.t('profile.loadFailed');
 
       Future<void> loadProfile() async {
         user.value = await loginProvider.cachedUser();
@@ -48,7 +48,7 @@ class ProfilePage extends HookConsumerWidget {
       return () {
         cancelled = true;
       };
-    }, [loginProvider]);
+    }, [loginProvider, loadFailedText]);
 
     final profileUser = user.value;
     final displayName = profileUser?.nick?.isNotEmpty == true
@@ -76,7 +76,7 @@ class ProfilePage extends HookConsumerWidget {
               //安全区域适配
               padding: EdgeInsets.only(
                 top: MediaQuery.of(context).padding.top + 39,
-                bottom: MediaQuery.of(context).padding.bottom,
+                bottom: AppSpacing.section,
               ),
               child: Column(
                 children: [
@@ -114,45 +114,15 @@ class ProfilePage extends HookConsumerWidget {
                       ),
                     ],
                   ),
-                  if (profileUser != null) ...[
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      [
-                        if (profileUser.uid != null) 'ID ${profileUser.uid}',
-                        if (profileUser.areaCode != null &&
-                            profileUser.phone != null)
-                          '+${profileUser.areaCode} ${profileUser.phone}',
-                      ].join('  ·  '),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                  if (isLoading.value) ...[
-                    const SizedBox(height: AppSpacing.sm),
-                    const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  ],
-                  if (errorText.value != null) ...[
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      errorText.value!,
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.danger,
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),
             // ListView部分
             Expanded(
               child: ListView.builder(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).padding.bottom + AppSpacing.md,
+                ),
                 physics: const BouncingScrollPhysics(),
                 itemCount: menuItems.length,
                 itemBuilder: (context, index) {
