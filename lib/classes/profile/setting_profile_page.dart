@@ -31,8 +31,8 @@ class SettingProfilePage extends HookConsumerWidget {
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTap: () {
-                    if (item.router.isNotEmpty) {
-                      context.push(item.router);
+                    if (item.action.isNotEmpty) {
+                      context.push(item.action);
                     }
                   },
                   child: Padding(
@@ -41,7 +41,7 @@ class SettingProfilePage extends HookConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Text(
-                            item.name,
+                            item.titleKey,
                             style: const TextStyle(
                               fontSize: 18,
                               color: Color(0xFF212121),
