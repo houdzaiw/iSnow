@@ -25,6 +25,13 @@ class HttpApi {
   /// 更新用户资料
   static const modifyUser = '/api/user/modifyUser';
 
+  /// ==================== 首页 / 房间 ====================
+  /// 首页推荐房间列表
+  static const homeRecommendRoom = '/api/home/room/recommend';
+
+  /// 派对列表
+  static const partyList = '/api/room/party/list';
+
   /// ==================== 认证 / 登录 ====================
   /// 登录
   static const login = '/oauth2/login';

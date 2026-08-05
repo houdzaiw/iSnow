@@ -31,6 +31,11 @@ class AppAssets {
       'assets/lanhu/calendar/speak_icon.png';
   static const String lanhuCalendarSpeakerButton =
       'assets/lanhu/calendar/speaker_button.png';
+  static const String lanhuPartyAvatar = 'assets/lanhu/party/party_avatar.png';
+  static const String lanhuPartyCover = 'assets/lanhu/party/party_cover.png';
+  static const String lanhuPartyPop = 'assets/lanhu/party/party_pop.png';
+  static const String lanhuPartyShare = 'assets/lanhu/party/party_share.png';
+  static const String lanhuPartyTrophy = 'assets/lanhu/party/party_trophy.png';
 
   static const String launchBackground = 'assets/base/launch_bg_image.png';
   static const String authBackground = 'assets/base/base_bg_image.png';

@@ -64,6 +64,7 @@ dependencies:
   convert: ^3.1.2
   shared_preferences: ^2.5.4
   country_flags: ^4.1.2
+  extended_tabs: ^5.0.0
 
 dev_dependencies:
   flutter_test:
@@ -92,4 +93,5 @@ flutter:
     - assets/lanhu/calendar/
     - assets/lanhu/home/
     - assets/lanhu/mood/
+    - assets/lanhu/party/
     - assets/lanhu/tabbar/
