@@ -247,15 +247,12 @@ class _PartyHeader extends StatelessWidget {
                 Tab(text: context.l10n.t('party.tabParty')),
                 Tab(text: context.l10n.t('party.tabRoom')),
               ],
-              indicator: const BoxDecoration(
+              indicator: const _GradientUnderlineTabIndicator(
                 gradient: AppGradients.sendButton,
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-              ),
-              indicatorPadding: const EdgeInsets.only(
-                left: 14,
-                right: 14,
-                top: 50,
-                bottom: 11,
+                width: 28,
+                height: 4,
+                bottom: 0,
+                radius: 8,
               ),
               indicatorSize: TabBarIndicatorSize.tab,
               labelColor: AppColors.textPrimary,
@@ -838,5 +835,50 @@ class _StateList extends StatelessWidget {
 extension on BorderRadius {
   BoxDecoration toBoxDecoration({required Color color}) {
     return BoxDecoration(color: color, borderRadius: this);
+  }
+}
+
+class _GradientUnderlineTabIndicator extends Decoration {
+  const _GradientUnderlineTabIndicator({
+    required this.gradient,
+    this.width = 28,
+    this.height = 4,
+    this.bottom = 0,
+    this.radius = 8,
+  });
+
+  final Gradient gradient;
+  final double width;
+  final double height;
+  final double bottom;
+  final double radius;
+
+  @override
+  BoxPainter createBoxPainter([VoidCallback? onChanged]) {
+    return _GradientUnderlinePainter(this);
+  }
+}
+
+class _GradientUnderlinePainter extends BoxPainter {
+  const _GradientUnderlinePainter(this.decoration);
+
+  final _GradientUnderlineTabIndicator decoration;
+
+  @override
+  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
+    final size = configuration.size;
+    if (size == null) return;
+
+    final rect = Rect.fromLTWH(
+      offset.dx + (size.width - decoration.width) / 2,
+      offset.dy + size.height - decoration.bottom - decoration.height,
+      decoration.width,
+      decoration.height,
+    );
+    final paint = Paint()..shader = decoration.gradient.createShader(rect);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, Radius.circular(decoration.radius)),
+      paint,
+    );
   }
 }

@@ -9,7 +9,28 @@ This document provides guidelines for agents working on this Flutter codebase.
 - **Routing**: go_router
 - **Local Database**: Isar
 - **HTTP Client**: Dio
-- **Architecture**: Clean architecture with separation of concerns
+- **Architecture**: Lightweight MVVM + Repository/Service separation
+
+## Architecture Guidelines
+
+All new feature development must follow the MVVM rules in
+[`docs/mvvm_architecture.md`](docs/mvvm_architecture.md).
+
+Project architecture is **lightweight MVVM + Repository/Service separation**:
+
+- **View**: Flutter pages and widgets. Render UI and forward user events only.
+- **ViewModel**: Riverpod Notifier/AsyncNotifier/StateNotifier or focused providers. Own page state and page workflows.
+- **Repository**: Business API and persistence boundary. Convert responses into typed models.
+- **Service / Manager**: Low-level infrastructure such as Dio, auth session, device info, and local database.
+- **Model**: Data structures, JSON mapping, enum conversion, and light derived fields.
+
+Strict rules:
+
+- Views must not call Dio, `HttpDioManager`, `AuthSession`, or `IsarDB` directly.
+- API paths must be declared in `HttpApi`.
+- Nady network requests must use `HttpDioManager`.
+- Do not introduce a second network stack.
+- For any page with network requests, submit actions, or multiple loading/error states, create a ViewModel.
 
 ## Build / Lint / Test Commands
 

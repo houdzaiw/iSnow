@@ -11,7 +11,7 @@ class AppShell extends StatelessWidget {
 
   static const List<String> _tabs = [
     '/home',
-    '/calendar',
+    '/party',
     '/messages',
     '/profile',
   ];

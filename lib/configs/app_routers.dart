@@ -8,11 +8,11 @@ import 'package:project/classes/profile/my_posts_page.dart';
 import 'package:project/classes/profile/setting_profile_page.dart';
 import 'package:project/classes/web/web_view_page.dart';
 
-import '../classes/calendar/calendar_page.dart';
 import '../classes/detail/post_detail_page.dart';
 import '../classes/home/home_page.dart';
 import '../classes/oauth/agree_policy_page.dart';
 import '../classes/oauth/login_page.dart';
+import '../classes/party/party_page.dart';
 import '../classes/profile/about_us_page.dart';
 import '../classes/profile/edit_profile_page.dart';
 import '../classes/profile/edit_nickname_page.dart';
@@ -136,10 +136,15 @@ final GoRouter goRouter = GoRouter(
           builder: (context, state) => const HomePage(),
         ),
         GoRoute(
-          path: '/calendar',
-          name: 'calendar',
-          builder: (context, state) => const CalendarPage(),
+          path: '/party',
+          name: 'party',
+          builder: (context, state) => const PartyPage(),
         ),
+        // GoRoute(
+        //   path: '/calendar',
+        //   name: 'calendar',
+        //   builder: (context, state) => const CalendarPage(),
+        // ),
         GoRoute(
           path: '/profile',
           name: 'profile',
