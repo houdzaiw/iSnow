@@ -36,6 +36,18 @@ class AppAssets {
   static const String lanhuPartyPop = 'assets/lanhu/party/party_pop.png';
   static const String lanhuPartyShare = 'assets/lanhu/party/party_share.png';
   static const String lanhuPartyTrophy = 'assets/lanhu/party/party_trophy.png';
+  static const String lanhuHomeRoomBanner =
+      'assets/lanhu/party/home_room_banner.png';
+  static const String lanhuHomeHotIcon = 'assets/lanhu/party/home_hot_icon.png';
+  static const String lanhuHomeFilterIcon =
+      'assets/lanhu/party/home_filter_icon.png';
+  static const String lanhuHomeBadgeBigWin =
+      'assets/lanhu/party/home_badge_bigwin.png';
+  static const String lanhuHomeBadgeMining =
+      'assets/lanhu/party/home_badge_mining.png';
+  static const String lanhuHomeBadgePk = 'assets/lanhu/party/home_badge_pk.png';
+  static const String lanhuHomeBadgeVoice =
+      'assets/lanhu/party/home_badge_voice.png';
 
   static const String launchBackground = 'assets/base/launch_bg_image.png';
   static const String authBackground = 'assets/base/base_bg_image.png';

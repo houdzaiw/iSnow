@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:country_flags/country_flags.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:extended_tabs/extended_tabs.dart';
 import 'package:flutter/material.dart';
@@ -7,46 +10,33 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../localization/app_localizations.dart';
 import '../../manager/http_api.dart';
 import '../../manager/http_dio_manager.dart';
+import '../../model/country_info.dart';
 import '../../model/server_response.dart';
 import '../../theme/app_theme.dart';
+
+part 'home_feed_model.dart';
+part 'home_feed_repository.dart';
+part 'home_feed_state.dart';
+part 'home_feed_view.dart';
+part 'home_feed_view_model.dart';
+part 'party_feed_view.dart';
 
 enum _MainFeedTab { party, room }
 
 enum _FeedSortTab { now, newest }
 
-class _FeedQuery {
-  const _FeedQuery({required this.mainTab, required this.sortTab});
-
-  final _MainFeedTab mainTab;
-  final _FeedSortTab sortTab;
-
-  int get partyType => sortTab == _FeedSortTab.now ? 0 : 1;
-
-  @override
-  bool operator ==(Object other) {
-    return other is _FeedQuery &&
-        other.mainTab == mainTab &&
-        other.sortTab == sortTab;
-  }
-
-  @override
-  int get hashCode => Object.hash(mainTab, sortTab);
+extension on _FeedSortTab {
+  int get partyType => this == _FeedSortTab.now ? 0 : 1;
 }
 
 final _partyRepositoryProvider = Provider<_PartyRepository>((ref) {
   return _PartyRepository(HttpDioManager());
 });
 
-final _feedItemsProvider =
-    FutureProvider.family<List<_PartyFeedItem>, _FeedQuery>((ref, query) async {
+final _partyFeedViewModelProvider =
+    FutureProvider.family<List<_PartyFeedItem>, _FeedSortTab>((ref, sortTab) {
       final repository = ref.watch(_partyRepositoryProvider);
-      return switch (query.mainTab) {
-        _MainFeedTab.party => repository.fetchPartyList(
-          type: query.partyType,
-          pageNum: 1,
-        ),
-        _MainFeedTab.room => repository.fetchRecommendRooms(page: 1),
-      };
+      return repository.fetchPartyList(type: sortTab.partyType, pageNum: 1);
     });
 
 class PartyPage extends HookConsumerWidget {
@@ -96,17 +86,6 @@ class _PartyRepository {
     return _requireList(response)
         .whereType<Map>()
         .map((item) => _PartyFeedItem.fromPartyJson(item))
-        .toList();
-  }
-
-  Future<List<_PartyFeedItem>> fetchRecommendRooms({required int page}) async {
-    final response = await _httpManager.get(
-      HttpApi.homeRecommendRoom,
-      queryParameters: {'page': page},
-    );
-    return _requireList(response)
-        .whereType<Map>()
-        .map((item) => _PartyFeedItem.fromRoomJson(item))
         .toList();
   }
 
@@ -176,28 +155,6 @@ class _PartyFeedItem {
       isLive: _int(json['status']) == 1 || onlineNum > 0,
       roomId: _string(json['roomId']),
       partyId: _intOrNull(json['partyId']),
-    );
-  }
-
-  factory _PartyFeedItem.fromRoomJson(Map<dynamic, dynamic> json) {
-    final audienceTop5 = _map(json['audienceTop5']);
-    final audience = audienceTop5['roomAudience'];
-    final firstAudience = audience is List && audience.isNotEmpty
-        ? _map(audience.first)
-        : const <String, dynamic>{};
-
-    return _PartyFeedItem(
-      coverUrl: _string(json['cover']),
-      avatarUrl: _string(firstAudience['avatar']),
-      title: _string(json['title']) ?? '',
-      hostName:
-          _string(firstAudience['nick']) ??
-          _string(json['nameEn']) ??
-          _string(json['country']) ??
-          '',
-      onlineCount: _int(json['online']),
-      isLive: true,
-      roomId: _string(json['roomId']),
     );
   }
 
@@ -313,6 +270,18 @@ class _FeedSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    return switch (mainTab) {
+      _MainFeedTab.party => const _PartyFeedSection(),
+      _MainFeedTab.room => const _HomeFeedView(),
+    };
+  }
+}
+
+class _PartyFeedSection extends HookConsumerWidget {
+  const _PartyFeedSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final sortController = useTabController(initialLength: 2, initialIndex: 1);
 
     return Stack(
@@ -324,19 +293,9 @@ class _FeedSection extends HookConsumerWidget {
               child: ExtendedTabBarView(
                 controller: sortController,
                 cacheExtent: 1,
-                children: [
-                  _FeedList(
-                    query: _FeedQuery(
-                      mainTab: mainTab,
-                      sortTab: _FeedSortTab.now,
-                    ),
-                  ),
-                  _FeedList(
-                    query: _FeedQuery(
-                      mainTab: mainTab,
-                      sortTab: _FeedSortTab.newest,
-                    ),
-                  ),
+                children: const [
+                  _PartyFeedView(sortTab: _FeedSortTab.now),
+                  _PartyFeedView(sortTab: _FeedSortTab.newest),
                 ],
               ),
             ),
@@ -406,21 +365,25 @@ class _SortBar extends StatelessWidget {
   }
 }
 
-class _FeedList extends ConsumerWidget {
-  const _FeedList({required this.query});
+class _FeedItemsView extends StatelessWidget {
+  const _FeedItemsView({
+    required this.feedItems,
+    required this.onRetry,
+    required this.onRefresh,
+  });
 
-  final _FeedQuery query;
+  final AsyncValue<List<_PartyFeedItem>> feedItems;
+  final VoidCallback onRetry;
+  final Future<void> Function() onRefresh;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final feedItems = ref.watch(_feedItemsProvider(query));
-
+  Widget build(BuildContext context) {
     return feedItems.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (_, __) => _StateList(
         text: context.l10n.t('party.loadFailed'),
         actionLabel: context.l10n.t('app.retry'),
-        onAction: () => ref.invalidate(_feedItemsProvider(query)),
+        onAction: onRetry,
       ),
       data: (items) {
         if (items.isEmpty) {
@@ -428,7 +391,7 @@ class _FeedList extends ConsumerWidget {
         }
         return RefreshIndicator(
           color: AppColors.primaryPink,
-          onRefresh: () => ref.refresh(_feedItemsProvider(query).future),
+          onRefresh: onRefresh,
           child: ListView.builder(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(17, 0, 17, 110),

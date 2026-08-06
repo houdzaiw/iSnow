@@ -29,6 +29,12 @@ class HttpApi {
   /// 首页推荐房间列表
   static const homeRecommendRoom = '/api/home/room/recommend';
 
+  /// 首页 Banner
+  static const homeResourceBanner = '/api/resource/banner';
+
+  /// 正在玩的好友列表
+  static const friendPlayingList = '/api/user/homepage/friends/play';
+
   /// 派对列表
   static const partyList = '/api/room/party/list';
 
