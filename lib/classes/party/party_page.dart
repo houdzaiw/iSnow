@@ -1,5 +1,4 @@
-import 'dart:async';
-
+import 'package:card_swiper/card_swiper.dart';
 import 'package:country_flags/country_flags.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:extended_tabs/extended_tabs.dart';

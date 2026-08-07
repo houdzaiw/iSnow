@@ -71,7 +71,7 @@ class _HomeFeedContent extends StatelessWidget {
   }
 }
 
-class _HomeBanner extends HookWidget {
+class _HomeBanner extends StatelessWidget {
   const _HomeBanner({required this.banners});
 
   final List<_HomeBannerItem> banners;
@@ -85,59 +85,39 @@ class _HomeBanner extends HookWidget {
       return const _HomeBannerFallback();
     }
 
-    final pageController = usePageController();
-    final activeIndex = useState(0);
-
-    useEffect(() {
-      if (activeIndex.value >= visibleBanners.length) {
-        activeIndex.value = 0;
-      }
-      if (visibleBanners.length < 2) return null;
-
-      final timer = Timer.periodic(const Duration(seconds: 4), (_) {
-        if (!pageController.hasClients) return;
-        final nextIndex = (activeIndex.value + 1) % visibleBanners.length;
-        pageController.animateToPage(
-          nextIndex,
-          duration: const Duration(milliseconds: 320),
-          curve: Curves.easeOutCubic,
-        );
-      });
-      return timer.cancel;
-    }, [visibleBanners.length]);
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 5),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10),
         child: SizedBox(
           height: 106,
-          child: Stack(
-            children: [
-              PageView.builder(
-                controller: pageController,
-                itemCount: visibleBanners.length,
-                onPageChanged: (index) => activeIndex.value = index,
-                itemBuilder: (context, index) {
-                  return _PartyImage(
-                    url: visibleBanners[index].imageUrl,
-                    assetName: AppAssets.lanhuHomeRoomBanner,
-                    width: double.infinity,
-                    height: 106,
-                  );
-                },
-              ),
-              if (visibleBanners.length > 1)
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 8,
-                  child: _HomeBannerIndicator(
-                    count: visibleBanners.length,
-                    activeIndex: activeIndex.value,
-                  ),
-                ),
-            ],
+          child: Swiper(
+            itemCount: visibleBanners.length,
+            autoplay: visibleBanners.length > 1,
+            autoplayDelay: 4000,
+            duration: 320,
+            loop: visibleBanners.length > 1,
+            itemBuilder: (context, index) {
+              return _PartyImage(
+                url: visibleBanners[index].imageUrl,
+                assetName: AppAssets.lanhuHomeRoomBanner,
+                width: double.infinity,
+                height: 106,
+              );
+            },
+            pagination: visibleBanners.length > 1
+                ? SwiperPagination(
+                    alignment: Alignment.bottomCenter,
+                    margin: const EdgeInsets.only(bottom: 8),
+                    builder: DotSwiperPaginationBuilder(
+                      color: Colors.white.withValues(alpha: 0.48),
+                      activeColor: Colors.white.withValues(alpha: 0.96),
+                      size: 5,
+                      activeSize: 14,
+                      space: 4,
+                    ),
+                  )
+                : null,
           ),
         ),
       ),
@@ -161,34 +141,6 @@ class _HomeBannerFallback extends StatelessWidget {
           fit: BoxFit.cover,
         ),
       ),
-    );
-  }
-}
-
-class _HomeBannerIndicator extends StatelessWidget {
-  const _HomeBannerIndicator({required this.count, required this.activeIndex});
-
-  final int count;
-  final int activeIndex;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(count, (index) {
-        final selected = index == activeIndex;
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOutCubic,
-          width: selected ? 14 : 5,
-          height: 5,
-          margin: const EdgeInsets.symmetric(horizontal: 2),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: selected ? 0.96 : 0.48),
-            borderRadius: BorderRadius.circular(5),
-          ),
-        );
-      }),
     );
   }
 }

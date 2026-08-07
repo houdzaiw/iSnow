@@ -65,6 +65,7 @@ dependencies:
   shared_preferences: ^2.5.4
   country_flags: ^4.1.2
   extended_tabs: ^5.0.0
+  card_swiper: ^3.0.1
 
 dev_dependencies:
   flutter_test:
