@@ -764,32 +764,51 @@ class _StateList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(17, 110, 17, 110),
-      children: [
-        Icon(Icons.hourglass_empty_rounded, color: AppColors.textPlaceholder),
-        const SizedBox(height: 8),
-        Text(
-          text,
-          textAlign: TextAlign.center,
-          style: AppTextStyles.bodySmall.copyWith(
-            color: AppColors.textTertiary,
-          ),
-        ),
-        if (actionLabel != null && onAction != null) ...[
-          const SizedBox(height: 12),
-          Center(
-            child: TextButton(
-              onPressed: onAction,
-              child: Text(
-                actionLabel!,
-                style: const TextStyle(color: AppColors.primaryPink),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final content = Padding(
+          padding: const EdgeInsets.fromLTRB(17, 110, 17, 110),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.hourglass_empty_rounded,
+                color: AppColors.textPlaceholder,
               ),
-            ),
+              const SizedBox(height: 8),
+              Text(
+                text,
+                textAlign: TextAlign.center,
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textTertiary,
+                ),
+              ),
+              if (actionLabel != null && onAction != null) ...[
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: onAction,
+                  child: Text(
+                    actionLabel!,
+                    style: const TextStyle(color: AppColors.primaryPink),
+                  ),
+                ),
+              ],
+            ],
           ),
-        ],
-      ],
+        );
+
+        if (!constraints.hasBoundedHeight) {
+          return content;
+        }
+
+        return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: content,
+          ),
+        );
+      },
     );
   }
 }
