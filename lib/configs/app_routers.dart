@@ -101,7 +101,10 @@ final GoRouter goRouter = GoRouter(
     GoRoute(
       path: '/chat-view',
       name: 'chat-view',
-      builder: (context, state) => const ChatPage(),
+      builder: (context, state) => ChatPage(
+        targetUID: state.uri.queryParameters['targetUID'] ?? '',
+        title: state.uri.queryParameters['title'],
+      ),
     ),
     GoRoute(
       path: '/post_detail-view',

@@ -59,4 +59,7 @@ class HttpApi {
 
   /// 获取头像上传参数
   static const uploadParam = '/api/resource/header-upload-param';
+
+  /// 获取腾讯云 IM 登录 token
+  static const timToken = '/token/tim';
 }
