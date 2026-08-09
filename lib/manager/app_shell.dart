@@ -56,6 +56,10 @@ class AppShell extends StatelessWidget {
                 unselectedItemColor: AppColors.transparent,
                 showSelectedLabels: false,
                 showUnselectedLabels: false,
+                selectedFontSize: 0,
+                unselectedFontSize: 0,
+                selectedLabelStyle: const TextStyle(fontSize: 0, height: 0),
+                unselectedLabelStyle: const TextStyle(fontSize: 0, height: 0),
                 enableFeedback: false,
                 onTap: (index) => _goToTab(context, index),
                 items: const [
