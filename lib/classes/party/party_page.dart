@@ -13,12 +13,12 @@ import '../../model/country_info.dart';
 import '../../model/server_response.dart';
 import '../../theme/app_theme.dart';
 
-part 'home_feed_model.dart';
+part 'model/home_feed_model.dart';
 part 'home_feed_repository.dart';
-part 'home_feed_state.dart';
-part 'home_feed_view.dart';
-part 'home_feed_view_model.dart';
-part 'party_feed_view.dart';
+part 'viewmodel/home_feed_state.dart';
+part 'viewmodel/home_feed_view_model.dart';
+part 'views/home_feed_view.dart';
+part 'views/party_feed_view.dart';
 
 enum _MainFeedTab { party, room }
 

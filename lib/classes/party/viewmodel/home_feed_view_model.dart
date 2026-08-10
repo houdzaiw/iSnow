@@ -1,4 +1,4 @@
-part of 'party_page.dart';
+part of '../party_page.dart';
 
 final _homeFeedViewModelProvider =
     AsyncNotifierProvider<_HomeFeedViewModel, _HomeFeedState>(

@@ -1,4 +1,4 @@
-part of 'party_page.dart';
+part of '../party_page.dart';
 
 class _PartyFeedView extends ConsumerWidget {
   const _PartyFeedView({required this.sortTab});

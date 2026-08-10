@@ -1,4 +1,4 @@
-part of 'party_page.dart';
+part of '../party_page.dart';
 
 class _HomeFeedView extends ConsumerWidget {
   const _HomeFeedView();

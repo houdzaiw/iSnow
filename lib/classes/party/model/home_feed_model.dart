@@ -1,4 +1,4 @@
-part of 'party_page.dart';
+part of '../party_page.dart';
 
 enum _HomeRoomTagType { pk, lucky, bigWin }
 
