@@ -66,13 +66,13 @@ class AppShell extends StatelessWidget {
                   BottomNavigationBarItem(
                     icon: _ShellTabIcon(
                       asset: AppAssets.lanhuShellTabHome,
-                      width: 27,
-                      height: 26,
+                      width: 44,
+                      height: 44,
                     ),
                     activeIcon: _ShellTabIcon(
-                      asset: AppAssets.lanhuShellTabHome,
-                      width: 27,
-                      height: 26,
+                      asset: AppAssets.lanhuShellTabHomeActive,
+                      width: 44,
+                      height: 44,
                       selected: true,
                     ),
                     label: '',
@@ -80,13 +80,13 @@ class AppShell extends StatelessWidget {
                   BottomNavigationBarItem(
                     icon: _ShellTabIcon(
                       asset: AppAssets.lanhuShellTabParty,
-                      width: 26,
-                      height: 26,
+                      width: 44,
+                      height: 44,
                     ),
                     activeIcon: _ShellTabIcon(
-                      asset: AppAssets.lanhuShellTabParty,
-                      width: 26,
-                      height: 26,
+                      asset: AppAssets.lanhuShellTabPartyActive,
+                      width: 44,
+                      height: 44,
                       selected: true,
                     ),
                     label: '',
@@ -94,13 +94,13 @@ class AppShell extends StatelessWidget {
                   BottomNavigationBarItem(
                     icon: _ShellTabIcon(
                       asset: AppAssets.lanhuShellTabMessages,
-                      width: 27,
-                      height: 27,
+                      width: 44,
+                      height: 44,
                     ),
                     activeIcon: _ShellTabIcon(
-                      asset: AppAssets.lanhuShellTabMessages,
-                      width: 27,
-                      height: 27,
+                      asset: AppAssets.lanhuShellTabMessagesActive,
+                      width: 44,
+                      height: 44,
                       selected: true,
                     ),
                     label: '',
@@ -108,13 +108,13 @@ class AppShell extends StatelessWidget {
                   BottomNavigationBarItem(
                     icon: _ShellTabIcon(
                       asset: AppAssets.lanhuShellTabProfile,
-                      width: 22,
-                      height: 24,
+                      width: 44,
+                      height: 44,
                     ),
                     activeIcon: _ShellTabIcon(
-                      asset: AppAssets.lanhuShellTabProfile,
-                      width: 22,
-                      height: 24,
+                      asset: AppAssets.lanhuShellTabProfileActive,
+                      width: 44,
+                      height: 44,
                       selected: true,
                     ),
                     label: '',
@@ -149,23 +149,16 @@ class _ShellTabIcon extends StatelessWidget {
   final double height;
   final bool selected;
 
-  static const _selectedScale = 1.08;
-
   @override
   Widget build(BuildContext context) {
     return Semantics(
       selected: selected,
-      child: AnimatedScale(
-        scale: selected ? _selectedScale : 1,
-        duration: const Duration(milliseconds: 160),
-        curve: Curves.easeOutCubic,
-        child: Image.asset(
-          asset,
-          width: width,
-          height: height,
-          fit: BoxFit.contain,
-          filterQuality: FilterQuality.high,
-        ),
+      child: Image.asset(
+        asset,
+        width: width,
+        height: height,
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.high,
       ),
     );
   }

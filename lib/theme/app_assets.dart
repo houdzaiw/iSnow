@@ -77,12 +77,20 @@ class AppAssets {
   static const String lanhuTabProfileActive =
       'assets/lanhu/tabbar/profile_active.png';
   static const String lanhuShellTabHome = 'assets/lanhu/tabbar/shell_home.png';
+  static const String lanhuShellTabHomeActive =
+      'assets/lanhu/tabbar/shell_home_active.webp';
   static const String lanhuShellTabParty =
       'assets/lanhu/tabbar/shell_party.png';
+  static const String lanhuShellTabPartyActive =
+      'assets/lanhu/tabbar/shell_party_active.webp';
   static const String lanhuShellTabMessages =
       'assets/lanhu/tabbar/shell_messages.png';
+  static const String lanhuShellTabMessagesActive =
+      'assets/lanhu/tabbar/shell_messages_active.webp';
   static const String lanhuShellTabProfile =
       'assets/lanhu/tabbar/shell_profile.png';
+  static const String lanhuShellTabProfileActive =
+      'assets/lanhu/tabbar/shell_profile_active.webp';
   static const String tabMessageNormal = 'assets/tabbar/message_normal.png';
   static const String tabMessageActive = 'assets/tabbar/message_select.png';
   static const String tabProfileNormal =
