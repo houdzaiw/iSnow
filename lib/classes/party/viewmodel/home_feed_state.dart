@@ -14,4 +14,20 @@ class _HomeFeedState {
   final List<CountryInfo> hotCountries;
   final List<_HomeRoomItem> rooms;
   final String? selectedCountryCode;
+
+  _HomeFeedState copyWith({
+    List<_HomeRoomItem>? rooms,
+    String? selectedCountryCode,
+    bool clearSelectedCountryCode = false,
+  }) {
+    return _HomeFeedState(
+      banners: banners,
+      friends: friends,
+      hotCountries: hotCountries,
+      rooms: rooms ?? this.rooms,
+      selectedCountryCode: clearSelectedCountryCode
+          ? null
+          : selectedCountryCode ?? this.selectedCountryCode,
+    );
+  }
 }

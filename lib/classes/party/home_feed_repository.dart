@@ -37,9 +37,10 @@ class _HomeFeedRepository {
   Future<List<_HomeRoomItem>> fetchRecommendRooms({
     required String? countryCode,
   }) async {
+    final normalizedCountryCode = _normalizeHomeCountryCode(countryCode);
     final queryParameters = <String, dynamic>{
       'page': 1,
-      if (countryCode != null) 'country': countryCode,
+      if (normalizedCountryCode != null) 'country': normalizedCountryCode,
     };
     final response = await _httpManager.get(
       HttpApi.homeRecommendRoom,

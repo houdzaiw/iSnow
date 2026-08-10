@@ -17,6 +17,8 @@ part 'model/home_feed_model.dart';
 part 'home_feed_repository.dart';
 part 'viewmodel/home_feed_state.dart';
 part 'viewmodel/home_feed_view_model.dart';
+part 'views/home_country_filter_bar.dart';
+part 'views/home_feed_list_view.dart';
 part 'views/home_feed_view.dart';
 part 'views/party_feed_view.dart';
 

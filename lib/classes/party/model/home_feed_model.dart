@@ -118,6 +118,12 @@ String? _homeFeedString(dynamic value) {
   return text == null || text.isEmpty ? null : text;
 }
 
+String? _normalizeHomeCountryCode(String? countryCode) {
+  final code = countryCode?.trim().toUpperCase();
+  if (code == null || code.isEmpty || code == 'NULL') return null;
+  return code;
+}
+
 int _homeFeedInt(dynamic value) {
   if (value is int) return value;
   if (value is num) return value.toInt();

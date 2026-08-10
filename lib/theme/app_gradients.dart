@@ -26,7 +26,7 @@ class AppGradients {
   static const LinearGradient sendButton = LinearGradient(
     begin: Alignment.bottomLeft,
     end: Alignment.topRight,
-    colors: [Color(0xFFFF557D), Color(0xFFFF50A3)],
+    colors: [Color(0xFFE21B7A), Color(0xFFFB274A)],
   );
 
   static const LinearGradient voiceBubble = LinearGradient(
