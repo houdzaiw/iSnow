@@ -18,6 +18,7 @@ import '../classes/profile/edit_profile_page.dart';
 import '../classes/profile/edit_nickname_page.dart';
 import '../classes/profile/profile_page.dart';
 import '../classes/profile/settings_page.dart';
+import '../classes/rank/rank_page.dart';
 import '../classes/launch_page.dart';
 import '../classes/oauth/login_detail_page.dart';
 import '../classes/oauth/register_page.dart';
@@ -99,6 +100,11 @@ final GoRouter goRouter = GoRouter(
       path: '/settings',
       name: 'settings',
       builder: (context, state) => const SettingsPage(),
+    ),
+    GoRoute(
+      path: '/rank',
+      name: 'rank',
+      builder: (context, state) => const RankPage(),
     ),
     GoRoute(
       path: '/chat-view',

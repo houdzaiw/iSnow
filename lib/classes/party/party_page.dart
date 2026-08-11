@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:extended_tabs/extended_tabs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../localization/app_localizations.dart';
@@ -229,7 +230,11 @@ class _PartyHeader extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          _HeaderIconButton(assetName: AppAssets.lanhuPartyTrophy),
+          _HeaderIconButton(
+            assetName: AppAssets.lanhuPartyTrophy,
+            onPressed: () => context.push('/rank'),
+            tooltip: context.l10n.t('rank.title'),
+          ),
           const SizedBox(width: 8),
           _HeaderIconButton(assetName: AppAssets.lanhuPartyPop),
           const SizedBox(width: 7),
@@ -248,18 +253,24 @@ class _PartyHeader extends StatelessWidget {
 }
 
 class _HeaderIconButton extends StatelessWidget {
-  const _HeaderIconButton({required this.assetName});
+  const _HeaderIconButton({
+    required this.assetName,
+    this.onPressed,
+    this.tooltip,
+  });
 
   final String assetName;
+  final VoidCallback? onPressed;
+  final String? tooltip;
 
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      onPressed: () {},
+      onPressed: onPressed ?? () {},
       icon: Image.asset(assetName, width: 24, height: 24),
       padding: const EdgeInsets.all(4),
       constraints: const BoxConstraints.tightFor(width: 32, height: 32),
-      tooltip: '',
+      tooltip: tooltip ?? '',
     );
   }
 }

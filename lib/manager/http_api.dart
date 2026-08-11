@@ -38,6 +38,12 @@ class HttpApi {
   /// 派对列表
   static const partyList = '/api/room/party/list';
 
+  /// 用户排行榜
+  static const rankCommonly = '/api/rank/commonly';
+
+  /// 房间排行榜
+  static const rankRoomCommonly = '/api/rank/room/commonly';
+
   /// ==================== 认证 / 登录 ====================
   /// 登录
   static const login = '/oauth2/login';
