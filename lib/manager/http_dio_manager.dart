@@ -7,12 +7,14 @@ import 'package:flutter/foundation.dart';
 import '../configs/app_configs.dart';
 import '../configs/app_device.dart';
 import '../configs/app_enum.dart';
+import 'app_navigation.dart';
 import 'auth_session.dart';
 
 class HttpDioManager {
   static final HttpDioManager _instance = HttpDioManager._internal();
 
   late Dio _dio;
+  bool _isHandlingUnauthorized = false;
 
   HttpDioManager._internal() {
     _initDio();
@@ -64,8 +66,9 @@ class HttpDioManager {
           _logResponse(response);
           handler.next(response);
         },
-        onError: (DioException e, handler) {
+        onError: (DioException e, handler) async {
           _logError(e);
+          await _handleUnauthorized(e);
           handler.next(e);
         },
       ),
@@ -336,6 +339,21 @@ class HttpDioManager {
       'type=${error.type} http=${response?.statusCode} '
       'message=${error.message} response=${response?.data}',
     );
+  }
+
+  Future<void> _handleUnauthorized(DioException error) async {
+    final statusCode = error.response?.statusCode;
+    if (statusCode != 401 || _isHandlingUnauthorized) return;
+
+    _isHandlingUnauthorized = true;
+    try {
+      await AuthSession.instance.clear();
+      AppNavigation.goLogin();
+    } finally {
+      Future<void>.delayed(const Duration(milliseconds: 500), () {
+        _isHandlingUnauthorized = false;
+      });
+    }
   }
 
   Map<String, dynamic> _headersSummary(Map<String, dynamic> headers) {

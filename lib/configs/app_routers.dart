@@ -21,6 +21,7 @@ import '../classes/profile/settings_page.dart';
 import '../classes/launch_page.dart';
 import '../classes/oauth/login_detail_page.dart';
 import '../classes/oauth/register_page.dart';
+import '../manager/app_navigation.dart';
 import '../manager/app_shell.dart';
 
 const String _initialRoute = String.fromEnvironment(
@@ -29,6 +30,7 @@ const String _initialRoute = String.fromEnvironment(
 );
 
 final GoRouter goRouter = GoRouter(
+  navigatorKey: appRootNavigatorKey,
   initialLocation: _initialRoute,
   routes: [
     // 启动页（不需要底部导航）
