@@ -4,6 +4,7 @@ class _RankState {
   const _RankState({
     required this.category,
     required this.period,
+    this.periodsByCategory = const <_RankCategory, _RankPeriod>{},
     this.boards = const <_RankQuery, _RankBoard>{},
     this.loadingQueries = const <_RankQuery>{},
     this.errors = const <_RankQuery, Object>{},
@@ -12,26 +13,32 @@ class _RankState {
   const _RankState.initial()
     : category = _RankCategory.wealth,
       period = _RankPeriod.daily,
+      periodsByCategory = const <_RankCategory, _RankPeriod>{},
       boards = const <_RankQuery, _RankBoard>{},
       loadingQueries = const <_RankQuery>{},
       errors = const <_RankQuery, Object>{};
 
   final _RankCategory category;
   final _RankPeriod period;
+  final Map<_RankCategory, _RankPeriod> periodsByCategory;
   final Map<_RankQuery, _RankBoard> boards;
   final Set<_RankQuery> loadingQueries;
   final Map<_RankQuery, Object> errors;
 
-  _RankQuery queryFor(_RankCategory category) {
-    return _RankQuery(category: category, period: period);
+  _RankPeriod periodFor(_RankCategory category) {
+    return periodsByCategory[category] ?? _RankPeriod.daily;
   }
 
-  _RankBoard? boardFor(_RankCategory category) {
-    return boards[queryFor(category)];
+  _RankQuery queryFor(_RankCategory category, [_RankPeriod? period]) {
+    return _RankQuery(category: category, period: period ?? this.period);
   }
 
-  Object? errorFor(_RankCategory category) {
-    return errors[queryFor(category)];
+  _RankBoard? boardFor(_RankCategory category, [_RankPeriod? period]) {
+    return boards[queryFor(category, period)];
+  }
+
+  Object? errorFor(_RankCategory category, [_RankPeriod? period]) {
+    return errors[queryFor(category, period)];
   }
 
   bool hasLoaded(_RankQuery query) {
@@ -45,6 +52,7 @@ class _RankState {
   _RankState copyWith({
     _RankCategory? category,
     _RankPeriod? period,
+    Map<_RankCategory, _RankPeriod>? periodsByCategory,
     Map<_RankQuery, _RankBoard>? boards,
     Set<_RankQuery>? loadingQueries,
     Map<_RankQuery, Object>? errors,
@@ -52,6 +60,7 @@ class _RankState {
     return _RankState(
       category: category ?? this.category,
       period: period ?? this.period,
+      periodsByCategory: periodsByCategory ?? this.periodsByCategory,
       boards: boards ?? this.boards,
       loadingQueries: loadingQueries ?? this.loadingQueries,
       errors: errors ?? this.errors,

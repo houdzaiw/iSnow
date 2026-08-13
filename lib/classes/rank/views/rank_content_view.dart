@@ -10,9 +10,12 @@ class _RankContentView extends ConsumerStatefulWidget {
 }
 
 class _RankContentViewState extends ConsumerState<_RankContentView>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final TabController _categoryController;
+  late final Map<_RankCategory, TabController> _periodControllers;
   _RankCategory? _requestedCategory;
+  final Map<_RankCategory, _RankPeriod> _requestedPeriods =
+      <_RankCategory, _RankPeriod>{};
 
   @override
   void initState() {
@@ -22,11 +25,25 @@ class _RankContentViewState extends ConsumerState<_RankContentView>
       initialIndex: _categoryIndex(_RankCategory.wealth),
       vsync: this,
     );
+    _periodControllers = {
+      for (final category in _RankCategory.values)
+        category: TabController(
+          length: _RankPeriod.values.length,
+          initialIndex: _periodIndex(_RankPeriod.daily),
+          vsync: this,
+        ),
+    };
     _categoryController.addListener(_handleCategoryChanged);
+    for (final entry in _periodControllers.entries) {
+      entry.value.addListener(() => _handlePeriodChanged(entry.key));
+    }
   }
 
   @override
   void dispose() {
+    for (final controller in _periodControllers.values) {
+      controller.dispose();
+    }
     _categoryController.removeListener(_handleCategoryChanged);
     _categoryController.dispose();
     super.dispose();
@@ -38,8 +55,15 @@ class _RankContentViewState extends ConsumerState<_RankContentView>
     if (_requestedCategory == state.category) {
       _requestedCategory = null;
     }
+    final requestedPeriod = _requestedPeriods[state.category];
+    if (requestedPeriod == state.periodFor(state.category)) {
+      _requestedPeriods.remove(state.category);
+    }
     _syncCategoryController(state.category);
-    final currentBoard = state.boardFor(state.category);
+    for (final category in _RankCategory.values) {
+      _syncPeriodController(category, state.periodFor(category));
+    }
+    final currentBoard = state.boardFor(state.category, state.period);
 
     return Stack(
       children: [
@@ -77,35 +101,22 @@ class _RankContentViewState extends ConsumerState<_RankContentView>
   }
 
   Widget _buildContainerView(_RankState state) {
-    final currentBoard = state.boardFor(state.category);
-
     return Expanded(
-      child: Column(
+      child: ExtendedTabBarView(
+        controller: _categoryController,
+        cacheExtent: 1,
         children: [
-          _RankPeriodTabs(
-            selectedPeriod: state.period,
-            onSelect: (period) =>
-                ref.read(_rankViewModelProvider.notifier).selectPeriod(period),
-          ),
-          const SizedBox(height: 17),
-          _RankCountdown(seconds: currentBoard?.countdown ?? 0),
-          Expanded(
-            child: ExtendedTabBarView(
-              controller: _categoryController,
-              cacheExtent: 1,
-              children: [
-                for (final category in _RankCategory.values)
-                  _RankBoardTabView(
-                    category: category,
-                    board: state.boardFor(category),
-                    error: state.errorFor(category),
-                    onRefresh: () => ref
-                        .read(_rankViewModelProvider.notifier)
-                        .refresh(category),
-                  ),
-              ],
+          for (final category in _RankCategory.values)
+            _RankCategoryBoardView(
+              category: category,
+              state: state,
+              periodController: _periodControllers[category]!,
+              onSelectPeriod: (period) =>
+                  _handlePeriodSelected(category, period),
+              onRefresh: (period) => ref
+                  .read(_rankViewModelProvider.notifier)
+                  .refresh(category, period),
             ),
-          ),
         ],
       ),
     );
@@ -125,6 +136,20 @@ class _RankContentViewState extends ConsumerState<_RankContentView>
     _categoryController.index = targetIndex;
   }
 
+  int _periodIndex(_RankPeriod period) {
+    final index = _RankPeriod.values.indexOf(period);
+    return index < 0 ? 0 : index;
+  }
+
+  void _syncPeriodController(_RankCategory category, _RankPeriod period) {
+    final controller = _periodControllers[category]!;
+    final targetIndex = _periodIndex(period);
+    if (controller.index == targetIndex || controller.indexIsChanging) {
+      return;
+    }
+    controller.index = targetIndex;
+  }
+
   void _handleCategoryChanged() {
     if (_categoryController.indexIsChanging) return;
 
@@ -140,6 +165,99 @@ class _RankContentViewState extends ConsumerState<_RankContentView>
 
     _requestedCategory = category;
     ref.read(_rankViewModelProvider.notifier).selectCategory(category);
+  }
+
+  void _handlePeriodSelected(_RankCategory category, _RankPeriod period) {
+    final controller = _periodControllers[category]!;
+    final targetIndex = _periodIndex(period);
+    if (controller.index != targetIndex) {
+      controller.animateTo(targetIndex);
+    }
+
+    final state = ref.read(_rankViewModelProvider);
+    if (period == state.periodFor(category)) return;
+
+    _requestedPeriods[category] = period;
+    ref
+        .read(_rankViewModelProvider.notifier)
+        .selectPeriod(period, category: category);
+  }
+
+  void _handlePeriodChanged(_RankCategory category) {
+    final controller = _periodControllers[category]!;
+    if (controller.indexIsChanging) return;
+
+    final animationValue = controller.animation?.value ?? controller.index;
+    if ((animationValue - controller.index).abs() > 0.01) return;
+
+    final period = _RankPeriod.values[controller.index];
+    final state = ref.read(_rankViewModelProvider);
+    if (category != state.category ||
+        period == state.periodFor(category) ||
+        period == _requestedPeriods[category]) {
+      return;
+    }
+
+    _requestedPeriods[category] = period;
+    ref
+        .read(_rankViewModelProvider.notifier)
+        .selectPeriod(period, category: category);
+  }
+}
+
+class _RankCategoryBoardView extends StatelessWidget {
+  const _RankCategoryBoardView({
+    required this.category,
+    required this.state,
+    required this.periodController,
+    required this.onSelectPeriod,
+    required this.onRefresh,
+  });
+
+  final _RankCategory category;
+  final _RankState state;
+  final TabController periodController;
+  final ValueChanged<_RankPeriod> onSelectPeriod;
+  final Future<void> Function(_RankPeriod period) onRefresh;
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedPeriod = state.periodFor(category);
+    final currentBoard = state.boardFor(category, selectedPeriod);
+
+    return Column(
+      children: [
+        _RankPeriodTabs(
+          tabController: periodController,
+          selectedPeriod: selectedPeriod,
+          onSelect: onSelectPeriod,
+        ),
+        const SizedBox(height: 17),
+        Expanded(
+          child: Column(
+            children: [
+              _RankCountdown(seconds: currentBoard?.countdown ?? 0),
+              Expanded(
+                child: ExtendedTabBarView(
+                  controller: periodController,
+                  cacheExtent: 1,
+                  link: true,
+                  children: [
+                    for (final period in _RankPeriod.values)
+                      _RankBoardTabView(
+                        category: category,
+                        board: state.boardFor(category, period),
+                        error: state.errorFor(category, period),
+                        onRefresh: () => onRefresh(period),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -353,8 +471,13 @@ class _RankCategoryTab extends StatelessWidget {
 }
 
 class _RankPeriodTabs extends StatelessWidget {
-  const _RankPeriodTabs({required this.selectedPeriod, required this.onSelect});
+  const _RankPeriodTabs({
+    required this.tabController,
+    required this.selectedPeriod,
+    required this.onSelect,
+  });
 
+  final TabController tabController;
   final _RankPeriod selectedPeriod;
   final ValueChanged<_RankPeriod> onSelect;
 
@@ -368,20 +491,36 @@ class _RankPeriodTabs extends StatelessWidget {
         color: Colors.white.withValues(alpha: 0.2),
         borderRadius: AppRadius.pillBorder,
       ),
-      child: Row(
-        children: [
-          for (final period in _RankPeriod.values)
-            Expanded(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () => onSelect(period),
-                child: _RankPeriodTab(
-                  period: period,
-                  selected: period == selectedPeriod,
+      child: AnimatedBuilder(
+        animation: tabController,
+        builder: (context, _) {
+          final periods = _RankPeriod.values;
+          final fallbackIndex = periods.indexOf(selectedPeriod);
+          final currentIndex = tabController.index < periods.length
+              ? tabController.index
+              : fallbackIndex;
+
+          return ExtendedTabBar(
+            controller: tabController,
+            indicator: const BoxDecoration(color: AppColors.transparent),
+            indicatorColor: AppColors.transparent,
+            dividerColor: AppColors.transparent,
+            labelPadding: EdgeInsets.zero,
+            overlayColor: WidgetStateProperty.all(AppColors.transparent),
+            splashFactory: NoSplash.splashFactory,
+            onTap: (index) => onSelect(periods[index]),
+            tabs: [
+              for (var index = 0; index < periods.length; index++)
+                Tab(
+                  height: 20,
+                  child: _RankPeriodTab(
+                    period: periods[index],
+                    selected: index == currentIndex,
+                  ),
                 ),
-              ),
-            ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }
