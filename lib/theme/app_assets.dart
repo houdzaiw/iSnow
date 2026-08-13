@@ -48,20 +48,43 @@ class AppAssets {
   static const String lanhuHomeBadgePk = 'assets/lanhu/party/home_badge_pk.png';
   static const String lanhuHomeBadgeVoice =
       'assets/lanhu/party/home_badge_voice.png';
-  static const String lanhuRankBackground =
-      'assets/lanhu/rank/rank_background.png';
+  static const String lanhuRankWealthBackground =
+      'assets/lanhu/rank/rank_wealth_background.png';
+  static const String lanhuRankCharmBackground =
+      'assets/lanhu/rank/rank_charm_background.png';
+  static const String lanhuRankRoomBackground =
+      'assets/lanhu/rank/rank_room_background.png';
+  static const String lanhuRankBackground = lanhuRankWealthBackground;
   static const String lanhuRankTabUnderline =
       'assets/lanhu/rank/rank_tab_underline.png';
+  static const String lanhuRankHelp = 'assets/lanhu/rank/rank_help.png';
   static const String lanhuRankTop1Card =
       'assets/lanhu/rank/rank_top1_card.png';
   static const String lanhuRankTop2Card =
       'assets/lanhu/rank/rank_top2_card.png';
   static const String lanhuRankTop3Card =
       'assets/lanhu/rank/rank_top3_card.png';
-  static const String lanhuRankListItem =
-      'assets/lanhu/rank/rank_list_item.png';
-  static const String lanhuRankMeBar = 'assets/lanhu/rank/rank_me_bar.png';
-  static const String lanhuRankCoin = 'assets/lanhu/rank/rank_coin.png';
+  static const String lanhuRankWealthListItem =
+      'assets/lanhu/rank/rank_wealth_list_item.png';
+  static const String lanhuRankCharmListItem =
+      'assets/lanhu/rank/rank_charm_list_item.png';
+  static const String lanhuRankRoomListItem =
+      'assets/lanhu/rank/rank_room_list_item.png';
+  static const String lanhuRankListItem = lanhuRankWealthListItem;
+  static const String lanhuRankWealthMeBar =
+      'assets/lanhu/rank/rank_wealth_me_bar.png';
+  static const String lanhuRankCharmMeBar =
+      'assets/lanhu/rank/rank_charm_me_bar.png';
+  static const String lanhuRankRoomMeBar =
+      'assets/lanhu/rank/rank_room_me_bar.png';
+  static const String lanhuRankMeBar = lanhuRankWealthMeBar;
+  static const String lanhuRankWealthValueIcon =
+      'assets/lanhu/rank/rank_wealth_value_icon.png';
+  static const String lanhuRankCharmValueIcon =
+      'assets/lanhu/rank/rank_charm_value_icon.png';
+  static const String lanhuRankRoomValueIcon =
+      'assets/lanhu/rank/rank_room_value_icon.png';
+  static const String lanhuRankCoin = lanhuRankWealthValueIcon;
   static const String lanhuRankLevelIcon =
       'assets/lanhu/rank/rank_level_icon.png';
 
@@ -69,6 +92,7 @@ class AppAssets {
   static const String authBackground = 'assets/base/base_bg_image.png';
   static const String pageBackground = 'assets/base/bg_image.png';
   static const String backButton = 'assets/base/back_button.png';
+  static const String backWhiteButton = 'assets/lanhu/base/nav_back_white.png';
   static const String closeButton = 'assets/base/close_button_image.png';
   static const String moreButton = 'assets/base/more_button.png';
   static const String legacyButtonBackground =

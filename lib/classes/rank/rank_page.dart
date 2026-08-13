@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:country_flags/country_flags.dart';
+import 'package:extended_tabs/extended_tabs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -20,50 +21,16 @@ part 'views/rank_list_view.dart';
 part 'views/rank_podium_view.dart';
 part 'views/rank_shared_widgets.dart';
 
-class RankPage extends ConsumerWidget {
+class RankPage extends StatelessWidget {
   const RankPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(_rankViewModelProvider);
-
+  Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
         backgroundColor: Colors.black,
-        body: Stack(
-          children: [
-            Positioned.fill(
-              child: Image.asset(
-                AppAssets.lanhuRankBackground,
-                fit: BoxFit.cover,
-              ),
-            ),
-            Positioned.fill(
-              child: state.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, __) => _RankStateMessage(
-                  text: context.l10n.t('rank.loadFailed'),
-                  actionLabel: context.l10n.t('app.retry'),
-                  onAction: () =>
-                      ref.read(_rankViewModelProvider.notifier).reload(),
-                ),
-                data: (rankState) => _RankContentView(
-                  state: rankState,
-                  onBack: () => context.pop(),
-                  onSelectCategory: (category) => ref
-                      .read(_rankViewModelProvider.notifier)
-                      .selectCategory(category),
-                  onSelectPeriod: (period) => ref
-                      .read(_rankViewModelProvider.notifier)
-                      .selectPeriod(period),
-                  onRefresh: () =>
-                      ref.read(_rankViewModelProvider.notifier).refresh(),
-                ),
-              ),
-            ),
-          ],
-        ),
+        body: _RankContentView(onBack: () => context.pop()),
       ),
     );
   }

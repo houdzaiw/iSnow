@@ -1,149 +1,266 @@
 part of '../rank_page.dart';
 
-class _RankContentView extends StatelessWidget {
-  const _RankContentView({
-    required this.state,
-    required this.onBack,
-    required this.onSelectCategory,
-    required this.onSelectPeriod,
-    required this.onRefresh,
-  });
+class _RankContentView extends ConsumerStatefulWidget {
+  const _RankContentView({required this.onBack});
 
-  final _RankState state;
   final VoidCallback onBack;
-  final ValueChanged<_RankCategory> onSelectCategory;
-  final ValueChanged<_RankPeriod> onSelectPeriod;
-  final Future<void> Function() onRefresh;
+
+  @override
+  ConsumerState<_RankContentView> createState() => _RankContentViewState();
+}
+
+class _RankContentViewState extends ConsumerState<_RankContentView>
+    with SingleTickerProviderStateMixin {
+  late final TabController _categoryController;
+  _RankCategory? _requestedCategory;
+
+  @override
+  void initState() {
+    super.initState();
+    _categoryController = TabController(
+      length: _RankCategory.values.length,
+      initialIndex: _categoryIndex(_RankCategory.wealth),
+      vsync: this,
+    );
+    _categoryController.addListener(_handleCategoryChanged);
+  }
+
+  @override
+  void dispose() {
+    _categoryController.removeListener(_handleCategoryChanged);
+    _categoryController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final entries = state.board.entries;
-    final topEntries = entries.take(3).toList(growable: false);
-    final listEntries = entries.skip(3).toList(growable: false);
+    final state = ref.watch(_rankViewModelProvider);
+    if (_requestedCategory == state.category) {
+      _requestedCategory = null;
+    }
+    _syncCategoryController(state.category);
+    final currentBoard = state.boardFor(state.category);
 
     return Stack(
       children: [
-        SafeArea(
-          bottom: false,
-          child: Column(
-            children: [
-              const SizedBox(height: 8),
-              _RankHeader(
-                category: state.category,
-                onBack: onBack,
-                onSelectCategory: onSelectCategory,
-              ),
-              const SizedBox(height: 15),
-              _RankPeriodTabs(
-                selectedPeriod: state.period,
-                onSelect: onSelectPeriod,
-              ),
-              const SizedBox(height: 17),
-              _RankCountdown(seconds: state.board.countdown),
-              Expanded(
-                child: RefreshIndicator(
-                  color: const Color.fromRGBO(254, 229, 190, 1),
-                  backgroundColor: const Color.fromRGBO(32, 18, 6, 1),
-                  onRefresh: onRefresh,
-                  child: entries.isEmpty
-                      ? ListView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          padding: const EdgeInsets.only(top: 100),
-                          children: [
-                            _RankStateMessage(
-                              text: context.l10n.t('rank.empty'),
-                            ),
-                          ],
-                        )
-                      : ListView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          padding: EdgeInsets.only(
-                            top: 8,
-                            bottom: state.board.me == null ? 32 : 104,
-                          ),
-                          children: [
-                            _RankPodiumView(
-                              entries: topEntries,
-                              category: state.category,
-                            ),
-                            const SizedBox(height: 8),
-                            _RankListView(
-                              entries: listEntries,
-                              category: state.category,
-                            ),
-                          ],
-                        ),
+        Positioned.fill(
+          child: Image.asset(state.category.backgroundAsset, fit: BoxFit.cover),
+        ),
+        Positioned.fill(
+          child: SafeArea(
+            bottom: false,
+            child: Column(
+              children: [
+                const SizedBox(height: 8),
+                _RankHeader(
+                  tabController: _categoryController,
+                  onBack: widget.onBack,
                 ),
-              ),
-            ],
+                const SizedBox(height: 15),
+                _buildContainerView(state),
+              ],
+            ),
           ),
         ),
-        if (state.board.me != null)
+        if (currentBoard?.me != null)
           Positioned(
             left: 0,
             right: 0,
             bottom: 0,
-            child: _RankMeBar(entry: state.board.me!, category: state.category),
+            child: _RankMeBar(
+              entry: currentBoard!.me!,
+              category: state.category,
+            ),
           ),
+      ],
+    );
+  }
+
+  Widget _buildContainerView(_RankState state) {
+    final currentBoard = state.boardFor(state.category);
+
+    return Expanded(
+      child: Column(
+        children: [
+          _RankPeriodTabs(
+            selectedPeriod: state.period,
+            onSelect: (period) =>
+                ref.read(_rankViewModelProvider.notifier).selectPeriod(period),
+          ),
+          const SizedBox(height: 17),
+          _RankCountdown(seconds: currentBoard?.countdown ?? 0),
+          Expanded(
+            child: ExtendedTabBarView(
+              controller: _categoryController,
+              cacheExtent: 1,
+              children: [
+                for (final category in _RankCategory.values)
+                  _RankBoardTabView(
+                    category: category,
+                    board: state.boardFor(category),
+                    error: state.errorFor(category),
+                    onRefresh: () => ref
+                        .read(_rankViewModelProvider.notifier)
+                        .refresh(category),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  int _categoryIndex(_RankCategory category) {
+    final index = _RankCategory.values.indexOf(category);
+    return index < 0 ? 0 : index;
+  }
+
+  void _syncCategoryController(_RankCategory category) {
+    final targetIndex = _categoryIndex(category);
+    if (_categoryController.index == targetIndex ||
+        _categoryController.indexIsChanging) {
+      return;
+    }
+    _categoryController.index = targetIndex;
+  }
+
+  void _handleCategoryChanged() {
+    if (_categoryController.indexIsChanging) return;
+
+    final animationValue =
+        _categoryController.animation?.value ?? _categoryController.index;
+    if ((animationValue - _categoryController.index).abs() > 0.01) return;
+
+    final category = _RankCategory.values[_categoryController.index];
+    final state = ref.read(_rankViewModelProvider);
+    if (category == state.category || category == _requestedCategory) {
+      return;
+    }
+
+    _requestedCategory = category;
+    ref.read(_rankViewModelProvider.notifier).selectCategory(category);
+  }
+}
+
+class _RankBoardTabView extends StatelessWidget {
+  const _RankBoardTabView({
+    required this.category,
+    required this.board,
+    required this.error,
+    required this.onRefresh,
+  });
+
+  final _RankCategory category;
+  final _RankBoard? board;
+  final Object? error;
+  final Future<void> Function() onRefresh;
+
+  @override
+  Widget build(BuildContext context) {
+    final board = this.board;
+    final entries = board?.entries ?? const <_RankEntry>[];
+    final topEntries = entries.take(3).toList(growable: false);
+    final listEntries = entries.skip(3).toList(growable: false);
+
+    return RefreshIndicator(
+      color: const Color.fromRGBO(254, 229, 190, 1),
+      backgroundColor: const Color.fromRGBO(32, 18, 6, 1),
+      onRefresh: onRefresh,
+      child: board == null
+          ? _RankBoardStateList(error: error, onRetry: onRefresh)
+          : entries.isEmpty
+          ? ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.only(top: 100),
+              children: [_RankStateMessage(text: context.l10n.t('rank.empty'))],
+            )
+          : ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.only(
+                top: 8,
+                bottom: board.me == null ? 32 : 104,
+              ),
+              children: [
+                _RankPodiumView(entries: topEntries, category: category),
+                const SizedBox(height: 8),
+                _RankListView(entries: listEntries, category: category),
+              ],
+            ),
+    );
+  }
+}
+
+class _RankBoardStateList extends StatelessWidget {
+  const _RankBoardStateList({required this.error, required this.onRetry});
+
+  final Object? error;
+  final Future<void> Function() onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.only(top: 100),
+      children: [
+        if (error != null)
+          _RankStateMessage(
+            text: context.l10n.t('rank.loadFailed'),
+            actionLabel: context.l10n.t('app.retry'),
+            onAction: () => onRetry(),
+          )
+        else
+          Center(child: const CircularProgressIndicator()),
       ],
     );
   }
 }
 
 class _RankHeader extends StatelessWidget {
-  const _RankHeader({
-    required this.category,
-    required this.onBack,
-    required this.onSelectCategory,
-  });
+  const _RankHeader({required this.tabController, required this.onBack});
 
-  final _RankCategory category;
+  final TabController tabController;
   final VoidCallback onBack;
-  final ValueChanged<_RankCategory> onSelectCategory;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 32,
-      child: Stack(
-        alignment: Alignment.center,
+      height: 36,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Positioned(
-            left: 21,
+          SizedBox(
+            width: 40,
+            height: 36,
             child: IconButton(
               onPressed: onBack,
-              icon: const Icon(Icons.chevron_left_rounded),
-              color: Colors.white,
-              iconSize: 34,
               padding: EdgeInsets.zero,
-              constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+              constraints: const BoxConstraints.tightFor(width: 36, height: 36),
               tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+              icon: Image.asset(
+                AppAssets.backWhiteButton,
+                width: 36,
+                height: 36,
+                fit: BoxFit.contain,
+              ),
             ),
           ),
+          _RankCategoryTabs(tabController: tabController),
           SizedBox(
-            width: 228,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                for (final item in _RankCategory.values)
-                  _RankCategoryTab(
-                    category: item,
-                    selected: item == category,
-                    onTap: () => onSelectCategory(item),
-                  ),
-              ],
-            ),
-          ),
-          Positioned(
-            right: 28,
+            width: 40,
+            height: 36,
             child: IconButton(
               onPressed: () {},
-              icon: const Icon(Icons.help_outline_rounded),
-              color: Colors.white.withValues(alpha: 0.75),
-              iconSize: 24,
               padding: EdgeInsets.zero,
-              constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+              constraints: const BoxConstraints.tightFor(width: 36, height: 36),
               tooltip: context.l10n.t('rank.help'),
+              icon: Image.asset(
+                AppAssets.lanhuRankHelp,
+                width: 24,
+                height: 24,
+                fit: BoxFit.contain,
+              ),
             ),
           ),
         ],
@@ -152,50 +269,84 @@ class _RankHeader extends StatelessWidget {
   }
 }
 
-class _RankCategoryTab extends StatelessWidget {
-  const _RankCategoryTab({
-    required this.category,
-    required this.selected,
-    required this.onTap,
-  });
+class _RankCategoryTabs extends StatelessWidget {
+  const _RankCategoryTabs({required this.tabController});
 
-  final _RankCategory category;
-  final bool selected;
-  final VoidCallback onTap;
+  final TabController tabController;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: SizedBox(
-        width: 58,
-        height: 27,
-        child: Stack(
-          alignment: Alignment.topCenter,
-          children: [
-            if (selected)
-              Positioned(
-                top: 14,
-                child: Image.asset(
-                  AppAssets.lanhuRankTabUnderline,
-                  width: 56,
-                  height: 13,
+    final categories = _RankCategory.values;
+
+    return SizedBox(
+      width: 228,
+      height: 27,
+      child: AnimatedBuilder(
+        animation: tabController,
+        builder: (context, _) {
+          final currentIndex = tabController.index;
+
+          return ExtendedTabBar(
+            controller: tabController,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            indicator: const BoxDecoration(color: AppColors.transparent),
+            indicatorColor: AppColors.transparent,
+            dividerColor: AppColors.transparent,
+            labelPadding: EdgeInsets.zero,
+            overlayColor: WidgetStateProperty.all(AppColors.transparent),
+            splashFactory: NoSplash.splashFactory,
+            tabs: [
+              for (var index = 0; index < categories.length; index++)
+                Tab(
+                  height: 27,
+                  child: _RankCategoryTab(
+                    category: categories[index],
+                    selected: index == currentIndex,
+                  ),
                 ),
-              ),
-            Text(
-              category.label(context),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: selected ? 1 : 0.4),
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                height: 1,
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _RankCategoryTab extends StatelessWidget {
+  const _RankCategoryTab({required this.category, required this.selected});
+
+  final _RankCategory category;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 58,
+      height: 27,
+      child: Stack(
+        alignment: Alignment.topCenter,
+        children: [
+          if (selected)
+            Positioned(
+              top: 14,
+              child: Image.asset(
+                AppAssets.lanhuRankTabUnderline,
+                width: 56,
+                height: 13,
               ),
             ),
-          ],
-        ),
+          Text(
+            category.label(context),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: selected ? 1 : 0.4),
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              height: 1,
+            ),
+          ),
+        ],
       ),
     );
   }

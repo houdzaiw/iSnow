@@ -1,5 +1,47 @@
 part of '../rank_page.dart';
 
+extension _RankCategoryAssets on _RankCategory {
+  String get backgroundAsset {
+    return switch (this) {
+      _RankCategory.wealth => AppAssets.lanhuRankWealthBackground,
+      _RankCategory.charm => AppAssets.lanhuRankCharmBackground,
+      _RankCategory.room => AppAssets.lanhuRankRoomBackground,
+    };
+  }
+
+  String get listItemAsset {
+    return switch (this) {
+      _RankCategory.wealth => AppAssets.lanhuRankWealthListItem,
+      _RankCategory.charm => AppAssets.lanhuRankCharmListItem,
+      _RankCategory.room => AppAssets.lanhuRankRoomListItem,
+    };
+  }
+
+  String get meBarAsset {
+    return switch (this) {
+      _RankCategory.wealth => AppAssets.lanhuRankWealthMeBar,
+      _RankCategory.charm => AppAssets.lanhuRankCharmMeBar,
+      _RankCategory.room => AppAssets.lanhuRankRoomMeBar,
+    };
+  }
+
+  String get valueIconAsset {
+    return switch (this) {
+      _RankCategory.wealth => AppAssets.lanhuRankWealthValueIcon,
+      _RankCategory.charm => AppAssets.lanhuRankCharmValueIcon,
+      _RankCategory.room => AppAssets.lanhuRankRoomValueIcon,
+    };
+  }
+
+  double get valueIconSize {
+    return switch (this) {
+      _RankCategory.wealth => 15,
+      _RankCategory.charm => 14,
+      _RankCategory.room => 12,
+    };
+  }
+}
+
 class _RankAvatar extends StatelessWidget {
   const _RankAvatar({required this.entry, required this.size});
 
@@ -204,17 +246,29 @@ class _RankBadgeIcon extends StatelessWidget {
 }
 
 class _RankValueText extends StatelessWidget {
-  const _RankValueText({required this.entry, required this.fontSize});
+  const _RankValueText({
+    required this.entry,
+    required this.category,
+    required this.fontSize,
+  });
 
   final _RankEntry entry;
+  final _RankCategory category;
   final double fontSize;
 
   @override
   Widget build(BuildContext context) {
+    final iconSize = category.valueIconSize;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Image.asset(AppAssets.lanhuRankCoin, width: 12, height: 12),
+        Image.asset(
+          category.valueIconAsset,
+          width: iconSize,
+          height: iconSize,
+          fit: BoxFit.contain,
+        ),
         const SizedBox(width: 3),
         Text(
           entry.valueText,

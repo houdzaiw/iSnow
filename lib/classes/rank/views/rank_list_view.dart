@@ -37,7 +37,7 @@ class _RankListTile extends StatelessWidget {
       child: Stack(
         children: [
           Positioned.fill(
-            child: Image.asset(AppAssets.lanhuRankListItem, fit: BoxFit.fill),
+            child: Image.asset(category.listItemAsset, fit: BoxFit.fill),
           ),
           Row(
             children: [
@@ -79,7 +79,7 @@ class _RankListTile extends StatelessWidget {
                   ],
                 ),
               ),
-              _RankValueText(entry: entry, fontSize: 12),
+              _RankValueText(entry: entry, category: category, fontSize: 12),
               const SizedBox(width: 24),
             ],
           ),
@@ -119,10 +119,7 @@ class _RankMeBar extends StatelessWidget {
               child: Stack(
                 children: [
                   Positioned.fill(
-                    child: Image.asset(
-                      AppAssets.lanhuRankMeBar,
-                      fit: BoxFit.fill,
-                    ),
+                    child: Image.asset(category.meBarAsset, fit: BoxFit.fill),
                   ),
                   Row(
                     children: [
@@ -164,7 +161,11 @@ class _RankMeBar extends StatelessWidget {
                           ],
                         ),
                       ),
-                      _RankValueText(entry: entry, fontSize: 14),
+                      _RankValueText(
+                        entry: entry,
+                        category: category,
+                        fontSize: 14,
+                      ),
                       const SizedBox(width: 28),
                     ],
                   ),

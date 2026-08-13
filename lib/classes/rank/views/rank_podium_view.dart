@@ -139,7 +139,11 @@ class _RankTopCard extends StatelessWidget {
           ),
           Positioned(
             top: valueTop,
-            child: _RankValueText(entry: entry, fontSize: 12),
+            child: _RankValueText(
+              entry: entry,
+              category: category,
+              fontSize: 12,
+            ),
           ),
         ],
       ),
