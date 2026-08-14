@@ -224,19 +224,25 @@ class _RankCategoryBoardView extends StatelessWidget {
   Widget build(BuildContext context) {
     final selectedPeriod = state.periodFor(category);
     final currentBoard = state.boardFor(category, selectedPeriod);
+    final colorStyle = category.rankColorStyle;
 
     return Column(
       children: [
         _RankPeriodTabs(
           tabController: periodController,
           selectedPeriod: selectedPeriod,
+          selectedGradientColors: colorStyle.periodTabGradientColors,
+          selectedTextColor: colorStyle.periodTabTextColor,
           onSelect: onSelectPeriod,
         ),
         const SizedBox(height: 17),
         Expanded(
           child: Column(
             children: [
-              _RankCountdown(seconds: currentBoard?.countdown ?? 0),
+              _RankCountdown(
+                seconds: currentBoard?.countdown ?? 0,
+                backgroundColor: colorStyle.countdownBackgroundColor,
+              ),
               Expanded(
                 child: ExtendedTabBarView(
                   controller: periodController,
@@ -258,6 +264,49 @@ class _RankCategoryBoardView extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+class _RankColorStyle {
+  const _RankColorStyle({
+    required this.periodTabGradientColors,
+    required this.periodTabTextColor,
+    required this.countdownBackgroundColor,
+  });
+
+  final List<Color> periodTabGradientColors;
+  final Color periodTabTextColor;
+  final Color countdownBackgroundColor;
+}
+
+extension _RankCategoryColorStyle on _RankCategory {
+  _RankColorStyle get rankColorStyle {
+    return switch (this) {
+      _RankCategory.wealth => const _RankColorStyle(
+        periodTabGradientColors: [
+          Color.fromRGBO(215, 254, 218, 1),
+          Color.fromRGBO(190, 254, 241, 1),
+        ],
+        periodTabTextColor: Color.fromRGBO(44, 161, 75, 1),
+        countdownBackgroundColor: Color.fromRGBO(65, 123, 82, 1),
+      ),
+      _RankCategory.charm => const _RankColorStyle(
+        periodTabGradientColors: [
+          Color.fromRGBO(238, 215, 254, 1),
+          Color.fromRGBO(231, 190, 254, 1),
+        ],
+        periodTabTextColor: Color.fromRGBO(144, 59, 208, 1),
+        countdownBackgroundColor: Color.fromRGBO(111, 67, 129, 1),
+      ),
+      _RankCategory.room => const _RankColorStyle(
+        periodTabGradientColors: [
+          Color.fromRGBO(254, 240, 215, 1),
+          Color.fromRGBO(254, 229, 190, 1),
+        ],
+        periodTabTextColor: Color.fromRGBO(152, 102, 27, 1),
+        countdownBackgroundColor: Color.fromRGBO(99, 75, 51, 1),
+      ),
+    };
   }
 }
 
@@ -474,11 +523,15 @@ class _RankPeriodTabs extends StatelessWidget {
   const _RankPeriodTabs({
     required this.tabController,
     required this.selectedPeriod,
+    required this.selectedGradientColors,
+    required this.selectedTextColor,
     required this.onSelect,
   });
 
   final TabController tabController;
   final _RankPeriod selectedPeriod;
+  final List<Color> selectedGradientColors;
+  final Color selectedTextColor;
   final ValueChanged<_RankPeriod> onSelect;
 
   @override
@@ -486,7 +539,6 @@ class _RankPeriodTabs extends StatelessWidget {
     return Container(
       width: 228,
       height: 24,
-      padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.2),
         borderRadius: AppRadius.pillBorder,
@@ -512,10 +564,12 @@ class _RankPeriodTabs extends StatelessWidget {
             tabs: [
               for (var index = 0; index < periods.length; index++)
                 Tab(
-                  height: 20,
+                  height: 25,
                   child: _RankPeriodTab(
                     period: periods[index],
                     selected: index == currentIndex,
+                    selectedGradientColors: selectedGradientColors,
+                    selectedTextColor: selectedTextColor,
                   ),
                 ),
             ],
@@ -527,39 +581,45 @@ class _RankPeriodTabs extends StatelessWidget {
 }
 
 class _RankPeriodTab extends StatelessWidget {
-  const _RankPeriodTab({required this.period, required this.selected});
+  const _RankPeriodTab({
+    required this.period,
+    required this.selected,
+    required this.selectedGradientColors,
+    required this.selectedTextColor,
+  });
 
   final _RankPeriod period;
   final bool selected;
+  final List<Color> selectedGradientColors;
+  final Color selectedTextColor;
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 160),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        gradient: selected
-            ? const LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color.fromRGBO(254, 240, 215, 1),
-                  Color.fromRGBO(254, 229, 190, 1),
-                ],
-              )
-            : null,
-        borderRadius: AppRadius.pillBorder,
-      ),
-      child: Text(
-        period.label(context),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          color: selected
-              ? const Color.fromRGBO(152, 102, 27, 1)
-              : Colors.white.withValues(alpha: 0.5),
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
+    return SizedBox.expand(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 160),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          gradient: selected
+              ? LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: selectedGradientColors,
+                )
+              : null,
+          borderRadius: AppRadius.pillBorder,
+        ),
+        child: Text(
+          period.label(context),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: selected
+                ? selectedTextColor
+                : Colors.white.withValues(alpha: 0.5),
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );
@@ -567,9 +627,10 @@ class _RankPeriodTab extends StatelessWidget {
 }
 
 class _RankCountdown extends StatelessWidget {
-  const _RankCountdown({required this.seconds});
+  const _RankCountdown({required this.seconds, required this.backgroundColor});
 
   final int seconds;
+  final Color backgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -582,10 +643,26 @@ class _RankCountdown extends StatelessWidget {
     final minutes = duration.inMinutes.remainder(60);
     final secs = duration.inSeconds.remainder(60);
     final parts = [
-      _CountdownPart(value: days, label: context.l10n.t('rank.day')),
-      _CountdownPart(value: hours, label: context.l10n.t('rank.hour')),
-      _CountdownPart(value: minutes, label: context.l10n.t('rank.min')),
-      _CountdownPart(value: secs, label: context.l10n.t('rank.sec')),
+      _CountdownPart(
+        value: days,
+        label: context.l10n.t('rank.day'),
+        backgroundColor: backgroundColor,
+      ),
+      _CountdownPart(
+        value: hours,
+        label: context.l10n.t('rank.hour'),
+        backgroundColor: backgroundColor,
+      ),
+      _CountdownPart(
+        value: minutes,
+        label: context.l10n.t('rank.min'),
+        backgroundColor: backgroundColor,
+      ),
+      _CountdownPart(
+        value: secs,
+        label: context.l10n.t('rank.sec'),
+        backgroundColor: backgroundColor,
+      ),
     ];
 
     return SizedBox(
@@ -604,10 +681,15 @@ class _RankCountdown extends StatelessWidget {
 }
 
 class _CountdownPart extends StatelessWidget {
-  const _CountdownPart({required this.value, required this.label});
+  const _CountdownPart({
+    required this.value,
+    required this.label,
+    required this.backgroundColor,
+  });
 
   final int value;
   final String label;
+  final Color backgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -619,7 +701,7 @@ class _CountdownPart extends StatelessWidget {
           height: 22,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: const Color.fromRGBO(99, 75, 51, 1),
+            color: backgroundColor,
             borderRadius: BorderRadius.circular(6),
           ),
           child: Text(

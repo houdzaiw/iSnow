@@ -27,8 +27,8 @@ class _RankPodiumView extends StatelessWidget {
                 assetName: AppAssets.lanhuRankTop2Card,
                 width: 128,
                 height: 202,
-                avatarSize: 62,
-                avatarTop: 35,
+                avatarSize: 72,
+                avatarTop: 15,
                 nameTop: 103,
                 badgeTop: 126,
                 valueTop: 163,
@@ -44,8 +44,8 @@ class _RankPodiumView extends StatelessWidget {
                 assetName: AppAssets.lanhuRankTop3Card,
                 width: 106,
                 height: 201,
-                avatarSize: 56,
-                avatarTop: 40,
+                avatarSize: 72,
+                avatarTop: 15,
                 nameTop: 103,
                 badgeTop: 126,
                 valueTop: 163,
@@ -61,8 +61,8 @@ class _RankPodiumView extends StatelessWidget {
                 assetName: AppAssets.lanhuRankTop1Card,
                 width: 174,
                 height: 250,
-                avatarSize: 78,
-                avatarTop: 56,
+                avatarSize: 83,
+                avatarTop: 27,
                 nameTop: 134,
                 badgeTop: 157,
                 valueTop: 201,
@@ -107,11 +107,12 @@ class _RankTopCard extends StatelessWidget {
       child: Stack(
         alignment: Alignment.topCenter,
         children: [
-          Positioned.fill(child: Image.asset(assetName, fit: BoxFit.fill)),
+
           Positioned(
             top: avatarTop,
             child: _RankAvatar(entry: entry, size: avatarSize),
           ),
+          Positioned.fill(child: Image.asset(assetName, fit: BoxFit.fill)),
           Positioned(
             top: nameTop,
             left: 10,
