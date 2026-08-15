@@ -47,7 +47,7 @@ class ProfileContentView extends StatelessWidget {
                       minHeight: constraints.maxHeight,
                     ),
                     child: SafeArea(
-                      bottom: false,
+                      bottom: true,
                       child: Center(
                         child: ConstrainedBox(
                           constraints: const BoxConstraints(maxWidth: 375),
@@ -81,14 +81,9 @@ class ProfileContentView extends StatelessWidget {
                                   items: state.featureItems,
                                   onMenuAction: onMenuAction,
                                 ),
-                                const SizedBox(height: 8),
+                                // const SizedBox(height: 8),
                                 _ProfileMenuCard(
                                   items: state.legalItems,
-                                  onMenuAction: onMenuAction,
-                                ),
-                                const SizedBox(height: 8),
-                                _ProfileMenuCard(
-                                  items: state.accountItems,
                                   onMenuAction: onMenuAction,
                                 ),
                               ],
