@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 
 import '../../../localization/app_localizations.dart';
 import '../../../theme/app_theme.dart';
-import '../profile_menu_item.dart';
-import '../profile_models.dart';
-import '../profile_state.dart';
+import '../mine/profile_menu_item.dart';
+import '../mine/profile_models.dart';
+import '../mine/profile_state.dart';
 
 class ProfileContentView extends StatelessWidget {
   const ProfileContentView({

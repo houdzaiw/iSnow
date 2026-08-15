@@ -16,7 +16,7 @@ import '../classes/party/party_page.dart';
 import '../classes/profile/about_us_page.dart';
 import '../classes/profile/edit_profile_page.dart';
 import '../classes/profile/edit_nickname_page.dart';
-import '../classes/profile/profile_page.dart';
+import '../classes/profile/mine/profile_page.dart';
 import '../classes/profile/settings_page.dart';
 import '../classes/rank/rank_page.dart';
 import '../classes/launch_page.dart';

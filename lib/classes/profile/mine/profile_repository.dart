@@ -1,6 +1,6 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../oauth/provider/login_provider.dart';
+import '../../oauth/provider/login_provider.dart';
 import 'profile_models.dart';
 
 final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
