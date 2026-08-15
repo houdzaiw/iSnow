@@ -87,6 +87,45 @@ class AppAssets {
   static const String lanhuRankCoin = lanhuRankWealthValueIcon;
   static const String lanhuRankLevelIcon =
       'assets/lanhu/rank/rank_level_icon.png';
+  static const String lanhuProfileVipCard =
+      'assets/lanhu/profile/profile_vip_card.png';
+  static const String lanhuProfileNobleCard =
+      'assets/lanhu/profile/profile_noble_card.png';
+  static const String lanhuProfileQuickWallet =
+      'assets/lanhu/profile/profile_quick_wallet.png';
+  static const String lanhuProfileQuickWealth =
+      'assets/lanhu/profile/profile_quick_wealth.png';
+  static const String lanhuProfileQuickCharm =
+      'assets/lanhu/profile/profile_quick_charm.png';
+  static const String lanhuProfileQuickRoom =
+      'assets/lanhu/profile/profile_quick_room.png';
+  static const String lanhuProfileQuickRecharge = lanhuProfileQuickWealth;
+  static const String lanhuProfileQuickInvite = lanhuProfileQuickCharm;
+  static const String lanhuProfileQuickStore = lanhuProfileQuickRoom;
+  static const String lanhuProfileMenuLevel =
+      'assets/lanhu/profile/profile_menu_level.png';
+  static const String lanhuProfileMenuBackpack =
+      'assets/lanhu/profile/profile_menu_backpack.png';
+  static const String lanhuProfileMenuHonor =
+      'assets/lanhu/profile/profile_menu_honor.png';
+  static const String lanhuProfileMenuSetting =
+      'assets/lanhu/profile/profile_menu_setting.png';
+  static const String lanhuProfileBadge01 =
+      'assets/lanhu/profile/profile_badge_01.png';
+  static const String lanhuProfileBadge02 =
+      'assets/lanhu/profile/profile_badge_02.png';
+  static const String lanhuProfileBadge03 =
+      'assets/lanhu/profile/profile_badge_03.png';
+  static const String lanhuProfileBadge04 =
+      'assets/lanhu/profile/profile_badge_04.png';
+  static const String lanhuProfileBadge05 =
+      'assets/lanhu/profile/profile_badge_05.png';
+  static const String lanhuProfileBadge06 =
+      'assets/lanhu/profile/profile_badge_06.png';
+  static const String lanhuProfileBadge07 =
+      'assets/lanhu/profile/profile_badge_07.png';
+  static const String lanhuProfileBadge08 =
+      'assets/lanhu/profile/profile_badge_08.png';
 
   static const String launchBackground = 'assets/base/launch_bg_image.png';
   static const String authBackground = 'assets/base/base_bg_image.png';

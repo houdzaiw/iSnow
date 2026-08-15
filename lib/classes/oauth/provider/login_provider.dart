@@ -307,7 +307,7 @@ class LoginProvider {
     return user;
   }
 
-  Future<UserData> getMyUserInfo() async {
+  Future<MeModel> getMyProfileInfo() async {
     final response = await _httpManager.get(HttpApi.myUserInfo);
     final me = _requireData(
       response,
@@ -322,7 +322,18 @@ class LoginProvider {
       countryCode: me.userBaseInfo.countryCode ?? cachedCountryCode,
     );
     await _authSession.saveUser(user);
-    return user;
+    return MeModel(
+      followingNum: me.followingNum,
+      followerNum: me.followerNum,
+      visitorNum: me.visitorNum,
+      receiveGiftValue: me.receiveGiftValue,
+      userBaseInfo: user,
+    );
+  }
+
+  Future<UserData> getMyUserInfo() async {
+    final me = await getMyProfileInfo();
+    return me.userBaseInfo;
   }
 
   Future<UserData> modifyUser({
