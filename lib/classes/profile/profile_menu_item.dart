@@ -13,10 +13,15 @@ class ProfileMenuItem {
 }
 
 class ProfileBadgeItem {
-  const ProfileBadgeItem({required this.iconAsset, required this.titleKey});
+  const ProfileBadgeItem({
+    required this.iconAsset,
+    required this.titleKey,
+    required this.webPath,
+  });
 
   final String iconAsset;
   final String titleKey;
+  final String webPath;
 }
 
 class ProfileMenuData {
@@ -145,34 +150,42 @@ class ProfileMenuData {
       ProfileBadgeItem(
         iconAsset: AppAssets.lanhuProfileBadge01,
         titleKey: 'profile.myTeam',
+        webPath: '/h5/profile/my-team.html',
       ),
       ProfileBadgeItem(
         iconAsset: AppAssets.lanhuProfileBadge02,
         titleKey: 'profile.agent',
+        webPath: '/h5/profile/agent.html',
       ),
       ProfileBadgeItem(
         iconAsset: AppAssets.lanhuProfileBadge03,
         titleKey: 'profile.bd',
+        webPath: '/h5/profile/bd.html',
       ),
       ProfileBadgeItem(
         iconAsset: AppAssets.lanhuProfileBadge04,
         titleKey: 'profile.host',
+        webPath: '/h5/profile/host.html',
       ),
       ProfileBadgeItem(
         iconAsset: AppAssets.lanhuProfileBadge05,
         titleKey: 'profile.manage',
+        webPath: '/h5/profile/manage.html',
       ),
       ProfileBadgeItem(
         iconAsset: AppAssets.lanhuProfileBadge06,
         titleKey: 'profile.dailyReward',
+        webPath: '/h5/profile/daily-reward.html',
       ),
       ProfileBadgeItem(
         iconAsset: AppAssets.lanhuProfileBadge07,
         titleKey: 'profile.saleCoin',
+        webPath: '/h5/profile/sale-coin.html',
       ),
       ProfileBadgeItem(
         iconAsset: AppAssets.lanhuProfileBadge08,
         titleKey: 'profile.gameCoin',
+        webPath: '/h5/profile/game-coin.html',
       ),
     ];
   }

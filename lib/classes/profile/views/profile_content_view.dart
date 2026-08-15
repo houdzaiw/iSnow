@@ -13,12 +13,14 @@ class ProfileContentView extends StatelessWidget {
     required this.state,
     required this.onRefresh,
     required this.onEditProfile,
+    required this.onBadgeAction,
     required this.onMenuAction,
   });
 
   final ProfileState state;
   final Future<void> Function() onRefresh;
   final VoidCallback onEditProfile;
+  final ValueChanged<ProfileBadgeItem> onBadgeAction;
   final ValueChanged<ProfileMenuItem> onMenuAction;
 
   @override
@@ -70,7 +72,10 @@ class ProfileContentView extends StatelessWidget {
                                   onMenuAction: onMenuAction,
                                 ),
                                 const SizedBox(height: 8),
-                                _ProfileBadgeCard(items: state.badgeItems),
+                                _ProfileBadgeCard(
+                                  items: state.badgeItems,
+                                  onBadgeAction: onBadgeAction,
+                                ),
                                 const SizedBox(height: 17),
                                 _ProfileMenuCard(
                                   items: state.featureItems,
@@ -480,9 +485,10 @@ class _ProfileShortcutItem extends StatelessWidget {
 }
 
 class _ProfileBadgeCard extends StatelessWidget {
-  const _ProfileBadgeCard({required this.items});
+  const _ProfileBadgeCard({required this.items, required this.onBadgeAction});
 
   final List<ProfileBadgeItem> items;
+  final ValueChanged<ProfileBadgeItem> onBadgeAction;
 
   @override
   Widget build(BuildContext context) {
@@ -504,7 +510,12 @@ class _ProfileBadgeCard extends StatelessWidget {
                 for (final item in visibleItems)
                   SizedBox(
                     width: itemWidth,
-                    child: Center(child: _ProfileBadgeItemView(item: item)),
+                    child: Center(
+                      child: _ProfileBadgeItemView(
+                        item: item,
+                        onTap: () => onBadgeAction(item),
+                      ),
+                    ),
                   ),
               ],
             );
@@ -516,35 +527,41 @@ class _ProfileBadgeCard extends StatelessWidget {
 }
 
 class _ProfileBadgeItemView extends StatelessWidget {
-  const _ProfileBadgeItemView({required this.item});
+  const _ProfileBadgeItemView({required this.item, required this.onTap});
 
   final ProfileBadgeItem item;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 54,
-      child: Column(
-        children: [
-          Image.asset(
-            item.iconAsset,
-            width: 32,
-            height: 32,
-            fit: BoxFit.contain,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            context.l10n.t(item.titleKey),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Color(0xFF747474),
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
+    return InkWell(
+      borderRadius: BorderRadius.circular(AppRadius.sm),
+      onTap: onTap,
+      child: SizedBox(
+        width: 54,
+        child: Column(
+          children: [
+            Image.asset(
+              item.iconAsset,
+              width: 32,
+              height: 32,
+              fit: BoxFit.contain,
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              context.l10n.t(item.titleKey),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFF747474),
+                fontSize: 12,
+                fontWeight: FontWeight.w400,
+                height: 1.15,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../configs/app_configs.dart';
 import '../../localization/app_localizations.dart';
 import 'profile_menu_item.dart';
 import 'profile_view_model.dart';
@@ -23,8 +24,24 @@ class ProfilePage extends ConsumerWidget {
         onRefresh: () =>
             ref.read(profileViewModelProvider.notifier).loadProfile(),
         onEditProfile: () => context.push('/edit-profile'),
+        onBadgeAction: (item) => _openBadgeWebView(context, item),
         onMenuAction: (item) => _handleMenuAction(context, ref, item),
       ),
+    );
+  }
+
+  void _openBadgeWebView(BuildContext context, ProfileBadgeItem item) {
+    final baseUri = Uri.parse(AppConfig.shared.appEnv.socketHost);
+    final webUri = baseUri.replace(path: item.webPath).toString();
+
+    context.push(
+      Uri(
+        path: '/web-view',
+        queryParameters: {
+          'title': context.l10n.t(item.titleKey),
+          'uri': webUri,
+        },
+      ).toString(),
     );
   }
 
