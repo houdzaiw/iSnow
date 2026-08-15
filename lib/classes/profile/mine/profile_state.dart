@@ -7,7 +7,6 @@ class ProfileState {
   ProfileState({
     required this.quickItems,
     required this.featureItems,
-    required this.legalItems,
     required this.accountItems,
     required this.badgeItems,
     this.profile,
@@ -21,7 +20,6 @@ class ProfileState {
     return ProfileState(
       quickItems: ProfileMenuData.getQuickItems(),
       featureItems: ProfileMenuData.getFeatureItems(),
-      legalItems: ProfileMenuData.getLegalItems(),
       accountItems: ProfileMenuData.getAccountItems(),
       badgeItems: ProfileMenuData.getBadgeItems(),
     );
@@ -34,7 +32,6 @@ class ProfileState {
   final Object? actionError;
   final List<ProfileMenuItem> quickItems;
   final List<ProfileMenuItem> featureItems;
-  final List<ProfileMenuItem> legalItems;
   final List<ProfileMenuItem> accountItems;
   final List<ProfileBadgeItem> badgeItems;
 
@@ -104,7 +101,6 @@ class ProfileState {
           : actionError,
       quickItems: quickItems,
       featureItems: featureItems,
-      legalItems: legalItems,
       accountItems: accountItems,
       badgeItems: badgeItems,
     );

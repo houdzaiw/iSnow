@@ -110,6 +110,12 @@ class AppAssets {
       'assets/lanhu/profile/profile_menu_honor.png';
   static const String lanhuProfileMenuSetting =
       'assets/lanhu/profile/profile_menu_setting.png';
+  static const String lanhuProfileMenuAbout =
+      'assets/lanhu/profile/profile_menu_about.png';
+  static const String lanhuProfileMenuPrivacy =
+      'assets/lanhu/profile/profile_menu_privacy.png';
+  static const String lanhuProfileMenuTerms =
+      'assets/lanhu/profile/profile_menu_terms.png';
   static const String lanhuProfileBadge01 =
       'assets/lanhu/profile/profile_badge_01.png';
   static const String lanhuProfileBadge02 =

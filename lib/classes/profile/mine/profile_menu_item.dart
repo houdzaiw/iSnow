@@ -107,23 +107,18 @@ class ProfileMenuData {
         titleKey: 'profile.settings',
         action: 'settings',
       ),
-    ];
-  }
-
-  static List<ProfileMenuItem> getLegalItems() {
-    return const [
       ProfileMenuItem(
-        AppAssets.profileAboutIcon,
+        AppAssets.lanhuProfileMenuAbout,
         titleKey: 'profile.aboutUs',
         action: 'about-us',
       ),
       ProfileMenuItem(
-        AppAssets.profilePrivacyIcon,
+        AppAssets.lanhuProfileMenuPrivacy,
         titleKey: 'settings.privacyPolicy',
         action: 'privacy-policy',
       ),
       ProfileMenuItem(
-        null,
+        AppAssets.lanhuProfileMenuTerms,
         titleKey: 'settings.termsOfUse',
         action: 'terms-of-use',
       ),

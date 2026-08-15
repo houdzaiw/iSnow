@@ -81,11 +81,6 @@ class ProfileContentView extends StatelessWidget {
                                   items: state.featureItems,
                                   onMenuAction: onMenuAction,
                                 ),
-                                // const SizedBox(height: 8),
-                                _ProfileMenuCard(
-                                  items: state.legalItems,
-                                  onMenuAction: onMenuAction,
-                                ),
                               ],
                             ),
                           ),
