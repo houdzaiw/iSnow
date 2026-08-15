@@ -486,43 +486,65 @@ class _ProfileBadgeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final visibleItems = items.take(7).toList(growable: false);
+
     return _ProfileWhiteCard(
       width: 351,
       height: 196,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(18, 24, 18, 20),
-        child: Wrap(
-          alignment: WrapAlignment.spaceBetween,
-          runSpacing: 18,
-          children: [
-            for (final item in items)
-              SizedBox(
-                width: 54,
-                child: Column(
-                  children: [
-                    Image.asset(
-                      item.iconAsset,
-                      width: 32,
-                      height: 32,
-                      fit: BoxFit.contain,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      context.l10n.t(item.titleKey),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Color(0xFF747474),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ],
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final itemWidth = constraints.maxWidth / 4;
+
+            return Wrap(
+              alignment: WrapAlignment.start,
+              runSpacing: 18,
+              children: [
+                for (final item in visibleItems)
+                  SizedBox(
+                    width: itemWidth,
+                    child: Center(child: _ProfileBadgeItemView(item: item)),
+                  ),
+              ],
+            );
+          },
         ),
+      ),
+    );
+  }
+}
+
+class _ProfileBadgeItemView extends StatelessWidget {
+  const _ProfileBadgeItemView({required this.item});
+
+  final ProfileBadgeItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 54,
+      child: Column(
+        children: [
+          Image.asset(
+            item.iconAsset,
+            width: 32,
+            height: 32,
+            fit: BoxFit.contain,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            context.l10n.t(item.titleKey),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Color(0xFF747474),
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ],
       ),
     );
   }

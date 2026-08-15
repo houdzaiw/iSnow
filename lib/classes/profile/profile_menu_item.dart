@@ -170,10 +170,6 @@ class ProfileMenuData {
         iconAsset: AppAssets.lanhuProfileBadge07,
         titleKey: 'profile.badge',
       ),
-      ProfileBadgeItem(
-        iconAsset: AppAssets.lanhuProfileBadge08,
-        titleKey: 'profile.honor',
-      ),
     ];
   }
 }

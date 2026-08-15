@@ -124,8 +124,6 @@ class AppAssets {
       'assets/lanhu/profile/profile_badge_06.png';
   static const String lanhuProfileBadge07 =
       'assets/lanhu/profile/profile_badge_07.png';
-  static const String lanhuProfileBadge08 =
-      'assets/lanhu/profile/profile_badge_08.png';
 
   static const String launchBackground = 'assets/base/launch_bg_image.png';
   static const String authBackground = 'assets/base/base_bg_image.png';
