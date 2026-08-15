@@ -486,7 +486,7 @@ class _ProfileBadgeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final visibleItems = items.take(7).toList(growable: false);
+    final visibleItems = items.take(8).toList(growable: false);
 
     return _ProfileWhiteCard(
       width: 351,
@@ -495,7 +495,7 @@ class _ProfileBadgeCard extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(18, 24, 18, 20),
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final itemWidth = constraints.maxWidth / 4;
+            final itemWidth = constraints.maxWidth / 5;
 
             return Wrap(
               alignment: WrapAlignment.start,

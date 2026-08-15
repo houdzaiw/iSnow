@@ -144,31 +144,35 @@ class ProfileMenuData {
     return const [
       ProfileBadgeItem(
         iconAsset: AppAssets.lanhuProfileBadge01,
-        titleKey: 'profile.vip',
+        titleKey: 'profile.myTeam',
       ),
       ProfileBadgeItem(
         iconAsset: AppAssets.lanhuProfileBadge02,
-        titleKey: 'profile.noble',
+        titleKey: 'profile.agent',
       ),
       ProfileBadgeItem(
         iconAsset: AppAssets.lanhuProfileBadge03,
-        titleKey: 'profile.wealth',
+        titleKey: 'profile.bd',
       ),
       ProfileBadgeItem(
         iconAsset: AppAssets.lanhuProfileBadge04,
-        titleKey: 'profile.charm',
+        titleKey: 'profile.host',
       ),
       ProfileBadgeItem(
         iconAsset: AppAssets.lanhuProfileBadge05,
-        titleKey: 'profile.room',
+        titleKey: 'profile.manage',
       ),
       ProfileBadgeItem(
         iconAsset: AppAssets.lanhuProfileBadge06,
-        titleKey: 'profile.guard',
+        titleKey: 'profile.dailyReward',
       ),
       ProfileBadgeItem(
         iconAsset: AppAssets.lanhuProfileBadge07,
-        titleKey: 'profile.badge',
+        titleKey: 'profile.saleCoin',
+      ),
+      ProfileBadgeItem(
+        iconAsset: AppAssets.lanhuProfileBadge08,
+        titleKey: 'profile.gameCoin',
       ),
     ];
   }
