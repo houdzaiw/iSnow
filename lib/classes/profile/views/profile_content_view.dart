@@ -42,6 +42,11 @@ class ProfileContentView extends StatelessWidget {
             onRefresh: onRefresh,
             child: LayoutBuilder(
               builder: (context, constraints) {
+                final contentWidth = (constraints.maxWidth - 24).clamp(
+                  0.0,
+                  double.infinity,
+                );
+
                 return SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   child: ConstrainedBox(
@@ -51,8 +56,8 @@ class ProfileContentView extends StatelessWidget {
                     child: SafeArea(
                       bottom: true,
                       child: Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 375),
+                        child: SizedBox(
+                          width: contentWidth,
                           child: Padding(
                             padding: const EdgeInsets.only(bottom: 28),
                             child: Column(
