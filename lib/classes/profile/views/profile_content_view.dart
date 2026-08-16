@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:country_flags/country_flags.dart';
 import 'package:flutter/material.dart';
 
 import '../../../localization/app_localizations.dart';
@@ -149,6 +150,11 @@ class _ProfileHeader extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       _GenderTag(gender: state.gender),
+                      _ProfileCountryFlag(
+                        region: state.displayRegion(
+                          context.l10n.t('profile.notSet'),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 5),
@@ -253,6 +259,32 @@ class _GenderTag extends StatelessWidget {
       child: Image.asset(asset, width: 12, height: 12, fit: BoxFit.contain),
     );
   }
+}
+
+class _ProfileCountryFlag extends StatelessWidget {
+  const _ProfileCountryFlag({required this.region});
+
+  final String region;
+
+  @override
+  Widget build(BuildContext context) {
+    final countryCode = _normalizeCountryCode(region);
+    if (countryCode == null) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 6),
+      child: CountryFlag.fromCountryCode(
+        countryCode,
+        theme: ImageTheme(width: 18, height: 18, shape: const Circle()),
+      ),
+    );
+  }
+}
+
+String? _normalizeCountryCode(String value) {
+  final code = value.trim().toUpperCase();
+  if (code.length != 2) return null;
+  return RegExp(r'^[A-Z]{2}$').hasMatch(code) ? code : null;
 }
 
 class _ProfileTinyTag extends StatelessWidget {
