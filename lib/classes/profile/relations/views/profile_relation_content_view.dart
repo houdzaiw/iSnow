@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../localization/app_localizations.dart';
 import '../../../../theme/app_theme.dart';
@@ -25,76 +24,38 @@ class ProfileRelationContentView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromRGBO(245, 245, 247, 1),
-      body: Column(
-        children: [
-          _RelationNavBar(title: context.l10n.t(state.type.titleKey)),
-          Expanded(
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (notification) {
-                if (notification.metrics.extentAfter < 120) {
-                  onLoadMore();
-                }
-                return false;
-              },
-              child: RefreshIndicator(
-                onRefresh: onRefresh,
-                child: _RelationBody(
-                  state: state,
-                  onRefresh: onRefresh,
-                  onToggleFollow: onToggleFollow,
-                ),
-              ),
-            ),
+      appBar: AppBar(
+        backgroundColor: AppColors.cardBackground,
+        foregroundColor: AppColors.textPrimary,
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          context.l10n.t(state.type.titleKey),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.066,
           ),
-        ],
+        ),
       ),
-    );
-  }
-}
-
-class _RelationNavBar extends StatelessWidget {
-  const _RelationNavBar({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).padding.top + 49,
-      color: AppColors.cardBackground,
-      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Positioned(
-            left: 18,
-            top: 7,
-            child: SizedBox(
-              width: 36,
-              height: 36,
-              child: IconButton(
-                padding: EdgeInsets.zero,
-                onPressed: () => context.pop(),
-                icon: const Icon(
-                  Icons.chevron_left,
-                  color: AppColors.textPrimary,
-                  size: 28,
-                ),
-              ),
-            ),
+      body: NotificationListener<ScrollNotification>(
+        onNotification: (notification) {
+          if (notification.metrics.extentAfter < 120) {
+            onLoadMore();
+          }
+          return false;
+        },
+        child: RefreshIndicator(
+          onRefresh: onRefresh,
+          child: _RelationBody(
+            state: state,
+            onRefresh: onRefresh,
+            onToggleFollow: onToggleFollow,
           ),
-          Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.066,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
