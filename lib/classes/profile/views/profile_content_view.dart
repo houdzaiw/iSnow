@@ -13,6 +13,7 @@ class ProfileContentView extends StatelessWidget {
     required this.state,
     required this.onRefresh,
     required this.onEditProfile,
+    required this.onMetricAction,
     required this.onBadgeAction,
     required this.onMenuAction,
   });
@@ -20,6 +21,7 @@ class ProfileContentView extends StatelessWidget {
   final ProfileState state;
   final Future<void> Function() onRefresh;
   final VoidCallback onEditProfile;
+  final ValueChanged<ProfileMetricItem> onMetricAction;
   final ValueChanged<ProfileBadgeItem> onBadgeAction;
   final ValueChanged<ProfileMenuItem> onMenuAction;
 
@@ -63,7 +65,10 @@ class ProfileContentView extends StatelessWidget {
                                 if (state.loadError != null)
                                   _ProfileLoadError(onRetry: onRefresh),
                                 const SizedBox(height: 26),
-                                _ProfileMetrics(items: state.metricItems),
+                                _ProfileMetrics(
+                                  items: state.metricItems,
+                                  onMetricAction: onMetricAction,
+                                ),
                                 const SizedBox(height: 18),
                                 const _ProfileMembershipCards(),
                                 const SizedBox(height: 16),
@@ -323,9 +328,10 @@ class _ProfileLoadError extends StatelessWidget {
 }
 
 class _ProfileMetrics extends StatelessWidget {
-  const _ProfileMetrics({required this.items});
+  const _ProfileMetrics({required this.items, required this.onMetricAction});
 
   final List<ProfileMetricItem> items;
+  final ValueChanged<ProfileMetricItem> onMetricAction;
 
   @override
   Widget build(BuildContext context) {
@@ -337,31 +343,35 @@ class _ProfileMetrics extends StatelessWidget {
         children: [
           for (final item in items)
             Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    item.value,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                onTap: () => onMetricAction(item),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      item.value,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    context.l10n.t(item.titleKey),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Color(0xFF9E9E9E),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
+                    const SizedBox(height: 4),
+                    Text(
+                      context.l10n.t(item.titleKey),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Color(0xFF9E9E9E),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
         ],

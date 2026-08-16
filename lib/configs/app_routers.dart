@@ -17,6 +17,7 @@ import '../classes/profile/about_us_page.dart';
 import '../classes/profile/edit_profile_page.dart';
 import '../classes/profile/edit_nickname_page.dart';
 import '../classes/profile/mine/profile_page.dart';
+import '../classes/profile/relations/profile_relation_page.dart';
 import '../classes/profile/settings_page.dart';
 import '../classes/rank/rank_page.dart';
 import '../classes/launch_page.dart';
@@ -134,6 +135,15 @@ final GoRouter goRouter = GoRouter(
       path: '/block-list',
       name: 'block-list',
       builder: (context, state) => BlockListPage(),
+    ),
+    GoRoute(
+      path: '/profile-relations/:type',
+      name: 'profile-relations',
+      builder: (context, state) => ProfileRelationPage(
+        type: ProfileRelationType.fromRoute(
+          state.pathParameters['type'] ?? 'followers',
+        ),
+      ),
     ),
     // 主应用页面（带底部导航）
     ShellRoute(

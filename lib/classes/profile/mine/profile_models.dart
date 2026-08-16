@@ -37,8 +37,13 @@ class ProfileAccountSummary {
 }
 
 class ProfileMetricItem {
-  const ProfileMetricItem({required this.value, required this.titleKey});
+  const ProfileMetricItem({
+    required this.value,
+    required this.titleKey,
+    required this.routeKey,
+  });
 
   final String value;
   final String titleKey;
+  final String routeKey;
 }

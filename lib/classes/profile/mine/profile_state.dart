@@ -70,14 +70,17 @@ class ProfileState {
       ProfileMetricItem(
         value: _formatCompactCount(data?.followingNum ?? 0),
         titleKey: 'profile.following',
+        routeKey: 'following',
       ),
       ProfileMetricItem(
         value: _formatCompactCount(data?.followerNum ?? 0),
         titleKey: 'profile.followers',
+        routeKey: 'followers',
       ),
       ProfileMetricItem(
         value: _formatCompactCount(data?.visitorNum ?? 0),
         titleKey: 'profile.visitors',
+        routeKey: 'visitors',
       ),
     ];
   }

@@ -24,6 +24,8 @@ class ProfilePage extends ConsumerWidget {
         onRefresh: () =>
             ref.read(profileViewModelProvider.notifier).loadProfile(),
         onEditProfile: () => context.push('/edit-profile'),
+        onMetricAction: (item) =>
+            context.push('/profile-relations/${item.routeKey}'),
         onBadgeAction: (item) => _openBadgeWebView(context, item),
         onMenuAction: (item) => _handleMenuAction(context, ref, item),
       ),
