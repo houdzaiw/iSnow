@@ -42,10 +42,7 @@ class ProfileContentView extends StatelessWidget {
             onRefresh: onRefresh,
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final contentWidth = (constraints.maxWidth - 24).clamp(
-                  0.0,
-                  double.infinity,
-                );
+                final contentWidth = (constraints.maxWidth - 24);
 
                 return SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -124,7 +121,7 @@ class _ProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 341,
+      width: MediaQuery.of(context).size.width - 24,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -341,7 +338,7 @@ class _ProfileMetrics extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 275,
+      width: MediaQuery.of(context).size.width - 24,
       height: 45,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -391,7 +388,7 @@ class _ProfileMembershipCards extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 349,
+      width: MediaQuery.of(context).size.width - 24,
       height: 68,
       child: Row(
         children: const [
@@ -431,7 +428,7 @@ class _ProfileShortcutCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _ProfileWhiteCard(
-      width: 351,
+      width: MediaQuery.of(context).size.width - 24,
       height: 95,
       child: Row(
         children: [
@@ -500,7 +497,7 @@ class _ProfileBadgeCard extends StatelessWidget {
     final visibleItems = items.take(8).toList(growable: false);
 
     return _ProfileWhiteCard(
-      width: 351,
+      width: MediaQuery.of(context).size.width - 24,
       height: 196,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(18, 24, 18, 20),
@@ -583,7 +580,7 @@ class _ProfileMenuCard extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(AppRadius.md),
       child: Container(
-        width: 351,
+        width: MediaQuery.of(context).size.width - 24,
         color: AppColors.cardBackground,
         child: Column(
           children: [
