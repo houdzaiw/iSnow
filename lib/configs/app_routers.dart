@@ -16,6 +16,7 @@ import '../classes/party/party_page.dart';
 import '../classes/profile/about_us_page.dart';
 import '../classes/profile/edit_profile_page.dart';
 import '../classes/profile/edit_nickname_page.dart';
+import '../classes/profile/homepage/profile_homepage_page.dart';
 import '../classes/profile/mine/profile_page.dart';
 import '../classes/profile/relations/profile_relation_page.dart';
 import '../classes/profile/settings_page.dart';
@@ -144,6 +145,15 @@ final GoRouter goRouter = GoRouter(
           state.pathParameters['type'] ?? 'followers',
         ),
       ),
+    ),
+    GoRoute(
+      path: '/profile-homepage/:targetUid',
+      name: 'profile-homepage',
+      builder: (context, state) {
+        final targetUid =
+            int.tryParse(state.pathParameters['targetUid'] ?? '') ?? 0;
+        return ProfileHomepagePage(targetUid: targetUid);
+      },
     ),
     // 主应用页面（带底部导航）
     ShellRoute(

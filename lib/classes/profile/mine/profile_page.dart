@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../configs/app_configs.dart';
 import '../../../localization/app_localizations.dart';
 import 'profile_menu_item.dart';
+import 'profile_state.dart';
 import 'profile_view_model.dart';
 import '../views/profile_content_view.dart';
 
@@ -24,12 +25,24 @@ class ProfilePage extends ConsumerWidget {
         onRefresh: () =>
             ref.read(profileViewModelProvider.notifier).loadProfile(),
         onEditProfile: () => context.push('/edit-profile'),
+        onAvatarAction: () => _openHomepage(context, state),
         onMetricAction: (item) =>
             context.push('/profile-relations/${item.routeKey}'),
         onBadgeAction: (item) => _openBadgeWebView(context, item),
         onMenuAction: (item) => _handleMenuAction(context, ref, item),
       ),
     );
+  }
+
+  void _openHomepage(BuildContext context, ProfileState state) {
+    final uid = state.profile?.user.uid;
+    if (uid == null || uid <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.t('profile.loadFailed'))),
+      );
+      return;
+    }
+    context.push('/profile-homepage/$uid');
   }
 
   void _openBadgeWebView(BuildContext context, ProfileBadgeItem item) {

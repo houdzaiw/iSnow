@@ -22,6 +22,9 @@ class HttpApi {
   /// 获取我的用户信息
   static const myUserInfo = '/api/user/mine';
 
+  /// 个人主页
+  static const userHomepage = '/api/user/homepage/get';
+
   /// 粉丝列表
   static const userFollowers = '/api/user/follow/followers/list';
 

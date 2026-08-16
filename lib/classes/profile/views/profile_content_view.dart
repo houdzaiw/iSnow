@@ -14,6 +14,7 @@ class ProfileContentView extends StatelessWidget {
     required this.state,
     required this.onRefresh,
     required this.onEditProfile,
+    required this.onAvatarAction,
     required this.onMetricAction,
     required this.onBadgeAction,
     required this.onMenuAction,
@@ -22,6 +23,7 @@ class ProfileContentView extends StatelessWidget {
   final ProfileState state;
   final Future<void> Function() onRefresh;
   final VoidCallback onEditProfile;
+  final VoidCallback onAvatarAction;
   final ValueChanged<ProfileMetricItem> onMetricAction;
   final ValueChanged<ProfileBadgeItem> onBadgeAction;
   final ValueChanged<ProfileMenuItem> onMenuAction;
@@ -64,6 +66,7 @@ class ProfileContentView extends StatelessWidget {
                                 _ProfileHeader(
                                   state: state,
                                   onEditProfile: onEditProfile,
+                                  onAvatarAction: onAvatarAction,
                                 ),
                                 if (state.loadError != null)
                                   _ProfileLoadError(onRetry: onRefresh),
@@ -114,10 +117,15 @@ class ProfileContentView extends StatelessWidget {
 }
 
 class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader({required this.state, required this.onEditProfile});
+  const _ProfileHeader({
+    required this.state,
+    required this.onEditProfile,
+    required this.onAvatarAction,
+  });
 
   final ProfileState state;
   final VoidCallback onEditProfile;
+  final VoidCallback onAvatarAction;
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +134,11 @@ class _ProfileHeader extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _ProfileAvatar(url: state.avatarUrl),
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onAvatarAction,
+            child: _ProfileAvatar(url: state.avatarUrl),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Padding(
