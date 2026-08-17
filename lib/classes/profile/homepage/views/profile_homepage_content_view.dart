@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:country_flags/country_flags.dart';
+import 'package:extended_tabs/extended_tabs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -9,6 +10,9 @@ import '../../../../localization/app_localizations.dart';
 import '../../../../theme/app_theme.dart';
 import '../profile_homepage_models.dart';
 import '../profile_homepage_state.dart';
+import 'profile_homepage_gifts_view.dart';
+import 'profile_homepage_honor_view.dart';
+import 'profile_homepage_profile_view.dart';
 
 class ProfileHomepageContentView extends StatelessWidget {
   const ProfileHomepageContentView({
@@ -142,15 +146,11 @@ class _LanhuProfileCanvas extends StatelessWidget {
           child: _MetricRow(info: info, scale: scale),
         ),
         Positioned(
-          left: 20 * scale,
+          left: 0,
+          right: 0,
           top: 538 * scale,
-          child: _ProfileTabs(scale: scale),
-        ),
-        Positioned(
-          left: 37 * scale,
-          right: 15 * scale,
-          top: 604 * scale,
-          child: _ProfileDetail(user: user, scale: scale),
+          bottom: 96 * scale,
+          child: _ProfileTabSection(info: info, scale: scale),
         ),
       ],
     );
@@ -334,7 +334,7 @@ class _IdentityBlock extends StatelessWidget {
           ),
         ),
         SizedBox(width: 8 * scale),
-        _PartyStatus(scale: scale),
+        if (info.isInRoom) _PartyStatus(scale: scale),
       ],
     );
   }
@@ -713,45 +713,89 @@ class _MetricItem extends StatelessWidget {
   }
 }
 
-class _ProfileTabs extends StatelessWidget {
-  const _ProfileTabs({required this.scale});
+class _ProfileTabSection extends StatefulWidget {
+  const _ProfileTabSection({required this.info, required this.scale});
 
+  final ProfileHomepageInfo info;
   final double scale;
 
   @override
+  State<_ProfileTabSection> createState() => _ProfileTabSectionState();
+}
+
+class _ProfileTabSectionState extends State<_ProfileTabSection>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this, initialIndex: 2);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final scale = widget.scale;
+    final tabs = [
+      context.l10n.t('profile.gifts'),
+      '${context.l10n.t('profile.honor')}(${widget.info.honors.length})',
+      context.l10n.t('profile.homepage'),
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            _TabLabel(
-              text: context.l10n.t('profile.gifts'),
-              selected: false,
-              scale: scale,
+        Padding(
+          padding: EdgeInsets.only(left: 20 * scale),
+          child: SizedBox(
+            width: 220 * scale,
+            height: 35 * scale,
+            child: AnimatedBuilder(
+              animation: _tabController,
+              builder: (context, _) {
+                final currentIndex = _tabController.index;
+
+                return ExtendedTabBar(
+                  controller: _tabController,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  indicator: const BoxDecoration(color: AppColors.transparent),
+                  indicatorColor: AppColors.transparent,
+                  dividerColor: AppColors.transparent,
+                  labelPadding: EdgeInsets.zero,
+                  overlayColor: WidgetStateProperty.all(AppColors.transparent),
+                  splashFactory: NoSplash.splashFactory,
+                  tabs: [
+                    for (var index = 0; index < tabs.length; index++)
+                      Tab(
+                        height: 35 * scale,
+                        child: _ProfileTabLabel(
+                          text: tabs[index],
+                          selected: index == currentIndex,
+                          scale: scale,
+                        ),
+                      ),
+                  ],
+                );
+              },
             ),
-            SizedBox(width: 20 * scale),
-            _TabLabel(
-              text: '${context.l10n.t('profile.honor')}(3)',
-              selected: false,
-              scale: scale,
-            ),
-            SizedBox(width: 20 * scale),
-            _TabLabel(
-              text: context.l10n.t('profile.homepage'),
-              selected: true,
-              scale: scale,
-            ),
-          ],
+          ),
         ),
-        SizedBox(height: 12 * scale),
-        Container(
-          width: 28 * scale,
-          height: 4 * scale,
-          margin: EdgeInsets.only(left: 150 * scale),
-          decoration: BoxDecoration(
-            gradient: AppGradients.sendButton,
-            borderRadius: BorderRadius.circular(98 * scale),
+        SizedBox(height: 24 * scale),
+        Expanded(
+          child: ExtendedTabBarView(
+            controller: _tabController,
+            cacheExtent: 1,
+            children: [
+              ProfileHomepageGiftsView(info: widget.info, scale: scale),
+              ProfileHomepageHonorView(info: widget.info, scale: scale),
+              ProfileHomepageProfileView(info: widget.info, scale: scale),
+            ],
           ),
         ),
       ],
@@ -759,8 +803,8 @@ class _ProfileTabs extends StatelessWidget {
   }
 }
 
-class _TabLabel extends StatelessWidget {
-  const _TabLabel({
+class _ProfileTabLabel extends StatelessWidget {
+  const _ProfileTabLabel({
     required this.text,
     required this.selected,
     required this.scale,
@@ -769,103 +813,39 @@ class _TabLabel extends StatelessWidget {
   final String text;
   final bool selected;
   final double scale;
-
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyle(
-        color: selected ? AppColors.textPrimary : const Color(0x66212121),
-        fontSize: 16 * scale,
-        fontWeight: FontWeight.w700,
-        height: 1,
-      ),
-    );
-  }
-}
-
-class _ProfileDetail extends StatelessWidget {
-  const _ProfileDetail({required this.user, required this.scale});
-
-  final ProfileHomepageUser user;
-  final double scale;
-
-  @override
-  Widget build(BuildContext context) {
-    final joinedDays = _joinedDays(user.createTime);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text(
-              context.l10n.t('profile.joined'),
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 15 * scale,
-                fontWeight: FontWeight.w700,
-                height: 1,
-              ),
+    return SizedBox(
+      height: 35 * scale,
+      child: Stack(
+        alignment: Alignment.topCenter,
+        children: [
+          Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: selected ? AppColors.textPrimary : const Color(0x66212121),
+              fontSize: 16 * scale,
+              fontWeight: FontWeight.w700,
+              height: 1,
             ),
-            SizedBox(width: 14 * scale),
-            Text(
-              joinedDays == null
-                  ? '--'
-                  : context.l10n.t('profile.days', {'days': '$joinedDays'}),
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 15 * scale,
-                fontWeight: FontWeight.w400,
-                height: 1,
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 26 * scale),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              width: 99 * scale,
-              child: Text(
-                '${context.l10n.t('profile.bio')}:',
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 15 * scale,
-                  fontWeight: FontWeight.w700,
-                  height: 1,
-                ),
-              ),
-            ),
-            SizedBox(width: 20 * scale),
-            Expanded(
+          ),
+          if (selected)
+            Positioned(
+              top: 25 * scale,
               child: Container(
-                constraints: BoxConstraints(minHeight: 52 * scale),
-                padding: EdgeInsets.fromLTRB(
-                  8 * scale,
-                  8 * scale,
-                  8 * scale,
-                  8 * scale,
-                ),
+                width: 28 * scale,
+                height: 4 * scale,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEFEFEF),
-                  borderRadius: BorderRadius.circular(12 * scale),
-                ),
-                child: Text(
-                  _displayBio(context, user),
-                  style: TextStyle(
-                    color: const Color(0x4D212121),
-                    fontSize: 15 * scale,
-                    fontWeight: FontWeight.w400,
-                    height: 1.2,
-                  ),
+                  gradient: AppGradients.sendButton,
+                  borderRadius: BorderRadius.circular(98 * scale),
                 ),
               ),
             ),
-          ],
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -1018,12 +998,6 @@ class _StateList extends StatelessWidget {
   }
 }
 
-String _displayBio(BuildContext context, ProfileHomepageUser user) {
-  final bio = user.userDesc?.trim();
-  if (bio == null || bio.isEmpty) return context.l10n.t('profile.bioEmpty');
-  return bio;
-}
-
 String _formatCompactCount(int value) {
   if (value >= 1000000) return '${(value / 1000000).toStringAsFixed(1)}M';
   if (value >= 1000) return '${(value / 1000).toStringAsFixed(1)}K';
@@ -1032,12 +1006,6 @@ String _formatCompactCount(int value) {
 
 String _level(int value, {required String fallback}) {
   return value <= 0 ? fallback : '$value';
-}
-
-int? _joinedDays(int? createTime) {
-  if (createTime == null || createTime <= 0) return null;
-  final created = DateTime.fromMillisecondsSinceEpoch(createTime);
-  return DateTime.now().difference(created).inDays.abs();
 }
 
 String? _normalizeCountryCode(String value) {

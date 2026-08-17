@@ -19,11 +19,53 @@ class ProfileHomepageRepository {
       throw Exception(body['message']?.toString() ?? 'Request failed');
     }
 
-    final data = _map(body['data']);
+    final data = _map(body['data'] ?? body);
     if (data.isEmpty) {
       throw Exception('Empty profile homepage data');
     }
-    return ProfileHomepageInfo.fromJson(data);
+    final info = ProfileHomepageInfo.fromJson(data);
+    final giftWall = await fetchGiftWall(targetUid: targetUid);
+    final honors = await fetchAchievedMedals(targetUid: targetUid);
+    return info.copyWith(giftWall: giftWall, honors: honors);
+  }
+
+  Future<ProfileHomepageGiftWall> fetchGiftWall({
+    required int targetUid,
+    int pageNum = 1,
+  }) async {
+    final response = await _httpManager.get(
+      HttpApi.giftWallList,
+      queryParameters: {'targetUid': targetUid, 'pageNum': pageNum},
+    );
+    final body = _map(response);
+    final code = _int(body['code']);
+    if (code != null && code != 200) {
+      throw Exception(body['message']?.toString() ?? 'Request failed');
+    }
+
+    return ProfileHomepageGiftWall.fromJson(_map(body['data']));
+  }
+
+  Future<List<ProfileHomepageHonorItem>> fetchAchievedMedals({
+    required int targetUid,
+  }) async {
+    final response = await _httpManager.get(
+      HttpApi.medalAchieved,
+      queryParameters: {'targetUid': targetUid},
+    );
+    final body = _map(response);
+    final code = _int(body['code']);
+    if (code != null && code != 200) {
+      throw Exception(body['message']?.toString() ?? 'Request failed');
+    }
+
+    final data = body['data'];
+    if (data is! List) return const [];
+    final medals = data
+        .map((item) => ProfileHomepageHonorItem.fromJson(_map(item)))
+        .where((item) => item.icon.isNotEmpty || item.id.isNotEmpty)
+        .toList(growable: false);
+    return medals..sort((a, b) => a.sortingOrder.compareTo(b.sortingOrder));
   }
 
   Future<void> setFollowing({

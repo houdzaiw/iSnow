@@ -37,6 +37,12 @@ class HttpApi {
   /// 访客列表
   static const userVisitors = '/api/user/homepage/visit/record';
 
+  /// 礼物墙
+  static const giftWallList = '/api/gift/wall/list';
+
+  /// 已获得勋章
+  static const medalAchieved = '/api/medal/achieved';
+
   /// 更新用户资料
   static const modifyUser = '/api/user/modifyUser';
 
