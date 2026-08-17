@@ -31,10 +31,13 @@ class ProfileHomepageContentView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final info = state.info;
+    final appBarScale = MediaQuery.sizeOf(context).width / 375;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
         backgroundColor: Colors.white,
+        extendBodyBehindAppBar: info != null,
+        appBar: info == null ? null : _TopBar(scale: appBarScale),
         body: LayoutBuilder(
           builder: (context, constraints) {
             if (state.isLoading && info == null) {
@@ -68,7 +71,6 @@ class ProfileHomepageContentView extends StatelessWidget {
                     ),
                   ),
                 ),
-                _TopBar(scale: scale),
                 _BottomActions(
                   scale: scale,
                   isFollowing: info.user.isFollowing,
@@ -182,41 +184,70 @@ class _CoverImage extends StatelessWidget {
   }
 }
 
-class _TopBar extends StatelessWidget {
+class _TopBar extends StatelessWidget implements PreferredSizeWidget {
   const _TopBar({required this.scale});
 
   final double scale;
 
+  static const double _toolbarHeight = 48;
+
+  @override
+  Size get preferredSize => Size.fromHeight(_toolbarHeight * scale);
+
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      bottom: false,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(18 * scale, 48 * scale, 20 * scale, 0),
-        child: Row(
-          children: [
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => Navigator.of(context).maybePop(),
-              child: SizedBox(
-                width: 36 * scale,
-                height: 36 * scale,
-                child: Icon(
-                  Icons.chevron_left_rounded,
-                  color: Colors.white,
-                  size: 34 * scale,
+    final toolbarHeight = _toolbarHeight * scale;
+
+    return AppBar(
+      toolbarHeight: toolbarHeight,
+      backgroundColor: AppColors.transparent,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      shadowColor: AppColors.transparent,
+      surfaceTintColor: AppColors.transparent,
+      systemOverlayStyle: SystemUiOverlayStyle.light,
+      automaticallyImplyLeading: false,
+      titleSpacing: 0,
+      title: SizedBox(
+        height: toolbarHeight,
+        child: Padding(
+          padding: EdgeInsets.only(left: 18 * scale, right: 20 * scale),
+          child: Row(
+            children: [
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => Navigator.of(context).maybePop(),
+                child: Image.asset(
+                  AppAssets.backWhiteButton,
+                  width: 36,
+                  height: 36,
+                  fit: BoxFit.contain,
                 ),
               ),
-            ),
-            const Spacer(),
-            Icon(
-              Icons.bar_chart_rounded,
-              color: Colors.white,
-              size: 28 * scale,
-            ),
-            SizedBox(width: 16 * scale),
-            Icon(Icons.edit_rounded, color: Colors.white, size: 28 * scale),
-          ],
+              const Spacer(),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => Navigator.of(context).maybePop(),
+                child: Image.asset(
+                  AppAssets.lanhuProfileHomepageRank,
+                  width: 24,
+                  height: 24,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              SizedBox(width: 16 * scale),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => Navigator.of(context).maybePop(),
+                child: Image.asset(
+                  AppAssets.lanhuProfileHomepageEdit,
+                  width: 24,
+                  height: 24,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -730,7 +761,7 @@ class _ProfileTabSectionState extends State<_ProfileTabSection>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this, initialIndex: 2);
+    _tabController = TabController(length: 3, vsync: this, initialIndex: 0);
   }
 
   @override

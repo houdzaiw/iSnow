@@ -20,7 +20,7 @@ class ProfileHomepageProfileView extends StatelessWidget {
     final joinedDays = _joinedDays(user.createTime);
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(37 * scale, 0, 15 * scale, 0),
+      padding: EdgeInsets.fromLTRB(18 * scale, 0, 15 * scale, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -54,7 +54,7 @@ class ProfileHomepageProfileView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
-                width: 99 * scale,
+                // width: 99 * scale,
                 child: Text(
                   '${context.l10n.t('profile.bio')}:',
                   textAlign: TextAlign.right,
@@ -66,7 +66,7 @@ class ProfileHomepageProfileView extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(width: 20 * scale),
+              SizedBox(width: 10 * scale),
               Expanded(
                 child: Container(
                   constraints: BoxConstraints(minHeight: 52 * scale),
@@ -78,7 +78,7 @@ class ProfileHomepageProfileView extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFEFEFEF),
-                    borderRadius: BorderRadius.circular(12 * scale),
+                    borderRadius: BorderRadius.circular(6 * scale),
                   ),
                   child: Text(
                     _displayBio(context, user),

@@ -140,6 +140,8 @@ class AppAssets {
       'assets/lanhu/profile_homepage/nav_back_white_small.png';
   static const String lanhuProfileHomepageRank =
       'assets/lanhu/profile_homepage/header_rank_icon.png';
+  static const String lanhuProfileHomepageEdit =
+      'assets/lanhu/profile_homepage/header_edit_icon.png';
   static const String lanhuProfileHomepageGenderFemale =
       'assets/lanhu/profile_homepage/gender_female.png';
   static const String lanhuProfileHomepageCopy =
