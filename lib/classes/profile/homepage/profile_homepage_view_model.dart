@@ -35,4 +35,26 @@ class ProfileHomepageViewModel
       state = state.copyWith(isLoading: false, error: error);
     }
   }
+
+  Future<void> toggleFollow() async {
+    final info = state.info;
+    if (info == null || info.user.uid <= 0 || state.isUpdatingFollow) return;
+
+    final nextFollowing = !info.user.isFollowing;
+    state = state.copyWith(isUpdatingFollow: true);
+    try {
+      await _repository.setFollowing(
+        targetUid: info.user.uid,
+        isFollowing: nextFollowing,
+      );
+      state = state.copyWith(
+        info: info.copyWith(
+          user: info.user.copyWith(isFollowing: nextFollowing),
+        ),
+        isUpdatingFollow: false,
+      );
+    } catch (error) {
+      state = state.copyWith(isUpdatingFollow: false, error: error);
+    }
+  }
 }

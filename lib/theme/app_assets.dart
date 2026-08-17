@@ -132,6 +132,24 @@ class AppAssets {
       'assets/lanhu/profile/profile_badge_07.png';
   static const String lanhuProfileBadge08 =
       'assets/lanhu/profile/profile_badge_08.png';
+  static const String lanhuProfileHomepageBackground =
+      'assets/lanhu/profile_homepage/header_background.png';
+  static const String lanhuProfileHomepageAvatarFrame =
+      'assets/lanhu/profile_homepage/avatar_frame.png';
+  static const String lanhuProfileHomepageBack =
+      'assets/lanhu/profile_homepage/nav_back_white_small.png';
+  static const String lanhuProfileHomepageRank =
+      'assets/lanhu/profile_homepage/header_rank_icon.png';
+  static const String lanhuProfileHomepageGenderFemale =
+      'assets/lanhu/profile_homepage/gender_female.png';
+  static const String lanhuProfileHomepageCopy =
+      'assets/lanhu/profile_homepage/id_copy_icon.png';
+  static const String lanhuProfileHomepageWealth =
+      'assets/lanhu/profile_homepage/wealth_icon.png';
+  static const String lanhuProfileHomepageCharm =
+      'assets/lanhu/profile_homepage/charm_icon.png';
+  static const String lanhuProfileHomepageVip =
+      'assets/lanhu/profile_homepage/vip_icon.png';
 
   static const String launchBackground = 'assets/base/launch_bg_image.png';
   static const String authBackground = 'assets/base/base_bg_image.png';

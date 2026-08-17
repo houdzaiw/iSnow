@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'profile_relation_type.dart';
@@ -22,6 +23,10 @@ class ProfileRelationPage extends ConsumerWidget {
       onRefresh: notifier.refresh,
       onLoadMore: notifier.loadMore,
       onToggleFollow: notifier.toggleFollow,
+      onOpenHomepage: (user) {
+        if (user.uid <= 0) return;
+        context.push('/profile-homepage/${user.uid}');
+      },
     );
   }
 }

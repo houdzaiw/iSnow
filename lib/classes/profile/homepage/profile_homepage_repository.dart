@@ -25,6 +25,16 @@ class ProfileHomepageRepository {
     }
     return ProfileHomepageInfo.fromJson(data);
   }
+
+  Future<void> setFollowing({
+    required int targetUid,
+    required bool isFollowing,
+  }) async {
+    await _httpManager.post(
+      HttpApi.userFollow,
+      data: {'targetUid': targetUid, 'isFollowing': isFollowing},
+    );
+  }
 }
 
 Map<String, dynamic> _map(Object? value) {

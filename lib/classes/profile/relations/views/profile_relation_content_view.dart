@@ -13,12 +13,14 @@ class ProfileRelationContentView extends StatelessWidget {
     required this.onRefresh,
     required this.onLoadMore,
     required this.onToggleFollow,
+    required this.onOpenHomepage,
   });
 
   final ProfileRelationState state;
   final Future<void> Function() onRefresh;
   final Future<void> Function() onLoadMore;
   final ValueChanged<ProfileRelationUser> onToggleFollow;
+  final ValueChanged<ProfileRelationUser> onOpenHomepage;
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +56,7 @@ class ProfileRelationContentView extends StatelessWidget {
             state: state,
             onRefresh: onRefresh,
             onToggleFollow: onToggleFollow,
+            onOpenHomepage: onOpenHomepage,
           ),
         ),
       ),
@@ -66,11 +69,13 @@ class _RelationBody extends StatelessWidget {
     required this.state,
     required this.onRefresh,
     required this.onToggleFollow,
+    required this.onOpenHomepage,
   });
 
   final ProfileRelationState state;
   final Future<void> Function() onRefresh;
   final ValueChanged<ProfileRelationUser> onToggleFollow;
+  final ValueChanged<ProfileRelationUser> onOpenHomepage;
 
   @override
   Widget build(BuildContext context) {
@@ -109,6 +114,7 @@ class _RelationBody extends StatelessWidget {
           typeShowsFollowButton: state.type.showsFollowButton,
           typeShowsVisitTime: state.type.showsVisitTime,
           onToggleFollow: () => onToggleFollow(state.items[index]),
+          onOpenHomepage: () => onOpenHomepage(state.items[index]),
         );
       },
     );
@@ -121,12 +127,14 @@ class _RelationUserRow extends StatelessWidget {
     required this.typeShowsFollowButton,
     required this.typeShowsVisitTime,
     required this.onToggleFollow,
+    required this.onOpenHomepage,
   });
 
   final ProfileRelationUser user;
   final bool typeShowsFollowButton;
   final bool typeShowsVisitTime;
   final VoidCallback onToggleFollow;
+  final VoidCallback onOpenHomepage;
 
   @override
   Widget build(BuildContext context) {
@@ -136,30 +144,40 @@ class _RelationUserRow extends StatelessWidget {
         height: 64,
         child: Row(
           children: [
-            _RelationAvatar(url: user.avatar),
-            const SizedBox(width: 10),
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onOpenHomepage,
+                child: Row(
                   children: [
-                    Text(
-                      user.nick.isEmpty
-                          ? context.l10n.t('profile.nickname')
-                          : user.nick,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 0.066,
-                        height: 1,
+                    _RelationAvatar(url: user.avatar),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              user.nick.isEmpty
+                                  ? context.l10n.t('profile.nickname')
+                                  : user.nick,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: 0.066,
+                                height: 1,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            _RelationTags(user: user),
+                          ],
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    _RelationTags(user: user),
                   ],
                 ),
               ),

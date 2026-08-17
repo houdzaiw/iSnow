@@ -97,5 +97,6 @@ flutter:
     - assets/lanhu/mood/
     - assets/lanhu/party/
     - assets/lanhu/profile/
+    - assets/lanhu/profile_homepage/
     - assets/lanhu/rank/
     - assets/lanhu/tabbar/
