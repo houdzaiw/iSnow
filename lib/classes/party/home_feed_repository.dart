@@ -21,9 +21,14 @@ class _HomeFeedRepository {
 
   Future<List<_HomeFriendItem>> fetchFriendsPlaying() async {
     final response = await _httpManager.get(HttpApi.friendPlayingList);
-    return _requireList(
-      response,
-    ).whereType<Map>().map((item) => _HomeFriendItem.fromJson(item)).toList();
+    final server = NadyServerResponse<List<_HomeFriendItem>>.fromJson(
+      _asMap(response),
+      _parseFriendsPlaying,
+    );
+    if (!server.isSuccess) {
+      throw server.toException();
+    }
+    return server.data ?? const <_HomeFriendItem>[];
   }
 
   Future<List<CountryInfo>> fetchHotCountries() async {
@@ -71,6 +76,14 @@ class _HomeFeedRepository {
     if (data is Map && data['list'] is List) return data['list'] as List;
     if (data is Map && data['data'] != null) return _extractList(data['data']);
     return const [];
+  }
+
+  List<_HomeFriendItem> _parseFriendsPlaying(Object? data) {
+    return _extractList(data)
+        .whereType<Map>()
+        .map(_HomeFriendItem.fromJson)
+        .where((item) => item.hasContent)
+        .toList(growable: false);
   }
 
   Map<String, dynamic> _asMap(dynamic response) {
