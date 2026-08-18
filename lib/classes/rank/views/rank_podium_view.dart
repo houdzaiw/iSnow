@@ -107,12 +107,15 @@ class _RankTopCard extends StatelessWidget {
       child: Stack(
         alignment: Alignment.topCenter,
         children: [
-
           Positioned(
             top: avatarTop,
             child: _RankAvatar(entry: entry, size: avatarSize),
           ),
           Positioned.fill(child: Image.asset(assetName, fit: BoxFit.fill)),
+          Positioned(
+            top: avatarTop,
+            child: _RankAvatarTapTarget(entry: entry, size: avatarSize),
+          ),
           Positioned(
             top: nameTop,
             left: 10,

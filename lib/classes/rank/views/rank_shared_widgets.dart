@@ -51,39 +51,70 @@ class _RankAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final avatar = entry.avatar;
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: const Color.fromRGBO(255, 239, 120, 1),
-          width: 1,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: entry.uid > 0
+          ? () => _openRankProfileHomepage(context, entry)
+          : null,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: const Color.fromRGBO(255, 239, 120, 1),
+            width: 1,
+          ),
         ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: avatar == null
-          ? const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color.fromRGBO(254, 229, 190, 1),
-                    Color.fromRGBO(99, 75, 51, 1),
-                  ],
+        clipBehavior: Clip.antiAlias,
+        child: avatar == null
+            ? const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color.fromRGBO(254, 229, 190, 1),
+                      Color.fromRGBO(99, 75, 51, 1),
+                    ],
+                  ),
                 ),
+                child: Icon(Icons.person_rounded, color: Colors.white70),
+              )
+            : CachedNetworkImage(
+                imageUrl: avatar,
+                fit: BoxFit.cover,
+                errorWidget: (_, __, ___) =>
+                    const Icon(Icons.person_rounded, color: Colors.white70),
               ),
-              child: Icon(Icons.person_rounded, color: Colors.white70),
-            )
-          : CachedNetworkImage(
-              imageUrl: avatar,
-              fit: BoxFit.cover,
-              errorWidget: (_, __, ___) =>
-                  const Icon(Icons.person_rounded, color: Colors.white70),
-            ),
+      ),
     );
   }
+}
+
+class _RankAvatarTapTarget extends StatelessWidget {
+  const _RankAvatarTapTarget({required this.entry, required this.size});
+
+  final _RankEntry entry;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    if (entry.uid <= 0) return SizedBox(width: size, height: size);
+    return SizedBox(
+      width: size,
+      height: size,
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () => _openRankProfileHomepage(context, entry),
+      ),
+    );
+  }
+}
+
+void _openRankProfileHomepage(BuildContext context, _RankEntry entry) {
+  if (entry.uid <= 0) return;
+  context.push('/profile-homepage/${entry.uid}');
 }
 
 class _RankBadges extends StatelessWidget {

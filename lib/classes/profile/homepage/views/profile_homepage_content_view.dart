@@ -817,7 +817,7 @@ class _ProfileTabSectionState extends State<_ProfileTabSection>
             ),
           ),
         ),
-        SizedBox(height: 24 * scale),
+        SizedBox(height: 10 * scale),
         Expanded(
           child: ExtendedTabBarView(
             controller: _tabController,

@@ -81,9 +81,19 @@ class _GiftWallHeader extends StatelessWidget {
       child: Row(
         children: [
           Text(
+            context.l10n.t('profile.giftsReceived', {'count': '$receive'}),
+            style: TextStyle(
+              color: AppColors.textPrimary66,
+              fontSize: 15 * scale,
+              fontWeight: FontWeight.w700,
+              height: 1,
+            ),
+          ),
+          Spacer(flex: 1),
+          Text(
             title,
             style: TextStyle(
-              color: AppColors.textPrimary,
+              color: AppColors.textPrimary66,
               fontSize: 15 * scale,
               fontWeight: FontWeight.w700,
               height: 1,
@@ -93,9 +103,9 @@ class _GiftWallHeader extends StatelessWidget {
           Text(
             total <= 0 ? _formatCompactCount(receive) : '$receive/$total',
             style: TextStyle(
-              color: AppColors.textPrimary,
+              color: AppColors.textPrimary66,
               fontSize: 15 * scale,
-              fontWeight: FontWeight.w400,
+              fontWeight: FontWeight.w700,
               height: 1,
             ),
           ),
