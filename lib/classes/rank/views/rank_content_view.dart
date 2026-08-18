@@ -240,6 +240,9 @@ class _RankCategoryBoardView extends StatelessWidget {
           child: Column(
             children: [
               _RankCountdown(
+                key: ValueKey<_RankQuery>(
+                  state.queryFor(category, selectedPeriod),
+                ),
                 seconds: currentBoard?.countdown ?? 0,
                 backgroundColor: colorStyle.countdownBackgroundColor,
               ),
@@ -626,18 +629,83 @@ class _RankPeriodTab extends StatelessWidget {
   }
 }
 
-class _RankCountdown extends StatelessWidget {
-  const _RankCountdown({required this.seconds, required this.backgroundColor});
+class _RankCountdown extends StatefulWidget {
+  const _RankCountdown({
+    super.key,
+    required this.seconds,
+    required this.backgroundColor,
+  });
 
   final int seconds;
   final Color backgroundColor;
 
   @override
-  Widget build(BuildContext context) {
+  State<_RankCountdown> createState() => _RankCountdownState();
+}
+
+class _RankCountdownState extends State<_RankCountdown> {
+  Timer? _timer;
+  late DateTime _endsAt;
+  late int _remainingSeconds;
+
+  @override
+  void initState() {
+    super.initState();
+    _resetCountdown(widget.seconds);
+  }
+
+  @override
+  void didUpdateWidget(covariant _RankCountdown oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.seconds != widget.seconds) {
+      _resetCountdown(widget.seconds);
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _resetCountdown(int seconds) {
+    _timer?.cancel();
+    _remainingSeconds = _normalizeCountdownSeconds(seconds);
+    _endsAt = DateTime.now().add(Duration(seconds: _remainingSeconds));
+    if (_remainingSeconds > 0) {
+      _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+    }
+  }
+
+  void _tick() {
+    if (!mounted) return;
+    final nextSeconds = _calculateRemainingSeconds();
+    if (nextSeconds == _remainingSeconds) return;
+
+    setState(() {
+      _remainingSeconds = nextSeconds;
+    });
+
+    if (nextSeconds <= 0) {
+      _timer?.cancel();
+      _timer = null;
+    }
+  }
+
+  int _calculateRemainingSeconds() {
+    final remainingMs = _endsAt.difference(DateTime.now()).inMilliseconds;
+    if (remainingMs <= 0) return 0;
+    return (remainingMs / Duration.millisecondsPerSecond).ceil();
+  }
+
+  int _normalizeCountdownSeconds(int seconds) {
     final normalizedSeconds = seconds > 1000000000 ? seconds ~/ 1000 : seconds;
-    final duration = Duration(
-      seconds: normalizedSeconds < 0 ? 0 : normalizedSeconds,
-    );
+    return normalizedSeconds < 0 ? 0 : normalizedSeconds;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final duration = Duration(seconds: _remainingSeconds);
     final days = duration.inDays;
     final hours = duration.inHours.remainder(24);
     final minutes = duration.inMinutes.remainder(60);
@@ -646,22 +714,22 @@ class _RankCountdown extends StatelessWidget {
       _CountdownPart(
         value: days,
         label: context.l10n.t('rank.day'),
-        backgroundColor: backgroundColor,
+        backgroundColor: widget.backgroundColor,
       ),
       _CountdownPart(
         value: hours,
         label: context.l10n.t('rank.hour'),
-        backgroundColor: backgroundColor,
+        backgroundColor: widget.backgroundColor,
       ),
       _CountdownPart(
         value: minutes,
         label: context.l10n.t('rank.min'),
-        backgroundColor: backgroundColor,
+        backgroundColor: widget.backgroundColor,
       ),
       _CountdownPart(
         value: secs,
         label: context.l10n.t('rank.sec'),
-        backgroundColor: backgroundColor,
+        backgroundColor: widget.backgroundColor,
       ),
     ];
 
