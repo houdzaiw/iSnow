@@ -7,14 +7,16 @@
 
 ## 结论
 
-nady 的房间功能建议在 iSnow 中拆成两个独立单例：
+nady 的房间功能建议在 iSnow 中拆成四个独立单例：
 
 | 单例 | 目标职责 | 当前 nady 对应 |
 | --- | --- | --- |
 | `AppSocketManager` / `SocketService` | 全 App 共享长连接；负责连接、鉴权、重连、心跳、频道订阅、事件分发、退订 | `LongLinkManager`、`LongLinkHandler`、`LongLink*Handler` |
 | `RoomManager` / `RoomService` | 当前一个房间的业务状态；负责进房、退房、房间 UI 状态、麦位、消息、礼物、RTC、管理操作 | `RoomManager`、`VoiceRoomController`、room providers |
+| `RoomAgoraManager` | 声网 Agora 引擎；负责初始化、join/leave channel、audience/broadcaster 角色切换、静音、声浪、音频混流、token 续期 | `AgoraRtcManager` |
+| `RoomMusicManager` | 房间音乐播放器；负责曲库、当前曲目、播放模式、播放器面板状态，调用 `RoomAgoraManager` 执行 audio mixing | `NadyMyMusic`、`NadyPlayingMusic`、`NadyRoomPlayStatus`、`NadyRoomPlayMode`、`NadyRoomMusicStateController` |
 
-socket 与 room 必须分开提取。socket 是全局基础设施，进入房间只是追加订阅 `room:{roomId}` 和 `room`；room 是业务状态聚合，应该只维护“当前一个房间”的状态。
+socket、room、Agora、music 必须分开提取。socket 是全局基础设施，进入房间只是追加订阅 `room:{roomId}` 和 `room`；room 是业务状态聚合，只维护“当前一个房间”的状态；Agora 是 RTC 音频能力；music 是曲库和播放策略，最终通过 Agora audio mixing 输出。
 
 ## 核心源码地图
 
@@ -163,6 +165,7 @@ lib/features/room/
   data/
     room_api.dart
     room_models.dart
+    room_repository.dart
     room_socket_events.dart
   socket/
     app_socket_manager.dart
@@ -172,8 +175,10 @@ lib/features/room/
   domain/
     room_manager.dart
     room_state.dart
-    room_repository.dart
-    room_rtc_manager.dart
+    room_agora_manager.dart
+    room_agora_state.dart
+    room_music_manager.dart
+    room_music_state.dart
   presentation/
     room_page.dart
     room_layout.dart
@@ -196,7 +201,8 @@ lib/features/room/
 | --- | --- | --- |
 | `AppSocketManager` | 连接 Centrifugo、订阅频道、解析 `LongLinkMsg`、发布事件流、重连上报 | 不保存房间 UI 状态，不直接弹业务弹窗 |
 | `RoomManager` | 保存当前房间状态、调用 room API、协调 RTC/socket、处理房间事件落状态 | 不持有 socket client 实例细节 |
-| `RoomRtcManager` | 声网初始化、join/leave、角色切换、麦克风/扬声器/音频混流 | 不处理 HTTP 进房和公屏消息 |
+| `RoomAgoraManager` | 声网初始化、join/leave、角色切换、麦克风/扬声器、声浪、音频混流、token 续期 | 不处理 HTTP 进房和公屏消息，不保存曲库 |
+| `RoomMusicManager` | 曲库、当前曲目、播放模式、播放器展开/收起，调用 Agora audio mixing | 不持有 socket client 或 Agora engine |
 | `RoomRepository` | HTTP API 请求和 model 转换 | 不关心 Widget 和弹窗 |
 | `Room UI` | watch 状态并渲染 | 不直接订阅原始 socket 频道 |
 
@@ -207,7 +213,7 @@ sequenceDiagram
   participant UI as Room Entry UI
   participant RM as RoomManager
   participant API as RoomRepository
-  participant RTC as RoomRtcManager
+  participant RTC as RoomAgoraManager
   participant SM as AppSocketManager
 
   UI->>RM: enterRoom(roomId, pwd?, followUid?, routeArgs?)
@@ -227,8 +233,9 @@ sequenceDiagram
 1. 先迁移 `AppSocketManager`，只支持连接、token、频道订阅、事件分发、心跳和重连上报。
 2. 再迁移 `RoomRepository` 和核心 model：`EnterRoomRequest`、`EnterRoomResp`、`RoomInfo`、`RoomMicModel`、`RoomUserInfo`、`LongLinkMsg`。
 3. 再迁移 `RoomManager` 核心状态：进房、退房、房间信息、麦位列表、公屏消息、身份、观众数。
-4. 再迁移 RTC：Agora join/leave、上麦/下麦、角色切换、静音、音量回调。
-5. 最后迁移增强功能：礼物动效、横幅、红包、幸运转盘、PK、游戏大厅、音乐播放器、座驾、管理弹窗。
+4. 再迁移 `RoomAgoraManager`：Agora join/leave、上麦/下麦、角色切换、静音、声浪、token 续期。
+5. 再迁移 `RoomMusicManager`：本地曲库、当前曲目、播放模式、播放器开关、Agora audio mixing。
+6. 最后迁移增强功能：礼物动效、横幅、红包、幸运转盘、PK、游戏大厅、座驾、管理弹窗。
 
 ## 环境变量和依赖
 
@@ -263,10 +270,11 @@ sequenceDiagram
 | provider 生命周期复杂 | `VoiceRoomController` 通过 `_listen` 保活多个 provider，dispose 时统一关闭 | iSnow 可用显式 `RoomState` 聚合，减少隐式保活 |
 | 本地设置写入疑似问题 | 静音 provider 中调用的是 `SpUtil.of.getBool(key, mute)`，看起来像读取而非写入 | 迁移时确认 iSnow 的本地存储 API，避免照搬潜在 bug |
 
-## 三份文档关系
+## 四份文档关系
 
 | 文档 | 内容 |
 | --- | --- |
 | `room_socket_architecture.md` | 当前总览、架构拆分、职责边界、迁移顺序 |
 | `socket_migration.md` | socket 连接、频道、鉴权、事件全量清单、payload、Dart 骨架 |
 | `room_migration.md` | 房间功能流程、API 请求参数、返回 model、状态结构、RoomManager 骨架 |
+| `agora_rtc_migration.md` | Agora RTC、上下麦推流、声浪、token 续期、音乐 audio mixing、Android 必需配置、Dart 骨架 |
