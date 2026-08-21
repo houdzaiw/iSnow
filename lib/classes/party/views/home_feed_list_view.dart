@@ -82,45 +82,53 @@ class _HomeRoomCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tagType = room.tagType;
+    final roomId = room.roomId;
     return ClipRRect(
       borderRadius: BorderRadius.circular(14),
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: _PartyImage(
-              url: room.cover,
-              assetName: AppAssets.lanhuHomeRoomBanner,
-              width: double.infinity,
-              height: double.infinity,
-            ),
-          ),
-          const Positioned.fill(child: _RoomCardGradient()),
-          if (tagType != null)
-            Positioned(
-              top: 12,
-              right: 8,
-              child: _RoomTag(
-                label: _homeRoomTagLabel(tagType),
-                assetName: _homeRoomTagAsset(tagType),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: roomId == null || roomId.isEmpty
+            ? null
+            : () =>
+                  context.pushNamed('room', pathParameters: {'roomId': roomId}),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: _PartyImage(
+                url: room.cover,
+                assetName: AppAssets.lanhuHomeRoomBanner,
+                width: double.infinity,
+                height: double.infinity,
               ),
             ),
-          Positioned(
-            left: 13,
-            bottom: 45,
-            child: _RoomCountryBadge(countryCode: room.countryCode),
-          ),
-          Positioned(
-            right: 10,
-            bottom: 45,
-            child: _RoomOnlineBadge(text: room.onlineText),
-          ),
-          Positioned(
-            left: 13,
-            right: 8,
-            bottom: 18,
-            child: _RoomTitle(title: room.title),
-          ),
-        ],
+            const Positioned.fill(child: _RoomCardGradient()),
+            if (tagType != null)
+              Positioned(
+                top: 12,
+                right: 8,
+                child: _RoomTag(
+                  label: _homeRoomTagLabel(tagType),
+                  assetName: _homeRoomTagAsset(tagType),
+                ),
+              ),
+            Positioned(
+              left: 13,
+              bottom: 45,
+              child: _RoomCountryBadge(countryCode: room.countryCode),
+            ),
+            Positioned(
+              right: 10,
+              bottom: 45,
+              child: _RoomOnlineBadge(text: room.onlineText),
+            ),
+            Positioned(
+              left: 13,
+              right: 8,
+              bottom: 18,
+              child: _RoomTitle(title: room.title),
+            ),
+          ],
+        ),
       ),
     );
   }

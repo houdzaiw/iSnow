@@ -1,0 +1,2928 @@
+{
+  "status": "success",
+  "project_name": "心情日历白包",
+  "total_sectors": 21,
+  "ungrouped_design_count": 0,
+  "sectors": [
+    {
+      "id": "d95bf66f-b7a2-414b-8c6f-9774cb80e469",
+      "parent_id": null,
+      "name": "基础弹窗",
+      "path": "基础弹窗",
+      "order": 200000,
+      "image_count": 2
+    },
+    {
+      "id": "2f3a1d87-d6e7-4393-9ba5-d5382ed75ec8",
+      "parent_id": null,
+      "name": "财富/游戏/活跃/魅力-等级说明",
+      "path": "财富/游戏/活跃/魅力-等级说明",
+      "order": 190000,
+      "image_count": 5
+    },
+    {
+      "id": "278ea19f-6927-42bc-aaae-6e52b889fefd",
+      "parent_id": null,
+      "name": "vip",
+      "path": "vip",
+      "order": 180000,
+      "image_count": 7
+    },
+    {
+      "id": "71bc9dc2-18dc-4775-ace0-a5a2ea4a486c",
+      "parent_id": null,
+      "name": "贵族",
+      "path": "贵族",
+      "order": 170000,
+      "image_count": 8
+    },
+    {
+      "id": "19ae24e3-9439-46cb-9a47-a7a5ea760275",
+      "parent_id": null,
+      "name": "商店&背包",
+      "path": "商店&背包",
+      "order": 160000,
+      "image_count": 11
+    },
+    {
+      "id": "591726a7-8246-44df-b182-2b4ad053d8da",
+      "parent_id": null,
+      "name": "每日任务/每日签到",
+      "path": "每日任务/每日签到",
+      "order": 150000,
+      "image_count": 9
+    },
+    {
+      "id": "8f6a0a03-c42f-4dc5-8ced-dbc9d5f96bc7",
+      "parent_id": null,
+      "name": "荣耀勋章页面",
+      "path": "荣耀勋章页面",
+      "order": 140000,
+      "image_count": 4
+    },
+    {
+      "id": "60421057-f4a4-4e1e-89e3-0bda9959073f",
+      "parent_id": null,
+      "name": "邀请好友",
+      "path": "邀请好友",
+      "order": 130000,
+      "image_count": 8
+    },
+    {
+      "id": "d3773a68-310c-43ce-b1cf-cd7952b38147",
+      "parent_id": null,
+      "name": "游戏数据页面",
+      "path": "游戏数据页面",
+      "order": 120000,
+      "image_count": 9
+    },
+    {
+      "id": "f809fded-58a2-461a-9a5c-288ef3eff6f2",
+      "parent_id": null,
+      "name": "游戏大厅",
+      "path": "游戏大厅",
+      "order": 110000,
+      "image_count": 8
+    },
+    {
+      "id": "31c763dd-5c34-493f-9d81-219af0afac20",
+      "parent_id": null,
+      "name": "lucky box",
+      "path": "lucky box",
+      "order": 100000,
+      "image_count": 9
+    },
+    {
+      "id": "9823bcef-add0-422e-8da5-caec7981d4dc",
+      "parent_id": null,
+      "name": "首充页面",
+      "path": "首充页面",
+      "order": 90000,
+      "image_count": 1
+    },
+    {
+      "id": "80833b75-5208-4387-9130-7859999923c1",
+      "parent_id": null,
+      "name": "PK功能",
+      "path": "PK功能",
+      "order": 80000,
+      "image_count": 9
+    },
+    {
+      "id": "82556018-b926-4137-9c95-c4cc009d72d5",
+      "parent_id": null,
+      "name": "音乐播放器",
+      "path": "音乐播放器",
+      "order": 70000,
+      "image_count": 8
+    },
+    {
+      "id": "4a8044d1-b642-4ea6-85b9-6920c45f48a6",
+      "parent_id": null,
+      "name": "财富/活跃/魅力-排行榜",
+      "path": "财富/活跃/魅力-排行榜",
+      "order": 60000,
+      "image_count": 3
+    },
+    {
+      "id": "f9a54f97-0f48-4c13-9155-ba6b7a0f1e54",
+      "parent_id": null,
+      "name": "我的 tab",
+      "path": "我的 tab",
+      "order": 50000,
+      "image_count": 17
+    },
+    {
+      "id": "3fcbf4ff-154e-4a01-8f3d-66670478e4fb",
+      "parent_id": null,
+      "name": "私聊/消息 tab",
+      "path": "私聊/消息 tab",
+      "order": 40000,
+      "image_count": 7
+    },
+    {
+      "id": "174320a9-4cf3-4fcd-a838-6aee8ca75a1a",
+      "parent_id": null,
+      "name": "版本升级",
+      "path": "版本升级",
+      "order": 30000,
+      "image_count": 1
+    },
+    {
+      "id": "2a2f03c2-88de-4939-8e41-ebc404ca7156",
+      "parent_id": null,
+      "name": "派对功能",
+      "path": "派对功能",
+      "order": 20000,
+      "image_count": 10
+    },
+    {
+      "id": "d1834064-7546-4d00-b5af-3f82c938e1ac",
+      "parent_id": null,
+      "name": "直播间",
+      "path": "直播间",
+      "order": 10000,
+      "image_count": 35
+    },
+    {
+      "id": "cff86ab5-a811-40a4-9e34-f0ba5213fba6",
+      "parent_id": null,
+      "name": "心情日历",
+      "path": "心情日历",
+      "order": 0,
+      "image_count": 40
+    }
+  ],
+  "total_designs": 211,
+  "designs": [
+    {
+      "index": 1,
+      "id": "7933e06d-776c-425e-8c87-48e252891200",
+      "name": "Frame 1312319198",
+      "width": 187.5,
+      "height": 137.5,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverad04ad6ce4e4f225dbfb958ced458847.png",
+      "has_comment": false,
+      "update_time": "2026-08-10T11:19:22.903377Z",
+      "sectors": [
+        "基础弹窗"
+      ]
+    },
+    {
+      "index": 2,
+      "id": "e0c6a39a-4027-422c-87c6-64b66e087c80",
+      "name": "排行榜",
+      "width": 187.5,
+      "height": 728.5,
+      "url": "https://alipic.lanhuapp.com/FigmaCover54539972d772a7da93e3a13d68410295.png",
+      "has_comment": false,
+      "update_time": "2026-07-30T16:42:09.75873Z",
+      "sectors": [
+        "vip"
+      ]
+    },
+    {
+      "index": 3,
+      "id": "b75b507b-040a-45fb-8365-9f20f0142acb",
+      "name": "排行榜",
+      "width": 187.5,
+      "height": 728.5,
+      "url": "https://alipic.lanhuapp.com/FigmaCovercf1c392edcd5d3a445bf2d608e53fbb4.png",
+      "has_comment": false,
+      "update_time": "2026-07-30T16:42:09.778558Z",
+      "sectors": [
+        "vip"
+      ]
+    },
+    {
+      "index": 4,
+      "id": "401b70d4-e4f8-447b-9e54-d4a077f7ce01",
+      "name": "排行榜",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover044fd4f3f86a91ff1eef3cb336e3ac56.png",
+      "has_comment": false,
+      "update_time": "2026-08-11T16:08:09.2345Z",
+      "sectors": [
+        "财富/活跃/魅力-排行榜"
+      ]
+    },
+    {
+      "index": 5,
+      "id": "5f96c250-9160-4732-a831-ce12a7715916",
+      "name": "个人主页",
+      "width": 187.5,
+      "height": 479.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover9015725c70b55431213984dc1f9d7ddc.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.892494Z",
+      "sectors": [
+        "我的 tab"
+      ]
+    },
+    {
+      "index": 6,
+      "id": "bb950f82-7336-4293-8d24-7c493b46abc8",
+      "name": "个人主页",
+      "width": 187.5,
+      "height": 479.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverab57028b44fc9473c3b1a5de02a52b93.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.89027Z",
+      "sectors": [
+        "我的 tab"
+      ]
+    },
+    {
+      "index": 7,
+      "id": "9c6852c3-ee9c-4796-9e29-019417e12af7",
+      "name": "我的-about us",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover577b41879a7273cda2069b1cf00ccc7c.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.885899Z",
+      "sectors": [
+        "我的 tab"
+      ]
+    },
+    {
+      "index": 8,
+      "id": "a6663fe9-b0ed-4015-8d33-d308b0e878ab",
+      "name": "我的-设置-语言",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover650e70f1f37293ae3bc8873779d396fa.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.872181Z",
+      "sectors": [
+        "我的 tab"
+      ]
+    },
+    {
+      "index": 9,
+      "id": "2fc3d65f-4a57-4f8e-a7a1-f976e741491a",
+      "name": "商店",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCovere2761d53f8616117ab697c931b85a818.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.042615Z",
+      "sectors": [
+        "商店&背包"
+      ]
+    },
+    {
+      "index": 10,
+      "id": "8bed7fd0-fbcf-40fc-88f9-6a17e43b0461",
+      "name": "背包",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover6d100f3b5b1e652d64baae13242ec596.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.044373Z",
+      "sectors": [
+        "商店&背包"
+      ]
+    },
+    {
+      "index": 11,
+      "id": "c2cf4a28-9c7a-4f1e-9436-81c4c19f553b",
+      "name": "邀请有礼-增加周累计邀请奖励",
+      "width": 187.5,
+      "height": 490.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover419381dfe0245b2532df21f002b5bc3e.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.003454Z",
+      "sectors": [
+        "邀请好友"
+      ]
+    },
+    {
+      "index": 12,
+      "id": "6d12c30f-40d4-4ca4-83fe-0e61b2dfe2a0",
+      "name": "游戏A 数据页",
+      "width": 187.5,
+      "height": 618.5,
+      "url": "https://alipic.lanhuapp.com/FigmaCover6f4e5dd8089ece0b7e4ddf6f6141ada7.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.981831Z",
+      "sectors": [
+        "游戏数据页面"
+      ]
+    },
+    {
+      "index": 13,
+      "id": "5797ed16-0aba-42e7-ae27-53d4d266f174",
+      "name": "bigwin界面",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover42471e0d3a86d9cd23a622b95cbcf818.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.956469Z",
+      "sectors": [
+        "游戏大厅"
+      ]
+    },
+    {
+      "index": 14,
+      "id": "05d4a3f6-3f5b-4b8e-b1ef-192a0fe84dd1",
+      "name": "充值优惠-弹窗",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover3948451936e25cd9f1e66061487fa0d1.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.968489Z",
+      "sectors": [
+        "游戏大厅"
+      ]
+    },
+    {
+      "index": 15,
+      "id": "0f7cc9c1-5b1d-4c4c-9e74-982e1bfeb8b9",
+      "name": "充值优惠-弹窗",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverd8f8add81c276d1076256bfbe37db40b.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.966414Z",
+      "sectors": [
+        "游戏大厅"
+      ]
+    },
+    {
+      "index": 16,
+      "id": "33c6c33b-09b7-4225-ba4f-dc5226808baf",
+      "name": "lucky box",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCovere08e9f4d28492bcd71d9d511b30bf957.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.937135Z",
+      "sectors": [
+        "lucky box"
+      ]
+    },
+    {
+      "index": 17,
+      "id": "409bd6c9-a9e8-48c5-8706-b29d20c49eff",
+      "name": "PK-直播间",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCovere2835340ab6eb3c9ec8607182a1430c7.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.927395Z",
+      "sectors": [
+        "PK功能"
+      ]
+    },
+    {
+      "index": 18,
+      "id": "c17f3adf-37e4-4697-bfee-c3ffba31f9aa",
+      "name": "PK-两人结果",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover7722aed9550209300075da259400bdc9.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.929317Z",
+      "sectors": [
+        "PK功能"
+      ]
+    },
+    {
+      "index": 19,
+      "id": "5cbb96ea-3afc-469c-9eee-6957e9ddbcb3",
+      "name": "PK",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverd90c5055bf69b333bfd6418f97d75af1.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.921739Z",
+      "sectors": [
+        "PK功能"
+      ]
+    },
+    {
+      "index": 20,
+      "id": "f2616a5f-f98e-4a45-a1d2-05537e65aa76",
+      "name": "直播间-15麦位-展开播放器",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverbe6fccb69c2eb7d0e31c1c970cee772a.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.903462Z",
+      "sectors": [
+        "音乐播放器"
+      ]
+    },
+    {
+      "index": 21,
+      "id": "062d5742-abc3-4b56-8191-c64d0e2f9943",
+      "name": "音乐播放器",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover1c4021fa8067f42f8c403492eedf085e.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.914885Z",
+      "sectors": [
+        "音乐播放器"
+      ]
+    },
+    {
+      "index": 22,
+      "id": "edd988c3-909e-42b2-839e-78d274cd95f9",
+      "name": "音乐播放器",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover2aeddbbbecb3cc12fcafe9bb6a3ae35e.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.91123Z",
+      "sectors": [
+        "音乐播放器"
+      ]
+    },
+    {
+      "index": 23,
+      "id": "3fcd80ef-47f1-463b-8313-7f2111dd3f2d",
+      "name": "音乐播放器",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover863bbee92908a5cd85041a2236dde6c0.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.916428Z",
+      "sectors": [
+        "音乐播放器"
+      ]
+    },
+    {
+      "index": 24,
+      "id": "b3b539d5-5f03-4b19-8722-86c083a8a248",
+      "name": "音乐播放器",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverd0fefc1344dbc0367cc5ed093821502a.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.909359Z",
+      "sectors": [
+        "音乐播放器"
+      ]
+    },
+    {
+      "index": 25,
+      "id": "ab83b62b-0b79-4c95-b4cf-31972564cd8e",
+      "name": "音乐播放器",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover92ffda457197ed14344024ed435b86d9.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.907615Z",
+      "sectors": [
+        "音乐播放器"
+      ]
+    },
+    {
+      "index": 26,
+      "id": "d4f9a2b4-136d-4589-910d-5fc02c9401c0",
+      "name": "音乐播放器",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverad453822e9b22f2ab8372a1bef6b0d68.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.913096Z",
+      "sectors": [
+        "音乐播放器"
+      ]
+    },
+    {
+      "index": 27,
+      "id": "791e9f8d-4c70-4f71-bef5-328e5fc55277",
+      "name": "音乐播放器",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover43fcf84a24bcd5a51b7a6b8e8b791fc2.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.905611Z",
+      "sectors": [
+        "音乐播放器"
+      ]
+    },
+    {
+      "index": 28,
+      "id": "c44234d6-fa57-422a-b3cb-e68741cb6c30",
+      "name": "排行榜",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverdcc1b1682d8b204ab2aa0608e8b7249f.png",
+      "has_comment": false,
+      "update_time": "2026-08-11T16:08:09.239663Z",
+      "sectors": [
+        "财富/活跃/魅力-排行榜"
+      ]
+    },
+    {
+      "index": 29,
+      "id": "23d7fdc2-0658-48c7-8945-40ec72e036f1",
+      "name": "排行榜",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverae13e2f1712da14809f9034dcf7c4557.png",
+      "has_comment": false,
+      "update_time": "2026-08-11T16:08:09.252032Z",
+      "sectors": [
+        "财富/活跃/魅力-排行榜"
+      ]
+    },
+    {
+      "index": 30,
+      "id": "4c14ae9a-36f6-466d-a7bd-641d158f56ed",
+      "name": "我的",
+      "width": 187.5,
+      "height": 535.5,
+      "url": "https://alipic.lanhuapp.com/FigmaCover7bb785e7a8cc3ce1618d7751beecbef9.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.895199Z",
+      "sectors": [
+        "我的 tab"
+      ]
+    },
+    {
+      "index": 31,
+      "id": "6f6b42a0-0e24-4dda-9bb8-1d57c1f6996d",
+      "name": "个人主页",
+      "width": 187.5,
+      "height": 479.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover456492ca4bc023812162cf1721ead5e8.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.88828Z",
+      "sectors": [
+        "我的 tab"
+      ]
+    },
+    {
+      "index": 32,
+      "id": "d0f0a524-9d61-4809-bbcd-9410af5a2f8f",
+      "name": "个人主页-followers",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover2222de364f9aa084da88465d794b66f8.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.8799Z",
+      "sectors": [
+        "我的 tab"
+      ]
+    },
+    {
+      "index": 33,
+      "id": "0b106028-503e-4e00-ac54-ca295af6c75d",
+      "name": "个人主页-访客",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverad148d21d9bf1b74798d2f175b9218f4.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.884125Z",
+      "sectors": [
+        "我的 tab"
+      ]
+    },
+    {
+      "index": 34,
+      "id": "e3ace86a-2a8e-4c4c-af78-66c48e6285f4",
+      "name": "个人主页-following",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover5a10a2db91c89cd522285fe484c15620.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.881915Z",
+      "sectors": [
+        "我的 tab"
+      ]
+    },
+    {
+      "index": 35,
+      "id": "d62e7285-ffa4-4358-93ba-828f14be9821",
+      "name": "个人主页-设置-Edit Profile",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover2adf9bac9466b9a5af7d762ed1b0eede.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.876487Z",
+      "sectors": [
+        "我的 tab"
+      ]
+    },
+    {
+      "index": 36,
+      "id": "3fea66b0-1c28-45f2-8365-46acf94560ff",
+      "name": "个人主页-设置-相册",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover0bee512cfd114e00ba9c109f8b14edcd.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.878323Z",
+      "sectors": [
+        "我的 tab"
+      ]
+    },
+    {
+      "index": 37,
+      "id": "303bd988-525b-4ea1-969c-82ded4dadc9d",
+      "name": "个人主页-设置-Edit Profile",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover344c739cf3e07672330f0d797222a82c.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.874533Z",
+      "sectors": [
+        "我的 tab"
+      ]
+    },
+    {
+      "index": 38,
+      "id": "d30b27d9-a9dd-4760-8437-0127f6a0cab5",
+      "name": "我的-设置-黑名单",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover16b5996e8b045b937a6aab5581c64bed.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.868528Z",
+      "sectors": [
+        "我的 tab"
+      ]
+    },
+    {
+      "index": 39,
+      "id": "f5273138-dcc1-4259-b209-acc6a104315b",
+      "name": "我的-设置",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover73a7b397232eb78845fb6e3d1272c3ac.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.862615Z",
+      "sectors": [
+        "我的 tab"
+      ]
+    },
+    {
+      "index": 40,
+      "id": "67017c64-3fcd-4cef-8c35-ea36f114f542",
+      "name": "我的-设置-vip",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover8f2385ffae769818945e7027acd6a14c.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.866533Z",
+      "sectors": [
+        "我的 tab"
+      ]
+    },
+    {
+      "index": 41,
+      "id": "ae20fc27-1008-4632-ac29-d6ac4126b6f6",
+      "name": "我的-设置-上传日志",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover2c35ccdeece9a4df9b6b163350ec5339.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.870385Z",
+      "sectors": [
+        "我的 tab"
+      ]
+    },
+    {
+      "index": 42,
+      "id": "c24a3cd0-f977-42e1-b2a1-679494f7f664",
+      "name": "我的-设置-账户安全",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover8fa3ff923d91289d853ab80ee72fbb09.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.864666Z",
+      "sectors": [
+        "我的 tab"
+      ]
+    },
+    {
+      "index": 43,
+      "id": "57679644-92d6-4e59-ba1d-44ad2866ec35",
+      "name": "私聊-用户-转账",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover838ab42b0dd88b8fc89db2585d901762.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.854902Z",
+      "sectors": [
+        "私聊/消息 tab"
+      ]
+    },
+    {
+      "index": 44,
+      "id": "2453ef86-031f-4acf-9aa0-5f980a1866d6",
+      "name": "私聊-系统通知",
+      "width": 187.5,
+      "height": 717.5,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverfeb41297e66f226ccfd7ad1d4ce3bccc.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.858466Z",
+      "sectors": [
+        "私聊/消息 tab"
+      ]
+    },
+    {
+      "index": 45,
+      "id": "ba27ac47-8040-4d9a-b460-eb21251408b0",
+      "name": "私聊-系统通知",
+      "width": 187.5,
+      "height": 717.5,
+      "url": "https://alipic.lanhuapp.com/FigmaCover57856f28d110bc52e48249edb7cc2fec.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.860369Z",
+      "sectors": [
+        "私聊/消息 tab"
+      ]
+    },
+    {
+      "index": 46,
+      "id": "4938fd76-3ede-423c-bf56-c6c8aa17a396",
+      "name": "私聊-用户-分享房间卡片",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover9ec4ca900e7108fbe2617ea2fe238b58.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.852708Z",
+      "sectors": [
+        "私聊/消息 tab"
+      ]
+    },
+    {
+      "index": 47,
+      "id": "e7f46acc-68cd-46f5-aa7f-b9fbc3719232",
+      "name": "信息",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCovera22d8c23573505b5eb834a78dfe7ba5c.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.848529Z",
+      "sectors": [
+        "私聊/消息 tab"
+      ]
+    },
+    {
+      "index": 48,
+      "id": "628f33d2-e466-4faf-aef7-6d1b85d9c962",
+      "name": "私聊-用户",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover4092cbaccda0237336d745ce79f1b7b9.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.850783Z",
+      "sectors": [
+        "私聊/消息 tab"
+      ]
+    },
+    {
+      "index": 49,
+      "id": "fcf16202-ca3b-4a1f-b852-2e2d379c0d1e",
+      "name": "私聊-用户-设置",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover3f498e7bb7caef3348b0554727f9dc89.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.856526Z",
+      "sectors": [
+        "私聊/消息 tab"
+      ]
+    },
+    {
+      "index": 50,
+      "id": "eb73cbb5-eac1-4fa3-b8e5-2429f354aa76",
+      "name": "版本升级",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCovereee96fc1e8b3597ee03d076e0db903ca.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.846774Z",
+      "sectors": [
+        "版本升级"
+      ]
+    },
+    {
+      "index": 51,
+      "id": "78283f0e-2b90-426b-8d83-1b7ab41fcd7f",
+      "name": "派对详细-日期",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverc9731809a8256a04bcb6767a01341e21.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.839833Z",
+      "sectors": [
+        "派对功能"
+      ]
+    },
+    {
+      "index": 52,
+      "id": "c05bf288-924e-4f2f-9ba2-f4e9a17596d3",
+      "name": "派对详细-日期",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover4188e3d480702956936b290b60eab99b.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.838209Z",
+      "sectors": [
+        "派对功能"
+      ]
+    },
+    {
+      "index": 53,
+      "id": "e006aca5-3cd7-4a46-b732-16541897f577",
+      "name": "派对详细-人员",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover2e975d99e21289281d63d00faeeed5b7.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.836355Z",
+      "sectors": [
+        "派对功能"
+      ]
+    },
+    {
+      "index": 54,
+      "id": "971168bb-5775-482a-ae3f-d3b78ede8fdc",
+      "name": "首页直播间-派对",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverac366fe53fd9276818961a4d8fd8dde2.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.830512Z",
+      "sectors": [
+        "派对功能"
+      ]
+    },
+    {
+      "index": 55,
+      "id": "f6cab16f-ee33-49df-b4a6-ba7909925ce6",
+      "name": "我的派对",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover891f8eee424e4dad99f14ff1cf51cbbd.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.83443Z",
+      "sectors": [
+        "派对功能"
+      ]
+    },
+    {
+      "index": 56,
+      "id": "2ee924f9-0b67-4532-b4c6-9e9099bf9d9a",
+      "name": "派对卡片",
+      "width": 407.0,
+      "height": 436.5,
+      "url": "https://alipic.lanhuapp.com/FigmaCover08f2daee4ef215892c495cac45eaa062.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.827832Z",
+      "sectors": [
+        "派对功能"
+      ]
+    },
+    {
+      "index": 57,
+      "id": "a4649ccd-3f3b-4809-8d59-4fb346a5f784",
+      "name": "首页直播间-派对",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverc199098118eb2e6632d4d06444925dd0.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.832413Z",
+      "sectors": [
+        "派对功能"
+      ]
+    },
+    {
+      "index": 58,
+      "id": "1b8fe12f-38e5-40e6-a289-8d5fc1bb9b18",
+      "name": "创建派对",
+      "width": 187.5,
+      "height": 558.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover46c59a5da56351a23fa869f3b8704e2f.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.845044Z",
+      "sectors": [
+        "派对功能"
+      ]
+    },
+    {
+      "index": 59,
+      "id": "c6635a87-8269-4d0a-a473-d4c071cf0d61",
+      "name": "创建派对-tag用户",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover9e4c64fb3a8ab41eb8cd6f8b59a912a0.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.841617Z",
+      "sectors": [
+        "派对功能"
+      ]
+    },
+    {
+      "index": 60,
+      "id": "e76bbf2c-964d-498d-ae4a-efc79d9cd201",
+      "name": "创建派对",
+      "width": 187.5,
+      "height": 558.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCovera1f8d3c6e0ea14f8d3e73010742eeb6d.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.843418Z",
+      "sectors": [
+        "派对功能"
+      ]
+    },
+    {
+      "index": 61,
+      "id": "8b867e6b-e9e5-4346-abbb-cb3fe1501601",
+      "name": "直播间-房间信息-派对",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCovere8257916199c3a38f0e89165077c4f26.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.454963Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 62,
+      "id": "665fe2cc-3682-47f2-8fcd-8fd1837e6ffe",
+      "name": "直播间-房间信息-黑名单",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover0fb1fedf83b74c9600bfd808f910c4f9.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.446189Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 63,
+      "id": "36ab7724-f723-4789-8e4c-d0e188c357fe",
+      "name": "直播间-房间信息",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverc77b91d21804b77dd469c5f687d5eb98.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.444417Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 64,
+      "id": "9bd2450c-0a47-448c-a450-936428413346",
+      "name": "直播间-礼物",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverc9319d100da4d0b31fd3a4cb6927fa09.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.435598Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 65,
+      "id": "d5061bc2-a746-4d2e-a62b-1c4e57065477",
+      "name": "直播间-房间信息-麦位",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCovercf2b11522102fa944370caee95108d9e.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.442851Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 66,
+      "id": "0c49c2ad-1a7d-403a-8555-d0b8a1a6b2e6",
+      "name": "直播间-房间信息-房间管理",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover56ea0b36fa350ab331c50f0d85b2d23a.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.447861Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 67,
+      "id": "a9895596-f5ff-4c8c-a336-915cbe2af91f",
+      "name": "直播间-观看人数",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover06a2982a17c234f93decd4a6656240a6.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.461715Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 68,
+      "id": "1b5af7e3-f76f-4cbf-b0e8-3e014ca37d7f",
+      "name": "直播间-房间信息-派对",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover6e29ca7fce153ab51f1c98609ce8b008.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.456816Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 69,
+      "id": "f9cf062d-4932-4ca6-8eaa-e11434d3f766",
+      "name": "直播间-房间信息-编辑信息",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover1ef9a6f03f85484800b10919dfa8a2c5.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.451437Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 70,
+      "id": "a1e67d83-ec46-4bd1-999b-de5c48569c7d",
+      "name": "直播间-房间信息-编辑",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover35e23b6d4550b8b2503c401bf2a87fae.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.453266Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 71,
+      "id": "2434935d-ecdd-4f53-bd9b-3d46529a238b",
+      "name": "直播间-房间信息-房间锁",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverb9e7da2b0e93ad7ac905d39097d41927.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.449679Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 72,
+      "id": "e7ee2bdc-7a9e-401f-a350-5a02724ceb61",
+      "name": "直播间-房间信息-派对",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover5886a487bd651e25324b2b5a18afc282.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.458756Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 73,
+      "id": "714de4f4-6a54-4b2f-a3a0-14c3ad91167f",
+      "name": "直播间-礼物",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverb5c53dabc5194c8dbe7eb5a294e14aff.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.430555Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 74,
+      "id": "dd85e4a7-00f5-41c9-a75b-b28a25da69ad",
+      "name": "直播间-礼物",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover151379253a107fc7447ab29c65b7ae01.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.433879Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 75,
+      "id": "5ba12b2c-6b42-4906-a29c-59dd726a28c2",
+      "name": "直播间-用户信息",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover387b862b281e75f68401406c9ccfff96.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.439689Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 76,
+      "id": "cb3f0c2a-91aa-4ed7-b5cc-e2a6c2ada4d6",
+      "name": "直播间-礼物",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover93d739aaba1b78e1626174c366b4025b.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.432244Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 77,
+      "id": "f48fe507-96c8-49d8-b3fa-f35ff7465f60",
+      "name": "直播间-私信",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover45f560fd876db9c535a8301e3bbc0bf4.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.441352Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 78,
+      "id": "82047090-c466-4e71-97be-4879e7136278",
+      "name": "直播间-用户信息",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover685d576bdc105c872e7393447d9d9ccb.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.437914Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 79,
+      "id": "ab2e3cbb-b6d1-458e-995b-b863e353b5b1",
+      "name": "直播间-榜单",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverd4eb3716845bb53e78c572c5b064f37d.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.424254Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 80,
+      "id": "da0307e3-4818-4a54-8391-54e440ac49e6",
+      "name": "私聊",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverfb5b21da6720555465e05a84c9496a3d.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:54:43.463694Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 81,
+      "id": "78562037-bec8-438f-b9da-9561cd7270b7",
+      "name": "logo",
+      "width": 317.0,
+      "height": 367.5,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverd25a91c85b609b17e527e56b6012598d.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:54:43.509107Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 82,
+      "id": "d378b8e8-84f4-468d-9d33-cbde7b8116cc",
+      "name": "我的",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverbbf79251ccad4ea3acadfb2d19641a6a.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:54:43.500346Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 83,
+      "id": "99d06077-9b87-4073-ba5f-9bef473c3979",
+      "name": "注册",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover8e37248c27e054f8b0a4ebe12d8e5101.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:54:43.532082Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 84,
+      "id": "7632c4d7-22a5-4e14-a5f0-465aeabe8ba4",
+      "name": "用户同意协议",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCovera8b72dbbfbca32c1675ca9bbdb5a3c36.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:54:43.517263Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 85,
+      "id": "5ef13509-4212-4267-9534-ba0eca4682b9",
+      "name": "私聊-删除",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover28725ee22850452812eefe41b9565984.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:54:43.460253Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 86,
+      "id": "67bc28bf-8ad6-4e4a-8b9a-9ce3a21d5f8b",
+      "name": "登录2",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover9636719720ed0151886d22ab4c621931.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:54:43.496445Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 87,
+      "id": "d8e7eb4e-e717-4d1a-b091-d4873d63199c",
+      "name": "导航栏",
+      "width": 187.5,
+      "height": 103.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover7e4f6f0747b003cee3733b11a27f9632.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:54:43.450575Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 88,
+      "id": "335aa307-949c-4b0f-9542-19d3ffa3e1ac",
+      "name": "基础弹窗-粉色",
+      "width": 397.5,
+      "height": 306.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverb1478e9f60f563222bc241e16e3c6f19.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.402812Z",
+      "sectors": [
+        "基础弹窗"
+      ]
+    },
+    {
+      "index": 89,
+      "id": "bae89655-997d-4d56-a699-7eaa7cf87d6f",
+      "name": "Frame 1312319269",
+      "width": 176.0,
+      "height": 114.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCovercf080e6c5f87d97a26f07168932f481a.png",
+      "has_comment": false,
+      "update_time": "2026-07-30T16:42:09.755166Z",
+      "sectors": [
+        "vip"
+      ]
+    },
+    {
+      "index": 90,
+      "id": "ffd4c693-e02b-4016-be55-298abeec5d55",
+      "name": "排行榜",
+      "width": 187.5,
+      "height": 728.5,
+      "url": "https://alipic.lanhuapp.com/FigmaCovercaa97afdfecf6ea13686893bcd22ab75.png",
+      "has_comment": false,
+      "update_time": "2026-07-30T16:42:09.762593Z",
+      "sectors": [
+        "vip"
+      ]
+    },
+    {
+      "index": 91,
+      "id": "d9027c57-2ffc-45f6-94b7-8e0811bf741e",
+      "name": "排行榜",
+      "width": 187.5,
+      "height": 728.5,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverd5b84d934bf0db0cb5d76572e4638749.png",
+      "has_comment": false,
+      "update_time": "2026-07-30T16:42:09.771287Z",
+      "sectors": [
+        "vip"
+      ]
+    },
+    {
+      "index": 92,
+      "id": "1aa4de5c-567b-4b5e-9de0-1e0af4d7ae74",
+      "name": "排行榜",
+      "width": 187.5,
+      "height": 549.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover7b21f814d95f613d48b7ae03ed6c0ae8.png",
+      "has_comment": false,
+      "update_time": "2026-07-30T16:42:09.793579Z",
+      "sectors": [
+        "财富/游戏/活跃/魅力-等级说明"
+      ]
+    },
+    {
+      "index": 93,
+      "id": "84445682-6c0f-46b6-aa09-e659c8114417",
+      "name": "排行榜",
+      "width": 187.5,
+      "height": 549.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover3e8c57df9ad43dec9266e8de87184e19.png",
+      "has_comment": false,
+      "update_time": "2026-07-30T16:42:09.7985Z",
+      "sectors": [
+        "财富/游戏/活跃/魅力-等级说明"
+      ]
+    },
+    {
+      "index": 94,
+      "id": "41557b86-acb5-4734-a98c-42e3295a2c06",
+      "name": "Frame 1312319270",
+      "width": 176.0,
+      "height": 64.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover2ea36263acd027332f7fd8fefe5cc6db.png",
+      "has_comment": false,
+      "update_time": "2026-07-30T16:42:09.782509Z",
+      "sectors": [
+        "财富/游戏/活跃/魅力-等级说明"
+      ]
+    },
+    {
+      "index": 95,
+      "id": "7016b670-7a2b-4957-997e-566182f433ee",
+      "name": "排行榜",
+      "width": 187.5,
+      "height": 549.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverd49a109cce717f27e10e025cb8a3d575.png",
+      "has_comment": false,
+      "update_time": "2026-07-30T16:42:09.789969Z",
+      "sectors": [
+        "财富/游戏/活跃/魅力-等级说明"
+      ]
+    },
+    {
+      "index": 96,
+      "id": "9ccd9f2f-b478-4e0f-bdab-a94600d0b602",
+      "name": "排行榜",
+      "width": 187.5,
+      "height": 549.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover5296e48f8dd6e90fa8c65ead889c51ff.png",
+      "has_comment": false,
+      "update_time": "2026-07-30T16:42:09.786146Z",
+      "sectors": [
+        "财富/游戏/活跃/魅力-等级说明"
+      ]
+    },
+    {
+      "index": 97,
+      "id": "ee040d75-7aac-4ad2-af4b-cf1baf61dc6a",
+      "name": "排行榜",
+      "width": 187.5,
+      "height": 728.5,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverfdada8e2d70f380641facf9a41363630.png",
+      "has_comment": false,
+      "update_time": "2026-07-30T16:42:09.774967Z",
+      "sectors": [
+        "vip"
+      ]
+    },
+    {
+      "index": 98,
+      "id": "f129a30e-5e5b-4991-a571-c34fb691510a",
+      "name": "排行榜",
+      "width": 187.5,
+      "height": 728.5,
+      "url": "https://alipic.lanhuapp.com/FigmaCover84ea23ae5b9b60fabf133ea6313e0eef.png",
+      "has_comment": false,
+      "update_time": "2026-07-30T16:42:09.766403Z",
+      "sectors": [
+        "vip"
+      ]
+    },
+    {
+      "index": 99,
+      "id": "bdc77b85-2078-48ce-90ae-4dd30c7bfc2e",
+      "name": "Emperor",
+      "width": 187.5,
+      "height": 812.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoveradfd135d1533719fe3de75a760729ada.png",
+      "has_comment": false,
+      "update_time": "2026-07-30T16:42:09.724368Z",
+      "sectors": [
+        "贵族"
+      ]
+    },
+    {
+      "index": 100,
+      "id": "afa1baf6-409b-4d5e-8a94-2220de8b7230",
+      "name": "贵族记录",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover674987c8ffd0789bf9af122a012cba25.png",
+      "has_comment": false,
+      "update_time": "2026-07-30T16:42:09.719761Z",
+      "sectors": [
+        "贵族"
+      ]
+    },
+    {
+      "index": 101,
+      "id": "ed181243-ec17-4665-8fe8-23d72f258e33",
+      "name": "Emperor",
+      "width": 187.5,
+      "height": 812.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover94bf1c884d4b7f2f5595d28b498c5b56.png",
+      "has_comment": false,
+      "update_time": "2026-07-30T16:42:09.731361Z",
+      "sectors": [
+        "贵族"
+      ]
+    },
+    {
+      "index": 102,
+      "id": "1f95b436-6819-40aa-af70-07809bf25660",
+      "name": "Emperor",
+      "width": 187.5,
+      "height": 812.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover9091e2f376d3629622be1cd6f1671c0a.png",
+      "has_comment": false,
+      "update_time": "2026-07-30T16:42:09.747715Z",
+      "sectors": [
+        "贵族"
+      ]
+    },
+    {
+      "index": 103,
+      "id": "851a9671-20b4-4655-855e-57cb9326a493",
+      "name": "Emperor",
+      "width": 187.5,
+      "height": 812.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover4e75aec62bf44123b06bceaa01b7b716.png",
+      "has_comment": false,
+      "update_time": "2026-07-30T16:42:09.751372Z",
+      "sectors": [
+        "贵族"
+      ]
+    },
+    {
+      "index": 104,
+      "id": "7e191668-8e55-420d-a82c-73a672d24be7",
+      "name": "Emperor",
+      "width": 187.5,
+      "height": 812.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover97974db5542713d5913df841cf8211d5.png",
+      "has_comment": false,
+      "update_time": "2026-07-30T16:42:09.743894Z",
+      "sectors": [
+        "贵族"
+      ]
+    },
+    {
+      "index": 105,
+      "id": "c7219c74-3aba-47aa-97da-5dc4552e8bd4",
+      "name": "Emperor",
+      "width": 187.5,
+      "height": 812.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover6797ae732fc43b05f10f5bc46ae8b89f.png",
+      "has_comment": false,
+      "update_time": "2026-07-30T16:42:09.735047Z",
+      "sectors": [
+        "贵族"
+      ]
+    },
+    {
+      "index": 106,
+      "id": "98823204-a2dc-4b35-bdad-82201b9c9298",
+      "name": "Emperor",
+      "width": 187.5,
+      "height": 812.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover20d150fba879d676392bf1abe4b74bdb.png",
+      "has_comment": false,
+      "update_time": "2026-07-30T16:42:09.740448Z",
+      "sectors": [
+        "贵族"
+      ]
+    },
+    {
+      "index": 107,
+      "id": "8adb50cc-32e7-4530-990d-3ef9fd9e56d2",
+      "name": "每日签到-已领取",
+      "width": 187.5,
+      "height": 512.5,
+      "url": "https://alipic.lanhuapp.com/FigmaCover187f548a1bcf9aacd3a7b8dc4e30fae8.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.029977Z",
+      "sectors": [
+        "每日任务/每日签到"
+      ]
+    },
+    {
+      "index": 108,
+      "id": "c9880b90-cde5-44c2-93ac-aa582c016492",
+      "name": "每日签到-不是贵族",
+      "width": 187.5,
+      "height": 512.5,
+      "url": "https://alipic.lanhuapp.com/FigmaCover74e76e7c3263b18400196954727bdd53.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.026407Z",
+      "sectors": [
+        "每日任务/每日签到"
+      ]
+    },
+    {
+      "index": 109,
+      "id": "70220153-a620-4566-a122-f1252318d76a",
+      "name": "背包",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover61e650ea72529e72eccbda39bcb3a432.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.04957Z",
+      "sectors": [
+        "商店&背包"
+      ]
+    },
+    {
+      "index": 110,
+      "id": "ed442ff7-d0c9-4660-b23f-cda3b3ddb939",
+      "name": "背包",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover18d0c7057b08db74a207aafba7c82736.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.047881Z",
+      "sectors": [
+        "商店&背包"
+      ]
+    },
+    {
+      "index": 111,
+      "id": "524b3099-8250-428c-ac60-df9835660ab6",
+      "name": "背包",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover4a530b47d058f43873217aa4e8abb373.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.04606Z",
+      "sectors": [
+        "商店&背包"
+      ]
+    },
+    {
+      "index": 112,
+      "id": "89ef6f05-ceca-45a7-ac65-9f0002c8265b",
+      "name": "商店",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover3363711226aed72c660fca1ac81a45bb.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.040718Z",
+      "sectors": [
+        "商店&背包"
+      ]
+    },
+    {
+      "index": 113,
+      "id": "66b6ef42-abc1-41ee-8fdb-8374e8f9e3ab",
+      "name": "商店",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoveraaae37bd28922af6b54c170d2898d926.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.038626Z",
+      "sectors": [
+        "商店&背包"
+      ]
+    },
+    {
+      "index": 114,
+      "id": "77109a15-4bfe-419a-8cda-68b5a4375bc5",
+      "name": "商店",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover351b2f0e5182f8607120c3ec6ee8ba1b.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.036854Z",
+      "sectors": [
+        "商店&背包"
+      ]
+    },
+    {
+      "index": 115,
+      "id": "0a624aa1-fa6e-4bbe-9876-869a6e83e8b7",
+      "name": "每日签到-贵族",
+      "width": 187.5,
+      "height": 512.5,
+      "url": "https://alipic.lanhuapp.com/FigmaCovercbb174672170394ec7830e3bc260f9e0.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.028186Z",
+      "sectors": [
+        "每日任务/每日签到"
+      ]
+    },
+    {
+      "index": 116,
+      "id": "055b8504-6a39-47cd-880a-2e97f2d87195",
+      "name": "每日签到-弹窗-是贵族",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCovere09275d755b2c4a9cce8c4e72b92da7f.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.018742Z",
+      "sectors": [
+        "每日任务/每日签到"
+      ]
+    },
+    {
+      "index": 117,
+      "id": "5e27ecc1-ab63-4cff-9970-8041e30b4140",
+      "name": "badge-具体",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover7762cc1cfd888307b5ff67737da4e674.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.011459Z",
+      "sectors": [
+        "荣耀勋章页面"
+      ]
+    },
+    {
+      "index": 118,
+      "id": "fd6f0bd5-bdcb-47b5-ab6b-4eddff690fb4",
+      "name": "badge",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverb45d710f6e5d6982183b6ab43cafe79e.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.007691Z",
+      "sectors": [
+        "荣耀勋章页面"
+      ]
+    },
+    {
+      "index": 119,
+      "id": "907a7f47-8f94-415c-a696-37431022cc60",
+      "name": "商店",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover0fafadfd50623f6470dd2e7ce6e45f3a.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.031628Z",
+      "sectors": [
+        "商店&背包"
+      ]
+    },
+    {
+      "index": 120,
+      "id": "e54a0f29-ecb2-4a68-9ba3-ed01936ea1e5",
+      "name": "商店",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCovera7e844537a813101ee3d641436d118db.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.033365Z",
+      "sectors": [
+        "商店&背包"
+      ]
+    },
+    {
+      "index": 121,
+      "id": "ac50f0be-c94c-4245-b924-97f79b5a1bbf",
+      "name": "商店",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover4cfc5fabeba9e38ee31dbec20b6a32f8.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.035112Z",
+      "sectors": [
+        "商店&背包"
+      ]
+    },
+    {
+      "index": 122,
+      "id": "f9019205-863f-4993-aa08-d618e78e9609",
+      "name": "每日任务 任务缩略图",
+      "width": 111.0,
+      "height": 343.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover131df523417e06d93eaba4f55040f0a6.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.013308Z",
+      "sectors": [
+        "每日任务/每日签到"
+      ]
+    },
+    {
+      "index": 123,
+      "id": "bf53b6c9-7288-4deb-8f10-ef2caa6b9ae4",
+      "name": "每日签到-弹窗-不是贵族",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover3b038c48bce23bd12f966f9e06bc6194.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.022819Z",
+      "sectors": [
+        "每日任务/每日签到"
+      ]
+    },
+    {
+      "index": 124,
+      "id": "1ff30bae-c54d-4116-ad40-2ad15ba941f5",
+      "name": "每日签到-弹窗-不是贵族",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover1259de3c3d6fed3192e4e0a169772898.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.020791Z",
+      "sectors": [
+        "每日任务/每日签到"
+      ]
+    },
+    {
+      "index": 125,
+      "id": "0ce8a15d-ac4e-4ced-8c8e-5f75c0a1a5f6",
+      "name": "每日签到-弹窗-是贵族",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCovereb3a756a95b8f99dc0cadba38a6bf6a2.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.016541Z",
+      "sectors": [
+        "每日任务/每日签到"
+      ]
+    },
+    {
+      "index": 126,
+      "id": "2953a585-b1af-4cee-a393-e37e6424c5bd",
+      "name": "每日签到-弹窗",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover014e3f8fc934c81e6161b5b34057a265.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.024605Z",
+      "sectors": [
+        "每日任务/每日签到"
+      ]
+    },
+    {
+      "index": 127,
+      "id": "ceb0b680-cdfa-4450-befc-4eddd74613e2",
+      "name": "badge",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoveraa0dd46fc2377c7d8873061f0524d636.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.005638Z",
+      "sectors": [
+        "荣耀勋章页面"
+      ]
+    },
+    {
+      "index": 128,
+      "id": "35ba7f68-b858-4fa7-aafe-0c4ab6eda225",
+      "name": "badge-具体",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverd1bc6f710e8551144943ce00ad796b11.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.009664Z",
+      "sectors": [
+        "荣耀勋章页面"
+      ]
+    },
+    {
+      "index": 129,
+      "id": "3c4f89b4-4810-47fb-b7a6-882a0f17fdc5",
+      "name": "邀请有礼-增加周累计邀请奖励-弹窗",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoveracfea3215d3d25ab2c5a2e127fd03e96.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.995966Z",
+      "sectors": [
+        "邀请好友"
+      ]
+    },
+    {
+      "index": 130,
+      "id": "069f3c3a-7021-408c-bf4d-e8cde494e3f5",
+      "name": "邀请有礼-增加周累计邀请奖励-弹窗",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover54e59df44fa650605c8a306fd40260a8.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.993999Z",
+      "sectors": [
+        "邀请好友"
+      ]
+    },
+    {
+      "index": 131,
+      "id": "0e7a2c1a-253f-4ecc-8603-ee7a7f61f694",
+      "name": "邀请好友-奖励列表",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverd6311b40ca9cda4eb5389fe218bcae94.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.992001Z",
+      "sectors": [
+        "邀请好友"
+      ]
+    },
+    {
+      "index": 132,
+      "id": "a1884b56-e814-47b2-8ac0-076861a2b413",
+      "name": "邀请好友-奖励列表",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverdb32cf57cd0d719a953cf54734411097.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.989856Z",
+      "sectors": [
+        "邀请好友"
+      ]
+    },
+    {
+      "index": 133,
+      "id": "312390b1-1816-4acc-b158-42b5c66ce923",
+      "name": "邀请有礼-增加周累计邀请奖励-弹窗",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover9bcce04488e7c20f15b0a48a4b9dbcf7.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.999775Z",
+      "sectors": [
+        "邀请好友"
+      ]
+    },
+    {
+      "index": 134,
+      "id": "67350434-69b5-4f60-b038-acffc98e25ce",
+      "name": "邀请有礼-增加周累计邀请奖励-弹窗",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover5abfa540636cdc76fe32c3b731951fdc.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.997676Z",
+      "sectors": [
+        "邀请好友"
+      ]
+    },
+    {
+      "index": 135,
+      "id": "e857427f-c8e5-472b-a31d-d5db9eb38e13",
+      "name": "邀请有礼-增加周累计邀请奖励-弹窗",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCovere31f3e7e0e65a54d4db5a7195d6db2ae.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:31.001458Z",
+      "sectors": [
+        "邀请好友"
+      ]
+    },
+    {
+      "index": 136,
+      "id": "ea641c9b-3341-4f6b-a2ec-c0dd5a623508",
+      "name": "首页直播间",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover54eae32acab92f887f27b318251e605f.png",
+      "has_comment": false,
+      "update_time": "2026-07-24T12:02:45.570879Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 137,
+      "id": "0c10eaf3-8079-45de-bba0-25330e30b8ab",
+      "name": "首充窗口-first-time recharge",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover104bc580a10f6e4eaa2a9fe0fd2b766f.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.934787Z",
+      "sectors": [
+        "首充页面"
+      ]
+    },
+    {
+      "index": 138,
+      "id": "4b51632b-9cda-4817-965b-40bf5de621eb",
+      "name": "游戏A 数据页",
+      "width": 187.5,
+      "height": 618.5,
+      "url": "https://alipic.lanhuapp.com/FigmaCovere89a1149830823c1354b63f20b1fc87e.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.987892Z",
+      "sectors": [
+        "游戏数据页面"
+      ]
+    },
+    {
+      "index": 139,
+      "id": "b0045d85-4a3e-48a3-86d4-581a53f5eba2",
+      "name": "游戏A 数据页",
+      "width": 187.5,
+      "height": 618.5,
+      "url": "https://alipic.lanhuapp.com/FigmaCover4fd354152b1339f6d7c527bff8997912.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.978725Z",
+      "sectors": [
+        "游戏数据页面"
+      ]
+    },
+    {
+      "index": 140,
+      "id": "d7aa199e-98de-4068-a706-21d765119035",
+      "name": "数据页-流水奖励-打开宝箱",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCovered0194ebd8a9730b466326804205c922.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.973069Z",
+      "sectors": [
+        "游戏数据页面"
+      ]
+    },
+    {
+      "index": 141,
+      "id": "70c20101-58bc-48b0-8ea2-d97174af4752",
+      "name": "数据页-流水奖励-打开宝箱",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover3eef696902d23a9e04591c4c0ba6964f.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.974954Z",
+      "sectors": [
+        "游戏数据页面"
+      ]
+    },
+    {
+      "index": 142,
+      "id": "90274b4d-525c-431f-9878-e68ae2dc5fa9",
+      "name": "游戏A 数据页",
+      "width": 187.5,
+      "height": 436.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover695d23f77be383d9d600d9d97a629659.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.976887Z",
+      "sectors": [
+        "游戏数据页面"
+      ]
+    },
+    {
+      "index": 143,
+      "id": "ecb4302a-18c9-4eb4-9ce3-848674d84ac7",
+      "name": "游戏A 数据页",
+      "width": 187.5,
+      "height": 618.5,
+      "url": "https://alipic.lanhuapp.com/FigmaCover242aedb9c23d5815087014435d93be54.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.98387Z",
+      "sectors": [
+        "游戏数据页面"
+      ]
+    },
+    {
+      "index": 144,
+      "id": "b11347ed-ea8d-4741-be5d-ac7592ee00c6",
+      "name": "游戏A 数据页",
+      "width": 187.5,
+      "height": 618.5,
+      "url": "https://alipic.lanhuapp.com/FigmaCover4a6fd81e326406c3a1ef66507a2eacbe.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.985957Z",
+      "sectors": [
+        "游戏数据页面"
+      ]
+    },
+    {
+      "index": 145,
+      "id": "b44b2a86-f0f0-4586-853a-a7891768f3bf",
+      "name": "疑问 表格",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverb495f31b2542cc225a132a96ea1d9821.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.971057Z",
+      "sectors": [
+        "游戏数据页面"
+      ]
+    },
+    {
+      "index": 146,
+      "id": "e529688f-2f27-4e64-962e-9bfc835c2af4",
+      "name": "lucky gift界面",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCovera4f1ae086448a56c114a4796435d6cb4.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.958375Z",
+      "sectors": [
+        "游戏大厅"
+      ]
+    },
+    {
+      "index": 147,
+      "id": "201b6e8d-650e-40b2-a54f-698c2da291f1",
+      "name": "游戏大厅界面",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover8205a1431bbc1af165ee744c7c093df9.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.954749Z",
+      "sectors": [
+        "游戏大厅"
+      ]
+    },
+    {
+      "index": 148,
+      "id": "359373cb-34ef-4266-89b9-33e2adb15c95",
+      "name": "直接贴脸打开某款游戏",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover7efdd0a4ec5b7734f6c34cd66e2d59a0.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.964376Z",
+      "sectors": [
+        "游戏大厅"
+      ]
+    },
+    {
+      "index": 149,
+      "id": "a1f73464-ebd4-40b0-b7fc-e4e089f5084b",
+      "name": "优惠小弹窗",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover2d1e6545d948e363ee6a005877f30f13.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.960221Z",
+      "sectors": [
+        "游戏大厅"
+      ]
+    },
+    {
+      "index": 150,
+      "id": "5ef43325-7ba2-4e85-bfe3-6a47dad3140d",
+      "name": "直接贴脸打开某款游戏",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover288dfd2aa3291b679962a0aebbe36865.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.961978Z",
+      "sectors": [
+        "游戏大厅"
+      ]
+    },
+    {
+      "index": 151,
+      "id": "e3a576ee-f109-4fe4-83b3-62094225fe11",
+      "name": "lucky box",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover256e59b54a113382e526abcb23aac79a.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.938903Z",
+      "sectors": [
+        "lucky box"
+      ]
+    },
+    {
+      "index": 152,
+      "id": "36341f60-6588-41e0-85eb-dc4c6f79d826",
+      "name": "lucky box-宝箱列表",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCovere67b39ed24ea1c8d9b46795ceaad44f6.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.94657Z",
+      "sectors": [
+        "lucky box"
+      ]
+    },
+    {
+      "index": 153,
+      "id": "6a86b195-11ee-4c8b-98cc-052e7d71dae0",
+      "name": "lucky box-弹窗",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoveracaf767cac33816d4b762c8a00490ff6.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.952967Z",
+      "sectors": [
+        "lucky box"
+      ]
+    },
+    {
+      "index": 154,
+      "id": "0c84b4ae-9adf-4431-9769-58887c52eafa",
+      "name": "lucky box",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover38cb97d589e1b87908ce8df41a822d4f.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.943039Z",
+      "sectors": [
+        "lucky box"
+      ]
+    },
+    {
+      "index": 155,
+      "id": "935fa2f0-cc8a-47d7-a011-d86b03a4cbcd",
+      "name": "lucky box",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverb760aee8d463aaad5153359f6218d06e.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.940857Z",
+      "sectors": [
+        "lucky box"
+      ]
+    },
+    {
+      "index": 156,
+      "id": "e9410a9a-eafa-4575-a956-722dbc3a6472",
+      "name": "lucky box-弹窗",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover98aa91565225b998df8171e33b304092.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.951044Z",
+      "sectors": [
+        "lucky box"
+      ]
+    },
+    {
+      "index": 157,
+      "id": "dd8607b5-5bb7-4a4d-8089-c3b8f2d787c0",
+      "name": "lucky box-弹窗",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverf029aab76a767325234e71064e77dad8.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.94833Z",
+      "sectors": [
+        "lucky box"
+      ]
+    },
+    {
+      "index": 158,
+      "id": "70bdeae9-81c3-401e-bc23-148a568edc20",
+      "name": "lucky box-右下角挂件",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover1120e0e999f90dce4ae2c6e602cac829.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.944745Z",
+      "sectors": [
+        "lucky box"
+      ]
+    },
+    {
+      "index": 159,
+      "id": "80086f7b-68a3-4406-be4b-669ab4e83aa7",
+      "name": "PK-两人结果",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover2b0dacdc643aaf7bc5528579ac436e8c.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.931198Z",
+      "sectors": [
+        "PK功能"
+      ]
+    },
+    {
+      "index": 160,
+      "id": "30f93f0f-a2f2-4065-a422-ef3ece0ec576",
+      "name": "PK-多人结果",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover087e67690e436573c9ff7b813e624d07.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.933042Z",
+      "sectors": [
+        "PK功能"
+      ]
+    },
+    {
+      "index": 161,
+      "id": "cb8cbc1b-8d65-45a3-a6fd-2513618847df",
+      "name": "PK",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverd2f29ab3a5e194d7fa9d9ab69a827086.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.919965Z",
+      "sectors": [
+        "PK功能"
+      ]
+    },
+    {
+      "index": 162,
+      "id": "e3f0f9cf-d76a-4223-ada4-0b1b1f1cec3b",
+      "name": "PK",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover65e5367dfa2a62407552306f0c26f40a.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.91813Z",
+      "sectors": [
+        "PK功能"
+      ]
+    },
+    {
+      "index": 163,
+      "id": "9a10527d-e53a-4c85-8dce-d3dbd639c134",
+      "name": "PK",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover9f5b87df431d3fbd1f3651e00d4b0d99.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.923535Z",
+      "sectors": [
+        "PK功能"
+      ]
+    },
+    {
+      "index": 164,
+      "id": "c6068f63-e185-4a83-8144-881627d7b2aa",
+      "name": "PK-弹窗",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover7943b6f22ecbf4e5cb093d0398d480a2.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T14:34:30.925386Z",
+      "sectors": [
+        "PK功能"
+      ]
+    },
+    {
+      "index": 165,
+      "id": "f8d75a00-3a63-46ef-aa4f-5e5112b6ec30",
+      "name": "直播间-榜单",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover11c88a1461d793cde45fb8768f5d432c.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.425857Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 166,
+      "id": "3f0a6f30-45fb-4d90-b50e-63b71ce7cf14",
+      "name": "直播间-更多-样式2",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover9394198600a24100577b5881ccd846ea.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.428989Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 167,
+      "id": "94371a89-331f-4dbf-a524-4f323fcdc130",
+      "name": "直播间-更多-样式2",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover75d0e6ad395c2bbcefc75ac5467a2b2b.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.427376Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 168,
+      "id": "6832256e-3e54-4013-b2eb-0ab980c4d5be",
+      "name": "Frame 1312323092",
+      "width": 1094.0,
+      "height": 275.5,
+      "url": "https://alipic.lanhuapp.com/FigmaCover1641392412ecd44049a02aca24d10859.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.464596Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 169,
+      "id": "c1e2e1ec-264c-4c14-a6dd-3c8346650692",
+      "name": "首页-直播间缩小",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover8d4001a5ccb7284bde6bc5132f9cd5cb.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.420917Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 170,
+      "id": "dc1507c0-1b92-44e1-a8b8-506dc981a8d2",
+      "name": "直播间-退出",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCovera3425bcac4f046c347c47c95d4707f4c.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.422602Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 171,
+      "id": "b5c07edc-5e8e-4072-a98f-82d7234cb645",
+      "name": "八人麦位",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverd86320890fe0233e627b922cc9ecefce.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.41606Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 172,
+      "id": "08308c32-aec3-456a-9882-58b6191eb012",
+      "name": "十五麦位",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover9c786b1a247ffe07a42e1946530d232e.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.410668Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 173,
+      "id": "cc03dc0c-a1e5-4dcc-ba8f-6bb2cfd909d2",
+      "name": "直播间-15麦位",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover24af8936ed182428889b99087cba7d60.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.404881Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 174,
+      "id": "441f362a-7a34-46db-aef3-b19503542a6f",
+      "name": "二十麦位",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover4642e15d0145ba753b2bf191da8fc9ae.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.408956Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 175,
+      "id": "02babbf9-d8a5-4978-b95a-99dcab58b9a4",
+      "name": "四人麦位",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover4e263cecdb1711b4dcb6bb014cfcfc19.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.417749Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 176,
+      "id": "8ed73e23-36d4-415c-a63a-c72467441549",
+      "name": "十二麦位",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverf977913870778896a2e51c3718c19cef.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.412406Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 177,
+      "id": "e459e31d-0447-43c5-81c8-5b4be084307e",
+      "name": "送礼鎏光",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover864f5db8807d7a0d4b9fbf6231ecbb28.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.419335Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 178,
+      "id": "dcfd3d54-f348-42df-a294-d402191cc7b8",
+      "name": "十人麦位",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover178365af597838336dacb5c120374afb.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.414203Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 179,
+      "id": "4a6d40ff-2e2b-4d9d-b6d1-dff21fe18895",
+      "name": "直播间-素材",
+      "width": 66.0,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover8380832d22ef5d7b5234dc70a6dce4b4.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T12:20:25.407099Z",
+      "sectors": [
+        "直播间"
+      ]
+    },
+    {
+      "index": 180,
+      "id": "383fada2-a018-4128-9279-a1d98519ee49",
+      "name": "首页-捞一个",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover1b196fc64c1868b49e52de85f08b14d6.png",
+      "has_comment": false,
+      "update_time": "2026-07-23T18:51:49.138655Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 181,
+      "id": "6ae8a48a-5463-4db6-a584-5e3da5f526c8",
+      "name": "编辑资料",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover1718203458f8e857a6de9578c17814aa.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:54:43.503981Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 182,
+      "id": "fe86c04f-9354-493f-bd26-19cb1ff5b297",
+      "name": "首页直播间",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover504953ff8abb883900a213fffd97a0b6.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:50:30.87386Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 183,
+      "id": "f17706e9-d6d3-46dc-980c-817c8908f8de",
+      "name": "日历 展开",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverf93533c657642d313caca92c36a93210.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:50:30.885181Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 184,
+      "id": "b813d1d6-f7ac-430e-85a4-34af342324b2",
+      "name": "我的",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover5f0067ab7e93538c6fdf1173a4430f87.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:54:43.521008Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 185,
+      "id": "d2f8b7e0-b2c9-4a68-bca5-1248f534c4fc",
+      "name": "日历 展开",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover3102251c15f44afeae7a144760760102.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:50:30.883804Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 186,
+      "id": "5655bb5e-a59f-41c1-8e40-c72e7ff0f4e5",
+      "name": "登录2",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover7c3fdcdc0cad6f720eb3b38e9262b456.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:54:43.540187Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 187,
+      "id": "5a577498-7f34-4974-92c5-d80e6d7ebe50",
+      "name": "注册",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover7dcd5e08fc84a728d1d23ff00577db5c.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:54:43.536385Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 188,
+      "id": "637c9d47-b8b8-4892-ac21-b5d225fd6d54",
+      "name": "填写心情",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverda44b7970cfe4d4a9161ec2a0bf9b1ee.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:50:30.897142Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 189,
+      "id": "ac577079-9171-4059-8c63-61459300f69e",
+      "name": "捞球弹窗",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover5cc34163ee5676b2f01f353752218ec8.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:50:30.878043Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 190,
+      "id": "2053175f-981b-4b1a-823c-8b62902846c7",
+      "name": "选择心情",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoveraf96823b81aa32ff8d00fcb72a07df46.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:50:30.886853Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 191,
+      "id": "e0b33152-e712-4d95-8937-5a63051983ac",
+      "name": "日历 折叠 帖子有图",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverb0569ae217ca6b4e6ba8ed6d3231848f.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:50:30.898789Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 192,
+      "id": "4b66b421-cd52-4e6b-ab43-c6b33eda073a",
+      "name": "填写心情",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoveraa59370d92b2b3b9f1e95756860e3ed4.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:50:30.895501Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 193,
+      "id": "a6738ee8-8c60-4df2-8540-9250a2e4c409",
+      "name": "填写心情",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover7ff465ca0a1edc555f8910dc2e5dffd4.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:50:30.890216Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 194,
+      "id": "039b32cb-2507-403c-930a-392cc0b848fd",
+      "name": "填写心情",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover80e2721c92d8fca8ea39fa5f9b3bbf5b.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:50:30.893775Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 195,
+      "id": "50abeaea-b419-46ad-8a57-2e9190bc7297",
+      "name": "日历-调整用户头像",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover2ee8ad351a9dd63c11cf168ff4c315ab.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:50:30.88205Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 196,
+      "id": "fe7ae0a6-e3b1-4d51-bd54-05ca72b1ef80",
+      "name": "填写心情",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCovere515834111c956f140dbd1b584eacaad.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:50:30.891981Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 197,
+      "id": "a5b60552-a53f-435e-8f00-21eef3461610",
+      "name": "填写心情",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverc65486469f718e8a11bbeb4347955ea9.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:50:30.888599Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 198,
+      "id": "ae64faa6-0d0b-435a-b816-2437cb6eb731",
+      "name": "日历-调整用户头像",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover6944915b2683cc0f54078ad0f043c8d8.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:50:30.880325Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 199,
+      "id": "c64f3546-a403-44c4-bb15-c3f0ad6f87df",
+      "name": "首页-捞一个",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover327cacad0ef97fa90423ea081420a4e2.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:50:30.876196Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 200,
+      "id": "9695ce6b-8985-4f55-948b-fec407e0549a",
+      "name": "注册2",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover2ab3e1dfa1b1a83dd91ec8e3bbe815b8.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:54:43.492582Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 201,
+      "id": "30970067-605d-4e23-bb93-8e4c895bfdd9",
+      "name": "注册",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverbb4e0908f0061b40b641bb7d7281195e.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:54:43.489165Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 202,
+      "id": "0c1705bd-f406-4af2-97fb-aafb79607f9e",
+      "name": "登录",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover2c7c91297a68e016209ffb33e03f4294.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:54:43.485319Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 203,
+      "id": "2e1d3183-3139-431a-b549-dd84d273d9cd",
+      "name": "登录",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover50e0d48a012b19372fdf8cf32104031e.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:54:43.512825Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 204,
+      "id": "2d536f3f-5193-4ab1-84d1-0a424d60f8cc",
+      "name": "编辑资料",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverf08e0efbcf9df7e35345d4999b651517.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:54:43.47827Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 205,
+      "id": "82e00f4f-1fd8-494b-8bd3-088d8f391daf",
+      "name": "聊天",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoveraf54a4209a105ff4d2fa381fe044bab7.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:54:43.467672Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 206,
+      "id": "db41178c-3441-4169-9116-d3f20dbf81fc",
+      "name": "聊天设置",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover8646e0c1addc701a165c2d2130c7f087.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:54:43.456253Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 207,
+      "id": "9cad61fe-adb1-432a-9afd-7c6f61bb8780",
+      "name": "编辑资料",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCoverd11d4c5ec5ad58e74ddd0b7aec80a49e.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:54:43.471115Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 208,
+      "id": "a3ef9c23-04a8-4fa4-aa73-f17ff35e9325",
+      "name": "编辑资料",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover349eeddeba69d9de43d662be8b4e379f.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:54:43.525053Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 209,
+      "id": "ac17db0c-73e5-4e51-bb9f-3c1c4c37a18c",
+      "name": "编辑资料",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover5e0318874f1f1645d46a008666792d30.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:54:43.474958Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 210,
+      "id": "c3c97f6d-f114-41e9-8869-62b06528a92e",
+      "name": "编辑资料",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover7e84dc6234880c3249b062deac43078c.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:54:43.528522Z",
+      "sectors": [
+        "心情日历"
+      ]
+    },
+    {
+      "index": 211,
+      "id": "9addd409-ea96-4877-a01e-61d283364ddc",
+      "name": "编辑资料",
+      "width": 187.5,
+      "height": 406.0,
+      "url": "https://alipic.lanhuapp.com/FigmaCover07b86f36d6ef4d682758042b7465baae.png",
+      "has_comment": false,
+      "update_time": "2026-07-29T11:54:43.48199Z",
+      "sectors": [
+        "心情日历"
+      ]
+    }
+  ],
+  "ai_suggestion": {
+    "notice": "This project contains 211 design images, which is quite a lot",
+    "recommendation": "Ask user whether to download all designs or specific ones first.",
+    "user_prompt_template": "该项目包含 211 个设计图。请选择：\n1. 下载全部 211 个设计图（完整查看所有UI）\n2. 下载关键设计图（请指定需要的设计图）",
+    "language_note": "Respond in Chinese when talking to user"
+  }
+}

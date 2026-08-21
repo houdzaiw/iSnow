@@ -80,6 +80,9 @@ class HttpApi {
   /// 锁麦位
   static const roomMicLock = '/api/room/mic/lock';
 
+  /// 发送房间公屏消息
+  static const roomMsgPush = '/api/room/msg/push';
+
   /// 房间长连接频道 token
   static const roomSocketToken = '/api/room/genGlobalToken';
 

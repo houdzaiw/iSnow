@@ -21,6 +21,7 @@ import '../classes/profile/mine/profile_page.dart';
 import '../classes/profile/relations/profile_relation_page.dart';
 import '../classes/profile/settings_page.dart';
 import '../classes/rank/rank_page.dart';
+import '../classes/room/room_page.dart';
 import '../classes/launch_page.dart';
 import '../classes/oauth/login_detail_page.dart';
 import '../classes/oauth/register_page.dart';
@@ -107,6 +108,19 @@ final GoRouter goRouter = GoRouter(
       path: '/rank',
       name: 'rank',
       builder: (context, state) => const RankPage(),
+    ),
+    GoRoute(
+      path: '/room/:roomId',
+      name: 'room',
+      builder: (context, state) {
+        final followUid =
+            int.tryParse(state.uri.queryParameters['followUid'] ?? '') ?? 0;
+        return RoomPage(
+          roomId: state.pathParameters['roomId'] ?? '',
+          roomPassword: state.uri.queryParameters['roomPassword'] ?? '',
+          followUid: followUid,
+        );
+      },
     ),
     GoRoute(
       path: '/chat-view',

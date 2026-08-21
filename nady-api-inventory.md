@@ -1,6 +1,6 @@
 # Nady API Inventory
 
-Generated from `/Users/liqihui/nady` source code on 2026-08-01. Scope is Retrofit/API wrapper definitions, API constants, facade usages, and Dart model/type definitions. Apifox project was provided as background, but this inventory is code-first as requested.
+Generated from `/Users/huili/nady` source code on 2026-08-01. Scope is Retrofit/API wrapper definitions, API constants, facade usages, and Dart model/type definitions. Apifox project was provided as background, but this inventory is code-first as requested.
 
 ## Scope And Sources
 

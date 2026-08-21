@@ -241,11 +241,13 @@ class _HomeRoomItem {
     required this.hot,
     required this.isPk,
     required this.thereOneLuckyBox,
+    this.roomId,
     this.cover,
     this.countryCode,
     this.hotText,
   });
 
+  final String? roomId;
   final String? cover;
   final String title;
   final int online;
@@ -271,6 +273,7 @@ class _HomeRoomItem {
 
   factory _HomeRoomItem.fromJson(Map<dynamic, dynamic> json) {
     return _HomeRoomItem(
+      roomId: _homeFeedString(json['roomId'] ?? json['roomID']),
       cover: _homeFeedString(json['cover']),
       title: _homeFeedString(json['title']) ?? '',
       online: _homeFeedInt(json['online']),

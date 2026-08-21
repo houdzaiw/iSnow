@@ -183,8 +183,11 @@ class RoomManager extends ChangeNotifier {
       );
       unawaited(refreshRoomData());
     } catch (error) {
-      if (enterResponse != null) {
-        unawaited(_cleanupAfterEnterFailure(enterResponse.roomId));
+      final cleanupRoomId = enterResponse?.roomId.isNotEmpty == true
+          ? enterResponse!.roomId
+          : roomId;
+      if (cleanupRoomId.isNotEmpty) {
+        unawaited(_cleanupAfterEnterFailure(cleanupRoomId));
       }
       _setState(
         _state.copyWith(
