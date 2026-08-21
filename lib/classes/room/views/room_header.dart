@@ -21,12 +21,7 @@ class _RoomHeader extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _RoomAvatarImage(
-              url: state.roomAvatar,
-              size: 66.r,
-              radius: 14.r,
-              fallbackIcon: Icons.headphones_rounded,
-            ),
+            _RoomAvatarImage(url: state.roomAvatar, size: 66.r, radius: 14.r),
             SizedBox(width: 10.w),
             Expanded(
               child: Padding(
@@ -36,9 +31,8 @@ class _RoomHeader extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(
-                          Icons.public_rounded,
-                          color: Colors.white.withValues(alpha: 0.82),
+                        _RoomAssetIcon(
+                          asset: AppAssets.lanhuRoomIconMissing,
                           size: 17.r,
                         ),
                         SizedBox(width: 3.w),
@@ -63,10 +57,11 @@ class _RoomHeader extends StatelessWidget {
                             shape: BoxShape.circle,
                             color: _roomPink,
                           ),
-                          child: Icon(
-                            Icons.add_rounded,
-                            color: Colors.white,
-                            size: 25.r,
+                          child: Center(
+                            child: _RoomAssetIcon(
+                              asset: AppAssets.lanhuRoomIconMissing,
+                              size: 22.r,
+                            ),
                           ),
                         ),
                       ],
@@ -89,12 +84,12 @@ class _RoomHeader extends StatelessWidget {
                         ),
                         SizedBox(width: 8.w),
                         _MetricChip(
-                          icon: Icons.groups_2_rounded,
+                          asset: AppAssets.lanhuRoomIconMissing,
                           text: _formatCompact(state.onlineCount),
                         ),
                         SizedBox(width: 6.w),
                         _MetricChip(
-                          icon: Icons.mic_rounded,
+                          asset: AppAssets.lanhuRoomMicSeat,
                           text: '$occupiedCount/20',
                         ),
                       ],
@@ -104,9 +99,18 @@ class _RoomHeader extends StatelessWidget {
               ),
             ),
             SizedBox(width: 8.w),
-            _HeaderIconButton(
-              icon: Icons.power_settings_new,
-              onTap: onExit,
+            Column(
+              children: [
+                _HeaderIconButton(
+                  asset: AppAssets.lanhuRoomIconMissing,
+                  onTap: onMinimize,
+                ),
+                SizedBox(height: 8.h),
+                _HeaderIconButton(
+                  asset: AppAssets.lanhuRoomPower,
+                  onTap: onExit,
+                ),
+              ],
             ),
           ],
         ),
@@ -116,9 +120,9 @@ class _RoomHeader extends StatelessWidget {
 }
 
 class _MetricChip extends StatelessWidget {
-  const _MetricChip({required this.icon, required this.text});
+  const _MetricChip({required this.asset, required this.text});
 
-  final IconData icon;
+  final String asset;
   final String text;
 
   @override
@@ -133,7 +137,7 @@ class _MetricChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: _roomGold, size: 14.r),
+          _RoomAssetIcon(asset: asset, size: 14.r),
           SizedBox(width: 3.w),
           Flexible(
             child: Text(
@@ -155,9 +159,9 @@ class _MetricChip extends StatelessWidget {
 }
 
 class _HeaderIconButton extends StatelessWidget {
-  const _HeaderIconButton({required this.icon, required this.onTap});
+  const _HeaderIconButton({required this.asset, required this.onTap});
 
-  final IconData icon;
+  final String asset;
   final VoidCallback onTap;
 
   @override
@@ -171,7 +175,9 @@ class _HeaderIconButton extends StatelessWidget {
         child: SizedBox(
           width: 36.r,
           height: 36.r,
-          child: Icon(icon, color: Colors.white, size: 25.r),
+          child: Center(
+            child: _RoomAssetIcon(asset: asset, size: 24.r),
+          ),
         ),
       ),
     );
@@ -183,13 +189,11 @@ class _RoomAvatarImage extends StatelessWidget {
     required this.url,
     required this.size,
     required this.radius,
-    required this.fallbackIcon,
   });
 
   final String? url;
   final double size;
   final double radius;
-  final IconData fallbackIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -200,13 +204,12 @@ class _RoomAvatarImage extends StatelessWidget {
         width: size,
         height: size,
         child: imageUrl == null || imageUrl.isEmpty
-            ? _AvatarFallback(icon: fallbackIcon)
+            ? const _AvatarFallback()
             : CachedNetworkImage(
                 imageUrl: imageUrl,
                 fit: BoxFit.cover,
-                placeholder: (_, __) => _AvatarFallback(icon: fallbackIcon),
-                errorWidget: (_, __, ___) =>
-                    _AvatarFallback(icon: fallbackIcon),
+                placeholder: (_, __) => const _AvatarFallback(),
+                errorWidget: (_, __, ___) => const _AvatarFallback(),
               ),
       ),
     );
@@ -214,9 +217,7 @@ class _RoomAvatarImage extends StatelessWidget {
 }
 
 class _AvatarFallback extends StatelessWidget {
-  const _AvatarFallback({required this.icon});
-
-  final IconData icon;
+  const _AvatarFallback();
 
   @override
   Widget build(BuildContext context) {
@@ -228,7 +229,11 @@ class _AvatarFallback extends StatelessWidget {
           colors: [Color(0xFF4A445A), Color(0xFF2A2738)],
         ),
       ),
-      child: Icon(icon, color: Colors.white70, size: 28.r),
+      child: Image.asset(
+        AppAssets.lanhuRoomAvatarSample,
+        fit: BoxFit.cover,
+        filterQuality: FilterQuality.high,
+      ),
     );
   }
 }

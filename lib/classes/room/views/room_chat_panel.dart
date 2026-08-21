@@ -24,9 +24,8 @@ class _RoomMusicStrip extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.music_note_rounded,
-                      color: Colors.white.withValues(alpha: 0.58),
+                    _RoomAssetIcon(
+                      asset: AppAssets.lanhuRoomIconMissing,
                       size: 24.r,
                     ),
                     SizedBox(width: 7.w),
@@ -63,7 +62,6 @@ class _RoomMusicStrip extends StatelessWidget {
                         url: entry.$2.avatar,
                         size: 38.r,
                         radius: 19.r,
-                        fallbackIcon: Icons.person_rounded,
                       ),
                     ),
                 ],
@@ -78,9 +76,8 @@ class _RoomMusicStrip extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.graphic_eq_rounded,
-                    color: Colors.white,
+                  _RoomAssetIcon(
+                    asset: AppAssets.lanhuRoomIconMissing,
                     size: 17.r,
                   ),
                   SizedBox(width: 6.w),
@@ -161,9 +158,8 @@ class _RoomChatTabs extends StatelessWidget {
           const Spacer(),
           Padding(
             padding: EdgeInsets.only(right: 22.w),
-            child: Icon(
-              Icons.card_giftcard_rounded,
-              color: Colors.white.withValues(alpha: 0.68),
+            child: _RoomAssetIcon(
+              asset: AppAssets.lanhuRoomChatPanelGift,
               size: 28.r,
             ),
           ),
@@ -234,12 +230,7 @@ class _RoomChatMessageBubble extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (!isSystem) ...[
-          _RoomAvatarImage(
-            url: message.senderAvatar,
-            size: 34.r,
-            radius: 17.r,
-            fallbackIcon: Icons.person_rounded,
-          ),
+          _RoomAvatarImage(url: message.senderAvatar, size: 34.r, radius: 17.r),
           SizedBox(width: 8.w),
         ],
         Expanded(

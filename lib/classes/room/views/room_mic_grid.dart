@@ -125,31 +125,25 @@ class _SeatCircle extends StatelessWidget {
         alignment: Alignment.center,
         children: [
           if (seat.isOccupied)
-            _RoomAvatarImage(
-              url: seat.avatar,
-              size: 54.r,
-              radius: 27.r,
-              fallbackIcon: Icons.person_rounded,
-            )
+            _RoomAvatarImage(url: seat.avatar, size: 54.r, radius: 27.r)
           else
-            Icon(
-              seat.isLocked ? Icons.lock_rounded : Icons.mic_rounded,
-              color: seat.isLocked
-                  ? Colors.white.withValues(alpha: 0.62)
-                  : _roomGold,
+            _RoomAssetIcon(
+              asset: seat.isLocked
+                  ? AppAssets.lanhuRoomIconMissing
+                  : AppAssets.lanhuRoomMicSeat,
               size: 31.r,
             ),
           if (seat.isMuted)
             Positioned(
               right: 2.r,
               bottom: 2.r,
-              child: _SeatStatusDot(icon: Icons.volume_off_rounded),
+              child: _SeatStatusDot(asset: AppAssets.lanhuRoomIconMissing),
             ),
           if (seat.isLocked && seat.isOccupied)
             Positioned(
               left: 2.r,
               bottom: 2.r,
-              child: _SeatStatusDot(icon: Icons.lock_rounded),
+              child: _SeatStatusDot(asset: AppAssets.lanhuRoomIconMissing),
             ),
           if (isPending)
             Positioned.fill(
@@ -174,9 +168,9 @@ class _SeatCircle extends StatelessWidget {
 }
 
 class _SeatStatusDot extends StatelessWidget {
-  const _SeatStatusDot({required this.icon});
+  const _SeatStatusDot({required this.asset});
 
-  final IconData icon;
+  final String asset;
 
   @override
   Widget build(BuildContext context) {
@@ -188,7 +182,9 @@ class _SeatStatusDot extends StatelessWidget {
         shape: BoxShape.circle,
         border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
       ),
-      child: Icon(icon, color: Colors.white, size: 12.r),
+      child: Center(
+        child: _RoomAssetIcon(asset: asset, size: 12.r),
+      ),
     );
   }
 }
@@ -203,7 +199,7 @@ class _SeatHeat extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.local_fire_department_rounded, color: _roomPink, size: 12.r),
+        _RoomAssetIcon(asset: AppAssets.lanhuRoomHeat, size: 12.r),
         SizedBox(width: 2.w),
         ConstrainedBox(
           constraints: BoxConstraints(maxWidth: 42.w),

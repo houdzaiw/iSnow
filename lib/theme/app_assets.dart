@@ -48,6 +48,41 @@ class AppAssets {
   static const String lanhuHomeBadgePk = 'assets/lanhu/party/home_badge_pk.png';
   static const String lanhuHomeBadgeVoice =
       'assets/lanhu/party/home_badge_voice.png';
+  static const String lanhuRoomHomeIndicator =
+      'assets/lanhu/room/room_home_indicator.png';
+  static const String lanhuRoomAvatarSample =
+      'assets/lanhu/room/room_avatar_sample.png';
+  static const String lanhuRoomIconMissing =
+      'assets/lanhu/room/room_icon_missing.png';
+  static const String lanhuRoomPower = 'assets/lanhu/room/room_power.png';
+  static const String lanhuRoomMicSeat = 'assets/lanhu/room/room_mic_seat.png';
+  static const String lanhuRoomHeat = 'assets/lanhu/room/room_heat.png';
+  static const String lanhuRoomAvatarGroup =
+      'assets/lanhu/room/room_avatar_group.png';
+  static const String lanhuRoomChatPanelGift =
+      'assets/lanhu/room/room_chat_panel_gift.png';
+  static const String lanhuRoomBigWinBanner =
+      'assets/lanhu/room/room_big_win_banner.png';
+  static const String lanhuRoomTreasureBanner =
+      'assets/lanhu/room/room_treasure_banner.png';
+  static const String lanhuRoomCarouselDot =
+      'assets/lanhu/room/room_carousel_dot.png';
+  static const String lanhuRoomBadgeCharm =
+      'assets/lanhu/room/room_badge_charm.png';
+  static const String lanhuRoomBadgeShield =
+      'assets/lanhu/room/room_badge_shield.png';
+  static const String lanhuRoomBadgeMedal =
+      'assets/lanhu/room/room_badge_medal.png';
+  static const String lanhuRoomBottomChat =
+      'assets/lanhu/room/room_bottom_chat.png';
+  static const String lanhuRoomBottomMic =
+      'assets/lanhu/room/room_bottom_mic.png';
+  static const String lanhuRoomBottomGift =
+      'assets/lanhu/room/room_bottom_gift.png';
+  static const String lanhuRoomBottomMessage =
+      'assets/lanhu/room/room_bottom_message.png';
+  static const String lanhuRoomBottomMore =
+      'assets/lanhu/room/room_bottom_more.png';
   static const String lanhuRankWealthBackground =
       'assets/lanhu/rank/rank_wealth_background.png';
   static const String lanhuRankCharmBackground =

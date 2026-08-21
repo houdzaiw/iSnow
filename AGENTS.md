@@ -31,6 +31,7 @@ Strict rules:
 - Nady network requests must use `HttpDioManager`.
 - Do not introduce a second network stack.
 - For any page with network requests, submit actions, or multiple loading/error states, create a ViewModel.
+- Room voice UI must follow [`docs/room/room_ui_asset_policy.md`](docs/room/room_ui_asset_policy.md): download Lanhu MCP room icons into `assets/lanhu/room/`, use design image assets first, use the red missing icon placeholder for unavailable icons, and never use Flutter `Icon`/`Icons.*` in `lib/classes/room/`.
 
 ## Build / Lint / Test Commands
 

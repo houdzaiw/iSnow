@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../theme/app_theme.dart';
 import 'viewmodel/room_state.dart';
 import 'viewmodel/room_view_model.dart';
 
@@ -101,7 +102,7 @@ class RoomPage extends HookConsumerWidget {
                         ),
                         if (state.agoraState.errorMessage != null)
                           _RoomNoticePill(
-                            icon: Icons.graphic_eq_rounded,
+                            asset: AppAssets.lanhuRoomIconMissing,
                             text: state.agoraState.errorMessage!,
                           ),
                         SizedBox(
@@ -163,9 +164,9 @@ class RoomPage extends HookConsumerWidget {
 }
 
 class _RoomNoticePill extends StatelessWidget {
-  const _RoomNoticePill({required this.icon, required this.text});
+  const _RoomNoticePill({required this.asset, required this.text});
 
-  final IconData icon;
+  final String asset;
   final String text;
 
   @override
@@ -180,7 +181,7 @@ class _RoomNoticePill extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, color: _roomGold, size: 16.r),
+          _RoomAssetIcon(asset: asset, size: 16.r),
           SizedBox(width: 8.w),
           Expanded(
             child: Text(
@@ -268,22 +269,31 @@ void _showRoomComposer(
                   ),
                 ),
                 SizedBox(width: 8.w),
-                IconButton.filled(
-                  style: IconButton.styleFrom(
-                    backgroundColor: _roomPink,
-                    foregroundColor: Colors.white,
-                    fixedSize: Size(44.r, 44.r),
+                Material(
+                  color: _roomPink,
+                  shape: const CircleBorder(),
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: () async {
+                      final text = controller.text;
+                      if (text.trim().isEmpty) return;
+                      await ref.read(provider.notifier).sendMessage(text);
+                      controller.clear();
+                      if (sheetContext.mounted) {
+                        Navigator.pop(sheetContext);
+                      }
+                    },
+                    child: SizedBox(
+                      width: 44.r,
+                      height: 44.r,
+                      child: Center(
+                        child: _RoomAssetIcon(
+                          asset: AppAssets.lanhuRoomIconMissing,
+                          size: 24.r,
+                        ),
+                      ),
+                    ),
                   ),
-                  onPressed: () async {
-                    final text = controller.text;
-                    if (text.trim().isEmpty) return;
-                    await ref.read(provider.notifier).sendMessage(text);
-                    controller.clear();
-                    if (sheetContext.mounted) {
-                      Navigator.pop(sheetContext);
-                    }
-                  },
-                  icon: const Icon(Icons.arrow_upward_rounded),
                 ),
               ],
             ),
@@ -321,7 +331,7 @@ void _showSeatActions(
             children: [
               if (!seat.isOccupied)
                 _SeatActionTile(
-                  icon: Icons.mic_rounded,
+                  asset: AppAssets.lanhuRoomMicSeat,
                   label: 'Up mic',
                   onTap: () {
                     Navigator.pop(sheetContext);
@@ -330,7 +340,7 @@ void _showSeatActions(
                 ),
               if (isMine)
                 _SeatActionTile(
-                  icon: Icons.mic_off_rounded,
+                  asset: AppAssets.lanhuRoomIconMissing,
                   label: 'Down mic',
                   onTap: () {
                     Navigator.pop(sheetContext);
@@ -339,9 +349,7 @@ void _showSeatActions(
                 ),
               if (seat.isOccupied && !isMine)
                 _SeatActionTile(
-                  icon: seat.isMuted
-                      ? Icons.volume_up_rounded
-                      : Icons.volume_off_rounded,
+                  asset: AppAssets.lanhuRoomIconMissing,
                   label: seat.isMuted ? 'Unmute seat' : 'Mute seat',
                   onTap: () {
                     Navigator.pop(sheetContext);
@@ -350,7 +358,7 @@ void _showSeatActions(
                 ),
               if (seat.isOccupied && !isMine)
                 _SeatActionTile(
-                  icon: Icons.person_remove_alt_1_rounded,
+                  asset: AppAssets.lanhuRoomIconMissing,
                   label: 'Kick down',
                   destructive: true,
                   onTap: () {
@@ -359,7 +367,7 @@ void _showSeatActions(
                   },
                 ),
               _SeatActionTile(
-                icon: seat.isLocked ? Icons.lock_open_rounded : Icons.lock,
+                asset: AppAssets.lanhuRoomIconMissing,
                 label: seat.isLocked ? 'Unlock seat' : 'Lock seat',
                 onTap: () {
                   Navigator.pop(sheetContext);
@@ -376,13 +384,13 @@ void _showSeatActions(
 
 class _SeatActionTile extends StatelessWidget {
   const _SeatActionTile({
-    required this.icon,
+    required this.asset,
     required this.label,
     required this.onTap,
     this.destructive = false,
   });
 
-  final IconData icon;
+  final String asset;
   final String label;
   final VoidCallback onTap;
   final bool destructive;
@@ -392,7 +400,7 @@ class _SeatActionTile extends StatelessWidget {
     final color = destructive ? const Color(0xFFFF6C79) : Colors.white;
     return ListTile(
       onTap: onTap,
-      leading: Icon(icon, color: color),
+      leading: _RoomAssetIcon(asset: asset, size: 24.r),
       title: Text(
         label,
         style: TextStyle(
@@ -401,6 +409,36 @@ class _SeatActionTile extends StatelessWidget {
           fontWeight: FontWeight.w600,
         ),
       ),
+    );
+  }
+}
+
+class _RoomAssetIcon extends StatelessWidget {
+  const _RoomAssetIcon({required this.asset, required this.size});
+
+  final String asset;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      asset,
+      width: size,
+      height: size,
+      fit: BoxFit.contain,
+      filterQuality: FilterQuality.high,
+      errorBuilder: (_, __, ___) {
+        if (asset == AppAssets.lanhuRoomIconMissing) {
+          return SizedBox(width: size, height: size);
+        }
+        return Image.asset(
+          AppAssets.lanhuRoomIconMissing,
+          width: size,
+          height: size,
+          fit: BoxFit.contain,
+          filterQuality: FilterQuality.high,
+        );
+      },
     );
   }
 }

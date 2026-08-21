@@ -33,15 +33,15 @@ class _RoomBottomBar extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _BottomIconButton(
-            icon: Icons.chat_bubble_rounded,
+            asset: AppAssets.lanhuRoomBottomChat,
             onTap: onChatTap,
             badge: state.messages.length > 99 ? '99+' : null,
           ),
           SizedBox(width: 18.w),
           _BottomIconButton(
-            icon: state.agoraState.mutedMicrophone
-                ? Icons.mic_off_rounded
-                : Icons.mic_rounded,
+            asset: state.agoraState.mutedMicrophone
+                ? AppAssets.lanhuRoomIconMissing
+                : AppAssets.lanhuRoomBottomMic,
             selected: !state.agoraState.mutedMicrophone && state.isOnMic,
             onTap: onToggleMic,
           ),
@@ -49,16 +49,13 @@ class _RoomBottomBar extends StatelessWidget {
           _GiftButton(onTap: () {}),
           const Spacer(),
           _BottomIconButton(
-            icon: state.agoraState.mutedSpeaker
-                ? Icons.volume_off_rounded
-                : Icons.drafts_rounded,
+            asset: state.agoraState.mutedSpeaker
+                ? AppAssets.lanhuRoomIconMissing
+                : AppAssets.lanhuRoomBottomMessage,
             onTap: onToggleSpeaker,
           ),
           SizedBox(width: 18.w),
-          _BottomIconButton(
-            icon: Icons.dashboard_customize_rounded,
-            onTap: () {},
-          ),
+          _BottomIconButton(asset: AppAssets.lanhuRoomBottomMore, onTap: () {}),
         ],
       ),
     );
@@ -67,13 +64,13 @@ class _RoomBottomBar extends StatelessWidget {
 
 class _BottomIconButton extends StatelessWidget {
   const _BottomIconButton({
-    required this.icon,
+    required this.asset,
     required this.onTap,
     this.selected = false,
     this.badge,
   });
 
-  final IconData icon;
+  final String asset;
   final VoidCallback onTap;
   final bool selected;
   final String? badge;
@@ -92,10 +89,11 @@ class _BottomIconButton extends StatelessWidget {
             child: SizedBox(
               width: 54.r,
               height: 54.r,
-              child: Icon(
-                icon,
-                color: selected ? const Color(0xFF252631) : Colors.white,
-                size: 30.r,
+              child: Center(
+                child: _RoomAssetIcon(
+                  asset: asset,
+                  size: asset == AppAssets.lanhuRoomBottomMore ? 40.r : 30.r,
+                ),
               ),
             ),
           ),
@@ -161,10 +159,11 @@ class _GiftButton extends StatelessWidget {
               ),
             ],
           ),
-          child: Icon(
-            Icons.card_giftcard_rounded,
-            color: _roomGoldLight,
-            size: 39.r,
+          child: Center(
+            child: _RoomAssetIcon(
+              asset: AppAssets.lanhuRoomBottomGift,
+              size: 44.r,
+            ),
           ),
         ),
       ),
