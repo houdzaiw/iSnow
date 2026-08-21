@@ -1,8 +1,8 @@
 # nady 房间功能迁移清单
 
 静态分析时间：2026-08-21  
-来源项目：`/Users/liqihui/nady`  
-目标项目：`/Users/liqihui/iSnow`  
+来源项目：`/Users/huili/nady`  
+目标项目：`/Users/huili/project/iSnow`  
 分析范围：`lib/pages/room`、`lib/services/room_manager`、`lib/services/api/room_api.dart`、`lib/model/room`、相关礼物/IM/RTC/游戏依赖。
 
 ## 功能清单

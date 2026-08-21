@@ -1,8 +1,8 @@
 # nady 房间与 Socket 架构总览
 
 静态分析时间：2026-08-21  
-来源项目：`/Users/liqihui/nady`  
-目标用途：给 `/Users/liqihui/iSnow` 迁移房间能力时作为数据清单和实现说明。  
+来源项目：`/Users/huili/nady`  
+目标用途：给 `/Users/huili/project/iSnow` 迁移房间能力时作为数据清单和实现说明。  
 分析范围：以 nady 代码为准，重点目录为 `lib/pages/room`，并追踪到 `lib/services/room_manager`、`lib/services/long_link`、`lib/services/api`、`lib/model/room`、`lib/model/long_link`。
 
 ## 结论

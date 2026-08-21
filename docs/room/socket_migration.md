@@ -1,8 +1,8 @@
 # nady 房间 Socket 迁移清单
 
 静态分析时间：2026-08-21  
-来源项目：`/Users/liqihui/nady`  
-目标项目：`/Users/liqihui/iSnow`  
+来源项目：`/Users/huili/nady`  
+目标项目：`/Users/huili/project/iSnow`  
 范围：`lib/services/long_link`、房间内动态订阅方、socket 相关 model。
 
 ## 当前实现摘要
@@ -52,7 +52,7 @@ nady 使用 `centrifuge` 作为长连接客户端。`LongLinkManager` 初始化�
 
 ## 消息包结构
 
-来源：`/Users/liqihui/nady/lib/model/long_link/long_link_msg.dart`
+来源：`/Users/huili/nady/lib/model/long_link/long_link_msg.dart`
 
 ### `LongLinkMsg<T>`
 

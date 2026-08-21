@@ -9,6 +9,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "61.0.0"
+  agora_rtc_engine:
+    dependency: "direct main"
+    description:
+      name: agora_rtc_engine
+      sha256: d9a88129b8fdc36ec5246331f36486b198dd7eb41ee68bfb54b289be8d60c6df
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.5.4"
   analyzer:
     dependency: transitive
     description:
@@ -161,6 +169,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.1"
+  centrifuge:
+    dependency: "direct main"
+    description:
+      name: centrifuge
+      sha256: fae4f68779e2bdc6a992ef6b6de2a7b507b6d2e48360a13092734f5b3cb2bc6a
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.20.0"
   characters:
     dependency: transitive
     description:
@@ -637,6 +653,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.5"
+  iris_method_channel:
+    dependency: transitive
+    description:
+      name: iris_method_channel
+      sha256: "9ba4f428bc944ef2a2eb04495f3e184d598984c1724991748a293172c6d1e43b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.7"
   isar:
     dependency: "direct main"
     description:
@@ -949,6 +973,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.2"
+  protobuf:
+    dependency: transitive
+    description:
+      name: protobuf
+      sha256: "75ec242d22e950bdcc79ee38dd520ce4ee0bc491d7fadc4ea47694604d22bf06"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.0"
   pub_semver:
     dependency: transitive
     description:

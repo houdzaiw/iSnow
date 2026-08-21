@@ -1,8 +1,8 @@
 # nady Agora RTC 与房间音乐迁移清单
 
 静态分析时间：2026-08-21  
-来源项目：`/Users/liqihui/nady`  
-目标用途：给 `/Users/liqihui/iSnow` 迁移房间语音、上下麦、声浪、静音、音乐播放器和 Agora audio mixing 能力时使用。  
+来源项目：`/Users/huili/nady`  
+目标用途：给 `/Users/huili/project/iSnow` 迁移房间语音、上下麦、声浪、静音、音乐播放器和 Agora audio mixing 能力时使用。  
 分析方式：仅基于 nady 代码静态分析，不依赖接口文档或运行时抓包。  
 
 ## 结论
@@ -31,29 +31,29 @@ iSnow 建议拆分为四个同级单例：
 
 | 类型 | 文件 |
 | --- | --- |
-| Agora 管理核心 | `/Users/liqihui/nady/lib/services/room_manager/rtc/agora_rtc_manager.dart` |
-| App 启动时初始化 Agora provider | `/Users/liqihui/nady/lib/pages/main/main_provider.dart` |
-| 进房/退房协调 | `/Users/liqihui/nady/lib/services/room_manager/room_manager.dart` |
-| 房间生命周期聚合 | `/Users/liqihui/nady/lib/services/room_manager/voice_room_controller.dart` |
-| 麦位点击、上下麦 | `/Users/liqihui/nady/lib/pages/room/voice_room/widgets/mic_area/room_mic_seat_controller.dart` |
-| 麦位列表、owner 自动上麦、邀请上麦 | `/Users/liqihui/nady/lib/services/room_manager/room_mic_data_list_provider.dart` |
-| 声浪状态 | `/Users/liqihui/nady/lib/services/room_manager/room_captured_audio_provider.dart` |
-| 本地麦克风静音状态 | `/Users/liqihui/nady/lib/services/room_manager/self_setting_room_mic_mute_status_provider.dart` |
-| 扬声器静音状态 | `/Users/liqihui/nady/lib/services/room_manager/self_setting_room_speaker_mute_status_provider.dart` |
-| 音乐列表和播放控制 | `/Users/liqihui/nady/lib/pages/room/widgets/music/nady_my_music.dart` |
-| 当前播放曲目 | `/Users/liqihui/nady/lib/pages/room/widgets/music/nady_playing_music.dart` |
-| 播放状态 | `/Users/liqihui/nady/lib/pages/room/widgets/music/nady_room_play_status.dart` |
-| 播放模式 | `/Users/liqihui/nady/lib/pages/room/widgets/music/nady_room_play_mode.dart` |
-| 播放器展开/收起状态 | `/Users/liqihui/nady/lib/pages/room/widgets/music/widgets/nady_room_music_state_controller.dart` |
-| 房间播放器 UI | `/Users/liqihui/nady/lib/pages/room/widgets/music/widgets/nady_room_music_player_widget.dart` |
-| 本地音乐扫描 | `/Users/liqihui/nady/lib/pages/room/widgets/music/nady_local_music.dart`、`/Users/liqihui/nady/lib/pages/room/widgets/music/data/nady_audio_scan_handle.dart` |
-| 音乐数据模型 | `/Users/liqihui/nady/lib/pages/room/widgets/music/data/nady_music_item.dart` |
-| Android 权限工具 | `/Users/liqihui/nady/lib/utils/nady_permission_manager.dart` |
-| Android 前台服务 | `/Users/liqihui/nady/lib/utils/foreground_service_manager.dart` |
-| Android Manifest | `/Users/liqihui/nady/android/app/src/main/AndroidManifest.xml` |
-| API wrapper | `/Users/liqihui/nady/lib/services/api/room_api.dart`、`/Users/liqihui/nady/lib/services/api/token_api.dart`、`/Users/liqihui/nady/lib/services/api/common_api.dart` |
-| Retrofit API | `/Users/liqihui/nady/lib/services/http/api_client.dart` |
-| API 路径常量 | `/Users/liqihui/nady/lib/services/api/api_urls.dart` |
+| Agora 管理核心 | `/Users/huili/nady/lib/services/room_manager/rtc/agora_rtc_manager.dart` |
+| App 启动时初始化 Agora provider | `/Users/huili/nady/lib/pages/main/main_provider.dart` |
+| 进房/退房协调 | `/Users/huili/nady/lib/services/room_manager/room_manager.dart` |
+| 房间生命周期聚合 | `/Users/huili/nady/lib/services/room_manager/voice_room_controller.dart` |
+| 麦位点击、上下麦 | `/Users/huili/nady/lib/pages/room/voice_room/widgets/mic_area/room_mic_seat_controller.dart` |
+| 麦位列表、owner 自动上麦、邀请上麦 | `/Users/huili/nady/lib/services/room_manager/room_mic_data_list_provider.dart` |
+| 声浪状态 | `/Users/huili/nady/lib/services/room_manager/room_captured_audio_provider.dart` |
+| 本地麦克风静音状态 | `/Users/huili/nady/lib/services/room_manager/self_setting_room_mic_mute_status_provider.dart` |
+| 扬声器静音状态 | `/Users/huili/nady/lib/services/room_manager/self_setting_room_speaker_mute_status_provider.dart` |
+| 音乐列表和播放控制 | `/Users/huili/nady/lib/pages/room/widgets/music/nady_my_music.dart` |
+| 当前播放曲目 | `/Users/huili/nady/lib/pages/room/widgets/music/nady_playing_music.dart` |
+| 播放状态 | `/Users/huili/nady/lib/pages/room/widgets/music/nady_room_play_status.dart` |
+| 播放模式 | `/Users/huili/nady/lib/pages/room/widgets/music/nady_room_play_mode.dart` |
+| 播放器展开/收起状态 | `/Users/huili/nady/lib/pages/room/widgets/music/widgets/nady_room_music_state_controller.dart` |
+| 房间播放器 UI | `/Users/huili/nady/lib/pages/room/widgets/music/widgets/nady_room_music_player_widget.dart` |
+| 本地音乐扫描 | `/Users/huili/nady/lib/pages/room/widgets/music/nady_local_music.dart`、`/Users/huili/nady/lib/pages/room/widgets/music/data/nady_audio_scan_handle.dart` |
+| 音乐数据模型 | `/Users/huili/nady/lib/pages/room/widgets/music/data/nady_music_item.dart` |
+| Android 权限工具 | `/Users/huili/nady/lib/utils/nady_permission_manager.dart` |
+| Android 前台服务 | `/Users/huili/nady/lib/utils/foreground_service_manager.dart` |
+| Android Manifest | `/Users/huili/nady/android/app/src/main/AndroidManifest.xml` |
+| API wrapper | `/Users/huili/nady/lib/services/api/room_api.dart`、`/Users/huili/nady/lib/services/api/token_api.dart`、`/Users/huili/nady/lib/services/api/common_api.dart` |
+| Retrofit API | `/Users/huili/nady/lib/services/http/api_client.dart` |
+| API 路径常量 | `/Users/huili/nady/lib/services/api/api_urls.dart` |
 
 ## 依赖与环境变量
 

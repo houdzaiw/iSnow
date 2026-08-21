@@ -50,6 +50,42 @@ class HttpApi {
   /// 首页推荐房间列表
   static const homeRecommendRoom = '/api/home/room/recommend';
 
+  /// 进入房间
+  static const roomEnter = '/api/room/inRoom';
+
+  /// 退出房间
+  static const roomExit = '/api/room/outRoom';
+
+  /// 房间详情
+  static const roomInfo = '/api/room/get/info';
+
+  /// 麦位列表
+  static const roomMicListInfo = '/api/room/mic/list/info';
+
+  /// 上麦
+  static const roomMicUp = '/api/room/mic/up';
+
+  /// 下麦
+  static const roomMicDown = '/api/room/mic/down';
+
+  /// 踢下麦
+  static const roomMicKickDown = '/api/room/mic/kick/down';
+
+  /// 禁麦
+  static const roomMicMute = '/api/room/mic/mute';
+
+  /// 解除禁麦
+  static const roomMicUnmute = '/api/room/mic/unmute';
+
+  /// 锁麦位
+  static const roomMicLock = '/api/room/mic/lock';
+
+  /// 房间长连接频道 token
+  static const roomSocketToken = '/api/room/genGlobalToken';
+
+  /// Agora RTC token
+  static const agoraToken = '/api/agora/token';
+
   /// 首页 Banner
   static const homeResourceBanner = '/api/resource/banner';
 
@@ -89,4 +125,7 @@ class HttpApi {
 
   /// 获取腾讯云 IM 登录 token
   static const timToken = '/token/tim';
+
+  /// 长连接 connection token
+  static const longLinkToken = '/token/long-link';
 }
