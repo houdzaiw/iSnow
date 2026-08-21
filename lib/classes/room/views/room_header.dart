@@ -49,9 +49,9 @@ class _RoomHeader extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 26.sp,
+                              fontSize: 16.sp,
                               height: 1,
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
@@ -71,7 +71,7 @@ class _RoomHeader extends StatelessWidget {
                         ),
                       ],
                     ),
-                    SizedBox(height: 10.h),
+                    SizedBox(height: 5.h),
                     Row(
                       children: [
                         Flexible(
@@ -81,7 +81,7 @@ class _RoomHeader extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 20.sp,
+                              fontSize: 13.sp,
                               height: 1,
                               fontWeight: FontWeight.w500,
                             ),
@@ -104,18 +104,9 @@ class _RoomHeader extends StatelessWidget {
               ),
             ),
             SizedBox(width: 8.w),
-            Column(
-              children: [
-                _HeaderIconButton(
-                  icon: Icons.keyboard_arrow_down_rounded,
-                  onTap: onMinimize,
-                ),
-                SizedBox(height: 8.h),
-                _HeaderIconButton(
-                  icon: Icons.power_settings_new,
-                  onTap: onExit,
-                ),
-              ],
+            _HeaderIconButton(
+              icon: Icons.power_settings_new,
+              onTap: onExit,
             ),
           ],
         ),
