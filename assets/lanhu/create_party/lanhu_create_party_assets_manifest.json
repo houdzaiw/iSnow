@@ -1,0 +1,33 @@
+{
+  "source": "https://lanhuapp.com/web/#/item/project/detailDetach?pid=9ab318f9-4876-4218-a940-73d4c98780c2&image_id=e76bbf2c-964d-498d-ae4a-efc79d9cd201&tid=7aacbbd3-8118-4f56-b35e-8ce2cb33a5c6&project_id=9ab318f9-4876-4218-a940-73d4c98780c2&fromEditor=true&type=image",
+  "design_id": "e76bbf2c-964d-498d-ae4a-efc79d9cd201",
+  "design_name": "创建派对",
+  "scale": "Web 2x",
+  "files": {
+    "create_party_background.png": {
+      "slice_name": "默认背景_全局",
+      "source_url": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNGefa9877d9edf61bcb1d82b455c65c0ec.png?x-oss-process=image/resize,w_750,h_1624/format,png"
+    },
+    "create_party_nav_background.png": {
+      "slice_name": "二级导航栏_bg",
+      "source_url": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNG30fada352b1c3ffb4bee1e1540a327f1.png?x-oss-process=image/resize,w_750,h_184/format,png"
+    },
+    "create_party_avatar_sample.png": {
+      "slice_name": "single-avatar_1",
+      "source_url": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaDDSSlicePNGe892636f14382a7a744780fd9bd21f46.png"
+    },
+    "create_party_chevron_right.png": {
+      "slice_name": "Vector_8467",
+      "source_url": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNG51ed6fc8402f9c065451350751f381f7.png?x-oss-process=image/resize,w_18,h_22/format,png"
+    },
+    "create_party_nav_back.png": {
+      "slice_name": "thumbnail_1",
+      "source_url": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaDDSSlicePNG8acfa2fccc5ce34ebe28016b2c97c365.png"
+    },
+    "create_party_add_cover.png": {
+      "slice_name": "Frame_1312319038",
+      "source_url": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNGdcfb3b8acc43597d436bc9503d98edea.png?x-oss-process=image/resize,w_64,h_64/format,png",
+      "semantic_note": "cover add button from Create party design"
+    }
+  }
+}

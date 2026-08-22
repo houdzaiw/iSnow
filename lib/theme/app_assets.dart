@@ -1,6 +1,7 @@
 class AppAssets {
   const AppAssets._();
 
+  static const String iconMissing = 'assets/lanhu/common/icon_missing.png';
   static const String lanhuLoginBackground =
       'assets/lanhu/base/login_background.png';
   static const String lanhuAuthButtonPrimary =
@@ -48,6 +49,18 @@ class AppAssets {
   static const String lanhuHomeBadgePk = 'assets/lanhu/party/home_badge_pk.png';
   static const String lanhuHomeBadgeVoice =
       'assets/lanhu/party/home_badge_voice.png';
+  static const String lanhuCreatePartyBackground =
+      'assets/lanhu/create_party/create_party_background.png';
+  static const String lanhuCreatePartyNavBackground =
+      'assets/lanhu/create_party/create_party_nav_background.png';
+  static const String lanhuCreatePartyNavBack =
+      'assets/lanhu/create_party/create_party_nav_back.png';
+  static const String lanhuCreatePartyAvatarSample =
+      'assets/lanhu/create_party/create_party_avatar_sample.png';
+  static const String lanhuCreatePartyAddCover =
+      'assets/lanhu/create_party/create_party_add_cover.png';
+  static const String lanhuCreatePartyChevronRight =
+      'assets/lanhu/create_party/create_party_chevron_right.png';
   static const String lanhuRoomHomeIndicator =
       'assets/lanhu/room/room_home_indicator.png';
   static const String lanhuRoomAvatarSample =

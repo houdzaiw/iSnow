@@ -98,6 +98,12 @@ class HttpApi {
   /// 派对列表
   static const partyList = '/api/room/party/list';
 
+  /// 创建派对
+  static const partyCreate = '/api/room/party/create';
+
+  /// 派对标签列表
+  static const partyTagList = '/api/room/party/tagList';
+
   /// 用户排行榜
   static const rankCommonly = '/api/rank/commonly';
 

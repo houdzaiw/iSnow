@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:project/classes/message/chat_page.dart';
 import 'package:project/classes/message/message_page.dart';
+import 'package:project/classes/create_party/create_party_page.dart';
 import 'package:project/classes/profile/block_list_page.dart';
 import 'package:project/classes/profile/my_posts_page.dart';
 import 'package:project/classes/profile/setting_profile_page.dart';
@@ -121,6 +122,11 @@ final GoRouter goRouter = GoRouter(
           followUid: followUid,
         );
       },
+    ),
+    GoRoute(
+      path: '/party/create',
+      name: 'create-party',
+      builder: (context, state) => const CreatePartyPage(),
     ),
     GoRoute(
       path: '/chat-view',

@@ -16,6 +16,11 @@ This document provides guidelines for agents working on this Flutter codebase.
 All new feature development must follow the MVVM rules in
 [`docs/mvvm_architecture.md`](docs/mvvm_architecture.md).
 
+All UI development, UI changes, and Lanhu MCP design implementation must follow
+[`docs/ui_theme_guidelines.md`](docs/ui_theme_guidelines.md). All visual tokens
+such as images, icons, colors, sizes, gradients, radius, shadows, and text styles
+must be centralized in `lib/theme/` before use.
+
 Project architecture is **lightweight MVVM + Repository/Service separation**:
 
 - **View**: Flutter pages and widgets. Render UI and forward user events only.

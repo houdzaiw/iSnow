@@ -295,7 +295,11 @@ class _RoomTitle extends StatelessWidget {
         : title;
     return Row(
       children: [
-        const Icon(Icons.local_florist, color: Color(0xFFFF79A7), size: 16),
+        Image.asset(
+          AppAssets.iconMissing,
+          width: AppSpacing.iconSizeSm,
+          height: AppSpacing.iconSizeSm,
+        ),
         const SizedBox(width: 2),
         Expanded(
           child: Text(

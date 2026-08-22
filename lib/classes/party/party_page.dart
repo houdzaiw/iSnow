@@ -240,9 +240,11 @@ class _PartyHeader extends StatelessWidget {
           const SizedBox(width: 7),
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.search_rounded),
-            color: AppColors.primaryPinkDeep,
-            iconSize: 32,
+            icon: Image.asset(
+              AppAssets.iconMissing,
+              width: AppSpacing.iconSizeLg,
+              height: AppSpacing.iconSizeLg,
+            ),
             tooltip: 'Search',
           ),
           const SizedBox(width: 11),
@@ -364,12 +366,16 @@ class _SortBar extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          const Icon(Icons.person_rounded, color: Color(0xFFFF8DA7), size: 20),
+          Image.asset(
+            AppAssets.iconMissing,
+            width: AppSpacing.xxl,
+            height: AppSpacing.xxl,
+          ),
           const SizedBox(width: 3),
-          const Icon(
-            Icons.chevron_right_rounded,
-            color: AppColors.textPrimary,
-            size: 20,
+          Image.asset(
+            AppAssets.lanhuCreatePartyChevronRight,
+            width: AppSpacing.iconSizeXs,
+            height: AppSpacing.iconSizeSm,
           ),
         ],
       ),
@@ -730,11 +736,11 @@ class _ShareButton extends StatelessWidget {
   }
 }
 
-class _CreatePartyButton extends StatelessWidget {
+class _CreatePartyButton extends ConsumerWidget {
   const _CreatePartyButton();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Positioned(
       right: 17,
       bottom: 42,
@@ -743,10 +749,11 @@ class _CreatePartyButton extends StatelessWidget {
         shape: const CircleBorder(),
         child: InkWell(
           customBorder: const CircleBorder(),
-          onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(context.l10n.t('profile.comingSoon'))),
-            );
+          onTap: () async {
+            final created = await context.push<bool>('/party/create');
+            if (created != true || !context.mounted) return;
+            ref.invalidate(_partyFeedViewModelProvider(_FeedSortTab.now));
+            ref.invalidate(_partyFeedViewModelProvider(_FeedSortTab.newest));
           },
           child: Container(
             width: 50,
@@ -756,10 +763,12 @@ class _CreatePartyButton extends StatelessWidget {
               gradient: AppGradients.sendButton,
               boxShadow: AppShadows.button,
             ),
-            child: const Icon(
-              Icons.add_rounded,
-              color: AppColors.textInverse,
-              size: 34,
+            child: Center(
+              child: Image.asset(
+                AppAssets.iconMissing,
+                width: AppSpacing.iconSizeLg,
+                height: AppSpacing.iconSizeLg,
+              ),
             ),
           ),
         ),
@@ -784,9 +793,10 @@ class _StateList extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
-                Icons.hourglass_empty_rounded,
-                color: AppColors.textPlaceholder,
+              Image.asset(
+                AppAssets.iconMissing,
+                width: AppSpacing.iconSizeMd,
+                height: AppSpacing.iconSizeMd,
               ),
               const SizedBox(height: 8),
               Text(

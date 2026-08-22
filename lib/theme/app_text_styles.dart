@@ -11,6 +11,12 @@ class AppTextStyles {
     fontWeight: FontWeight.w600,
   );
 
+  static const TextStyle navTitleStrong = TextStyle(
+    color: AppColors.textPrimary,
+    fontSize: 17,
+    fontWeight: FontWeight.w700,
+  );
+
   static const TextStyle title = TextStyle(
     color: AppColors.textPrimary,
     fontSize: 18,
@@ -45,6 +51,48 @@ class AppTextStyles {
     color: AppColors.textPrimary,
     fontSize: 14,
     fontWeight: FontWeight.w600,
+  );
+
+  static const TextStyle formLabel = TextStyle(
+    color: AppColors.textPrimary,
+    fontSize: 16,
+    fontWeight: FontWeight.w500,
+  );
+
+  static const TextStyle requiredMark = TextStyle(
+    color: AppColors.requiredMark,
+    fontSize: 16,
+    fontWeight: FontWeight.w500,
+  );
+
+  static const TextStyle formHelper = TextStyle(
+    color: AppColors.textPrimary,
+    fontSize: 14,
+    fontWeight: FontWeight.w400,
+  );
+
+  static const TextStyle formFieldHint = TextStyle(
+    color: AppColors.formPlaceholder,
+    fontSize: 13,
+    fontWeight: FontWeight.w400,
+  );
+
+  static const TextStyle chip = TextStyle(
+    color: AppColors.textPrimary,
+    fontSize: 12,
+    fontWeight: FontWeight.w400,
+  );
+
+  static const TextStyle chipSelected = TextStyle(
+    color: AppColors.chipSelectedText,
+    fontSize: 12,
+    fontWeight: FontWeight.w500,
+  );
+
+  static const TextStyle primaryButtonLarge = TextStyle(
+    color: AppColors.textInverse,
+    fontSize: 18,
+    fontWeight: FontWeight.w500,
   );
 
   static const TextStyle menuItem = TextStyle(
