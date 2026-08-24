@@ -5,7 +5,7 @@ const Object _unset = Object();
 class CreateRoomState {
   const CreateRoomState({
     this.currentUser,
-    this.title = "Let's go Party!",
+    this.title = '',
     this.description = '',
     this.avatarLocalPath,
     this.avatarUrl,
@@ -33,7 +33,12 @@ class CreateRoomState {
 
   String get titleCountText => '${title.length}/20';
   String get descriptionCountText => '${description.length}/200';
-  bool get canSubmit => !isSubmitting && !isUploadingAvatar;
+  bool get canSubmit =>
+      !isSubmitting &&
+      !isUploadingAvatar &&
+      avatarUrl?.trim().isNotEmpty == true &&
+      title.trim().isNotEmpty &&
+      description.trim().isNotEmpty;
 
   CreateRoomState copyWith({
     Object? currentUser = _unset,

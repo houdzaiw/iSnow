@@ -31,12 +31,7 @@ class _RoomHeader extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        _RoomAssetIcon(
-                          asset: AppAssets.lanhuRoomIconMissing,
-                          size: 17.r,
-                        ),
-                        SizedBox(width: 3.w),
-                        Expanded(
+                        Flexible(
                           child: Text(
                             state.roomTitle,
                             maxLines: 1,
@@ -50,19 +45,9 @@ class _RoomHeader extends StatelessWidget {
                           ),
                         ),
                         SizedBox(width: 6.w),
-                        Container(
-                          width: 31.r,
-                          height: 31.r,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: _roomPink,
-                          ),
-                          child: Center(
-                            child: _RoomAssetIcon(
-                              asset: AppAssets.lanhuRoomIconMissing,
-                              size: 22.r,
-                            ),
-                          ),
+                        _RoomAssetIcon(
+                          asset: AppAssets.lanhuRoomAddFriend,
+                          size: 22.r,
                         ),
                       ],
                     ),

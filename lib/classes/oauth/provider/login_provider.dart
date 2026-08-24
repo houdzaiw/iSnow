@@ -369,7 +369,10 @@ class LoginProvider {
     );
   }
 
-  Future<String> uploadAvatarFile(String filePath) async {
+  Future<String> uploadAvatarFile(
+    String filePath, {
+    bool returnFullUrl = false,
+  }) async {
     final uploadParam = await getUploadParam();
     final bytes = await File(filePath).readAsBytes();
     final extension = filePath.split('.').last.toLowerCase();
@@ -414,7 +417,14 @@ class LoginProvider {
         responseType: ResponseType.plain,
       ),
     );
-    return uploadPath;
+    if (!returnFullUrl) return uploadPath;
+
+    final domain = uploadParam.domain.trim();
+    if (domain.isEmpty) return objectUri.toString();
+    final normalizedDomain = domain.endsWith('/')
+        ? domain.substring(0, domain.length - 1)
+        : domain;
+    return '$normalizedDomain/$uploadPath';
   }
 
   Future<void> logout() async {

@@ -73,6 +73,7 @@ void main() {
           'countryCode': 'KG',
           'areaCode': '996',
           'phone': '13212345678',
+          'roomId': '2091733862198116353',
           'userStatus': 'USER_STATUS_NEED_COMPLETE',
         },
       }, (json) => UserData.fromJson((json as Map).cast<String, dynamic>()));
@@ -80,11 +81,13 @@ void main() {
       expect(response.isSuccess, isTrue);
       expect(response.traceId, 'trace-1');
       expect(response.data?.uid, 1001);
+      expect(response.data?.roomId, '2091733862198116353');
       expect(response.data?.userStatus, NadyLoginStatus.incompleteInformation);
       expect(
         response.data?.toJson()['userStatus'],
         'USER_STATUS_NEED_COMPLETE',
       );
+      expect(response.data?.toJson()['roomId'], '2091733862198116353');
     });
 
     test('converts failure wrapper to debuggable exception', () {

@@ -15,6 +15,8 @@ Future<String?> showCreateRoomSheet(BuildContext context) {
     context: context,
     isScrollControlled: true,
     useRootNavigator: true,
+    isDismissible: true,
+    enableDrag: true,
     useSafeArea: false,
     backgroundColor: AppColors.transparent,
     barrierColor: AppColors.modalScrimStrong,

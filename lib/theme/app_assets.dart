@@ -77,6 +77,7 @@ class AppAssets {
   static const String lanhuRoomIconMissing =
       'assets/lanhu/room/room_icon_missing.png';
   static const String lanhuRoomPower = 'assets/lanhu/room/room_power.png';
+  static const String lanhuRoomAddFriend = 'assets/lanhu/room/room_add_friend.png';
   static const String lanhuRoomMicSeat = 'assets/lanhu/room/room_mic_seat.png';
   static const String lanhuRoomHeat = 'assets/lanhu/room/room_heat.png';
   static const String lanhuRoomAvatarGroup =

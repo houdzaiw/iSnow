@@ -56,6 +56,7 @@ class UserData {
     this.countryCode,
     this.areaCode,
     this.phone,
+    this.roomId,
     this.userStatus,
   });
 
@@ -70,6 +71,7 @@ class UserData {
   final String? countryCode;
   final String? areaCode;
   final String? phone;
+  final String? roomId;
   final NadyLoginStatus? userStatus;
 
   String? get userId => uid?.toString();
@@ -89,6 +91,7 @@ class UserData {
       countryCode: json['countryCode']?.toString(),
       areaCode: json['areaCode']?.toString(),
       phone: json['phone']?.toString(),
+      roomId: json['roomId']?.toString(),
       userStatus: nadyLoginStatusFromJson(json['userStatus']),
     );
   }
@@ -105,6 +108,7 @@ class UserData {
     String? countryCode,
     String? areaCode,
     String? phone,
+    String? roomId,
     NadyLoginStatus? userStatus,
   }) {
     return UserData(
@@ -119,6 +123,7 @@ class UserData {
       countryCode: countryCode ?? this.countryCode,
       areaCode: areaCode ?? this.areaCode,
       phone: phone ?? this.phone,
+      roomId: roomId ?? this.roomId,
       userStatus: userStatus ?? this.userStatus,
     );
   }
@@ -136,6 +141,7 @@ class UserData {
       'countryCode': countryCode,
       'areaCode': areaCode,
       'phone': phone,
+      'roomId': roomId,
       'userStatus': userStatus == null
           ? null
           : nadyLoginStatusToJson(userStatus!),

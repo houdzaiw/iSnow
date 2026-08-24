@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'create_room_models.dart';
@@ -23,11 +24,7 @@ class CreateRoomViewModel extends AutoDisposeNotifier<CreateRoomState> {
     state = state.copyWith(isLoading: true, loadError: null);
     try {
       final user = await _repository.fetchCurrentUser();
-      state = state.copyWith(
-        currentUser: user,
-        avatarUrl: state.avatarUrl ?? _string(user?.avatar),
-        isLoading: false,
-      );
+      state = state.copyWith(currentUser: user, isLoading: false);
     } catch (error) {
       state = state.copyWith(isLoading: false, loadError: error);
     }
@@ -72,7 +69,7 @@ class CreateRoomViewModel extends AutoDisposeNotifier<CreateRoomState> {
   }
 
   Future<String?> submit({required String languageCode}) async {
-    if (!state.canSubmit) return null;
+    if (state.isSubmitting || state.isUploadingAvatar) return null;
 
     final validationKey = _validationMessageKey();
     if (validationKey != null) {
@@ -81,8 +78,9 @@ class CreateRoomViewModel extends AutoDisposeNotifier<CreateRoomState> {
     }
 
     state = state.copyWith(isSubmitting: true, message: null, messageKey: null);
+    late final String roomId;
     try {
-      final roomId = await _repository.openRoom(
+      roomId = await _repository.openRoom(
         CreateRoomDraft(
           avatar: state.avatarUrl!.trim(),
           title: state.title.trim(),
@@ -90,12 +88,34 @@ class CreateRoomViewModel extends AutoDisposeNotifier<CreateRoomState> {
           language: _normalizeLanguage(languageCode),
         ),
       );
-      state = state.copyWith(isSubmitting: false);
-      return roomId;
     } catch (error) {
-      state = state.copyWith(isSubmitting: false, message: error.toString());
+      state = state.copyWith(
+        isSubmitting: false,
+        messageKey: 'createRoom.createFailed',
+        message: null,
+      );
       return null;
     }
+
+    try {
+      await _repository.fetchRemoteCurrentUser();
+    } catch (error) {
+      debugPrint('Refresh user after openRoom failed: $error');
+    }
+
+    try {
+      await _repository.enterRoom(roomId);
+    } catch (error) {
+      state = state.copyWith(
+        isSubmitting: false,
+        messageKey: 'createRoom.enterFailed',
+        message: null,
+      );
+      return null;
+    }
+
+    state = state.copyWith(isSubmitting: false);
+    return roomId;
   }
 
   String? _validationMessageKey() {
@@ -115,9 +135,4 @@ class CreateRoomViewModel extends AutoDisposeNotifier<CreateRoomState> {
     final normalized = languageCode.trim().toLowerCase();
     return normalized.isEmpty ? 'en' : normalized;
   }
-}
-
-String? _string(Object? value) {
-  final text = value?.toString().trim();
-  return text == null || text.isEmpty ? null : text;
 }
