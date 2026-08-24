@@ -36,6 +36,7 @@ class AppColors {
   static const Color formPlaceholder = Color(0xFF989898);
   static const Color sheetPlaceholder = Color(0xFFBEBEBE);
   static const Color sheetCounter = Color(0xFF9C9C9C);
+  static const Color roomHeatText = Color(0xFFDFDFDF);
   static const Color textInverse = Colors.white;
   static const Color transparent = Colors.transparent;
 

@@ -65,7 +65,7 @@ class _RoomMicSeat extends StatelessWidget {
       child: Column(
         children: [
           _SeatCircle(seat: seat, isMine: isMine, isPending: isPending),
-          SizedBox(height: 9.h),
+          SizedBox(height: 6.h),
           Text(
             seat.position.toString(),
             maxLines: 1,
@@ -73,12 +73,12 @@ class _RoomMicSeat extends StatelessWidget {
               color: isMine
                   ? Colors.white
                   : Colors.white.withValues(alpha: 0.48),
-              fontSize: 20.sp,
+              fontSize: 12.sp,
               height: 1,
               fontWeight: FontWeight.w300,
             ),
           ),
-          SizedBox(height: 4.h),
+          SizedBox(height: 3.h),
           _SeatHeat(value: seat.heat),
         ],
       ),
@@ -102,8 +102,8 @@ class _SeatCircle extends StatelessWidget {
     final borderColor = seat.isSpeaking || isMine ? _roomGoldLight : _roomGold;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 180),
-      width: 61.r,
-      height: 61.r,
+      width: 46.r,
+      height: 46.r,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: Colors.black.withValues(alpha: seat.isOccupied ? 0.12 : 0.2),
@@ -210,10 +210,10 @@ class _SeatHeat extends StatelessWidget {
               value.toString(),
               maxLines: 1,
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.74),
-                fontSize: 14.sp,
+                color: AppColors.roomHeatText,
+                fontSize: 10.sp,
                 height: 1,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w400,
               ),
             ),
           ),

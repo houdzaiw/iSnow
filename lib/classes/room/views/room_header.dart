@@ -15,87 +15,75 @@ class _RoomHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final occupiedCount = state.seats.where((seat) => seat.isOccupied).length;
     return SizedBox(
-      height: 110.h,
+      height: 90.h,
       child: Padding(
-        padding: EdgeInsets.fromLTRB(22.w, 18.h, 22.w, 8.h),
+        padding: EdgeInsets.fromLTRB(11.w, 8.h, 11.w, 8.h),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             _RoomAvatarImage(url: state.roomAvatar, size: 66.r, radius: 14.r),
-            SizedBox(width: 10.w),
+            SizedBox(width: 6.w),
             Expanded(
-              child: Padding(
-                padding: EdgeInsets.only(top: 7.h),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            state.roomTitle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16.sp,
-                              height: 1,
-                              fontWeight: FontWeight.w700,
-                            ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          state.roomTitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16.sp,
+                            height: 1,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
-                        SizedBox(width: 6.w),
-                        _RoomAssetIcon(
-                          asset: AppAssets.lanhuRoomAddFriend,
-                          size: 22.r,
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 5.h),
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            'ID: ${state.roomNo}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 13.sp,
-                              height: 1,
-                              fontWeight: FontWeight.w500,
-                            ),
+                      ),
+                      SizedBox(width: 6.w),
+                      _RoomAssetIcon(
+                        asset: AppAssets.lanhuRoomAddFriend,
+                        size: 22.r,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 5.h),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          'ID: ${state.roomNo}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 13.sp,
+                            height: 1,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        SizedBox(width: 8.w),
-                        _MetricChip(
-                          asset: AppAssets.lanhuRoomIconMissing,
-                          text: _formatCompact(state.onlineCount),
-                        ),
-                        SizedBox(width: 6.w),
-                        _MetricChip(
-                          asset: AppAssets.lanhuRoomMicSeat,
-                          text: '$occupiedCount/20',
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                      SizedBox(width: 8.w),
+                      _MetricChip(
+                        asset: AppAssets.lanhuRoomOnlineCount,
+                        text: _formatCompact(state.onlineCount),
+                      ),
+                      SizedBox(width: 6.w),
+                      _MetricChip(
+                        asset: AppAssets.lanhuRoomHeaderMicSeat,
+                        text: '$occupiedCount/20',
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-            SizedBox(width: 8.w),
-            Column(
-              children: [
-                _HeaderIconButton(
-                  asset: AppAssets.lanhuRoomIconMissing,
-                  onTap: onMinimize,
-                ),
-                SizedBox(height: 8.h),
-                _HeaderIconButton(
-                  asset: AppAssets.lanhuRoomPower,
-                  onTap: onExit,
-                ),
-              ],
+            _HeaderIconButton(
+              asset: AppAssets.lanhuRoomPower,
+              onTap: onExit,
             ),
           ],
         ),
@@ -131,9 +119,9 @@ class _MetricChip extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: _roomGold,
-                fontSize: 13.sp,
+                fontSize: 12.sp,
                 height: 1,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
@@ -151,18 +139,14 @@ class _HeaderIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.black.withValues(alpha: 0.16),
-      shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        child: SizedBox(
-          width: 36.r,
-          height: 36.r,
-          child: Center(
-            child: _RoomAssetIcon(asset: asset, size: 24.r),
-          ),
+    return InkWell(
+      customBorder: const CircleBorder(),
+      onTap: onTap,
+      child: SizedBox(
+        width: 36.r,
+        height: 36.r,
+        child: Center(
+          child: _RoomAssetIcon(asset: asset, size: 24.r),
         ),
       ),
     );

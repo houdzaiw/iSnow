@@ -100,11 +100,11 @@ class RoomPage extends HookConsumerWidget {
                             }
                           },
                         ),
-                        if (state.agoraState.errorMessage != null)
-                          _RoomNoticePill(
-                            asset: AppAssets.lanhuRoomIconMissing,
-                            text: state.agoraState.errorMessage!,
-                          ),
+                        // if (state.agoraState.errorMessage != null)
+                        //   _RoomNoticePill(
+                        //     asset: AppAssets.lanhuRoomIconMissing,
+                        //     text: state.agoraState.errorMessage!,
+                        //   ),
                         SizedBox(
                           height: 380.h,
                           child: _RoomMicGrid(
