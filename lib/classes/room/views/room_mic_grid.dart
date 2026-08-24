@@ -104,23 +104,6 @@ class _SeatCircle extends StatelessWidget {
       duration: const Duration(milliseconds: 180),
       width: 46.r,
       height: 46.r,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.black.withValues(alpha: seat.isOccupied ? 0.12 : 0.2),
-        border: Border.all(
-          color: borderColor,
-          width: seat.isSpeaking ? 2.4 : 2,
-        ),
-        boxShadow: seat.isSpeaking
-            ? [
-                BoxShadow(
-                  color: _roomGold.withValues(alpha: 0.45),
-                  blurRadius: 16,
-                  spreadRadius: 1,
-                ),
-              ]
-            : null,
-      ),
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -131,7 +114,7 @@ class _SeatCircle extends StatelessWidget {
               asset: seat.isLocked
                   ? AppAssets.lanhuRoomIconMissing
                   : AppAssets.lanhuRoomMicSeat,
-              size: 31.r,
+              size: 46.r,
             ),
           if (seat.isMuted)
             Positioned(
