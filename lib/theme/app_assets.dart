@@ -35,6 +35,7 @@ class AppAssets {
   static const String lanhuPartyAvatar = 'assets/lanhu/party/party_avatar.png';
   static const String lanhuPartyCover = 'assets/lanhu/party/party_cover.png';
   static const String lanhuPartyPop = 'assets/lanhu/party/party_pop.png';
+  static const String lanhuPartySearch = 'assets/lanhu/party/party_search.png';
   static const String lanhuPartyShare = 'assets/lanhu/party/party_share.png';
   static const String lanhuPartyTrophy = 'assets/lanhu/party/party_trophy.png';
   static const String lanhuHomeRoomBanner =
@@ -61,6 +62,14 @@ class AppAssets {
       'assets/lanhu/create_party/create_party_add_cover.png';
   static const String lanhuCreatePartyChevronRight =
       'assets/lanhu/create_party/create_party_chevron_right.png';
+  static const String lanhuCreateRoomSheetBackground =
+      'assets/lanhu/create_room/create_room_sheet_background.png';
+  static const String lanhuCreateRoomAvatarSample =
+      'assets/lanhu/create_room/create_room_avatar_sample.png';
+  static const String lanhuCreateRoomCamera =
+      'assets/lanhu/create_room/create_room_camera.png';
+  static const String lanhuCreateRoomHomeIndicator =
+      'assets/lanhu/create_room/create_room_home_indicator.png';
   static const String lanhuRoomHomeIndicator =
       'assets/lanhu/room/room_home_indicator.png';
   static const String lanhuRoomAvatarSample =

@@ -13,6 +13,7 @@ import '../../manager/http_dio_manager.dart';
 import '../../model/country_info.dart';
 import '../../model/server_response.dart';
 import '../../theme/app_theme.dart';
+import '../create_room/create_room_sheet.dart';
 
 part 'model/home_feed_model.dart';
 part 'home_feed_repository.dart';
@@ -236,12 +237,16 @@ class _PartyHeader extends StatelessWidget {
             tooltip: context.l10n.t('rank.title'),
           ),
           const SizedBox(width: 8),
-          _HeaderIconButton(assetName: AppAssets.lanhuPartyPop),
+          _HeaderIconButton(
+            assetName: AppAssets.lanhuPartyPop,
+            onPressed: () => _openCreateRoom(context),
+            tooltip: context.l10n.t('createRoom.title'),
+          ),
           const SizedBox(width: 7),
           IconButton(
             onPressed: () {},
             icon: Image.asset(
-              AppAssets.iconMissing,
+              AppAssets.lanhuPartySearch,
               width: AppSpacing.iconSizeLg,
               height: AppSpacing.iconSizeLg,
             ),
@@ -252,6 +257,12 @@ class _PartyHeader extends StatelessWidget {
       ),
     );
   }
+}
+
+Future<void> _openCreateRoom(BuildContext context) async {
+  final roomId = await showCreateRoomSheet(context);
+  if (roomId == null || roomId.trim().isEmpty || !context.mounted) return;
+  context.go('/room/${Uri.encodeComponent(roomId.trim())}');
 }
 
 class _HeaderIconButton extends StatelessWidget {

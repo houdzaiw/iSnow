@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:project/classes/create_room/create_room_models.dart';
 import 'package:project/manager/http_dio_manager.dart';
 import 'package:project/model/server_response.dart';
 import 'package:project/model/user_profile.dart';
@@ -32,6 +33,32 @@ void main() {
   });
 
   group('Nady response parsing', () {
+    test('serializes open room request and parses room id response', () {
+      const draft = CreateRoomDraft(
+        avatar: 'https://simisoul.xyz/dev/avatar.jpg',
+        title: 'hello1',
+        roomDesc: 'hello',
+        language: 'en',
+      );
+      final response = NadyServerResponse<String>.fromJson({
+        'code': 200,
+        'data': '2091733862198116353',
+        'timestamp': '2026-08-24T03:46:30.846+0000',
+        'message': 'success',
+        'traceId': 'c8646e7f-d896-4ca5-a76f-799a45414a02',
+        'msg': 'success',
+      }, (json) => json?.toString() ?? '');
+
+      expect(draft.toJson(), {
+        'avatar': 'https://simisoul.xyz/dev/avatar.jpg',
+        'title': 'hello1',
+        'roomDesc': 'hello',
+        'language': 'en',
+      });
+      expect(response.isSuccess, isTrue);
+      expect(response.data, '2091733862198116353');
+    });
+
     test('parses server response wrapper and user status', () {
       final response = NadyServerResponse<UserData>.fromJson({
         'code': 200,

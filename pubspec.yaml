@@ -96,6 +96,7 @@ flutter:
     - assets/lanhu/base/
     - assets/lanhu/calendar/
     - assets/lanhu/common/
+    - assets/lanhu/create_room/
     - assets/lanhu/create_party/
     - assets/lanhu/home/
     - assets/lanhu/mood/

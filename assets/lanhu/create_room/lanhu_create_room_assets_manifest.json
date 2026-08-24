@@ -1,0 +1,29 @@
+{
+  "project_id": "9ab318f9-4876-4218-a940-73d4c98780c2",
+  "design_id": "2edc99d7-1778-4df6-bece-29c25d1df9aa",
+  "design_name": "创建房间",
+  "module": "create_room",
+  "assets": [
+    {
+      "name": "create_room_sheet_background.png",
+      "source": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaDDSSlicePNG4a87159bb53bde196ad1590ae833c328.png",
+      "logical_size": "375x639"
+    },
+    {
+      "name": "create_room_avatar_sample.png",
+      "source": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaDDSSlicePNGcc5ff7f24b96c65f1ce61d0767ea2543.png",
+      "logical_size": "90x90"
+    },
+    {
+      "name": "create_room_camera.png",
+      "source": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNG3ac07b165540fcb0e05c833492df6a45.png?x-oss-process=image/resize,w_60,h_54/format,png",
+      "logical_size": "30x27"
+    },
+    {
+      "name": "create_room_home_indicator.png",
+      "source": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaDDSSlicePNGc26b54443862c6ad6832ce1cdc2de840.png",
+      "logical_size": "375x34"
+    }
+  ],
+  "missing_icon_policy": "If a required Lanhu icon is unavailable, use AppAssets.iconMissing and mark the UI in red for later replacement."
+}

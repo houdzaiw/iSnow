@@ -19,6 +19,7 @@ class AppColors {
   static const Color cardBackground = Colors.white;
   static const Color fieldBackground = Color(0xFFFDF5EB);
   static const Color formInputBackground = Color(0xFFEFEFEF);
+  static const Color sheetInputBackground = Color(0xFFF3F3F3);
   static const Color chipBackground = Color(0xFFEEEEEE);
   static const Color chipSelectedBackground = Color(0xFFFFF5FA);
   static const Color neutralLight = Color(0xFFEDEDED);
@@ -33,10 +34,13 @@ class AppColors {
   static const Color textTertiary = Color(0xFF999999);
   static const Color textPlaceholder = Color(0xFFB2B2B2);
   static const Color formPlaceholder = Color(0xFF989898);
+  static const Color sheetPlaceholder = Color(0xFFBEBEBE);
+  static const Color sheetCounter = Color(0xFF9C9C9C);
   static const Color textInverse = Colors.white;
   static const Color transparent = Colors.transparent;
 
   static const Color overlay = Color.fromRGBO(0, 0, 0, 0.5);
+  static const Color modalScrimStrong = Color.fromRGBO(0, 0, 0, 0.6);
   static const Color avatarPlaceholder = Color(0xFFE0E0E0);
   static const Color requiredMark = Color(0xFFFE1F1F);
   static const Color chipSelectedText = Color(0xFFFF3DC5);

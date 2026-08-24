@@ -23,6 +23,12 @@ class AppTextStyles {
     fontWeight: FontWeight.w700,
   );
 
+  static const TextStyle sheetTitle = TextStyle(
+    color: AppColors.textPrimary,
+    fontSize: 16,
+    fontWeight: FontWeight.w500,
+  );
+
   static const TextStyle button = TextStyle(
     color: AppColors.textPrimary,
     fontSize: 20,
@@ -77,6 +83,24 @@ class AppTextStyles {
     fontWeight: FontWeight.w400,
   );
 
+  static const TextStyle sheetInput = TextStyle(
+    color: AppColors.textPrimary,
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+  );
+
+  static const TextStyle sheetPlaceholder = TextStyle(
+    color: AppColors.sheetPlaceholder,
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+  );
+
+  static const TextStyle sheetCounter = TextStyle(
+    color: AppColors.sheetCounter,
+    fontSize: 13,
+    fontWeight: FontWeight.w400,
+  );
+
   static const TextStyle chip = TextStyle(
     color: AppColors.textPrimary,
     fontSize: 12,
@@ -93,6 +117,12 @@ class AppTextStyles {
     color: AppColors.textInverse,
     fontSize: 18,
     fontWeight: FontWeight.w500,
+  );
+
+  static const TextStyle primaryButtonCompact = TextStyle(
+    color: AppColors.textInverse,
+    fontSize: 16,
+    fontWeight: FontWeight.w700,
   );
 
   static const TextStyle menuItem = TextStyle(

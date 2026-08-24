@@ -53,6 +53,9 @@ class HttpApi {
   /// 进入房间
   static const roomEnter = '/api/room/inRoom';
 
+  /// 创建房间
+  static const roomOpen = '/api/room/openRoom';
+
   /// 退出房间
   static const roomExit = '/api/room/outRoom';
 

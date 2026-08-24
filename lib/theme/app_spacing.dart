@@ -28,4 +28,20 @@ class AppSpacing {
   static const double formCardSpacing = 12;
   static const double formChipWidth = 80;
   static const double formChipHeight = 24;
+
+  static const double createRoomSheetHeight = 639;
+  static const double createRoomTitleTop = 26;
+  static const double createRoomAvatarTop = 27;
+  static const double createRoomNameTop = 27;
+  static const double createRoomDescriptionTop = 21;
+  static const double createRoomConfirmTop = 88;
+  static const double createRoomHorizontalInset = 20;
+  static const double createRoomFieldRightInset = 14;
+  static const double createRoomButtonHorizontalInset = 19;
+  static const double createRoomFieldHeight = 37;
+  static const double createRoomDescriptionHeight = 151;
+  static const double createRoomCounterSpace = 54;
+  static const double createRoomAvatarSize = 90;
+  static const double createRoomCameraWidth = 30;
+  static const double createRoomCameraHeight = 27;
 }

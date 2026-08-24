@@ -34,4 +34,10 @@ class AppGradients {
     end: Alignment.centerRight,
     colors: [AppColors.voiceBubbleStart, AppColors.voiceBubbleEnd],
   );
+
+  static const LinearGradient createRoomConfirmButton = LinearGradient(
+    begin: Alignment.centerRight,
+    end: Alignment.centerLeft,
+    colors: [AppColors.voiceBubbleStart, AppColors.voiceBubbleEnd],
+  );
 }
