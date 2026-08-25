@@ -196,7 +196,7 @@ class _RoomChatTab extends StatelessWidget {
                 color: selected
                     ? Colors.white
                     : Colors.white.withValues(alpha: 0.48),
-                fontSize: 22.sp,
+                fontSize: 14.sp,
                 height: 1,
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
               ),

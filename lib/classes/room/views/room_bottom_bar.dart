@@ -16,18 +16,15 @@ class _RoomBottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 108.h + MediaQuery.paddingOf(context).bottom,
+      height: 54.h + MediaQuery.paddingOf(context).bottom,
       padding: EdgeInsets.fromLTRB(
         28.w,
-        12.h,
+        8.h,
         28.w,
         MediaQuery.paddingOf(context).bottom + 8.h,
       ),
       decoration: BoxDecoration(
-        color: const Color(0xFF565665).withValues(alpha: 0.98),
-        border: const Border(
-          top: BorderSide(color: Color(0xFFFF5C78), width: 6),
-        ),
+        color: const Color(0xB3000000).withValues(alpha: 0.98),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,20 +77,15 @@ class _BottomIconButton extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        Material(
-          color: selected ? _roomGold : const Color(0xFF252631),
-          shape: const CircleBorder(),
-          child: InkWell(
-            customBorder: const CircleBorder(),
-            onTap: onTap,
-            child: SizedBox(
-              width: 54.r,
-              height: 54.r,
-              child: Center(
-                child: _RoomAssetIcon(
-                  asset: asset,
-                  size: asset == AppAssets.lanhuRoomBottomMore ? 40.r : 30.r,
-                ),
+        InkWell(
+          onTap: onTap,
+          child: SizedBox(
+            width: 34.r,
+            height: 34.r,
+            child: Center(
+              child: _RoomAssetIcon(
+                asset: asset,
+                size: asset == AppAssets.lanhuRoomBottomMore ? 40.r : 30.r,
               ),
             ),
           ),
@@ -140,30 +132,10 @@ class _GiftButton extends StatelessWidget {
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: onTap,
-        child: Container(
-          width: 72.r,
-          height: 72.r,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFFFF79B8), Color(0xFFFF3E85), Color(0xFFE72D72)],
-            ),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.24)),
-            boxShadow: [
-              BoxShadow(
-                color: _roomPink.withValues(alpha: 0.36),
-                blurRadius: 18,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: Center(
-            child: _RoomAssetIcon(
-              asset: AppAssets.lanhuRoomBottomGift,
-              size: 44.r,
-            ),
+        child: Center(
+          child: _RoomAssetIcon(
+            asset: AppAssets.lanhuRoomBottomGift,
+            size: 44.r,
           ),
         ),
       ),
