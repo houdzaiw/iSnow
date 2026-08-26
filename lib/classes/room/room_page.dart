@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:extended_tabs/extended_tabs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -16,9 +17,7 @@ part 'views/room_header.dart';
 part 'views/room_mic_grid.dart';
 
 const Color _roomGold = Color(0xFFFFD86B);
-const Color _roomGoldLight = Color(0xFFFFF0A6);
 const Color _roomPink = Color(0xFFFF4FA0);
-const Color _roomPanel = Color(0x996F6A55);
 
 class RoomPage extends HookConsumerWidget {
   const RoomPage({
@@ -100,11 +99,6 @@ class RoomPage extends HookConsumerWidget {
                             }
                           },
                         ),
-                        // if (state.agoraState.errorMessage != null)
-                        //   _RoomNoticePill(
-                        //     asset: AppAssets.lanhuRoomIconMissing,
-                        //     text: state.agoraState.errorMessage!,
-                        //   ),
                         SizedBox(
                           height: 380.h,
                           child: _RoomMicGrid(
@@ -158,44 +152,6 @@ class RoomPage extends HookConsumerWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _RoomNoticePill extends StatelessWidget {
-  const _RoomNoticePill({required this.asset, required this.text});
-
-  final String asset;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      margin: EdgeInsets.fromLTRB(24.w, 0, 24.w, 8.h),
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.36),
-        borderRadius: BorderRadius.circular(18.r),
-      ),
-      child: Row(
-        children: [
-          _RoomAssetIcon(asset: asset, size: 16.r),
-          SizedBox(width: 8.w),
-          Expanded(
-            child: Text(
-              text,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.86),
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

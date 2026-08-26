@@ -40,4 +40,10 @@ class AppGradients {
     end: Alignment.centerLeft,
     colors: [AppColors.voiceBubbleStart, AppColors.voiceBubbleEnd],
   );
+
+  static const LinearGradient roomBottomBar = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Colors.transparent,Colors.transparent,Color(0xFC000000)],
+  );
 }

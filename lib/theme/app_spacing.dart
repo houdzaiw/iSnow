@@ -44,4 +44,18 @@ class AppSpacing {
   static const double createRoomAvatarSize = 90;
   static const double createRoomCameraWidth = 30;
   static const double createRoomCameraHeight = 27;
+
+  static const double roomChatTabBarHeight = 44;
+  static const double roomChatTabWidth = 56;
+  static const double roomChatTabsWidth = 168;
+  static const double roomChatTabIndicatorTop = 6;
+  static const double roomChatTabIndicatorWidth = 22;
+  static const double roomChatTabIndicatorHeight = 4;
+  static const double roomChatTabIndicatorRadius = 2;
+  static const double roomChatGiftRightInset = 22;
+  static const double roomChatGiftIconSize = 28;
+  static const double roomChatMessageHorizontalInset = 28;
+  static const double roomChatMessageTopFirst = 4;
+  static const double roomChatMessageTop = 8;
+  static const double roomChatMessageBottomInset = 10;
 }

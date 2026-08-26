@@ -160,4 +160,18 @@ class AppTextStyles {
     fontSize: 12,
     fontWeight: FontWeight.w400,
   );
+
+  static const TextStyle roomChatTab = TextStyle(
+    color: AppColors.roomChatTab,
+    fontSize: 14,
+    height: 1,
+    fontWeight: FontWeight.w400,
+  );
+
+  static const TextStyle roomChatTabSelected = TextStyle(
+    color: AppColors.roomChatTabSelected,
+    fontSize: 14,
+    height: 1,
+    fontWeight: FontWeight.w700,
+  );
 }

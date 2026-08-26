@@ -100,7 +100,7 @@ class _RoomMusicStrip extends StatelessWidget {
   }
 }
 
-class _RoomChatPanel extends StatelessWidget {
+class _RoomChatPanel extends HookWidget {
   const _RoomChatPanel({required this.state, required this.onFilterChanged});
 
   final RoomPageState state;
@@ -108,27 +108,59 @@ class _RoomChatPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final messages = state.visibleMessages;
-    return Container(
+    final filters = RoomChatFilter.values;
+    final selectedIndex = filters.indexOf(state.chatFilter);
+    final tabController = useTabController(
+      initialLength: filters.length,
+      initialIndex: selectedIndex,
+    );
+    final selectedFilter = useRef(state.chatFilter);
+
+    void updateFilter(RoomChatFilter filter) {
+      if (filter == selectedFilter.value) return;
+      selectedFilter.value = filter;
+      onFilterChanged(filter);
+    }
+
+    useEffect(() {
+      selectedFilter.value = state.chatFilter;
+      if (tabController.index != selectedIndex) {
+        tabController.animateTo(selectedIndex);
+      }
+      return null;
+    }, [selectedIndex]);
+
+    useEffect(() {
+      void handleTabChanged() {
+        final index = tabController.index;
+        if (index < 0 || index >= filters.length) return;
+        updateFilter(filters[index]);
+      }
+
+      tabController.addListener(handleTabChanged);
+      return () => tabController.removeListener(handleTabChanged);
+    }, [tabController, state.chatFilter, onFilterChanged]);
+
+    return SizedBox(
       width: double.infinity,
-      color: _roomPanel,
       child: Column(
         children: [
           _RoomChatTabs(
             selected: state.chatFilter,
-            onSelected: onFilterChanged,
+            tabController: tabController,
+            onSelected: updateFilter,
           ),
           Expanded(
-            child: ListView.builder(
-              padding: EdgeInsets.fromLTRB(28.w, 2.h, 28.w, 10.h),
-              itemCount: messages.length,
-              itemBuilder: (context, index) {
-                final message = messages[index];
-                return Padding(
-                  padding: EdgeInsets.only(top: index == 0 ? 4.h : 8.h),
-                  child: _RoomChatMessageBubble(message: message),
-                );
-              },
+            child: ExtendedTabBarView(
+              controller: tabController,
+              cacheExtent: filters.length - 1,
+              children: [
+                for (final filter in filters)
+                  _RoomChatMessageList(
+                    key: PageStorageKey<String>('room-chat-${filter.name}'),
+                    messages: _messagesForFilter(state.messages, filter),
+                  ),
+              ],
             ),
           ),
         ],
@@ -138,29 +170,59 @@ class _RoomChatPanel extends StatelessWidget {
 }
 
 class _RoomChatTabs extends StatelessWidget {
-  const _RoomChatTabs({required this.selected, required this.onSelected});
+  const _RoomChatTabs({
+    required this.selected,
+    required this.tabController,
+    required this.onSelected,
+  });
 
   final RoomChatFilter selected;
+  final TabController tabController;
   final ValueChanged<RoomChatFilter> onSelected;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 44.h,
+      height: AppSpacing.roomChatTabBarHeight.h,
       child: Row(
         children: [
-          for (final filter in RoomChatFilter.values)
-            _RoomChatTab(
-              filter: filter,
-              selected: selected == filter,
-              onTap: () => onSelected(filter),
+          SizedBox(
+            width: AppSpacing.roomChatTabsWidth.w,
+            child: AnimatedBuilder(
+              animation: tabController,
+              builder: (context, _) {
+                return ExtendedTabBar(
+                  controller: tabController,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  indicator: const BoxDecoration(color: AppColors.transparent),
+                  indicatorColor: AppColors.transparent,
+                  dividerColor: AppColors.transparent,
+                  labelPadding: EdgeInsets.zero,
+                  overlayColor: WidgetStateProperty.all(AppColors.transparent),
+                  splashFactory: NoSplash.splashFactory,
+                  onTap: (index) => onSelected(RoomChatFilter.values[index]),
+                  tabs: [
+                    for (final filter in RoomChatFilter.values)
+                      Tab(
+                        height: AppSpacing.roomChatTabBarHeight.h,
+                        child: _RoomChatTab(
+                          filter: filter,
+                          selected: selected == filter,
+                        ),
+                      ),
+                  ],
+                );
+              },
             ),
+          ),
           const Spacer(),
           Padding(
-            padding: EdgeInsets.only(right: 22.w),
+            padding: EdgeInsets.only(
+              right: AppSpacing.roomChatGiftRightInset.w,
+            ),
             child: _RoomAssetIcon(
               asset: AppAssets.lanhuRoomChatPanelGift,
-              size: 28.r,
+              size: AppSpacing.roomChatGiftIconSize.r,
             ),
           ),
         ],
@@ -170,50 +232,69 @@ class _RoomChatTabs extends StatelessWidget {
 }
 
 class _RoomChatTab extends StatelessWidget {
-  const _RoomChatTab({
-    required this.filter,
-    required this.selected,
-    required this.onTap,
-  });
+  const _RoomChatTab({required this.filter, required this.selected});
 
   final RoomChatFilter filter;
   final bool selected;
-  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: SizedBox(
-        width: 92.w,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              _filterLabel(filter),
-              maxLines: 1,
-              style: TextStyle(
-                color: selected
-                    ? Colors.white
-                    : Colors.white.withValues(alpha: 0.48),
-                fontSize: 14.sp,
-                height: 1,
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+    return SizedBox(
+      width: AppSpacing.roomChatTabWidth.w,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            _filterLabel(filter),
+            maxLines: 1,
+            style: selected
+                ? AppTextStyles.roomChatTabSelected
+                : AppTextStyles.roomChatTab,
+          ),
+          SizedBox(height: AppSpacing.roomChatTabIndicatorTop.h),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 160),
+            width: selected ? AppSpacing.roomChatTabIndicatorWidth.w : 0,
+            height: AppSpacing.roomChatTabIndicatorHeight.h,
+            decoration: BoxDecoration(
+              color: AppColors.roomChatTabSelected,
+              borderRadius: BorderRadius.circular(
+                AppSpacing.roomChatTabIndicatorRadius.r,
               ),
             ),
-            SizedBox(height: 6.h),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 160),
-              width: selected ? 22.w : 0,
-              height: 4.h,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(2.r),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
+    );
+  }
+}
+
+class _RoomChatMessageList extends StatelessWidget {
+  const _RoomChatMessageList({super.key, required this.messages});
+
+  final List<RoomChatEntry> messages;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.roomChatMessageHorizontalInset.w,
+        AppSpacing.xxs.h,
+        AppSpacing.roomChatMessageHorizontalInset.w,
+        AppSpacing.roomChatMessageBottomInset.h,
+      ),
+      itemCount: messages.length,
+      itemBuilder: (context, index) {
+        final message = messages[index];
+        return Padding(
+          padding: EdgeInsets.only(
+            top: index == 0
+                ? AppSpacing.roomChatMessageTopFirst.h
+                : AppSpacing.roomChatMessageTop.h,
+          ),
+          child: _RoomChatMessageBubble(message: message),
+        );
+      },
     );
   }
 }
@@ -294,5 +375,16 @@ String _filterLabel(RoomChatFilter filter) {
     RoomChatFilter.all => 'All',
     RoomChatFilter.chat => 'Chat',
     RoomChatFilter.gift => 'Gift',
+  };
+}
+
+List<RoomChatEntry> _messagesForFilter(
+  List<RoomChatEntry> messages,
+  RoomChatFilter filter,
+) {
+  return switch (filter) {
+    RoomChatFilter.all => messages,
+    RoomChatFilter.chat => messages.where((item) => item.isChat).toList(),
+    RoomChatFilter.gift => messages.where((item) => item.isGift).toList(),
   };
 }

@@ -99,7 +99,6 @@ class _SeatCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = seat.isSpeaking || isMine ? _roomGoldLight : _roomGold;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 180),
       width: 46.r,

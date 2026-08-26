@@ -23,9 +23,7 @@ class _RoomBottomBar extends StatelessWidget {
         28.w,
         MediaQuery.paddingOf(context).bottom + 8.h,
       ),
-      decoration: BoxDecoration(
-        color: const Color(0xB3000000).withValues(alpha: 0.98),
-      ),
+      decoration: BoxDecoration(gradient: AppGradients.roomBottomBar),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
