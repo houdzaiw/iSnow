@@ -14,6 +14,8 @@ class ProfilePage extends ConsumerWidget {
 
   static const _userAgreementUrl = 'https://www.simisoul.com/protocol.html';
   static const _privacyPolicyUrl = 'https://www.simisoul.com/policy.html';
+  static const _walletWebPath = '/h5/wallet/index.html';
+  static const _walletRechargeTab = '1';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -55,6 +57,27 @@ class ProfilePage extends ConsumerWidget {
         queryParameters: {
           'title': context.l10n.t(item.titleKey),
           'uri': webUri,
+        },
+      ).toString(),
+    );
+  }
+
+  void _openWalletWebView(BuildContext context) {
+    final baseUri = Uri.parse(AppConfig.shared.appEnv.socketHost);
+    final walletUri = baseUri.replace(
+      path: _walletWebPath,
+      queryParameters: {
+        'language': Localizations.localeOf(context).languageCode,
+        'tab': _walletRechargeTab,
+      },
+    );
+
+    context.push(
+      Uri(
+        path: '/web-view',
+        queryParameters: {
+          'title': context.l10n.t('profile.wallet'),
+          'uri': walletUri.toString(),
         },
       ).toString(),
     );
@@ -109,6 +132,8 @@ class ProfilePage extends ConsumerWidget {
         await _confirmLogout(context, ref);
         break;
       case 'wallet':
+        _openWalletWebView(context);
+        break;
       case 'recharge':
       case 'invite-friends':
       case 'store':
