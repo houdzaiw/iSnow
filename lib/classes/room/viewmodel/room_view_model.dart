@@ -272,15 +272,16 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
     Map<int, int> volumeLevels,
   ) {
     final byPosition = <int, RoomMicModel>{};
+    final seatCount = _seatCountForMicList(micList);
     for (var index = 0; index < micList.length; index += 1) {
       final mic = micList[index];
-      final position = mic.position > 0 ? mic.position : index + 1;
-      if (position > 0 && position <= 20) {
+      final position = _micPosition(mic, index);
+      if (position >= 0 && position < seatCount) {
         byPosition[position] = mic;
       }
     }
-    return List.generate(20, (index) {
-      final position = index + 1;
+    return List.generate(seatCount, (index) {
+      final position = index;
       final mic = byPosition[position];
       if (mic == null) return RoomSeatViewData.empty(position);
       final uid = mic.uid;
@@ -290,6 +291,29 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
         volume: uid == null ? 0 : volumeLevels[uid] ?? 0,
       );
     });
+  }
+
+  int _seatCountForMicList(List<RoomMicModel> micList) {
+    if (micList.isEmpty) return roomDefaultMicSeatCount;
+
+    var maxPosition = -1;
+    for (var index = 0; index < micList.length; index += 1) {
+      final position = _micPosition(micList[index], index);
+      if (position > maxPosition) maxPosition = position;
+    }
+
+    final inferredCount = maxPosition + 1 > micList.length
+        ? maxPosition + 1
+        : micList.length;
+    if (inferredCount < roomDefaultMicSeatCount) return roomDefaultMicSeatCount;
+    if (inferredCount > roomMaxMicSeatCount) return roomMaxMicSeatCount;
+    return inferredCount;
+  }
+
+  int _micPosition(RoomMicModel mic, int index) {
+    final position = mic.position;
+    if (position >= 0 && position < roomMaxMicSeatCount) return position;
+    return index;
   }
 
   void _handleSocketMessage(RoomSocketMessage message) {

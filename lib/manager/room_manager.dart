@@ -290,6 +290,7 @@ class RoomManager extends ChangeNotifier {
   Future<RoomMicOperateResp> upMic(int position) async {
     final roomId = _requireCurrentRoomId();
     final response = await _api.upMic(roomId: roomId, position: position);
+    _applyMicOperateResponse(response);
     await _agoraManager.publish(position: position);
     unawaited(refreshMicList());
     return response;
@@ -298,6 +299,7 @@ class RoomManager extends ChangeNotifier {
   Future<RoomMicOperateResp> downMic(int position) async {
     final roomId = _requireCurrentRoomId();
     final response = await _api.downMic(roomId: roomId, position: position);
+    _applyMicOperateResponse(response);
     await _agoraManager.stopPublish(position: position);
     unawaited(refreshMicList());
     return response;
@@ -313,6 +315,7 @@ class RoomManager extends ChangeNotifier {
       position: position,
       targetUid: targetUid,
     );
+    _applyMicOperateResponse(response);
     final uid = await _authSession.uid();
     if (uid == targetUid) {
       await _agoraManager.stopPublish(position: position);
@@ -329,6 +332,7 @@ class RoomManager extends ChangeNotifier {
     final response = mute
         ? await _api.muteMicSeat(roomId: roomId, position: position)
         : await _api.unmuteMicSeat(roomId: roomId, position: position);
+    _applyMicOperateResponse(response);
     unawaited(refreshMicList());
     return response;
   }
@@ -343,6 +347,7 @@ class RoomManager extends ChangeNotifier {
       position: position,
       isLock: isLock,
     );
+    _applyMicOperateResponse(response);
     unawaited(refreshMicList());
     return response;
   }
@@ -431,6 +436,36 @@ class RoomManager extends ChangeNotifier {
         .whereType<Map>()
         .map((item) => RoomMicModel.fromJson(item.cast<String, dynamic>()))
         .toList();
+  }
+
+  void _applyMicOperateResponse(RoomMicOperateResp response) {
+    final micList = _extractMicListFromOperateResponse(response);
+    if (micList == null) return;
+    _setState(_state.copyWith(micList: micList, errorMessage: null));
+  }
+
+  List<RoomMicModel>? _extractMicListFromOperateResponse(
+    RoomMicOperateResp response,
+  ) {
+    final directMicList = _parseMicListPayload(response.raw);
+    if (directMicList != null) return directMicList;
+
+    final messageList = response.raw['messageList'];
+    if (messageList is! Iterable) return null;
+
+    for (final group in messageList) {
+      if (group is! Map) continue;
+      final messages = group['message'];
+      if (messages is! Iterable) continue;
+      for (final message in messages) {
+        if (message is! Map) continue;
+        if (message['event'] != 'RoomMicUpdateEvent') continue;
+        final micList = _parseMicListPayload(message['payload']);
+        if (micList != null) return micList;
+      }
+    }
+
+    return null;
   }
 
   Object? _decodePayload(Object? payload) {

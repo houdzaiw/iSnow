@@ -93,13 +93,23 @@ class RoomMicModel {
   final Map<String, dynamic> raw;
 
   factory RoomMicModel.fromJson(Map<String, dynamic> json) {
+    final roomUserBaseDto = _asMap(json['roomUserBaseDto']);
+    final roomUserBase = _asMap(roomUserBaseDto?['userBase']);
+    final userInfo =
+        _asMap(json['userBaseInfo'] ?? json['userInfo']) ?? roomUserBase;
     return RoomMicModel(
       position:
-          _asInt(json['position'] ?? json['pos'] ?? json['micIndex']) ?? 0,
-      uid: _asInt(json['uid'] ?? json['userId'] ?? json['userID']),
+          _asInt(json['position'] ?? json['pos'] ?? json['micIndex']) ?? -1,
+      uid: _asInt(
+        json['uid'] ??
+            json['userId'] ??
+            json['userID'] ??
+            roomUserBaseDto?['uid'] ??
+            roomUserBase?['uid'],
+      ),
       isLocked: _asBool(json['isLock'] ?? json['isLocked'] ?? json['lock']),
       isMuted: _asBool(json['isMute'] ?? json['isMuted'] ?? json['mute']),
-      userInfo: _asMap(json['userBaseInfo'] ?? json['userInfo']),
+      userInfo: userInfo,
       raw: json,
     );
   }

@@ -67,7 +67,7 @@ class _RoomMicSeat extends StatelessWidget {
           _SeatCircle(seat: seat, isMine: isMine, isPending: isPending),
           SizedBox(height: 6.h),
           Text(
-            seat.position.toString(),
+            seat.displayPosition.toString(),
             maxLines: 1,
             style: TextStyle(
               color: isMine

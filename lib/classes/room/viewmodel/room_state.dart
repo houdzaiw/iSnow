@@ -7,6 +7,9 @@ enum RoomChatFilter { all, chat, gift }
 
 enum RoomChatEntryKind { chat, gift, system, enter, image, expression }
 
+const int roomDefaultMicSeatCount = 4;
+const int roomMaxMicSeatCount = 20;
+
 class RoomSeatViewData {
   const RoomSeatViewData({
     required this.position,
@@ -32,6 +35,7 @@ class RoomSeatViewData {
 
   bool get isOccupied => uid != null && uid! > 0;
   bool get isSpeaking => volume > 0;
+  int get displayPosition => position + 1;
 
   factory RoomSeatViewData.empty(int position) {
     return RoomSeatViewData(position: position);
@@ -44,7 +48,7 @@ class RoomSeatViewData {
   }) {
     final userInfo = mic.userInfo ?? const <String, dynamic>{};
     return RoomSeatViewData(
-      position: mic.position > 0 ? mic.position : position,
+      position: mic.position >= 0 ? mic.position : position,
       uid: mic.uid,
       nickname: _stringValue(
         userInfo['nick'] ??
@@ -185,7 +189,7 @@ class RoomPageState {
       roomId: roomId,
       currentRoomId: roomId,
       roomNo: roomId,
-      seats: List.generate(20, (index) => RoomSeatViewData.empty(index + 1)),
+      seats: List.generate(roomDefaultMicSeatCount, RoomSeatViewData.empty),
       messages: [
         RoomChatEntry(
           id: 'room-policy',
