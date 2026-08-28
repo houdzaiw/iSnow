@@ -167,11 +167,6 @@ class RoomManager extends ChangeNotifier {
         ),
       );
 
-      await _socketManager.joinRoom(
-        effectiveRoomId,
-        url: socketUrl ?? _defaultSocketUrl(),
-      );
-
       _setState(
         _state.copyWith(
           status: RoomStatus.ready,
@@ -179,6 +174,12 @@ class RoomManager extends ChangeNotifier {
           isInRoom: true,
           isMinimized: false,
           errorMessage: null,
+        ),
+      );
+      unawaited(
+        _joinSocketBestEffort(
+          roomId: effectiveRoomId,
+          url: socketUrl ?? _defaultSocketUrl(),
         ),
       );
       unawaited(refreshRoomData());
@@ -368,6 +369,17 @@ class RoomManager extends ChangeNotifier {
       );
     } catch (error) {
       debugPrint('Agora join skipped or failed: $error');
+    }
+  }
+
+  Future<void> _joinSocketBestEffort({
+    required String roomId,
+    required String url,
+  }) async {
+    try {
+      await _socketManager.joinRoom(roomId, url: url);
+    } catch (error) {
+      debugPrint('Room socket join skipped or failed: $error');
     }
   }
 

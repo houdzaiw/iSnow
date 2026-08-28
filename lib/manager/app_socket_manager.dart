@@ -80,6 +80,7 @@ class AppSocketManager extends ChangeNotifier {
 
   centrifuge.Client? _client;
   String? _socketUrl;
+  int _roomJoinGeneration = 0;
   AppSocketState _state = const AppSocketState();
 
   AppSocketState get state => _state;
@@ -99,7 +100,7 @@ class AppSocketManager extends ChangeNotifier {
       }
     }
 
-    await close();
+    await close(invalidateRoomJoin: false);
     _socketUrl = url;
     _setState(const AppSocketState(status: AppSocketStatus.connecting));
 
@@ -126,7 +127,9 @@ class AppSocketManager extends ChangeNotifier {
   }
 
   Future<void> joinRoom(String roomId, {required String url}) async {
+    final generation = ++_roomJoinGeneration;
     await connect(url: url);
+    if (!_isActiveRoomJoin(generation)) return;
     final client = _client;
     if (client == null) {
       throw const NadyApiException(message: 'Socket client is not ready');
@@ -145,6 +148,10 @@ class AppSocketManager extends ChangeNotifier {
 
     final roomChannel = 'room:$roomId';
     await _subscribeChannel(client, roomChannel);
+    if (!_isActiveRoomJoin(generation)) {
+      await _unsubscribeChannel(roomChannel);
+      return;
+    }
 
     var broadcastSubscribed = false;
     try {
@@ -152,6 +159,10 @@ class AppSocketManager extends ChangeNotifier {
       broadcastSubscribed = true;
     } catch (error) {
       debugPrint('Room broadcast socket subscribe failed: $error');
+    }
+    if (!_isActiveRoomJoin(generation)) {
+      await _unsubscribeChannel(roomChannel);
+      return;
     }
 
     _setState(
@@ -166,6 +177,7 @@ class AppSocketManager extends ChangeNotifier {
   }
 
   Future<void> leaveRoom(String roomId) async {
+    _roomJoinGeneration += 1;
     await _unsubscribeChannel('room:$roomId');
     await _unsubscribeChannel('room');
     _setState(
@@ -183,12 +195,16 @@ class AppSocketManager extends ChangeNotifier {
   }
 
   Future<void> disconnect() async {
+    _roomJoinGeneration += 1;
     await leaveCurrentRoomSubscriptions();
     await _client?.disconnect();
     _setState(const AppSocketState(status: AppSocketStatus.disconnected));
   }
 
-  Future<void> close() async {
+  Future<void> close({bool invalidateRoomJoin = true}) async {
+    if (invalidateRoomJoin) {
+      _roomJoinGeneration += 1;
+    }
     await leaveCurrentRoomSubscriptions();
     for (final listener in _clientListeners) {
       await listener.cancel();
@@ -198,6 +214,10 @@ class AppSocketManager extends ChangeNotifier {
     _client = null;
     _socketUrl = null;
     _setState(const AppSocketState(status: AppSocketStatus.idle));
+  }
+
+  bool _isActiveRoomJoin(int generation) {
+    return generation == _roomJoinGeneration;
   }
 
   Future<void> leaveCurrentRoomSubscriptions() async {
