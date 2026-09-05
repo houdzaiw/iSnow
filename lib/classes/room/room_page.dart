@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../localization/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import 'viewmodel/room_state.dart';
 import 'viewmodel/room_view_model.dart';
@@ -105,19 +106,14 @@ class RoomPage extends HookConsumerWidget {
                             seats: state.seats,
                             currentUid: state.currentUid,
                             pendingSeatPosition: state.pendingSeatPosition,
-                            onSeatTap: (seat) {
-                              final isMine =
-                                  seat.uid != null &&
-                                  seat.uid == state.currentUid;
-                              if (seat.isLocked ||
-                                  (seat.isOccupied && !isMine)) {
-                                _showSeatActions(context, ref, provider, seat);
-                                return;
-                              }
-                              ref.read(provider.notifier).toggleSeat(seat);
-                            },
-                            onSeatLongPress: (seat) =>
-                                _showSeatActions(context, ref, provider, seat),
+                            onSeatTap: (seat) =>
+                                _handleSeatTap(context, ref, provider, seat),
+                            onSeatLongPress: (seat) => _handleSeatLongPress(
+                              context,
+                              ref,
+                              provider,
+                              seat,
+                            ),
                           ),
                         ),
                         _RoomMusicStrip(state: state),
@@ -175,6 +171,65 @@ class _RoomLoadingOverlay extends StatelessWidget {
       ),
     );
   }
+}
+
+void _handleSeatTap(
+  BuildContext context,
+  WidgetRef ref,
+  AutoDisposeStateNotifierProvider<RoomViewModel, RoomPageState> provider,
+  RoomSeatViewData seat,
+) {
+  final state = ref.read(provider);
+  if (state.pendingSeatPosition != null) return;
+
+  final isMine = _isCurrentUserSeat(state, seat);
+  if (seat.isOccupied) {
+    if (isMine || state.isOwnerOrManager) {
+      _showSeatActions(context, ref, provider, seat);
+      return;
+    }
+    _openSeatUserProfile(context, seat);
+    return;
+  }
+
+  if (state.isOwnerOrManager) {
+    _showSeatActions(context, ref, provider, seat);
+    return;
+  }
+
+  if (!seat.isLocked) {
+    ref.read(provider.notifier).upMic(seat.position);
+  }
+}
+
+void _handleSeatLongPress(
+  BuildContext context,
+  WidgetRef ref,
+  AutoDisposeStateNotifierProvider<RoomViewModel, RoomPageState> provider,
+  RoomSeatViewData seat,
+) {
+  final state = ref.read(provider);
+  if (state.pendingSeatPosition != null) return;
+
+  if (_isCurrentUserSeat(state, seat) || state.isOwnerOrManager) {
+    _showSeatActions(context, ref, provider, seat);
+    return;
+  }
+
+  if (seat.isOccupied) {
+    _openSeatUserProfile(context, seat);
+  }
+}
+
+bool _isCurrentUserSeat(RoomPageState state, RoomSeatViewData seat) {
+  final uid = state.currentUid;
+  return uid != null && uid > 0 && seat.uid == uid;
+}
+
+void _openSeatUserProfile(BuildContext context, RoomSeatViewData seat) {
+  final uid = seat.uid;
+  if (uid == null || uid <= 0) return;
+  context.push('/profile-homepage/$uid');
 }
 
 void _showRoomComposer(
@@ -267,75 +322,154 @@ void _showSeatActions(
   RoomSeatViewData seat,
 ) {
   final state = ref.read(provider);
+  final actions = _seatActionsFor(context, ref, provider, seat, state);
+  if (actions.isEmpty) return;
+
   showModalBottomSheet<void>(
     context: context,
     backgroundColor: Colors.transparent,
     builder: (sheetContext) {
-      final notifier = ref.read(provider.notifier);
-      final isMine = seat.uid != null && seat.uid == state.currentUid;
       return SafeArea(
         top: false,
         child: Container(
-          margin: EdgeInsets.fromLTRB(12.w, 0, 12.w, 12.h),
+          margin: EdgeInsets.fromLTRB(
+            AppSpacing.roomActionSheetHorizontalMargin.w,
+            0,
+            AppSpacing.roomActionSheetHorizontalMargin.w,
+            AppSpacing.roomActionSheetBottomMargin.h,
+          ),
           decoration: BoxDecoration(
-            color: const Color(0xFF242432),
-            borderRadius: BorderRadius.circular(24.r),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+            color: AppColors.roomActionSheet,
+            borderRadius: BorderRadius.circular(AppRadius.roomActionSheet.r),
+            border: Border.all(color: AppColors.roomActionSheetBorder),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (!seat.isOccupied)
+              for (final action in actions)
                 _SeatActionTile(
-                  asset: AppAssets.lanhuRoomMicSeat,
-                  label: 'Up mic',
+                  asset: action.asset,
+                  label: action.label,
+                  destructive: action.destructive,
                   onTap: () {
                     Navigator.pop(sheetContext);
-                    notifier.upMic(seat.position);
+                    action.onTap();
                   },
                 ),
-              if (isMine)
-                _SeatActionTile(
-                  asset: AppAssets.lanhuRoomIconMissing,
-                  label: 'Down mic',
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    notifier.downMic(seat.position);
-                  },
-                ),
-              if (seat.isOccupied && !isMine)
-                _SeatActionTile(
-                  asset: AppAssets.lanhuRoomIconMissing,
-                  label: seat.isMuted ? 'Unmute seat' : 'Mute seat',
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    notifier.setSeatMuted(seat, !seat.isMuted);
-                  },
-                ),
-              if (seat.isOccupied && !isMine)
-                _SeatActionTile(
-                  asset: AppAssets.lanhuRoomIconMissing,
-                  label: 'Kick down',
-                  destructive: true,
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    notifier.kickDownMic(seat);
-                  },
-                ),
-              _SeatActionTile(
-                asset: AppAssets.lanhuRoomIconMissing,
-                label: seat.isLocked ? 'Unlock seat' : 'Lock seat',
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  notifier.setSeatLocked(seat, !seat.isLocked);
-                },
-              ),
             ],
           ),
         ),
       );
     },
   );
+}
+
+List<_SeatAction> _seatActionsFor(
+  BuildContext context,
+  WidgetRef ref,
+  AutoDisposeStateNotifierProvider<RoomViewModel, RoomPageState> provider,
+  RoomSeatViewData seat,
+  RoomPageState state,
+) {
+  final notifier = ref.read(provider.notifier);
+  final isMine = _isCurrentUserSeat(state, seat);
+  final canManage = state.isOwnerOrManager;
+  final actions = <_SeatAction>[];
+
+  void addProfileAction() {
+    actions.add(
+      _SeatAction(
+        asset: AppAssets.lanhuRoomIconMissing,
+        label: context.l10n.t('room.checkProfile'),
+        onTap: () => _openSeatUserProfile(context, seat),
+      ),
+    );
+  }
+
+  if (seat.isOccupied) {
+    if (isMine) {
+      actions.add(
+        _SeatAction(
+          asset: AppAssets.lanhuRoomIconMissing,
+          label: context.l10n.t('room.leaveMic'),
+          onTap: () => notifier.downMic(seat.position),
+        ),
+      );
+      addProfileAction();
+      return actions;
+    }
+
+    addProfileAction();
+    if (!canManage) return actions;
+
+    actions.addAll([
+      _SeatAction(
+        asset: AppAssets.lanhuRoomIconMissing,
+        label: context.l10n.t(seat.isMuted ? 'room.unmuteMic' : 'room.muteMic'),
+        onTap: () => notifier.setSeatMuted(seat, !seat.isMuted),
+      ),
+      _SeatAction(
+        asset: AppAssets.lanhuRoomIconMissing,
+        label: context.l10n.t('room.kickDownMic'),
+        destructive: true,
+        onTap: () => notifier.kickDownMic(seat),
+      ),
+      _SeatAction(
+        asset: AppAssets.lanhuRoomIconMissing,
+        label: context.l10n.t(
+          seat.isLocked ? 'room.unlockMic' : 'room.lockMic',
+        ),
+        onTap: () => notifier.setSeatLocked(seat, !seat.isLocked),
+      ),
+    ]);
+    return actions;
+  }
+
+  if (!canManage) {
+    if (!seat.isLocked) {
+      actions.add(
+        _SeatAction(
+          asset: AppAssets.lanhuRoomMicSeat,
+          label: context.l10n.t('room.takeMic'),
+          onTap: () => notifier.upMic(seat.position),
+        ),
+      );
+    }
+    return actions;
+  }
+
+  actions.addAll([
+    _SeatAction(
+      asset: AppAssets.lanhuRoomMicSeat,
+      label: context.l10n.t('room.takeMic'),
+      onTap: () => notifier.upMic(seat.position),
+    ),
+    _SeatAction(
+      asset: AppAssets.lanhuRoomIconMissing,
+      label: context.l10n.t(seat.isMuted ? 'room.unmuteMic' : 'room.muteMic'),
+      onTap: () => notifier.setSeatMuted(seat, !seat.isMuted),
+    ),
+    _SeatAction(
+      asset: AppAssets.lanhuRoomIconMissing,
+      label: context.l10n.t(seat.isLocked ? 'room.unlockMic' : 'room.lockMic'),
+      onTap: () => notifier.setSeatLocked(seat, !seat.isLocked),
+    ),
+  ]);
+  return actions;
+}
+
+class _SeatAction {
+  const _SeatAction({
+    required this.asset,
+    required this.label,
+    required this.onTap,
+    this.destructive = false,
+  });
+
+  final String asset;
+  final String label;
+  final VoidCallback onTap;
+  final bool destructive;
 }
 
 class _SeatActionTile extends StatelessWidget {
@@ -353,17 +487,16 @@ class _SeatActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = destructive ? const Color(0xFFFF6C79) : Colors.white;
+    final color = destructive ? AppColors.danger : AppColors.textInverse;
     return ListTile(
       onTap: onTap,
-      leading: _RoomAssetIcon(asset: asset, size: 24.r),
+      leading: _RoomAssetIcon(
+        asset: asset,
+        size: AppSpacing.roomActionIconSize.r,
+      ),
       title: Text(
         label,
-        style: TextStyle(
-          color: color,
-          fontSize: 16.sp,
-          fontWeight: FontWeight.w600,
-        ),
+        style: AppTextStyles.roomAction.copyWith(color: color),
       ),
     );
   }

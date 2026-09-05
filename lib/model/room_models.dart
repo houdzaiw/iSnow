@@ -1,3 +1,10 @@
+enum UserRoomIdentity { audience, manager, owner }
+
+extension UserRoomIdentityX on UserRoomIdentity {
+  bool get isOwnerOrManager =>
+      this == UserRoomIdentity.owner || this == UserRoomIdentity.manager;
+}
+
 class EnterRoomResp {
   const EnterRoomResp({
     required this.roomId,
@@ -10,7 +17,7 @@ class EnterRoomResp {
   });
 
   final String roomId;
-  final int? identity;
+  final UserRoomIdentity? identity;
   final String? agoraToken;
   final String? longLinkToken;
   final int? status;
@@ -20,7 +27,7 @@ class EnterRoomResp {
   factory EnterRoomResp.fromJson(Map<String, dynamic> json) {
     return EnterRoomResp(
       roomId: json['roomId']?.toString() ?? json['roomID']?.toString() ?? '',
-      identity: _asInt(json['identity']),
+      identity: _asRoomIdentity(json['identity']),
       agoraToken: json['agoraToken']?.toString(),
       longLinkToken: json['longLinkToken']?.toString(),
       status: _asInt(json['status']),
@@ -37,6 +44,7 @@ class RoomInfo {
     this.title,
     this.avatar,
     this.roomDesc,
+    this.roomOwnerUid,
     this.roomLock,
     this.audienceCount,
   });
@@ -45,6 +53,7 @@ class RoomInfo {
   final String? title;
   final String? avatar;
   final String? roomDesc;
+  final int? roomOwnerUid;
   final bool? roomLock;
   final int? audienceCount;
   final Map<String, dynamic> raw;
@@ -56,6 +65,9 @@ class RoomInfo {
       title: data['title']?.toString(),
       avatar: data['avatar']?.toString(),
       roomDesc: data['roomDesc']?.toString(),
+      roomOwnerUid: _asInt(
+        data['roomUid'] ?? data['roomUID'] ?? data['ownerUid'],
+      ),
       roomLock: _asBool(data['roomLock']),
       audienceCount: _asInt(data['audienceCount'] ?? data['roomAudience']),
       raw: json,
@@ -135,6 +147,26 @@ int? _asInt(Object? value) {
   if (value is int) return value;
   if (value is num) return value.toInt();
   return int.tryParse(value?.toString() ?? '');
+}
+
+UserRoomIdentity? _asRoomIdentity(Object? value) {
+  if (value is UserRoomIdentity) return value;
+  if (value is num) {
+    return switch (value.toInt()) {
+      0 => UserRoomIdentity.audience,
+      1 => UserRoomIdentity.manager,
+      2 => UserRoomIdentity.owner,
+      _ => null,
+    };
+  }
+
+  final text = value?.toString().trim().toUpperCase();
+  return switch (text) {
+    'ROOM_AUDIENCE' || 'AUDIENCE' => UserRoomIdentity.audience,
+    'ROOM_MANAGER' || 'MANAGER' => UserRoomIdentity.manager,
+    'ROOM_OWNER' || 'OWNER' => UserRoomIdentity.owner,
+    _ => null,
+  };
 }
 
 bool? _asBool(Object? value) {

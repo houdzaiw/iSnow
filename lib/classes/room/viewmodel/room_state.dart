@@ -176,6 +176,13 @@ class RoomPageState {
     return seats.any((seat) => seat.uid == uid);
   }
 
+  bool get isOwnerOrManager {
+    if (enterResponse?.identity?.isOwnerOrManager == true) return true;
+    final uid = currentUid;
+    final ownerUid = roomInfo?.roomOwnerUid;
+    return uid != null && uid > 0 && ownerUid != null && uid == ownerUid;
+  }
+
   List<RoomChatEntry> get visibleMessages {
     return switch (chatFilter) {
       RoomChatFilter.all => messages,

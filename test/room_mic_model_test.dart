@@ -32,4 +32,38 @@ void main() {
     expect(seat.avatar, 'https://example.com/avatar.jpg');
     expect(seat.heat, 12);
   });
+
+  test('parses room identity strings', () {
+    final owner = EnterRoomResp.fromJson({
+      'roomId': '1001',
+      'identity': 'ROOM_OWNER',
+    });
+    final manager = EnterRoomResp.fromJson({
+      'roomId': '1001',
+      'identity': 'ROOM_MANAGER',
+    });
+    final audience = EnterRoomResp.fromJson({
+      'roomId': '1001',
+      'identity': 'ROOM_AUDIENCE',
+    });
+
+    expect(owner.identity, UserRoomIdentity.owner);
+    expect(owner.identity?.isOwnerOrManager, isTrue);
+    expect(manager.identity, UserRoomIdentity.manager);
+    expect(manager.identity?.isOwnerOrManager, isTrue);
+    expect(audience.identity, UserRoomIdentity.audience);
+    expect(audience.identity?.isOwnerOrManager, isFalse);
+  });
+
+  test('detects owner by room owner uid fallback', () {
+    final roomInfo = RoomInfo.fromJson({
+      'roomInfoDTO': {'roomId': '1001', 'roomUid': 72546721},
+    });
+    final state = RoomPageState.initial(
+      '1001',
+    ).copyWith(roomInfo: roomInfo, currentUid: 72546721);
+
+    expect(roomInfo.roomOwnerUid, 72546721);
+    expect(state.isOwnerOrManager, isTrue);
+  });
 }

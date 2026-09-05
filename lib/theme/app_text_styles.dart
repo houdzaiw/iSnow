@@ -174,4 +174,10 @@ class AppTextStyles {
     height: 1,
     fontWeight: FontWeight.w700,
   );
+
+  static const TextStyle roomAction = TextStyle(
+    color: AppColors.textInverse,
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+  );
 }

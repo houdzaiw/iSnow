@@ -13,6 +13,7 @@ class AppRadius {
   static const double dialog = 40;
   static const double homeCard = 45;
   static const double homeCardContent = 42;
+  static const double roomActionSheet = 24;
   static const double pill = 40;
 
   static const BorderRadius cardBorder = BorderRadius.all(

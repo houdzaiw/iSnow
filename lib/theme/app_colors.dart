@@ -40,6 +40,8 @@ class AppColors {
   static const Color roomChatPanel = Color(0x996F6A55);
   static const Color roomChatTab = Color(0x7AFFFFFF);
   static const Color roomChatTabSelected = Colors.white;
+  static const Color roomActionSheet = Color(0xFF242432);
+  static const Color roomActionSheetBorder = Color(0x14FFFFFF);
   static const Color textInverse = Colors.white;
   static const Color transparent = Colors.transparent;
 
