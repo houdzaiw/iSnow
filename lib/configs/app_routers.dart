@@ -92,7 +92,9 @@ final GoRouter goRouter = GoRouter(
       builder: (context, state) {
         final title = state.uri.queryParameters['title'] ?? 'WebView';
         final uri = state.uri.queryParameters['uri'] ?? '';
-        return WebViewPage(title: title, uri: uri);
+        final hiddenAppBar =
+            state.uri.queryParameters['hiddenAppBar'] == 'true';
+        return WebViewPage(title: title, uri: uri, hiddenAppBar: hiddenAppBar);
       },
     ),
     GoRoute(
