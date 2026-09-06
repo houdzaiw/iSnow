@@ -41,6 +41,7 @@ class RoomInfo {
   const RoomInfo({
     required this.roomId,
     required this.raw,
+    this.roomNo,
     this.title,
     this.avatar,
     this.roomDesc,
@@ -50,6 +51,7 @@ class RoomInfo {
   });
 
   final String roomId;
+  final String? roomNo;
   final String? title;
   final String? avatar;
   final String? roomDesc;
@@ -62,6 +64,7 @@ class RoomInfo {
     final data = _nestedRoomInfo(json);
     return RoomInfo(
       roomId: data['roomId']?.toString() ?? data['roomID']?.toString() ?? '',
+      roomNo: data['roomNo']?.toString() ?? data['roomNO']?.toString(),
       title: data['title']?.toString(),
       avatar: data['avatar']?.toString(),
       roomDesc: data['roomDesc']?.toString(),

@@ -1,4 +1,5 @@
 import '../../model/user_profile.dart';
+import '../../model/room_models.dart';
 import 'create_party_models.dart';
 
 const Object _unset = Object();
@@ -7,6 +8,7 @@ class CreatePartyState {
   const CreatePartyState({
     required this.startTime,
     this.currentUser,
+    this.roomInfo,
     this.tags = const [],
     this.selectedTagIds = const {},
     this.topic = '',
@@ -17,16 +19,18 @@ class CreatePartyState {
     this.isLoading = false,
     this.isUploadingCover = false,
     this.isSubmitting = false,
+    this.canCreateParty = true,
     this.loadError,
     this.message,
     this.messageKey,
   });
 
   factory CreatePartyState.initial() {
-    return CreatePartyState(startTime: _nextHalfHour(DateTime.now()));
+    return CreatePartyState(startTime: _nextPartyStartTime(DateTime.now()));
   }
 
   final UserData? currentUser;
+  final RoomInfo? roomInfo;
   final List<CreatePartyTag> tags;
   final Set<int> selectedTagIds;
   final String topic;
@@ -38,14 +42,28 @@ class CreatePartyState {
   final bool isLoading;
   final bool isUploadingCover;
   final bool isSubmitting;
+  final bool canCreateParty;
   final Object? loadError;
   final String? message;
   final String? messageKey;
 
-  CreatePartyHost get host => CreatePartyHost.fromUser(currentUser);
+  CreatePartyHost get host {
+    return CreatePartyHost.fromRoomInfo(roomInfo, fallbackUser: currentUser);
+  }
+
   String get topicCountText => '${topic.length}/50';
   String get descriptionCountText => '${description.length}/500';
-  bool get canSubmit => !isSubmitting && !isUploadingCover;
+  bool get canSubmit {
+    return canCreateParty &&
+        !isLoading &&
+        !isSubmitting &&
+        !isUploadingCover &&
+        (coverUrl?.trim().isNotEmpty == true) &&
+        topic.trim().isNotEmpty &&
+        description.trim().isNotEmpty &&
+        durationMinutes >= 30 &&
+        startTime.isAfter(DateTime.now());
+  }
 
   List<CreatePartyTag> get selectedTags {
     return tags
@@ -55,6 +73,7 @@ class CreatePartyState {
 
   CreatePartyState copyWith({
     Object? currentUser = _unset,
+    Object? roomInfo = _unset,
     List<CreatePartyTag>? tags,
     Set<int>? selectedTagIds,
     String? topic,
@@ -66,6 +85,7 @@ class CreatePartyState {
     bool? isLoading,
     bool? isUploadingCover,
     bool? isSubmitting,
+    bool? canCreateParty,
     Object? loadError = _unset,
     Object? message = _unset,
     Object? messageKey = _unset,
@@ -74,6 +94,9 @@ class CreatePartyState {
       currentUser: identical(currentUser, _unset)
           ? this.currentUser
           : currentUser as UserData?,
+      roomInfo: identical(roomInfo, _unset)
+          ? this.roomInfo
+          : roomInfo as RoomInfo?,
       tags: tags ?? this.tags,
       selectedTagIds: selectedTagIds ?? this.selectedTagIds,
       topic: topic ?? this.topic,
@@ -89,6 +112,7 @@ class CreatePartyState {
       isLoading: isLoading ?? this.isLoading,
       isUploadingCover: isUploadingCover ?? this.isUploadingCover,
       isSubmitting: isSubmitting ?? this.isSubmitting,
+      canCreateParty: canCreateParty ?? this.canCreateParty,
       loadError: identical(loadError, _unset) ? this.loadError : loadError,
       message: identical(message, _unset) ? this.message : message as String?,
       messageKey: identical(messageKey, _unset)
@@ -98,10 +122,6 @@ class CreatePartyState {
   }
 }
 
-DateTime _nextHalfHour(DateTime now) {
-  final minute = now.minute < 30 ? 30 : 60;
-  final rounded = DateTime(now.year, now.month, now.day, now.hour, minute);
-  return rounded.isAfter(now)
-      ? rounded
-      : rounded.add(const Duration(minutes: 30));
+DateTime _nextPartyStartTime(DateTime now) {
+  return DateTime(now.year, now.month, now.day, now.hour + 1);
 }

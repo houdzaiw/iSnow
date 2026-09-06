@@ -1,4 +1,5 @@
 import '../../model/user_profile.dart';
+import '../../model/room_models.dart';
 
 class CreatePartyTag {
   const CreatePartyTag({
@@ -63,6 +64,26 @@ class CreatePartyHost {
       countryCode: _string(user?.countryCode)?.toUpperCase(),
     );
   }
+
+  factory CreatePartyHost.fromRoomInfo(
+    RoomInfo? roomInfo, {
+    UserData? fallbackUser,
+  }) {
+    final title = _string(roomInfo?.title);
+    final roomNo = _string(roomInfo?.roomNo);
+    final roomId = _string(roomInfo?.roomId);
+    final avatar = _string(roomInfo?.avatar);
+    if (title == null && roomNo == null && roomId == null && avatar == null) {
+      return CreatePartyHost.fromUser(fallbackUser);
+    }
+
+    return CreatePartyHost(
+      name: _firstText(title, fallbackUser?.nick, 'anywhere'),
+      idText: _firstText(roomNo, roomId, fallbackUser?.userNo?.toString()),
+      avatar: avatar ?? _string(fallbackUser?.avatar),
+      countryCode: _string(fallbackUser?.countryCode)?.toUpperCase(),
+    );
+  }
 }
 
 class CreatePartyDraft {
@@ -80,7 +101,7 @@ class CreatePartyDraft {
   final String description;
   final int duration;
   final DateTime beginTime;
-  final List<int> tagIdList;
+  final List<String> tagIdList;
 
   Map<String, dynamic> toJson() {
     return {
@@ -88,16 +109,10 @@ class CreatePartyDraft {
       'topic': topic,
       'description': description,
       'duration': duration,
-      'beginTime': _formatDateTime(beginTime),
+      'beginTime': beginTime.toUtc().millisecondsSinceEpoch,
       'tagIdList': tagIdList,
     };
   }
-}
-
-String _formatDateTime(DateTime value) {
-  String two(int input) => input.toString().padLeft(2, '0');
-  return '${value.year}-${two(value.month)}-${two(value.day)} '
-      '${two(value.hour)}:${two(value.minute)}:${two(value.second)}';
 }
 
 String _firstText(

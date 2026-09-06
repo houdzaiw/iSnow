@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:project/classes/create_party/create_party_models.dart';
+import 'package:project/classes/create_party/create_party_state.dart';
 import 'package:project/classes/create_room/create_room_models.dart';
 import 'package:project/manager/http_dio_manager.dart';
 import 'package:project/model/server_response.dart';
@@ -33,6 +35,44 @@ void main() {
   });
 
   group('Nady response parsing', () {
+    test('serializes create party request like Nady API', () {
+      final startTime = DateTime(2026, 9, 6, 21, 30);
+      final draft = CreatePartyDraft(
+        picUrl: 'dev/party-cover.png',
+        topic: 'Weekend Party',
+        description: 'Sing and chat together',
+        duration: 90,
+        beginTime: startTime,
+        tagIdList: const ['1', '2'],
+      );
+
+      expect(draft.toJson(), {
+        'picUrl': 'dev/party-cover.png',
+        'topic': 'Weekend Party',
+        'description': 'Sing and chat together',
+        'duration': 90,
+        'beginTime': startTime.toUtc().millisecondsSinceEpoch,
+        'tagIdList': ['1', '2'],
+      });
+    });
+
+    test('enables create party submit only when required fields are ready', () {
+      final ready = CreatePartyState(
+        startTime: DateTime.now().add(const Duration(hours: 1)),
+        coverUrl: 'dev/party-cover.png',
+        topic: 'Weekend Party',
+        description: 'Sing and chat together',
+        durationMinutes: 90,
+      );
+
+      expect(ready.canSubmit, isTrue);
+      expect(ready.copyWith(coverUrl: null).canSubmit, isFalse);
+      expect(ready.copyWith(topic: '   ').canSubmit, isFalse);
+      expect(ready.copyWith(description: '   ').canSubmit, isFalse);
+      expect(ready.copyWith(durationMinutes: 0).canSubmit, isFalse);
+      expect(ready.copyWith(canCreateParty: false).canSubmit, isFalse);
+    });
+
     test('serializes open room request and parses room id response', () {
       const draft = CreateRoomDraft(
         avatar: 'https://simisoul.xyz/dev/avatar.jpg',

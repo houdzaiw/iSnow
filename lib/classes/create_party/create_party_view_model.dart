@@ -5,11 +5,11 @@ import 'create_party_repository.dart';
 import 'create_party_state.dart';
 
 final createPartyViewModelProvider =
-    NotifierProvider<CreatePartyViewModel, CreatePartyState>(
+    AutoDisposeNotifierProvider<CreatePartyViewModel, CreatePartyState>(
       CreatePartyViewModel.new,
     );
 
-class CreatePartyViewModel extends Notifier<CreatePartyState> {
+class CreatePartyViewModel extends AutoDisposeNotifier<CreatePartyState> {
   CreatePartyRepository get _repository =>
       ref.read(createPartyRepositoryProvider);
 
@@ -20,13 +20,30 @@ class CreatePartyViewModel extends Notifier<CreatePartyState> {
   }
 
   Future<void> loadInitialData() async {
-    state = state.copyWith(isLoading: true, loadError: null);
+    state = state.copyWith(
+      isLoading: true,
+      loadError: null,
+      message: null,
+      messageKey: null,
+    );
     Object? loadError;
+    var canCreateParty = true;
+
+    try {
+      await _repository.preCheck();
+    } catch (error) {
+      canCreateParty = false;
+      loadError = error;
+      state = state.copyWith(message: error.toString());
+    }
+
     try {
       final user = await _repository.fetchCurrentUser();
       state = state.copyWith(currentUser: user);
+      final roomInfo = await _repository.fetchCurrentRoomInfo(user);
+      state = state.copyWith(roomInfo: roomInfo);
     } catch (error) {
-      loadError = error;
+      loadError ??= error;
     }
 
     try {
@@ -36,7 +53,11 @@ class CreatePartyViewModel extends Notifier<CreatePartyState> {
       loadError ??= error;
     }
 
-    state = state.copyWith(isLoading: false, loadError: loadError);
+    state = state.copyWith(
+      isLoading: false,
+      canCreateParty: canCreateParty,
+      loadError: loadError,
+    );
   }
 
   void updateTopic(String value) {
@@ -56,19 +77,36 @@ class CreatePartyViewModel extends Notifier<CreatePartyState> {
   }
 
   void updateDuration(int minutes) {
-    state = state.copyWith(durationMinutes: minutes);
+    state = state.copyWith(
+      durationMinutes: minutes,
+      message: null,
+      messageKey: null,
+    );
   }
 
   void updateStartTime(DateTime startTime) {
-    state = state.copyWith(startTime: startTime);
+    state = state.copyWith(
+      startTime: startTime,
+      message: null,
+      messageKey: null,
+    );
   }
 
   void toggleTag(int tagId) {
-    final selected = {...state.selectedTagIds};
-    if (!selected.add(tagId)) {
+    final selected = state.selectedTagIds.toList(growable: true);
+    if (selected.contains(tagId)) {
       selected.remove(tagId);
+    } else {
+      selected.add(tagId);
+      if (selected.length > 2) {
+        selected.removeAt(0);
+      }
     }
-    state = state.copyWith(selectedTagIds: selected);
+    state = state.copyWith(
+      selectedTagIds: selected.toSet(),
+      message: null,
+      messageKey: null,
+    );
   }
 
   Future<void> uploadCover(String filePath) async {
@@ -111,7 +149,9 @@ class CreatePartyViewModel extends Notifier<CreatePartyState> {
           description: state.description.trim(),
           duration: state.durationMinutes,
           beginTime: state.startTime,
-          tagIdList: state.selectedTagIds.toList(growable: false),
+          tagIdList: state.selectedTagIds
+              .map((id) => id.toString())
+              .toList(growable: false),
         ),
       );
       state = state.copyWith(isSubmitting: false);
@@ -123,6 +163,9 @@ class CreatePartyViewModel extends Notifier<CreatePartyState> {
   }
 
   String? _validationMessageKey() {
+    if (!state.canCreateParty) {
+      return 'createParty.preCheckFailed';
+    }
     if (state.coverUrl?.trim().isNotEmpty != true) {
       return 'createParty.coverRequired';
     }
@@ -131,6 +174,12 @@ class CreatePartyViewModel extends Notifier<CreatePartyState> {
     }
     if (state.description.trim().isEmpty) {
       return 'createParty.descriptionRequired';
+    }
+    if (!state.startTime.isAfter(DateTime.now())) {
+      return 'createParty.startTimeRequired';
+    }
+    if (state.durationMinutes < 30) {
+      return 'createParty.durationRequired';
     }
     return null;
   }

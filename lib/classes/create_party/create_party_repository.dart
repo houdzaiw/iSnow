@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../manager/auth_session.dart';
 import '../../manager/http_api.dart';
 import '../../manager/http_dio_manager.dart';
+import '../../model/room_models.dart';
 import '../../model/server_response.dart';
 import '../../model/user_profile.dart';
 import '../oauth/provider/login_provider.dart';
@@ -31,7 +32,7 @@ class CreatePartyRepository {
 
   Future<UserData?> fetchCurrentUser() async {
     final cached = await _authSession.user();
-    if (cached != null) return cached;
+    if (cached != null && _string(cached.roomId) != null) return cached;
 
     final response = await _httpManager.get(HttpApi.myUserInfo);
     final server = NadyServerResponse<MeModel>.fromJson(
@@ -46,6 +47,35 @@ class CreatePartyRepository {
       await _authSession.saveUser(user);
     }
     return user;
+  }
+
+  Future<void> preCheck() async {
+    final response = await _httpManager.post(HttpApi.partyPreCheck, data: {});
+    final server = NadyServerResponse<dynamic>.fromJson(
+      _asMap(response),
+      (json) => json,
+    );
+    if (!server.isSuccess) {
+      throw server.toException();
+    }
+  }
+
+  Future<RoomInfo?> fetchCurrentRoomInfo(UserData? user) async {
+    final roomId = _string(user?.roomId);
+    if (roomId == null) return null;
+
+    final response = await _httpManager.get(
+      HttpApi.roomInfo,
+      queryParameters: {'roomId': roomId},
+    );
+    final server = NadyServerResponse<RoomInfo>.fromJson(
+      _asMap(response),
+      (json) => RoomInfo.fromJson((json as Map).cast<String, dynamic>()),
+    );
+    if (!server.isSuccess) {
+      throw server.toException();
+    }
+    return server.data;
   }
 
   Future<List<CreatePartyTag>> fetchTags() async {
@@ -94,5 +124,10 @@ class CreatePartyRepository {
     if (data is Map && data['list'] is List) return data['list'] as List;
     if (data is Map && data['data'] != null) return _extractList(data['data']);
     return const [];
+  }
+
+  String? _string(Object? value) {
+    final text = value?.toString().trim();
+    return text == null || text.isEmpty ? null : text;
   }
 }

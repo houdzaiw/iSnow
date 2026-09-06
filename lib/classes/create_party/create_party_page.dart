@@ -44,6 +44,12 @@ class CreatePartyPage extends ConsumerWidget {
         child: Column(
           children: [
             _CreatePartyNavBar(onBack: () => context.pop()),
+            if (state.isLoading)
+              const LinearProgressIndicator(
+                minHeight: AppSpacing.xxs,
+                color: AppColors.primaryPink,
+                backgroundColor: AppColors.neutralLight,
+              ),
             Expanded(
               child: RefreshIndicator(
                 color: AppColors.primaryPink,
@@ -82,6 +88,7 @@ class CreatePartyPage extends ConsumerWidget {
                     _ConfirmButton(
                       isSubmitting: state.isSubmitting,
                       enabled: state.canSubmit,
+                      label: context.l10n.t('createParty.create'),
                       onPressed: () => _submit(context, notifier),
                     ),
                   ],
@@ -487,9 +494,6 @@ class _TagCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final selectedTags = state.selectedTags;
     final languageCode = Localizations.localeOf(context).languageCode;
-    final subtitle = selectedTags.isEmpty
-        ? context.l10n.t('createParty.tagHint')
-        : selectedTags.map((tag) => tag.nameForLocale(languageCode)).join(', ');
 
     return _FormCard(
       child: InkWell(
@@ -503,16 +507,29 @@ class _TagCard extends StatelessWidget {
               style: AppTextStyles.formLabel,
             ),
             const SizedBox(height: AppSpacing.md),
-            Text(
-              subtitle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.formHelper.copyWith(
-                decoration: selectedTags.isEmpty
-                    ? TextDecoration.underline
-                    : null,
+            if (selectedTags.isEmpty)
+              Text(
+                context.l10n.t('createParty.tagHint'),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.formHelper.copyWith(
+                  decoration: TextDecoration.underline,
+                ),
+              )
+            else
+              Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
+                children: [
+                  for (final tag in selectedTags)
+                    _TagChip(
+                      label: tag.nameForLocale(languageCode),
+                      iconUrl: tag.tagPic,
+                      selected: true,
+                      onTap: onTap,
+                    ),
+                ],
               ),
-            ),
           ],
         ),
       ),
@@ -524,34 +541,41 @@ class _ConfirmButton extends StatelessWidget {
   const _ConfirmButton({
     required this.isSubmitting,
     required this.enabled,
+    required this.label,
     required this.onPressed,
   });
 
   final bool isSubmitting;
   final bool enabled;
+  final String label;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
+    final active = enabled && !isSubmitting;
+    final textColor = active
+        ? AppColors.textInverse
+        : AppColors.textPlaceholder;
     return SizedBox(
       height: AppSpacing.controlHeightLg,
       width: double.infinity,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: AppGradients.voiceBubble,
+          color: active ? null : AppColors.chipBackground,
+          gradient: active ? AppGradients.voiceBubble : null,
           borderRadius: AppRadius.pillBorder,
         ),
         child: Material(
           color: AppColors.transparent,
           child: InkWell(
-            onTap: enabled ? onPressed : null,
+            onTap: active ? onPressed : null,
             borderRadius: AppRadius.pillBorder,
             child: Center(
               child: Text(
-                isSubmitting
-                    ? context.l10n.t('createParty.submitting')
-                    : context.l10n.t('createParty.confirm'),
-                style: AppTextStyles.primaryButtonLarge,
+                isSubmitting ? context.l10n.t('createParty.submitting') : label,
+                style: AppTextStyles.primaryButtonLarge.copyWith(
+                  color: textColor,
+                ),
               ),
             ),
           ),
@@ -817,9 +841,19 @@ class _TagSheet extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              context.l10n.t('createParty.chooseTags'),
-              style: AppTextStyles.title,
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    context.l10n.t('createParty.chooseTags'),
+                    style: AppTextStyles.title,
+                  ),
+                ),
+                Text(
+                  '(${state.selectedTagIds.length}/2)',
+                  style: AppTextStyles.caption,
+                ),
+              ],
             ),
             const SizedBox(height: AppSpacing.lg),
             if (state.tags.isEmpty)
@@ -836,6 +870,7 @@ class _TagSheet extends ConsumerWidget {
                   for (final tag in state.tags)
                     _TagChip(
                       label: tag.nameForLocale(languageCode),
+                      iconUrl: tag.tagPic,
                       selected: state.selectedTagIds.contains(tag.id),
                       onTap: () => notifier.toggleTag(tag.id),
                     ),
@@ -845,6 +880,7 @@ class _TagSheet extends ConsumerWidget {
             _ConfirmButton(
               isSubmitting: false,
               enabled: true,
+              label: context.l10n.t('createParty.confirm'),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ],
@@ -859,14 +895,17 @@ class _TagChip extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    this.iconUrl,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onTap;
+  final String? iconUrl;
 
   @override
   Widget build(BuildContext context) {
+    final icon = iconUrl?.trim();
     return InkWell(
       onTap: onTap,
       borderRadius: AppRadius.pillBorder,
@@ -883,11 +922,34 @@ class _TagChip extends StatelessWidget {
               ? Border.all(color: AppColors.chipSelectedText)
               : null,
         ),
-        child: Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: selected ? AppTextStyles.chipSelected : AppTextStyles.chip,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null && icon.startsWith('http')) ...[
+              ClipOval(
+                child: CachedNetworkImage(
+                  imageUrl: icon,
+                  width: AppSpacing.iconSizeXs,
+                  height: AppSpacing.iconSizeXs,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.xs),
+            ],
+            ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: AppSpacing.formChipWidth,
+              ),
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: selected
+                    ? AppTextStyles.chipSelected
+                    : AppTextStyles.chip,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -936,8 +998,7 @@ class _SheetOption extends StatelessWidget {
 
 DateTime _nextAvailableStartTime() {
   final now = DateTime.now();
-  final minute = now.minute < 30 ? 30 : 60;
-  return DateTime(now.year, now.month, now.day, now.hour, minute);
+  return DateTime(now.year, now.month, now.day, now.hour + 1);
 }
 
 String _formatMinuteTime(DateTime value) {

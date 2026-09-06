@@ -107,6 +107,9 @@ class HttpApi {
   /// 派对标签列表
   static const partyTagList = '/api/room/party/tagList';
 
+  /// 创建派对前置检查
+  static const partyPreCheck = '/api/room/party/preCheck';
+
   /// 用户排行榜
   static const rankCommonly = '/api/rank/commonly';
 
