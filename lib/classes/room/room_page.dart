@@ -348,7 +348,6 @@ void _showSeatActions(
             children: [
               for (final action in actions)
                 _SeatActionTile(
-                  asset: action.asset,
                   label: action.label,
                   destructive: action.destructive,
                   onTap: () {
@@ -379,7 +378,6 @@ List<_SeatAction> _seatActionsFor(
   void addProfileAction() {
     actions.add(
       _SeatAction(
-        asset: AppAssets.lanhuRoomIconMissing,
         label: context.l10n.t('room.checkProfile'),
         onTap: () => _openSeatUserProfile(context, seat),
       ),
@@ -390,7 +388,6 @@ List<_SeatAction> _seatActionsFor(
     if (isMine) {
       actions.add(
         _SeatAction(
-          asset: AppAssets.lanhuRoomIconMissing,
           label: context.l10n.t('room.leaveMic'),
           onTap: () => notifier.downMic(seat.position),
         ),
@@ -404,18 +401,15 @@ List<_SeatAction> _seatActionsFor(
 
     actions.addAll([
       _SeatAction(
-        asset: AppAssets.lanhuRoomIconMissing,
         label: context.l10n.t(seat.isMuted ? 'room.unmuteMic' : 'room.muteMic'),
         onTap: () => notifier.setSeatMuted(seat, !seat.isMuted),
       ),
       _SeatAction(
-        asset: AppAssets.lanhuRoomIconMissing,
         label: context.l10n.t('room.kickDownMic'),
         destructive: true,
         onTap: () => notifier.kickDownMic(seat),
       ),
       _SeatAction(
-        asset: AppAssets.lanhuRoomIconMissing,
         label: context.l10n.t(
           seat.isLocked ? 'room.unlockMic' : 'room.lockMic',
         ),
@@ -429,7 +423,6 @@ List<_SeatAction> _seatActionsFor(
     if (!seat.isLocked) {
       actions.add(
         _SeatAction(
-          asset: AppAssets.lanhuRoomMicSeat,
           label: context.l10n.t('room.takeMic'),
           onTap: () => notifier.upMic(seat.position),
         ),
@@ -440,17 +433,14 @@ List<_SeatAction> _seatActionsFor(
 
   actions.addAll([
     _SeatAction(
-      asset: AppAssets.lanhuRoomMicSeat,
       label: context.l10n.t('room.takeMic'),
       onTap: () => notifier.upMic(seat.position),
     ),
     _SeatAction(
-      asset: AppAssets.lanhuRoomIconMissing,
       label: context.l10n.t(seat.isMuted ? 'room.unmuteMic' : 'room.muteMic'),
       onTap: () => notifier.setSeatMuted(seat, !seat.isMuted),
     ),
     _SeatAction(
-      asset: AppAssets.lanhuRoomIconMissing,
       label: context.l10n.t(seat.isLocked ? 'room.unlockMic' : 'room.lockMic'),
       onTap: () => notifier.setSeatLocked(seat, !seat.isLocked),
     ),
@@ -460,13 +450,11 @@ List<_SeatAction> _seatActionsFor(
 
 class _SeatAction {
   const _SeatAction({
-    required this.asset,
     required this.label,
     required this.onTap,
     this.destructive = false,
   });
 
-  final String asset;
   final String label;
   final VoidCallback onTap;
   final bool destructive;
@@ -474,13 +462,11 @@ class _SeatAction {
 
 class _SeatActionTile extends StatelessWidget {
   const _SeatActionTile({
-    required this.asset,
     required this.label,
     required this.onTap,
     this.destructive = false,
   });
 
-  final String asset;
   final String label;
   final VoidCallback onTap;
   final bool destructive;
@@ -488,15 +474,18 @@ class _SeatActionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = destructive ? AppColors.danger : AppColors.textInverse;
-    return ListTile(
+    return InkWell(
       onTap: onTap,
-      leading: _RoomAssetIcon(
-        asset: asset,
-        size: AppSpacing.roomActionIconSize.r,
-      ),
-      title: Text(
-        label,
-        style: AppTextStyles.roomAction.copyWith(color: color),
+      child: SizedBox(
+        height: AppSpacing.controlHeightLg.h,
+        width: double.infinity,
+        child: Center(
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: AppTextStyles.roomAction.copyWith(color: color),
+          ),
+        ),
       ),
     );
   }

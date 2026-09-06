@@ -60,5 +60,4 @@ class AppSpacing {
   static const double roomChatMessageBottomInset = 10;
   static const double roomActionSheetHorizontalMargin = 12;
   static const double roomActionSheetBottomMargin = 12;
-  static const double roomActionIconSize = 24;
 }
