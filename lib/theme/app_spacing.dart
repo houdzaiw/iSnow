@@ -22,6 +22,7 @@ class AppSpacing {
   static const double controlHeightSm = 32;
   static const double controlHeightMd = 44;
   static const double controlHeightLg = 48;
+  static const double buttonHeightLg = 50;
   static const double formFieldHeight = 56;
   static const double formTextAreaHeight = 99;
   static const double formCoverHeight = 122;

@@ -372,9 +372,9 @@ class _SortBar extends StatelessWidget {
           ),
           const Spacer(),
           Image.asset(
-            AppAssets.iconMissing,
-            width: AppSpacing.xxl,
-            height: AppSpacing.xxl,
+            AppAssets.lanhuCreatePartyMine,
+            width: AppSpacing.createRoomTitleTop,
+            height: AppSpacing.createRoomTitleTop,
           ),
           const SizedBox(width: 3),
           Image.asset(
@@ -748,7 +748,7 @@ class _CreatePartyButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Positioned(
       right: 17,
-      bottom: 42,
+      bottom: MediaQuery.of(context).padding.bottom + 40,
       child: Material(
         color: AppColors.transparent,
         shape: const CircleBorder(),
@@ -760,20 +760,11 @@ class _CreatePartyButton extends ConsumerWidget {
             ref.invalidate(_partyFeedViewModelProvider(_FeedSortTab.now));
             ref.invalidate(_partyFeedViewModelProvider(_FeedSortTab.newest));
           },
-          child: Container(
-            width: 50,
-            height: 50,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: AppGradients.sendButton,
-              boxShadow: AppShadows.button,
-            ),
-            child: Center(
-              child: Image.asset(
-                AppAssets.iconMissing,
-                width: AppSpacing.iconSizeLg,
-                height: AppSpacing.iconSizeLg,
-              ),
+          child: Center(
+            child: Image.asset(
+              AppAssets.lanhuPartyAdd,
+              width: AppSpacing.buttonHeightLg,
+              height: AppSpacing.buttonHeightLg,
             ),
           ),
         ),
