@@ -3,26 +3,36 @@ enum AppEnv {
     "http://simi2.w1.luyouxia.net/simi",
     "https://www.simijoy.com",
     "https://analytics-preview.habilive.net",
+    "https://www.simijoy.com/h5/wallet/index.html",
     false,
   ),
   qa(
     "https://www.simijoy.com/simi",
     "https://www.simijoy.com",
     "https://analytics-preview.habilive.net",
+    "https://www.simijoy.com/h5/wallet/index.html",
     false,
   ),
   product(
     "https://www.simisoul.com/simi",
     "https://www.simisoul.com",
     "https://analytics.habilive.net",
+    "https://www.simisoul.com/h5/wallet/index.html",
     true,
   );
 
   final String baseUrl;
   final String socketHost;
   final String h5Url;
+  final String h5WalletUrl;
   final bool isLocal;
-  const AppEnv(this.baseUrl, this.socketHost, this.h5Url, this.isLocal);
+  const AppEnv(
+    this.baseUrl,
+    this.socketHost,
+    this.h5Url,
+    this.h5WalletUrl,
+    this.isLocal,
+  );
 }
 
 enum ErrorCode {
