@@ -17,27 +17,130 @@ class _RoomMicGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
-      itemCount: seats.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 5,
-        mainAxisExtent: 91.h,
-        crossAxisSpacing: 10.w,
-        mainAxisSpacing: 12.h,
-      ),
-      itemBuilder: (context, index) {
-        final seat = seats[index];
-        return _RoomMicSeat(
-          seat: seat,
-          isMine: seat.uid != null && seat.uid == currentUid,
-          isPending: pendingSeatPosition == seat.position,
-          onTap: () => onSeatTap(seat),
-          onLongPress: () => onSeatLongPress(seat),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final horizontalInset = AppSpacing.roomMicGridHorizontalInset.w;
+        final contentWidth = constraints.maxWidth - horizontalInset * 2;
+        final child = seats.length == 12
+            ? _buildTwelveSeatLayout(contentWidth)
+            : _buildWrapSeatLayout(seats, contentWidth);
+
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: horizontalInset,
+            vertical: AppSpacing.roomMicGridVerticalInset.h,
+          ),
+          child: Align(alignment: Alignment.topCenter, child: child),
         );
       },
     );
+  }
+
+  Widget _buildTwelveSeatLayout(double contentWidth) {
+    final featuredGap = AppSpacing.roomMicFeaturedSeatGap.w;
+    final featuredWidth = _responsiveSeatWidth(
+      contentWidth: contentWidth,
+      preferredWidth: AppSpacing.roomMicFeaturedSeatWidth.w,
+      seatsPerRow: 2,
+      spacing: featuredGap,
+    );
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildSeat(
+              seats[0],
+              width: featuredWidth,
+              height: AppSpacing.roomMicFeaturedSeatHeight,
+              circleSize: AppSpacing.roomMicFeaturedSeatCircleSize,
+              avatarSize: AppSpacing.roomMicFeaturedSeatAvatarSize,
+            ),
+            SizedBox(width: featuredGap),
+            _buildSeat(
+              seats[1],
+              width: featuredWidth,
+              height: AppSpacing.roomMicFeaturedSeatHeight,
+              circleSize: AppSpacing.roomMicFeaturedSeatCircleSize,
+              avatarSize: AppSpacing.roomMicFeaturedSeatAvatarSize,
+            ),
+          ],
+        ),
+        SizedBox(height: AppSpacing.roomMicFeaturedRowsGap.h),
+        _buildWrapSeatLayout(seats.skip(2), contentWidth),
+      ],
+    );
+  }
+
+  Widget _buildWrapSeatLayout(
+    Iterable<RoomSeatViewData> visibleSeats,
+    double contentWidth,
+  ) {
+    final spacing = _seatSpacingForCount(seats.length).w;
+    final width = _responsiveSeatWidth(
+      contentWidth: contentWidth,
+      preferredWidth: AppSpacing.roomMicSeatWidth.w,
+      seatsPerRow: _seatsPerRowForCount(seats.length),
+      spacing: spacing,
+    );
+
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: spacing,
+      children: [
+        for (final seat in visibleSeats) _buildSeat(seat, width: width),
+      ],
+    );
+  }
+
+  Widget _buildSeat(
+    RoomSeatViewData seat, {
+    required double width,
+    double height = AppSpacing.roomMicSeatHeight,
+    double circleSize = AppSpacing.roomMicSeatCircleSize,
+    double avatarSize = AppSpacing.roomMicSeatAvatarSize,
+  }) {
+    return SizedBox(
+      width: width,
+      height: height.h,
+      child: _RoomMicSeat(
+        seat: seat,
+        isMine: seat.uid != null && seat.uid == currentUid,
+        isPending: pendingSeatPosition == seat.position,
+        circleSize: circleSize,
+        avatarSize: avatarSize,
+        onTap: () => onSeatTap(seat),
+        onLongPress: () => onSeatLongPress(seat),
+      ),
+    );
+  }
+
+  double _seatSpacingForCount(int count) {
+    return count == 8
+        ? AppSpacing.roomMicSeatSpacingWide
+        : AppSpacing.roomMicSeatSpacing;
+  }
+
+  int _seatsPerRowForCount(int count) {
+    if (count <= 0) return roomDefaultMicSeatCount;
+    if (count <= roomDefaultMicSeatCount) return count;
+    if (count == 8) return 4;
+    return 5;
+  }
+
+  double _responsiveSeatWidth({
+    required double contentWidth,
+    required double preferredWidth,
+    required int seatsPerRow,
+    required double spacing,
+  }) {
+    if (seatsPerRow <= 1) return preferredWidth;
+    final availableWidth =
+        (contentWidth - spacing * (seatsPerRow - 1)) / seatsPerRow;
+    if (availableWidth <= 0) return preferredWidth;
+    return availableWidth < preferredWidth ? availableWidth : preferredWidth;
   }
 }
 
@@ -46,6 +149,8 @@ class _RoomMicSeat extends StatelessWidget {
     required this.seat,
     required this.isMine,
     required this.isPending,
+    required this.circleSize,
+    required this.avatarSize,
     required this.onTap,
     required this.onLongPress,
   });
@@ -53,6 +158,8 @@ class _RoomMicSeat extends StatelessWidget {
   final RoomSeatViewData seat;
   final bool isMine;
   final bool isPending;
+  final double circleSize;
+  final double avatarSize;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
 
@@ -64,7 +171,13 @@ class _RoomMicSeat extends StatelessWidget {
       onLongPress: onLongPress,
       child: Column(
         children: [
-          _SeatCircle(seat: seat, isMine: isMine, isPending: isPending),
+          _SeatCircle(
+            seat: seat,
+            isMine: isMine,
+            isPending: isPending,
+            circleSize: circleSize,
+            avatarSize: avatarSize,
+          ),
           SizedBox(height: 6.h),
           Text(
             seat.displayPosition.toString(),
@@ -91,29 +204,37 @@ class _SeatCircle extends StatelessWidget {
     required this.seat,
     required this.isMine,
     required this.isPending,
+    required this.circleSize,
+    required this.avatarSize,
   });
 
   final RoomSeatViewData seat;
   final bool isMine;
   final bool isPending;
+  final double circleSize;
+  final double avatarSize;
 
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 180),
-      width: 46.r,
-      height: 46.r,
+      width: circleSize.r,
+      height: circleSize.r,
       child: Stack(
         alignment: Alignment.center,
         children: [
           if (seat.isOccupied)
-            _RoomAvatarImage(url: seat.avatar, size: 54.r, radius: 27.r)
+            _RoomAvatarImage(
+              url: seat.avatar,
+              size: avatarSize.r,
+              radius: avatarSize.r / 2,
+            )
           else
             _RoomAssetIcon(
               asset: seat.isLocked
                   ? AppAssets.lanhuRoomIconMissing
                   : AppAssets.lanhuRoomMicSeat,
-              size: 46.r,
+              size: circleSize.r,
             ),
           if (seat.isMuted)
             Positioned(

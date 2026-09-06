@@ -58,6 +58,20 @@ class AppSpacing {
   static const double roomChatMessageTopFirst = 4;
   static const double roomChatMessageTop = 8;
   static const double roomChatMessageBottomInset = 10;
+  static const double roomMicGridHorizontalInset = 14;
+  static const double roomMicGridVerticalInset = 6;
+  static const double roomMicSeatWidth = 68;
+  static const double roomMicSeatHeight = 80;
+  static const double roomMicSeatCircleSize = 46;
+  static const double roomMicSeatAvatarSize = 54;
+  static const double roomMicSeatSpacing = 4;
+  static const double roomMicSeatSpacingWide = 12;
+  static const double roomMicFeaturedSeatWidth = 76;
+  static const double roomMicFeaturedSeatHeight = 88;
+  static const double roomMicFeaturedSeatCircleSize = 56;
+  static const double roomMicFeaturedSeatAvatarSize = 64;
+  static const double roomMicFeaturedSeatGap = 46;
+  static const double roomMicFeaturedRowsGap = 4;
   static const double roomActionSheetHorizontalMargin = 12;
   static const double roomActionSheetBottomMargin = 12;
 }
