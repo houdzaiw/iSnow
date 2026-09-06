@@ -76,6 +76,12 @@ class AppAssets {
       'assets/lanhu/room/room_avatar_sample.png';
   static const String lanhuRoomIconMissing =
       'assets/lanhu/room/room_icon_missing.png';
+  static const String lanhuRoomMicLockSeat =
+      'assets/lanhu/room/room_mic_lock_seat.png';
+  static const String lanhuRoomMusicIcon =
+      'assets/lanhu/room/room_music_icon.png';
+  static const String lanhuRoomOnlineIcon =
+      'assets/lanhu/room/room_online_icon.png';
   static const String lanhuRoomPower = 'assets/lanhu/room/room_power.png';
   static const String lanhuRoomAddFriend =
       'assets/lanhu/room/room_add_friend.png';

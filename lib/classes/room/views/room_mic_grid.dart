@@ -232,7 +232,7 @@ class _SeatCircle extends StatelessWidget {
           else
             _RoomAssetIcon(
               asset: seat.isLocked
-                  ? AppAssets.lanhuRoomIconMissing
+                  ? AppAssets.lanhuRoomMicLockSeat
                   : AppAssets.lanhuRoomMicSeat,
               size: circleSize.r,
             ),
@@ -246,7 +246,7 @@ class _SeatCircle extends StatelessWidget {
             Positioned(
               left: 2.r,
               bottom: 2.r,
-              child: _SeatStatusDot(asset: AppAssets.lanhuRoomIconMissing),
+              child: _SeatStatusDot(asset: AppAssets.lanhuRoomMicLockSeat),
             ),
           if (isPending)
             Positioned.fill(

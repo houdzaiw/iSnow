@@ -25,7 +25,7 @@ class _RoomMusicStrip extends StatelessWidget {
                 child: Row(
                   children: [
                     _RoomAssetIcon(
-                      asset: AppAssets.lanhuRoomIconMissing,
+                      asset: AppAssets.lanhuRoomMusicIcon,
                       size: 24.r,
                     ),
                     SizedBox(width: 7.w),
@@ -77,7 +77,7 @@ class _RoomMusicStrip extends StatelessWidget {
               child: Row(
                 children: [
                   _RoomAssetIcon(
-                    asset: AppAssets.lanhuRoomIconMissing,
+                    asset: AppAssets.lanhuRoomOnlineIcon,
                     size: 17.r,
                   ),
                   SizedBox(width: 6.w),
