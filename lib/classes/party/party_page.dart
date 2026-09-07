@@ -37,10 +37,9 @@ final _partyRepositoryProvider = Provider<_PartyRepository>((ref) {
 });
 
 final _partyFeedViewModelProvider =
-    FutureProvider.family<List<_PartyFeedItem>, _FeedSortTab>((ref, sortTab) {
-      final repository = ref.watch(_partyRepositoryProvider);
-      return repository.fetchPartyList(type: sortTab.partyType, pageNum: 1);
-    });
+    NotifierProvider.family<_PartyFeedViewModel, _PartyFeedState, _FeedSortTab>(
+      _PartyFeedViewModel.new,
+    );
 
 class PartyPage extends HookConsumerWidget {
   const PartyPage({super.key});
@@ -390,42 +389,84 @@ class _SortBar extends StatelessWidget {
 
 class _FeedItemsView extends StatelessWidget {
   const _FeedItemsView({
-    required this.feedItems,
+    required this.state,
     required this.onRetry,
     required this.onRefresh,
+    required this.onLoadMore,
   });
 
-  final AsyncValue<List<_PartyFeedItem>> feedItems;
-  final VoidCallback onRetry;
+  final _PartyFeedState state;
+  final Future<void> Function() onRetry;
   final Future<void> Function() onRefresh;
+  final Future<void> Function() onLoadMore;
 
   @override
   Widget build(BuildContext context) {
-    return feedItems.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, __) => _StateList(
-        text: context.l10n.t('party.loadFailed'),
-        actionLabel: context.l10n.t('app.retry'),
-        onAction: onRetry,
-      ),
-      data: (items) {
-        if (items.isEmpty) {
-          return _StateList(text: context.l10n.t('party.noData'));
+    if (state.isLoading && state.items.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (state.error != null && state.items.isEmpty) {
+      return RefreshIndicator(
+        color: AppColors.primaryPink,
+        onRefresh: onRefresh,
+        child: _StateList(
+          text: context.l10n.t('party.loadFailed'),
+          actionLabel: context.l10n.t('app.retry'),
+          onAction: () => onRetry(),
+        ),
+      );
+    }
+    if (state.items.isEmpty) {
+      return RefreshIndicator(
+        color: AppColors.primaryPink,
+        onRefresh: onRefresh,
+        child: _StateList(text: context.l10n.t('party.noData')),
+      );
+    }
+
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification.metrics.axis == Axis.vertical &&
+            notification.metrics.extentAfter < 160) {
+          onLoadMore();
         }
-        return RefreshIndicator(
-          color: AppColors.primaryPink,
-          onRefresh: onRefresh,
-          child: ListView.builder(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(17, 0, 17, 110),
-            itemCount: items.length,
-            itemBuilder: (context, index) => Padding(
-              padding: EdgeInsets.only(top: index == 0 ? 8 : 12),
-              child: _PartyCard(item: items[index]),
-            ),
-          ),
-        );
+        return false;
       },
+      child: RefreshIndicator(
+        color: AppColors.primaryPink,
+        onRefresh: onRefresh,
+        child: ListView.builder(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(17, 0, 17, 110),
+          itemCount: state.items.length + (state.isLoadingMore ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index >= state.items.length) {
+              return const _LoadMoreIndicator();
+            }
+            return Padding(
+              padding: EdgeInsets.only(top: index == 0 ? 8 : 12),
+              child: _PartyCard(item: state.items[index]),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _LoadMoreIndicator extends StatelessWidget {
+  const _LoadMoreIndicator();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 16),
+      child: Center(
+        child: SizedBox.square(
+          dimension: 18,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      ),
     );
   }
 }

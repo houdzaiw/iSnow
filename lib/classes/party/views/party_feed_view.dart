@@ -8,10 +8,12 @@ class _PartyFeedView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = _partyFeedViewModelProvider(sortTab);
+    final notifier = ref.read(provider.notifier);
     return _FeedItemsView(
-      feedItems: ref.watch(provider),
-      onRetry: () => ref.invalidate(provider),
-      onRefresh: () => ref.refresh(provider.future).then<void>((_) {}),
+      state: ref.watch(provider),
+      onRetry: notifier.refresh,
+      onRefresh: notifier.refresh,
+      onLoadMore: notifier.loadMore,
     );
   }
 }

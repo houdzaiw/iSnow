@@ -169,6 +169,11 @@ class CreatePartyViewModel extends AutoDisposeNotifier<CreatePartyState> {
               .toList(growable: false),
         ),
       );
+      try {
+        await _repository.refreshPartyLists();
+      } catch (_) {
+        // The party is already created; PartyPage invalidates its feeds after pop.
+      }
       state = state.copyWith(isSubmitting: false);
       return true;
     } catch (error) {

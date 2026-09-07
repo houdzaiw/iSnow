@@ -173,6 +173,31 @@ class CreatePartyRepository {
     }
   }
 
+  Future<void> refreshPartyLists() async {
+    await Future.wait([
+      _fetchPartyList(type: 0, pageNum: 1),
+      _fetchPartyList(type: 1, pageNum: 1),
+      _fetchPartyList(type: 2, pageNum: 1),
+    ]);
+  }
+
+  Future<void> _fetchPartyList({
+    required int type,
+    required int pageNum,
+  }) async {
+    final response = await _httpManager.get(
+      HttpApi.partyList,
+      queryParameters: {'type': type, 'pageNum': pageNum},
+    );
+    final server = NadyServerResponse<List<dynamic>>.fromJson(
+      _asMap(response),
+      (json) => _extractList(json),
+    );
+    if (!server.isSuccess) {
+      throw server.toException();
+    }
+  }
+
   Map<String, dynamic> _asMap(dynamic response) {
     if (response is Map<String, dynamic>) return response;
     if (response is Map) return response.cast<String, dynamic>();
