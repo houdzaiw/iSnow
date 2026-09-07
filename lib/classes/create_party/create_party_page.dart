@@ -251,7 +251,9 @@ class _CoverCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xxl),
           GestureDetector(
-            onTap: state.isUploadingCover ? null : onPickCover,
+            onTap: state.isUploadingCover || state.isSubmitting
+                ? null
+                : onPickCover,
             child: SizedBox(
               height: AppSpacing.formCoverHeight,
               width: double.infinity,
@@ -524,7 +526,6 @@ class _TagCard extends StatelessWidget {
                   for (final tag in selectedTags)
                     _TagChip(
                       label: tag.nameForLocale(languageCode),
-                      iconUrl: tag.tagPic,
                       selected: true,
                       onTap: onTap,
                     ),
@@ -872,7 +873,6 @@ class _TagSheet extends ConsumerWidget {
                   for (final tag in state.tags)
                     _TagChip(
                       label: tag.nameForLocale(languageCode),
-                      iconUrl: tag.tagPic,
                       selected: state.selectedTagIds.contains(tag.id),
                       onTap: () => notifier.toggleTag(tag.id),
                     ),
@@ -897,17 +897,14 @@ class _TagChip extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
-    this.iconUrl,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onTap;
-  final String? iconUrl;
 
   @override
   Widget build(BuildContext context) {
-    final icon = iconUrl?.trim();
     return InkWell(
       onTap: onTap,
       borderRadius: AppRadius.pillBorder,
@@ -926,17 +923,6 @@ class _TagChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (icon != null && icon.startsWith('http')) ...[
-              ClipOval(
-                child: CachedNetworkImage(
-                  imageUrl: icon,
-                  width: AppSpacing.iconSizeXs,
-                  height: AppSpacing.iconSizeXs,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.xs),
-            ],
             ConstrainedBox(
               constraints: const BoxConstraints(
                 maxWidth: AppSpacing.formChipWidth,

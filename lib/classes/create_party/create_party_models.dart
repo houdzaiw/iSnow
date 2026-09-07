@@ -115,6 +115,93 @@ class CreatePartyDraft {
   }
 }
 
+enum CreatePartyStrategyPushEvent {
+  hostSideGameHall('HOST_SIDE_GAME_HALL');
+
+  const CreatePartyStrategyPushEvent(this.value);
+
+  final String value;
+}
+
+class CreatePartyStrategyPushTimesCount {
+  const CreatePartyStrategyPushTimesCount({
+    required this.timer,
+    required this.count,
+  });
+
+  static const fallback = CreatePartyStrategyPushTimesCount(timer: 1, count: 1);
+
+  final int timer;
+  final int count;
+
+  bool get isUsable => count > 0;
+
+  factory CreatePartyStrategyPushTimesCount.fromJson(
+    Map<dynamic, dynamic> json,
+  ) {
+    return CreatePartyStrategyPushTimesCount(
+      timer: _int(json['timer']),
+      count: _int(json['count']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'timer': timer, 'count': count};
+  }
+}
+
+class CreatePartyStrategyPushConfig {
+  const CreatePartyStrategyPushConfig({
+    required this.eventType,
+    required this.timesCount,
+  });
+
+  final String eventType;
+  final List<CreatePartyStrategyPushTimesCount> timesCount;
+
+  CreatePartyStrategyPushTimesCount? get firstUsableTimesCount {
+    for (final item in timesCount) {
+      if (item.isUsable) return item;
+    }
+    return null;
+  }
+
+  factory CreatePartyStrategyPushConfig.fromJson(Map<dynamic, dynamic> json) {
+    final rawTimesCount = json['timesCount'];
+    final timesCount = rawTimesCount is List
+        ? rawTimesCount
+              .whereType<Map>()
+              .map(CreatePartyStrategyPushTimesCount.fromJson)
+              .toList(growable: false)
+        : const <CreatePartyStrategyPushTimesCount>[];
+
+    return CreatePartyStrategyPushConfig(
+      eventType: _string(json['eventType']) ?? '',
+      timesCount: timesCount,
+    );
+  }
+}
+
+class CreatePartyStrategyPushRequest {
+  const CreatePartyStrategyPushRequest({
+    required this.eventType,
+    required this.timesCount,
+    required this.roomId,
+  });
+
+  final String eventType;
+  final CreatePartyStrategyPushTimesCount timesCount;
+  final String roomId;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'eventType': eventType,
+      'timesCount': timesCount.toJson(),
+      'roomId': roomId,
+    };
+  }
+}
+
 String _firstText(
   String? first, [
   String? second,

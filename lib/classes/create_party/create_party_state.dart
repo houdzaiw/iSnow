@@ -16,6 +16,7 @@ class CreatePartyState {
     this.durationMinutes = 30,
     this.coverLocalPath,
     this.coverUrl,
+    this.strategyTimesCount,
     this.isLoading = false,
     this.isUploadingCover = false,
     this.isSubmitting = false,
@@ -39,6 +40,7 @@ class CreatePartyState {
   final DateTime startTime;
   final String? coverLocalPath;
   final String? coverUrl;
+  final CreatePartyStrategyPushTimesCount? strategyTimesCount;
   final bool isLoading;
   final bool isUploadingCover;
   final bool isSubmitting;
@@ -51,6 +53,8 @@ class CreatePartyState {
     return CreatePartyHost.fromRoomInfo(roomInfo, fallbackUser: currentUser);
   }
 
+  String? get activeRoomId => _roomIdOf(roomInfo, currentUser);
+
   String get topicCountText => '${topic.length}/50';
   String get descriptionCountText => '${description.length}/500';
   bool get canSubmit {
@@ -58,7 +62,8 @@ class CreatePartyState {
         !isLoading &&
         !isSubmitting &&
         !isUploadingCover &&
-        (coverUrl?.trim().isNotEmpty == true) &&
+        activeRoomId != null &&
+        (coverLocalPath?.trim().isNotEmpty == true) &&
         topic.trim().isNotEmpty &&
         description.trim().isNotEmpty &&
         durationMinutes >= 30 &&
@@ -82,6 +87,7 @@ class CreatePartyState {
     DateTime? startTime,
     Object? coverLocalPath = _unset,
     Object? coverUrl = _unset,
+    Object? strategyTimesCount = _unset,
     bool? isLoading,
     bool? isUploadingCover,
     bool? isSubmitting,
@@ -109,6 +115,9 @@ class CreatePartyState {
       coverUrl: identical(coverUrl, _unset)
           ? this.coverUrl
           : coverUrl as String?,
+      strategyTimesCount: identical(strategyTimesCount, _unset)
+          ? this.strategyTimesCount
+          : strategyTimesCount as CreatePartyStrategyPushTimesCount?,
       isLoading: isLoading ?? this.isLoading,
       isUploadingCover: isUploadingCover ?? this.isUploadingCover,
       isSubmitting: isSubmitting ?? this.isSubmitting,
@@ -124,4 +133,16 @@ class CreatePartyState {
 
 DateTime _nextPartyStartTime(DateTime now) {
   return DateTime(now.year, now.month, now.day, now.hour + 1);
+}
+
+String? _roomIdOf(RoomInfo? roomInfo, UserData? user) {
+  return _firstNonEmpty(roomInfo?.roomId, user?.roomId);
+}
+
+String? _firstNonEmpty(Object? first, Object? second) {
+  for (final value in [first, second]) {
+    final text = value?.toString().trim();
+    if (text != null && text.isNotEmpty) return text;
+  }
+  return null;
 }

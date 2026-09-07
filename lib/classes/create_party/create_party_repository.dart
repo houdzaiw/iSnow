@@ -60,6 +60,66 @@ class CreatePartyRepository {
     }
   }
 
+  Future<CreatePartyStrategyPushTimesCount>
+  fetchCreatePartyStrategyTimesCount() async {
+    try {
+      final response = await _httpManager.post(
+        HttpApi.strategyPushConfig,
+        data: {},
+      );
+      final server =
+          NadyServerResponse<List<CreatePartyStrategyPushConfig>>.fromJson(
+            _asMap(response),
+            (json) => _extractList(json)
+                .whereType<Map>()
+                .map(CreatePartyStrategyPushConfig.fromJson)
+                .toList(growable: false),
+          );
+      if (!server.isSuccess) {
+        return CreatePartyStrategyPushTimesCount.fallback;
+      }
+
+      final eventType = CreatePartyStrategyPushEvent.hostSideGameHall.value;
+      for (final config
+          in server.data ?? const <CreatePartyStrategyPushConfig>[]) {
+        if (config.eventType == eventType) {
+          return config.firstUsableTimesCount ??
+              CreatePartyStrategyPushTimesCount.fallback;
+        }
+      }
+    } catch (_) {
+      return CreatePartyStrategyPushTimesCount.fallback;
+    }
+    return CreatePartyStrategyPushTimesCount.fallback;
+  }
+
+  Future<void> fetchStrategyPush({
+    required String roomId,
+    CreatePartyStrategyPushTimesCount? timesCount,
+  }) async {
+    final normalizedRoomId = _string(roomId);
+    if (normalizedRoomId == null) {
+      throw const NadyApiException(message: 'Current room is unavailable');
+    }
+
+    final request = CreatePartyStrategyPushRequest(
+      eventType: CreatePartyStrategyPushEvent.hostSideGameHall.value,
+      timesCount: timesCount ?? CreatePartyStrategyPushTimesCount.fallback,
+      roomId: normalizedRoomId,
+    );
+    final response = await _httpManager.post(
+      HttpApi.strategyPush,
+      data: request.toJson(),
+    );
+    final server = NadyServerResponse<dynamic>.fromJson(
+      _asMap(response),
+      (json) => json,
+    );
+    if (!server.isSuccess) {
+      throw server.toException();
+    }
+  }
+
   Future<RoomInfo?> fetchCurrentRoomInfo(UserData? user) async {
     final roomId = _string(user?.roomId);
     if (roomId == null) return null;

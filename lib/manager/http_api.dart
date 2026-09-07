@@ -110,6 +110,12 @@ class HttpApi {
   /// 创建派对前置检查
   static const partyPreCheck = '/api/room/party/preCheck';
 
+  /// 获取策略推送配置
+  static const strategyPushConfig = '/api/strategyPush/getStrategyPushConfig';
+
+  /// 获取策略推送结果数据
+  static const strategyPush = '/api/strategyPush/getStrategyPush';
+
   /// 用户排行榜
   static const rankCommonly = '/api/rank/commonly';
 

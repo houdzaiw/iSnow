@@ -3,6 +3,7 @@ import 'package:project/classes/create_party/create_party_models.dart';
 import 'package:project/classes/create_party/create_party_state.dart';
 import 'package:project/classes/create_room/create_room_models.dart';
 import 'package:project/manager/http_dio_manager.dart';
+import 'package:project/model/room_models.dart';
 import 'package:project/model/server_response.dart';
 import 'package:project/model/user_profile.dart';
 
@@ -56,21 +57,82 @@ void main() {
       });
     });
 
+    test('serializes create party strategy push request like Nady API', () {
+      const request = CreatePartyStrategyPushRequest(
+        eventType: 'HOST_SIDE_GAME_HALL',
+        timesCount: CreatePartyStrategyPushTimesCount(timer: 5, count: 1),
+        roomId: '2091733862198116353',
+      );
+
+      expect(request.toJson(), {
+        'eventType': 'HOST_SIDE_GAME_HALL',
+        'timesCount': {'timer': 5, 'count': 1},
+        'roomId': '2091733862198116353',
+      });
+    });
+
+    test('parses create party strategy push config times count', () {
+      final config = CreatePartyStrategyPushConfig.fromJson({
+        'eventType': 'HOST_SIDE_GAME_HALL',
+        'timesCount': [
+          {'timer': 5, 'count': 1},
+        ],
+      });
+
+      expect(config.eventType, 'HOST_SIDE_GAME_HALL');
+      expect(config.firstUsableTimesCount?.toJson(), {'timer': 5, 'count': 1});
+    });
+
     test('enables create party submit only when required fields are ready', () {
       final ready = CreatePartyState(
         startTime: DateTime.now().add(const Duration(hours: 1)),
-        coverUrl: 'dev/party-cover.png',
+        currentUser: const UserData(roomId: '2091733862198116353'),
+        coverLocalPath: '/tmp/party-cover.png',
         topic: 'Weekend Party',
         description: 'Sing and chat together',
         durationMinutes: 90,
       );
 
       expect(ready.canSubmit, isTrue);
-      expect(ready.copyWith(coverUrl: null).canSubmit, isFalse);
+      expect(ready.copyWith(coverLocalPath: null).canSubmit, isFalse);
       expect(ready.copyWith(topic: '   ').canSubmit, isFalse);
       expect(ready.copyWith(description: '   ').canSubmit, isFalse);
       expect(ready.copyWith(durationMinutes: 0).canSubmit, isFalse);
       expect(ready.copyWith(canCreateParty: false).canSubmit, isFalse);
+      expect(ready.copyWith(currentUser: null).canSubmit, isFalse);
+    });
+
+    test('parses create party room info response like Nady API', () {
+      final response = NadyServerResponse<RoomInfo>.fromJson({
+        'code': 200,
+        'data': {
+          'roomInfoDTO': {
+            'roomId': '2091733862198116353',
+            'roomUid': 72546721,
+            'roomNo': 72546721,
+            'avatar': 'https://simisoul.xyz/dev/room.jpg',
+            'title': 'hello1',
+            'roomTypeValue': 1,
+            'roomDesc': 'hello',
+            'roomLock': false,
+            'country': 'SA',
+          },
+          'roomMicUpType': null,
+        },
+        'timestamp': '2026-09-07T06:16:02.779+0000',
+        'message': 'success',
+        'traceId': '30d02e62-9507-48a0-9069-eb77f67fb116',
+        'msg': 'success',
+      }, (json) => RoomInfo.fromJson((json as Map).cast<String, dynamic>()));
+
+      expect(response.isSuccess, isTrue);
+      expect(response.data?.roomId, '2091733862198116353');
+      expect(response.data?.roomNo, '72546721');
+      expect(response.data?.roomOwnerUid, 72546721);
+      expect(response.data?.title, 'hello1');
+      expect(response.data?.avatar, 'https://simisoul.xyz/dev/room.jpg');
+      expect(response.data?.roomDesc, 'hello');
+      expect(response.data?.roomLock, isFalse);
     });
 
     test('serializes open room request and parses room id response', () {

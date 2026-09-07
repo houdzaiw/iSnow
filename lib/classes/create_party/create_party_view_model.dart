@@ -53,10 +53,14 @@ class CreatePartyViewModel extends AutoDisposeNotifier<CreatePartyState> {
       loadError ??= error;
     }
 
+    final strategyTimesCount = await _repository
+        .fetchCreatePartyStrategyTimesCount();
+
     state = state.copyWith(
       isLoading: false,
       canCreateParty: canCreateParty,
       loadError: loadError,
+      strategyTimesCount: strategyTimesCount,
     );
   }
 
@@ -110,29 +114,23 @@ class CreatePartyViewModel extends AutoDisposeNotifier<CreatePartyState> {
   }
 
   Future<void> uploadCover(String filePath) async {
-    if (filePath.trim().isEmpty || state.isUploadingCover) return;
+    if (filePath.trim().isEmpty ||
+        state.isUploadingCover ||
+        state.isSubmitting) {
+      return;
+    }
     state = state.copyWith(
-      isUploadingCover: true,
+      coverLocalPath: filePath,
+      coverUrl: null,
       message: null,
       messageKey: null,
     );
-    try {
-      final coverUrl = await _repository.uploadCover(filePath);
-      state = state.copyWith(
-        coverLocalPath: filePath,
-        coverUrl: coverUrl,
-        isUploadingCover: false,
-      );
-    } catch (error) {
-      state = state.copyWith(
-        isUploadingCover: false,
-        message: error.toString(),
-      );
-    }
   }
 
   Future<bool> submit() async {
-    if (!state.canSubmit) return false;
+    if (state.isLoading || state.isSubmitting || state.isUploadingCover) {
+      return false;
+    }
 
     final validationKey = _validationMessageKey();
     if (validationKey != null) {
@@ -140,11 +138,28 @@ class CreatePartyViewModel extends AutoDisposeNotifier<CreatePartyState> {
       return false;
     }
 
+    final roomId = state.activeRoomId;
+    if (roomId == null) {
+      state = state.copyWith(
+        messageKey: 'createParty.roomRequired',
+        message: null,
+      );
+      return false;
+    }
+
+    final coverPath = state.coverLocalPath!.trim();
     state = state.copyWith(isSubmitting: true, message: null, messageKey: null);
     try {
+      await _repository.fetchStrategyPush(
+        roomId: roomId,
+        timesCount: state.strategyTimesCount,
+      );
+      state = state.copyWith(isUploadingCover: true);
+      final coverUrl = await _repository.uploadCover(coverPath);
+      state = state.copyWith(coverUrl: coverUrl, isUploadingCover: false);
       await _repository.createParty(
         CreatePartyDraft(
-          picUrl: state.coverUrl!.trim(),
+          picUrl: coverUrl.trim(),
           topic: state.topic.trim(),
           description: state.description.trim(),
           duration: state.durationMinutes,
@@ -157,7 +172,11 @@ class CreatePartyViewModel extends AutoDisposeNotifier<CreatePartyState> {
       state = state.copyWith(isSubmitting: false);
       return true;
     } catch (error) {
-      state = state.copyWith(isSubmitting: false, message: error.toString());
+      state = state.copyWith(
+        isSubmitting: false,
+        isUploadingCover: false,
+        message: error.toString(),
+      );
       return false;
     }
   }
@@ -166,7 +185,10 @@ class CreatePartyViewModel extends AutoDisposeNotifier<CreatePartyState> {
     if (!state.canCreateParty) {
       return 'createParty.preCheckFailed';
     }
-    if (state.coverUrl?.trim().isNotEmpty != true) {
+    if (state.activeRoomId == null) {
+      return 'createParty.roomRequired';
+    }
+    if (state.coverLocalPath?.trim().isNotEmpty != true) {
       return 'createParty.coverRequired';
     }
     if (state.topic.trim().isEmpty) {
