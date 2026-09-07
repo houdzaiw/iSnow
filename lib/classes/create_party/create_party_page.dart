@@ -660,6 +660,8 @@ class _CountedTextField extends StatelessWidget {
             style: AppTextStyles.formHelper,
             decoration: InputDecoration(
               isDense: true,
+              filled: false,
+              fillColor: AppColors.transparent,
               hintText: hintText,
               hintStyle: AppTextStyles.formFieldHint,
               counterText: '',
@@ -912,7 +914,6 @@ class _TagChip extends StatelessWidget {
       child: Container(
         height: AppSpacing.formChipHeight,
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
-        alignment: Alignment.center,
         decoration: BoxDecoration(
           color: selected
               ? AppColors.chipSelectedBackground
