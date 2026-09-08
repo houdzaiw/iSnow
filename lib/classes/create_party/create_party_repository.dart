@@ -175,7 +175,6 @@ class CreatePartyRepository {
 
   Future<void> refreshPartyLists() async {
     await Future.wait([
-      _fetchPartyList(type: 0, pageNum: 1),
       _fetchPartyList(type: 1, pageNum: 1),
       _fetchPartyList(type: 2, pageNum: 1),
     ]);

@@ -5,6 +5,8 @@ final _homeFeedViewModelProvider =
       _HomeFeedViewModel.new,
     );
 
+const int _partyListPageSize = 10;
+
 class _PartyFeedViewModel
     extends FamilyNotifier<_PartyFeedState, _FeedSortTab> {
   late final _PartyRepository _repository;
@@ -31,7 +33,7 @@ class _PartyFeedViewModel
       state = state.copyWith(
         items: items,
         pageNum: 1,
-        hasMore: items.isNotEmpty,
+        hasMore: items.length >= _partyListPageSize,
         isLoading: false,
         isRefreshing: false,
         isLoadingMore: false,
@@ -67,7 +69,9 @@ class _PartyFeedViewModel
       state = state.copyWith(
         items: merged,
         pageNum: nextPage,
-        hasMore: nextItems.isNotEmpty && merged.length > state.items.length,
+        hasMore:
+            nextItems.length >= _partyListPageSize &&
+            merged.length > state.items.length,
         isLoadingMore: false,
       );
     } catch (error) {
