@@ -44,6 +44,12 @@ class AppGradients {
   static const LinearGradient roomBottomBar = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [Colors.transparent,Colors.transparent,Color(0xFC000000)],
+    colors: [Colors.transparent, Colors.transparent, Color(0xFC000000)],
+  );
+
+  static const LinearGradient partyCoverScrim = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Colors.transparent, Color(0x66000000)],
   );
 }

@@ -30,6 +30,28 @@ class AppSpacing {
   static const double formChipWidth = 80;
   static const double formChipHeight = 24;
 
+  static const double partyListHorizontalInset = 17;
+  static const double partyListBottomInset = 110;
+  static const double partyCardHorizontalPadding = 16;
+  static const double partyCardTopPadding = 20;
+  static const double partyCardBottomPadding = 14;
+  static const double partyCardCoverHeight = 180;
+  static const double partyCardBadgeHeight = 26;
+  static const double partyBadgeHorizontalPadding = 6;
+  static const double partyCardTagMaxWidth = 136;
+  static const double partyCardStatusMaxWidth = 178;
+  static const double partyCardAudienceBarHeight = 40;
+  static const double partyTagIconSize = 14;
+  static const double partyStatusDotSize = 6;
+  static const double partyHostAvatarSize = 32;
+  static const double partySubscribeAvatarSize = 20;
+  static const double partySubscribeAvatarOverlap = 6;
+  static const double partyActionWidth = 110;
+  static const double partyActionHeight = 40;
+  static const double partyActionIconSize = 18;
+  static const double partyShareButtonSize = 26;
+  static const double partyShareIconSize = 18;
+
   static const double createRoomSheetHeight = 639;
   static const double createRoomTitleTop = 26;
   static const double createRoomAvatarTop = 27;

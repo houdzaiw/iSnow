@@ -115,48 +115,92 @@ class _PartyRepository {
 
 class _PartyFeedItem {
   const _PartyFeedItem({
+    required this.uid,
     required this.title,
     required this.hostName,
-    required this.onlineCount,
-    required this.isLive,
+    required this.onlineNum,
+    required this.subscribeNum,
+    required this.status,
+    required this.isSubscribe,
+    required this.isCanceled,
+    required this.tags,
+    required this.subscribeUsers,
     this.coverUrl,
     this.avatarUrl,
     this.roomId,
     this.partyId,
+    this.beginTime,
+    this.endTime,
   });
 
+  final int uid;
   final String? coverUrl;
   final String? avatarUrl;
   final String title;
   final String hostName;
-  final int onlineCount;
-  final bool isLive;
+  final int onlineNum;
+  final int subscribeNum;
+  final int status;
+  final bool isSubscribe;
+  final bool isCanceled;
   final String? roomId;
   final int? partyId;
+  final DateTime? beginTime;
+  final DateTime? endTime;
+  final List<_PartyTagItem> tags;
+  final List<_PartyUserItem> subscribeUsers;
+
+  bool get isLive => status == 1;
+  bool get isWaiting => status == 2;
+  bool get isEnded => status == 3;
+  bool get isClosed => isCanceled || status == 4;
+  bool get canEnterRoom => isLive && (roomId?.isNotEmpty ?? false);
+
+  int get audienceCount => isLive ? onlineNum : subscribeNum;
 
   String get onlineText {
-    if (onlineCount >= 10000) {
-      return '${(onlineCount / 10000).toStringAsFixed(1)}w';
+    if (audienceCount >= 10000) {
+      return '${(audienceCount / 10000).toStringAsFixed(1)}w';
     }
-    if (onlineCount >= 1000) {
-      return '${(onlineCount / 1000).toStringAsFixed(1)}k';
+    if (audienceCount >= 1000) {
+      return '${(audienceCount / 1000).toStringAsFixed(1)}k';
     }
-    return '$onlineCount';
+    return '$audienceCount';
   }
 
   factory _PartyFeedItem.fromPartyJson(Map<dynamic, dynamic> json) {
     final userInfo = _map(json['createUserInfo']);
     final topic = _string(json['topic']) ?? _string(json['description']);
     final onlineNum = _int(json['onlineNum']);
+    final rawStatus = _int(json['status']);
+    final isCanceled = _bool(json['cancle']) || rawStatus == 4;
     return _PartyFeedItem(
+      uid: _int(json['uid']),
       coverUrl: _string(json['picUrl']),
       avatarUrl: _string(userInfo['avatar']),
       title: topic ?? '',
       hostName: _string(userInfo['nick']) ?? '',
-      onlineCount: onlineNum == 0 ? _int(json['subscribeNum']) : onlineNum,
-      isLive: _int(json['status']) == 1 || onlineNum > 0,
+      onlineNum: onlineNum,
+      subscribeNum: _int(json['subscribeNum']),
+      status: isCanceled ? 4 : rawStatus,
+      isSubscribe: _bool(json['isSubscribe']),
+      isCanceled: isCanceled,
       roomId: _string(json['roomId']),
       partyId: _intOrNull(json['partyId']),
+      beginTime: _dateTime(json['beginTime']),
+      endTime: _dateTime(json['endTime']),
+      tags: _list(json['partyTags'])
+          .whereType<Map>()
+          .map(_PartyTagItem.fromJson)
+          .where((tag) => tag.hasContent)
+          .take(2)
+          .toList(growable: false),
+      subscribeUsers: _list(json['subscribeUserList'])
+          .whereType<Map>()
+          .map(_PartyUserItem.fromJson)
+          .where((user) => user.avatar != null)
+          .take(8)
+          .toList(growable: false),
     );
   }
 
@@ -183,6 +227,96 @@ class _PartyFeedItem {
     if (value is num) return value.toInt();
     return int.tryParse(value.toString());
   }
+
+  static List<dynamic> _list(dynamic value) {
+    if (value is List) return value;
+    return const [];
+  }
+
+  static bool _bool(dynamic value) {
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    final text = value?.toString().trim().toLowerCase();
+    return text == 'true' || text == '1' || text == 'yes';
+  }
+
+  static DateTime? _dateTime(dynamic value) {
+    final text = _string(value);
+    if (text == null) return null;
+    return DateTime.tryParse(text)?.toLocal();
+  }
+}
+
+class _PartyTagItem {
+  const _PartyTagItem({
+    required this.id,
+    required this.enName,
+    required this.arName,
+    this.trName,
+    this.idName,
+    this.tagPic,
+  });
+
+  final int id;
+  final String enName;
+  final String arName;
+  final String? trName;
+  final String? idName;
+  final String? tagPic;
+
+  bool get hasContent {
+    return enName.isNotEmpty ||
+        arName.isNotEmpty ||
+        (trName?.isNotEmpty ?? false) ||
+        (idName?.isNotEmpty ?? false);
+  }
+
+  String labelForLocale(String languageCode) {
+    final preferred = switch (languageCode) {
+      'zh' => enName,
+      'tr' => trName,
+      'id' => idName,
+      'ar' => arName,
+      _ => enName,
+    };
+    return _firstText(preferred, enName, arName, trName, idName, '$id');
+  }
+
+  factory _PartyTagItem.fromJson(Map<dynamic, dynamic> json) {
+    return _PartyTagItem(
+      id: _PartyFeedItem._int(json['id']),
+      enName: _PartyFeedItem._string(json['enName']) ?? '',
+      arName: _PartyFeedItem._string(json['arName']) ?? '',
+      trName: _PartyFeedItem._string(json['trName']),
+      idName: _PartyFeedItem._string(json['idName']),
+      tagPic: _PartyFeedItem._string(json['tagPic']),
+    );
+  }
+}
+
+class _PartyUserItem {
+  const _PartyUserItem({this.avatar});
+
+  final String? avatar;
+
+  factory _PartyUserItem.fromJson(Map<dynamic, dynamic> json) {
+    return _PartyUserItem(avatar: _PartyFeedItem._string(json['avatar']));
+  }
+}
+
+String _firstText(
+  Object? first,
+  Object? second, [
+  Object? third,
+  Object? fourth,
+  Object? fifth,
+  Object? sixth,
+]) {
+  for (final value in [first, second, third, fourth, fifth, sixth]) {
+    final text = value?.toString().trim();
+    if (text != null && text.isNotEmpty) return text;
+  }
+  return '';
 }
 
 class _PartyHeader extends ConsumerWidget {
@@ -387,9 +521,6 @@ class _SortBar extends StatelessWidget {
   }
 }
 
-
-
-
 class _PartyImage extends StatelessWidget {
   const _PartyImage({
     required this.url,
@@ -437,9 +568,10 @@ class _AssetFallbackImage extends StatelessWidget {
 }
 
 class _AvatarImage extends StatelessWidget {
-  const _AvatarImage({required this.url});
+  const _AvatarImage({required this.url, this.size = 22});
 
   final String? url;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
@@ -447,8 +579,8 @@ class _AvatarImage extends StatelessWidget {
       child: _PartyImage(
         url: url,
         assetName: AppAssets.lanhuPartyAvatar,
-        width: 22,
-        height: 22,
+        width: size,
+        height: size,
       ),
     );
   }
