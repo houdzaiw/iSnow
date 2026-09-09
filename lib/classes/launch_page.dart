@@ -29,8 +29,8 @@ class _LaunchPageState extends State<LaunchPage> {
     if (!mounted) return;
 
     if (isLoggedIn) {
-      // 已登录，跳转到首页
-      context.go('/home');
+      // 已登录，跳转到派对页
+      context.go('/party');
     } else {
       // 未登录，跳转到登录页
       context.go('/login');

@@ -238,7 +238,7 @@ class _SeatCircle extends StatelessWidget {
             ),
           if (seat.isMuted)
             Positioned(
-              left: -2.r,
+              left: 0,
               bottom: 2.r,
               child: _RoomAssetIcon(
                 asset: AppAssets.lanhuRoomMicMuteStatus,

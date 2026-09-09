@@ -215,7 +215,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
       if (!mounted) return;
       _showMessage(context.l10n.t('auth.registerSuccess'));
-      context.go('/home');
+      context.go('/party');
     } catch (e) {
       if (!mounted) return;
       _showMessage(e.toString());

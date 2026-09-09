@@ -9,6 +9,7 @@ class AppShell extends StatelessWidget {
   final String location;
   const AppShell({required this.location, required this.child, super.key});
 
+  static const String _defaultTab = '/party';
   static const List<String> _tabs = [
     '/home',
     '/party',
@@ -18,7 +19,7 @@ class AppShell extends StatelessWidget {
 
   int _locationToIndex(String location) {
     final idx = _tabs.indexWhere((t) => location.startsWith(t));
-    return idx < 0 ? 0 : idx;
+    return idx < 0 ? _tabs.indexOf(_defaultTab) : idx;
   }
 
   @override

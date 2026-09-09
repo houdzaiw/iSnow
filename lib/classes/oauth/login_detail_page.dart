@@ -198,7 +198,7 @@ class LoginDetailPage extends HookConsumerWidget {
             debugPrint('User: ${response.data?.email}');
           }
 
-          context.go('/home');
+          context.go('/party');
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
