@@ -35,7 +35,7 @@ class _RoomBottomBar extends StatelessWidget {
           SizedBox(width: 18.w),
           _BottomIconButton(
             asset: state.agoraState.mutedMicrophone
-                ? AppAssets.lanhuRoomIconMissing
+                ? AppAssets.lanhuRoomBottomMicMuted
                 : AppAssets.lanhuRoomBottomMic,
             selected: !state.agoraState.mutedMicrophone && state.isOnMic,
             onTap: onToggleMic,

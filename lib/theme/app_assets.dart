@@ -87,6 +87,8 @@ class AppAssets {
       'assets/lanhu/room/room_mic_lock_seat.png';
   static const String lanhuRoomMicMuteStatus =
       'assets/lanhu/room/room_mic_mute_status.png';
+  static const String lanhuRoomBottomMicMuted =
+      'assets/lanhu/room/room_bottom_mic_muted.png';
   static const String lanhuRoomMusicIcon =
       'assets/lanhu/room/room_music_icon.png';
   static const String lanhuRoomOnlineIcon =

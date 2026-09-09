@@ -46,7 +46,10 @@ class PartyPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tabController = useTabController(initialLength: 2);
+    final tabController = useTabController(
+      initialLength: _MainFeedTab.values.length,
+      initialIndex: _MainFeedTab.room.index,
+    );
 
     return Scaffold(
       backgroundColor: const Color(0xFFFCFCFC),
