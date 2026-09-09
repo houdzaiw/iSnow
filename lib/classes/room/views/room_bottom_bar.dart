@@ -78,14 +78,7 @@ class _BottomIconButton extends StatelessWidget {
         InkWell(
           onTap: onTap,
           child: SizedBox(
-            width: 34.r,
-            height: 34.r,
-            child: Center(
-              child: _RoomAssetIcon(
-                asset: asset,
-                size: asset == AppAssets.lanhuRoomBottomMore ? 40.r : 30.r,
-              ),
-            ),
+            child: Image.asset(asset, width: 34.r, height: 34.r),
           ),
         ),
         if (badge != null)
