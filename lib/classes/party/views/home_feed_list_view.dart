@@ -230,7 +230,10 @@ class _RoomOnlineBadge extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const _HomeAudioBars(),
+        const _PartyAudioIcon(
+          width: AppSpacing.partyHomeAudioIconWidth,
+          height: AppSpacing.partyHomeAudioIconHeight,
+        ),
         const SizedBox(width: 2),
         Text(
           text,
@@ -241,44 +244,6 @@ class _RoomOnlineBadge extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _HomeAudioBars extends StatelessWidget {
-  const _HomeAudioBars();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 14,
-      height: 18,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: const [
-          _HomeAudioBar(height: 8),
-          _HomeAudioBar(height: 14),
-          _HomeAudioBar(height: 10),
-        ],
-      ),
-    );
-  }
-}
-
-class _HomeAudioBar extends StatelessWidget {
-  const _HomeAudioBar({required this.height});
-
-  final double height;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 3,
-      height: height,
-      decoration: BorderRadius.circular(
-        2,
-      ).toBoxDecoration(color: const Color(0xFFE13BFF)),
     );
   }
 }
@@ -295,12 +260,6 @@ class _RoomTitle extends StatelessWidget {
         : title;
     return Row(
       children: [
-        Image.asset(
-          AppAssets.iconMissing,
-          width: AppSpacing.iconSizeSm,
-          height: AppSpacing.iconSizeSm,
-        ),
-        const SizedBox(width: 2),
         Expanded(
           child: Text(
             displayTitle,

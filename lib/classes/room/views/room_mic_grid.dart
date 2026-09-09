@@ -238,9 +238,12 @@ class _SeatCircle extends StatelessWidget {
             ),
           if (seat.isMuted)
             Positioned(
-              right: 2.r,
+              left: -2.r,
               bottom: 2.r,
-              child: _SeatStatusDot(asset: AppAssets.lanhuRoomIconMissing),
+              child: _RoomAssetIcon(
+                asset: AppAssets.lanhuRoomMicMuteStatus,
+                size: AppSpacing.roomMicSeatStatusIconSize.r,
+              ),
             ),
           if (seat.isLocked && seat.isOccupied)
             Positioned(

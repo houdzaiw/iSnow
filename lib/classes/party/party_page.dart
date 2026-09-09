@@ -586,6 +586,26 @@ class _AvatarImage extends StatelessWidget {
   }
 }
 
+class _PartyAudioIcon extends StatelessWidget {
+  const _PartyAudioIcon({
+    this.width = AppSpacing.partyAudioIconSize,
+    this.height = AppSpacing.partyAudioIconSize,
+  });
+
+  final double width;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset(
+      AppAssets.lanhuPartyAudioBars,
+      width: width,
+      height: height,
+      fit: BoxFit.contain,
+    );
+  }
+}
+
 class _CreatePartyButton extends ConsumerWidget {
   const _CreatePartyButton();
 
@@ -635,9 +655,9 @@ class _StateList extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Image.asset(
-                AppAssets.iconMissing,
-                width: AppSpacing.iconSizeMd,
-                height: AppSpacing.iconSizeMd,
+                AppAssets.lanhuPartyStateEmpty,
+                width: AppSpacing.partyStateImageSize,
+                height: AppSpacing.partyStateImageSize,
               ),
               const SizedBox(height: 8),
               Text(
@@ -674,12 +694,6 @@ class _StateList extends StatelessWidget {
         );
       },
     );
-  }
-}
-
-extension on BorderRadius {
-  BoxDecoration toBoxDecoration({required Color color}) {
-    return BoxDecoration(color: color, borderRadius: this);
   }
 }
 

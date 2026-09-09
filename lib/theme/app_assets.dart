@@ -39,6 +39,10 @@ class AppAssets {
   static const String lanhuPartyShare = 'assets/lanhu/party/party_share.png';
   static const String lanhuPartyTrophy = 'assets/lanhu/party/party_trophy.png';
   static const String lanhuPartyAdd = 'assets/lanhu/party/party_add.png';
+  static const String lanhuPartyAudioBars =
+      'assets/lanhu/party/party_audio_bars.png';
+  static const String lanhuPartyStateEmpty =
+      'assets/lanhu/party/party_state_empty.png';
   static const String lanhuHomeRoomBanner =
       'assets/lanhu/party/home_room_banner.png';
   static const String lanhuHomeHotIcon = 'assets/lanhu/party/home_hot_icon.png';
@@ -81,6 +85,8 @@ class AppAssets {
       'assets/lanhu/room/room_icon_missing.png';
   static const String lanhuRoomMicLockSeat =
       'assets/lanhu/room/room_mic_lock_seat.png';
+  static const String lanhuRoomMicMuteStatus =
+      'assets/lanhu/room/room_mic_mute_status.png';
   static const String lanhuRoomMusicIcon =
       'assets/lanhu/room/room_music_icon.png';
   static const String lanhuRoomOnlineIcon =

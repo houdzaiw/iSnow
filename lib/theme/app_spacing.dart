@@ -49,6 +49,11 @@ class AppSpacing {
   static const double partyActionWidth = 110;
   static const double partyActionHeight = 40;
   static const double partyActionIconSize = 18;
+  static const double partyAudioIconSize = 16;
+  static const double partyHomeAudioIconWidth = 14;
+  static const double partyHomeAudioIconHeight = 18;
+  static const double partyActionAudioIconWidth = 12;
+  static const double partyStateImageSize = 116;
   static const double partyShareButtonSize = 26;
   static const double partyShareIconSize = 18;
 
@@ -87,6 +92,7 @@ class AppSpacing {
   static const double roomMicSeatHeight = 80;
   static const double roomMicSeatCircleSize = 46;
   static const double roomMicSeatAvatarSize = 54;
+  static const double roomMicSeatStatusIconSize = 16;
   static const double roomMicSeatSpacing = 4;
   static const double roomMicSeatSpacingWide = 12;
   static const double roomMicFeaturedSeatWidth = 76;

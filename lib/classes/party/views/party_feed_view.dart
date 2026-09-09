@@ -396,7 +396,7 @@ class _PartyAudienceBar extends StatelessWidget {
           children: [
             const SizedBox(width: 12),
             item.isLive
-                ? const _AudioBars()
+                ? const _PartyAudioIcon()
                 : const _ReminderGlyph(size: AppSpacing.iconSizeSm),
             const SizedBox(width: 4),
             Text(
@@ -460,45 +460,6 @@ class _StackedAvatars extends StatelessWidget {
   }
 }
 
-class _AudioBars extends StatelessWidget {
-  const _AudioBars({this.width = 16});
-
-  final double width;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: width,
-      height: 16,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _AudioBar(height: 7, color: AppColors.textInverse),
-          _AudioBar(height: 13, color: AppColors.textInverse),
-          _AudioBar(height: 10, color: AppColors.textInverse),
-        ],
-      ),
-    );
-  }
-}
-
-class _AudioBar extends StatelessWidget {
-  const _AudioBar({required this.height, required this.color});
-
-  final double height;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 3,
-      height: height,
-      decoration: BorderRadius.circular(2).toBoxDecoration(color: color),
-    );
-  }
-}
-
 class _PartyActionButton extends StatelessWidget {
   const _PartyActionButton({required this.item});
 
@@ -526,7 +487,10 @@ class _PartyActionButton extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           if (item.isLive) ...[
-            const _AudioBars(width: 12),
+            const _PartyAudioIcon(
+              width: AppSpacing.partyActionAudioIconWidth,
+              height: AppSpacing.partyAudioIconSize,
+            ),
             const SizedBox(width: 4),
           ] else if (item.isWaiting) ...[
             const _ReminderGlyph(size: AppSpacing.partyActionIconSize),
