@@ -128,6 +128,45 @@ class AppAssets {
       'assets/lanhu/room/room_bottom_message.png';
   static const String lanhuRoomBottomMore =
       'assets/lanhu/room/room_bottom_more.png';
+  static const String lanhuRoomMoreShare =
+      'assets/lanhu/room/room_more_share.png';
+  static const String lanhuRoomMoreReport =
+      'assets/lanhu/room/room_more_report.png';
+  static const String lanhuRoomMoreMusic =
+      'assets/lanhu/room/room_more_music.png';
+  static const String lanhuRoomMoreCharmCounter =
+      'assets/lanhu/room/room_more_charm_counter.png';
+  static const String lanhuRoomMoreCharmCounterMuted =
+      'assets/lanhu/room/room_more_charm_counter_muted.png';
+  static const String lanhuRoomMoreVoice =
+      'assets/lanhu/room/room_more_voice.png';
+  static const String lanhuRoomMoreVoiceMuted =
+      'assets/lanhu/room/room_more_voice_muted.png';
+  static const String lanhuRoomMoreRoomData =
+      'assets/lanhu/room/room_more_room_data.png';
+  static const String lanhuRoomMoreCharmSetting =
+      'assets/lanhu/room/room_more_charm_setting.png';
+  static const String lanhuRoomMoreMessage =
+      'assets/lanhu/room/room_more_message.png';
+  static const String lanhuRoomMoreMessageBadge =
+      'assets/lanhu/room/room_more_message_badge.png';
+  static const String lanhuRoomMoreEffectsSetting =
+      'assets/lanhu/room/room_more_effects_setting.png';
+  static const String lanhuRoomMoreModeChat =
+      'assets/lanhu/room/room_more_mode_chat.png';
+  static const String lanhuRoomMoreModeGame =
+      'assets/lanhu/room/room_more_mode_game.png';
+  static const String lanhuRoomMoreModeWin =
+      'assets/lanhu/room/room_more_mode_win.png';
+  static const String lanhuRoomMoreModeParty =
+      'assets/lanhu/room/room_more_mode_party.png';
+  static const String lanhuRoomMoreModeKtv =
+      'assets/lanhu/room/room_more_mode_ktv.png';
+  static const String lanhuRoomMorePk = 'assets/lanhu/room/room_more_pk.png';
+  static const String lanhuRoomMoreLuckyBox =
+      'assets/lanhu/room/room_more_lucky_box.png';
+  static const String lanhuRoomMorePartyWin =
+      'assets/lanhu/room/room_more_party_win.png';
   static const String lanhuRankWealthBackground =
       'assets/lanhu/rank/rank_wealth_background.png';
   static const String lanhuRankCharmBackground =

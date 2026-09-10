@@ -103,4 +103,17 @@ class AppSpacing {
   static const double roomMicFeaturedRowsGap = 4;
   static const double roomActionSheetHorizontalMargin = 12;
   static const double roomActionSheetBottomMargin = 12;
+  static const double roomMoreSheetHorizontalMargin = 12;
+  static const double roomMoreSheetBottomMargin = 12;
+  static const double roomMoreSheetHorizontalInset = 16;
+  static const double roomMoreSheetTopInset = 18;
+  static const double roomMoreSectionTopGap = 16;
+  static const double roomMoreSectionTitleBottom = 10;
+  static const double roomMoreGridMainGap = 12;
+  static const double roomMoreGridCrossGap = 8;
+  static const double roomMoreToolTileHeight = 96;
+  static const double roomMoreToolIconBoxSize = 50;
+  static const double roomMoreToolIconSize = 34;
+  static const double roomMoreToolLabelTop = 7;
+  static const double roomMoreLoadingHeight = 72;
 }

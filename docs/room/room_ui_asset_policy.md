@@ -9,8 +9,15 @@
   ```bash
   python3 tools/download_lanhu_room_assets.py "lanhu-mcp/data/lanhu_designs/<project_id>/二十麦位.html"
   ```
+- Figma/蓝湖设计稿可以直接使用 `--design-url` 下载指定 `image_id` 的切图：
+  ```bash
+  python3 tools/download_lanhu_room_assets.py \
+    --design-url "https://lanhuapp.com/web/#/item/project/detailDetach?pid=<project_id>&image_id=<image_id>&tid=<team_id>"
+  ```
 - 下载后的文件必须使用稳定的语义化文件名，例如 `room_bottom_chat.png`、`room_mic_seat.png`，不要在业务代码中引用蓝湖临时类名或 `thumbnail_*.png`。
 - 下载来源和文件映射需要保留在 `assets/lanhu/room/lanhu_room_assets_manifest.json`，方便后续核对和替换。
+- 解析蓝湖导出 HTML 时，必须同时检查 `<img src>`、行内 `style` 和 CSS 选择器中的 `background`/`background-image`，不能只根据 `div` 的 `group_6` 等临时类名判断资源。
+- `group_6 flex-col` 这类类名只在对应 `image_id` 的设计稿上下文中有效，禁止跨页面复用同名类；如果节点只是 CSS 形状、没有真实图片地址，才使用红色缺省图并在 manifest 中标记原因。
 - `pubspec.yaml` 必须包含 `assets/lanhu/room/`。
 
 ## Flutter Room UI

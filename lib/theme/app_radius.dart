@@ -14,6 +14,9 @@ class AppRadius {
   static const double homeCard = 45;
   static const double homeCardContent = 42;
   static const double roomActionSheet = 24;
+  static const double roomMoreSheet = 24;
+  static const double roomMoreToolTile = 18;
+  static const double roomMoreTag = 7;
   static const double pill = 40;
 
   static const BorderRadius cardBorder = BorderRadius.all(

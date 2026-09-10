@@ -42,6 +42,14 @@ class AppColors {
   static const Color roomChatTabSelected = Colors.white;
   static const Color roomActionSheet = Color(0xFF242432);
   static const Color roomActionSheetBorder = Color(0x14FFFFFF);
+  static const Color roomMoreSheet = Color(0xFF1C1B29);
+  static const Color roomMoreTile = Color(0x14FFFFFF);
+  static const Color roomMoreTileActive = Color(0x33FF5390);
+  static const Color roomMoreSectionTitle = Color(0xE6FFFFFF);
+  static const Color roomMoreToolText = Color(0xCCFFFFFF);
+  static const Color roomMoreToolSubtle = Color(0x80FFFFFF);
+  static const Color roomMoreTagHot = Color(0xFFFF3D54);
+  static const Color roomMoreTagNew = Color(0xFF3DDCFF);
   static const Color partyCardBackground = Color(0xFF25232B);
   static const Color partyBadgeOverlay = Color(0x66000000);
   static const Color partyActionBackground = Color(0xE6000000);

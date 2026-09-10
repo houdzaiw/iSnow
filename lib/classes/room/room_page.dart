@@ -9,13 +9,16 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../localization/app_localizations.dart';
 import '../../theme/app_theme.dart';
+import 'models/room_more_tools_models.dart';
 import 'viewmodel/room_state.dart';
+import 'viewmodel/room_more_tools_view_model.dart';
 import 'viewmodel/room_view_model.dart';
 
 part 'views/room_bottom_bar.dart';
 part 'views/room_chat_panel.dart';
 part 'views/room_header.dart';
 part 'views/room_mic_grid.dart';
+part 'views/room_more_tools_sheet.dart';
 
 const Color _roomGold = Color(0xFFFFD86B);
 const Color _roomPink = Color(0xFFFF4FA0);
@@ -138,6 +141,8 @@ class RoomPage extends HookConsumerWidget {
                               .toggleLocalMicrophone(),
                           onToggleSpeaker: () =>
                               ref.read(provider.notifier).toggleSpeaker(),
+                          onMoreTap: () =>
+                              _showRoomMoreToolsSheet(context, ref, provider),
                         ),
                       ],
                     ),

@@ -95,6 +95,9 @@ class HttpApi {
   /// 首页 Banner
   static const homeResourceBanner = '/api/resource/banner';
 
+  /// 房间大厅 / 游戏模式开关
+  static const lobbyOpen = '/api/lobby/open';
+
   /// 正在玩的好友列表
   static const friendPlayingList = '/api/user/homepage/friends/play';
 

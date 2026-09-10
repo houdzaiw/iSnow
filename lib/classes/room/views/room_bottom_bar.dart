@@ -6,12 +6,14 @@ class _RoomBottomBar extends StatelessWidget {
     required this.onChatTap,
     required this.onToggleMic,
     required this.onToggleSpeaker,
+    required this.onMoreTap,
   });
 
   final RoomPageState state;
   final VoidCallback onChatTap;
   final VoidCallback onToggleMic;
   final VoidCallback onToggleSpeaker;
+  final VoidCallback onMoreTap;
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +52,10 @@ class _RoomBottomBar extends StatelessWidget {
             onTap: onToggleSpeaker,
           ),
           SizedBox(width: 18.w),
-          _BottomIconButton(asset: AppAssets.lanhuRoomBottomMore, onTap: () {}),
+          _BottomIconButton(
+            asset: AppAssets.lanhuRoomBottomMore,
+            onTap: onMoreTap,
+          ),
         ],
       ),
     );

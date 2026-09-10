@@ -180,4 +180,32 @@ class AppTextStyles {
     fontSize: 16,
     fontWeight: FontWeight.w600,
   );
+
+  static const TextStyle roomMoreSectionTitle = TextStyle(
+    color: AppColors.roomMoreSectionTitle,
+    fontSize: 16,
+    height: 1,
+    fontWeight: FontWeight.w700,
+  );
+
+  static const TextStyle roomMoreTool = TextStyle(
+    color: AppColors.roomMoreToolText,
+    fontSize: 11,
+    height: 1.2,
+    fontWeight: FontWeight.w500,
+  );
+
+  static const TextStyle roomMoreHint = TextStyle(
+    color: AppColors.roomMoreToolSubtle,
+    fontSize: 12,
+    height: 1.2,
+    fontWeight: FontWeight.w400,
+  );
+
+  static const TextStyle roomMoreTag = TextStyle(
+    color: AppColors.textInverse,
+    fontSize: 8,
+    height: 1,
+    fontWeight: FontWeight.w800,
+  );
 }
