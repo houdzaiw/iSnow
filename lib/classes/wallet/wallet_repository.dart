@@ -64,22 +64,27 @@ class WalletRepository {
   Future<String> createGoogleRechargeOrder(
     WalletRechargeProduct product,
   ) async {
-    final request = {
-      'productId': product.id,
-      'channel': 'google',
-      'merchant': 1,
-      'countryRechargeChannelConfigId': '',
-    };
+    final request = WalletRechargeRequest(
+      productId: product.id,
+      channel: 'google',
+      merchant: 1,
+    );
     final response = await _httpManager.post(
       HttpApi.walletRechargeGoogleCreation,
-      data: {'rechargeReqJson': await _encrypt(request)},
+      data: {'rechargeReqJson': await _encrypt(request.toJson())},
     );
     final server = NadyServerResponse<dynamic>.fromJson(
       _asMap(response),
       (json) => json,
     );
     if (!server.isSuccess) throw server.toException();
-    return server.data?.toString() ?? '';
+    final orderId = server.data?.toString() ?? '';
+    if (orderId.isEmpty) {
+      throw const NadyApiException(
+        message: 'Google recharge order id is empty',
+      );
+    }
+    return orderId;
   }
 
   Future<void> createAppleRechargeRecord({
@@ -87,17 +92,16 @@ class WalletRepository {
     required String orderId,
     required String purchaseToken,
   }) async {
-    final request = {
-      'productId': product.id,
-      'channel': 'apple',
-      'merchant': 2,
-      'orderId': orderId,
-      'purchaseToken': purchaseToken,
-      'countryRechargeChannelConfigId': '',
-    };
+    final request = WalletRechargeRequest(
+      productId: product.id,
+      channel: 'apple',
+      merchant: 2,
+      orderId: orderId,
+      purchaseToken: purchaseToken,
+    );
     final response = await _httpManager.post(
       HttpApi.walletRechargeCreation,
-      data: {'rechargeReqJson': await _encrypt(request)},
+      data: {'rechargeReqJson': await _encrypt(request.toJson())},
     );
     final server = NadyServerResponse<dynamic>.fromJson(
       _asMap(response),

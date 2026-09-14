@@ -38,4 +38,21 @@ void main() {
     expect(product.dollarAmount, 199);
     expect(product.merchant, '1');
   });
+
+  test('serializes Google recharge request with Nady-compatible fields', () {
+    const request = WalletRechargeRequest(
+      productId: 'coin_100',
+      channel: 'google',
+      merchant: 1,
+    );
+
+    expect(request.toJson(), <String, dynamic>{
+      'productId': 'coin_100',
+      'channel': 'google',
+      'merchant': 1,
+      'orderId': null,
+      'purchaseToken': null,
+      'countryRechargeChannelConfigId': '',
+    });
+  });
 }

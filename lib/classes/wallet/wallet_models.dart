@@ -80,6 +80,35 @@ class WalletConvertProportion {
   }
 }
 
+class WalletRechargeRequest {
+  const WalletRechargeRequest({
+    required this.productId,
+    required this.channel,
+    required this.merchant,
+    this.orderId,
+    this.purchaseToken,
+    this.countryRechargeChannelConfigId = '',
+  });
+
+  final String productId;
+  final String channel;
+  final int merchant;
+  final String? orderId;
+  final String? purchaseToken;
+  final String countryRechargeChannelConfigId;
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'productId': productId,
+      'channel': channel,
+      'merchant': merchant,
+      'orderId': orderId,
+      'purchaseToken': purchaseToken,
+      'countryRechargeChannelConfigId': countryRechargeChannelConfigId,
+    };
+  }
+}
+
 int _intValue(Object? value) {
   if (value is num) return value.toInt();
   return int.tryParse(value?.toString() ?? '') ?? 0;

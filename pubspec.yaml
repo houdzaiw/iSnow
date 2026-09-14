@@ -70,6 +70,7 @@ dependencies:
   agora_rtc_engine: ^6.5.4
   centrifuge: ^0.20.0
   in_app_purchase: 3.2.2
+  in_app_purchase_android: 0.4.0+10
 
 dev_dependencies:
   flutter_test:
