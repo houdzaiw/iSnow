@@ -155,6 +155,54 @@ class AppTextStyles {
     fontWeight: FontWeight.w400,
   );
 
+  static const TextStyle walletTab = TextStyle(
+    color: Color(0xA6FFFFFF),
+    fontSize: 13,
+    fontWeight: FontWeight.w400,
+  );
+
+  static const TextStyle walletTabSelected = TextStyle(
+    color: AppColors.walletBalanceText,
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+  );
+
+  static const TextStyle walletBalanceLabel = TextStyle(
+    color: AppColors.textInverse,
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+  );
+
+  static const TextStyle walletBalance = TextStyle(
+    color: AppColors.textInverse,
+    fontSize: 28,
+    fontWeight: FontWeight.w700,
+  );
+
+  static const TextStyle walletSectionTitle = TextStyle(
+    color: AppColors.textInverse,
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+  );
+
+  static const TextStyle walletCoinAmount = TextStyle(
+    color: Color(0xFFE8E8E8),
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+  );
+
+  static const TextStyle walletPrice = TextStyle(
+    color: AppColors.walletActionText,
+    fontSize: 12,
+    fontWeight: FontWeight.w600,
+  );
+
+  static const TextStyle walletGuide = TextStyle(
+    color: Color(0xFF9B9C9E),
+    fontSize: 12,
+    fontWeight: FontWeight.w400,
+  );
+
   static const TextStyle calendarDay = TextStyle(
     color: AppColors.textPrimary,
     fontSize: 12,

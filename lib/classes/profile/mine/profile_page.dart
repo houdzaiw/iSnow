@@ -60,26 +60,8 @@ class ProfilePage extends ConsumerWidget {
     );
   }
 
-  void _openWalletWebView(BuildContext context) {
-    final walletUri = Uri.parse(
-      AppConfig.shared.appEnv.h5WalletUrl,
-    ).replace(queryParameters: {'language': _walletLanguage(context)});
-
-    context.push(
-      Uri(
-        path: '/web-view',
-        queryParameters: {
-          'title': context.l10n.t('profile.wallet'),
-          'uri': walletUri.toString(),
-          'hiddenAppBar': 'true',
-        },
-      ).toString(),
-    );
-  }
-
-  String _walletLanguage(BuildContext context) {
-    final languageCode = Localizations.localeOf(context).languageCode.trim();
-    return languageCode.isEmpty ? 'en' : languageCode;
+  void _openWalletPage(BuildContext context) {
+    context.push('/wallet');
   }
 
   Future<void> _handleMenuAction(
@@ -131,9 +113,9 @@ class ProfilePage extends ConsumerWidget {
         await _confirmLogout(context, ref);
         break;
       case 'wallet':
-        _openWalletWebView(context);
-        break;
       case 'recharge':
+        _openWalletPage(context);
+        break;
       case 'invite-friends':
       case 'store':
       case 'level':

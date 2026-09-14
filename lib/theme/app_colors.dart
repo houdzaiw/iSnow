@@ -67,4 +67,11 @@ class AppColors {
   static const Color iconMuted = Color(0xFFD0CDCD);
   static const Color missingAsset = Color(0xFFFF2D2D);
   static const Color danger = Color(0xFFFF4D4F);
+
+  static const Color walletBackground = Color(0xFF211D1B);
+  static const Color walletPanelStart = Color(0xF533281E);
+  static const Color walletPanelEnd = Color(0xFF423822);
+  static const Color walletPanelDivider = Color(0x1AFFFFFF);
+  static const Color walletBalanceText = Color(0xFF402810);
+  static const Color walletActionText = Color(0xFF4A321B);
 }

@@ -103,7 +103,7 @@ class AppSpacing {
   static const double roomMicFeaturedRowsGap = 4;
   static const double roomActionSheetHorizontalMargin = 12;
   static const double roomActionSheetBottomMargin = 12;
-  static const double roomMoreSheetHorizontalMargin = 12;
+  static const double roomMoreSheetHorizontalMargin = 0;
   static const double roomMoreSheetBottomMargin = 12;
   static const double roomMoreSheetHorizontalInset = 16;
   static const double roomMoreSheetTopInset = 18;
@@ -116,4 +116,18 @@ class AppSpacing {
   static const double roomMoreToolIconSize = 34;
   static const double roomMoreToolLabelTop = 7;
   static const double roomMoreLoadingHeight = 72;
+
+  static const double walletContentWidth = 343;
+  static const double walletBalanceTop = 24;
+  static const double walletBalanceHeight = 100;
+  static const double walletPanelHorizontalInset = 12;
+  static const double walletPanelTopRadius = 12;
+  static const double walletPanelTopInset = 16;
+  static const double walletPanelBottomInset = 28;
+  static const double walletRechargeHeaderHeight = 56;
+  static const double walletRechargeRowHeight = 64;
+  static const double walletRechargeRowHorizontalInset = 16;
+  static const double walletRechargeButtonWidth = 80;
+  static const double walletRechargeButtonHeight = 32;
+  static const double walletRechargeButtonRadius = 16;
 }

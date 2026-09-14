@@ -376,6 +376,25 @@ class AppAssets {
   static const String profileContactIcon = 'assets/profile/contact_us_icon.png';
   static const String profileSettingIcon = 'assets/profile/setting_icon.png';
 
+  static const String walletBack = 'assets/wallet/app_back.webp';
+  static const String walletTopBgCoins =
+      'assets/wallet/wallet_top_bg_coins.webp';
+  static const String walletTopBgDiamonds =
+      'assets/wallet/wallet_top_bg_diamonds.webp';
+  static const String walletCommonHeader =
+      'assets/wallet/common_header_bg.webp';
+  static const String walletCoinsTop = 'assets/wallet/coins_top.webp';
+  static const String walletBalanceCoin = 'assets/wallet/icon_coin.webp';
+  static const String walletCoin = 'assets/wallet/ic_others_coin.webp';
+  static const String walletBalanceArrow = 'assets/wallet/me_wallte_arrow.webp';
+  static const String walletCoinDetailsArrow =
+      'assets/wallet/ic_outline_morearrow_coin.webp';
+  static const String walletDiamondBalance =
+      'assets/wallet/diamond_icon_topIcon.webp';
+  static const String walletDiamondDetailsArrow =
+      'assets/wallet/ic_outline_morearrow_diamonds.webp';
+  static const String walletDiamondCard = 'assets/wallet/card_bg_diamond.webp';
+
   static const List<String> moodImages = [
     'assets/mood/model_01.png',
     'assets/mood/model_02.png',

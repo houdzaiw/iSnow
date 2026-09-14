@@ -119,6 +119,23 @@ class HttpApi {
   /// 获取策略推送结果数据
   static const strategyPush = '/api/strategyPush/getStrategyPush';
 
+  /// 用户钱包余额
+  static const walletPurse = '/api/revenue/purse';
+
+  /// 查询当前平台的充值商品
+  static const walletRechargePackageList =
+      '/api/recharge/package/queryByChannel';
+
+  /// 创建 Apple 充值记录
+  static const walletRechargeCreation = '/api/recharge/record/creation';
+
+  /// 创建 Google 充值订单
+  static const walletRechargeGoogleCreation =
+      '/api/recharge/record/google/creation';
+
+  /// 获取钱包兑换说明
+  static const walletConvertProportion = '/api/revenue/purse/convertProportion';
+
   /// 用户排行榜
   static const rankCommonly = '/api/rank/commonly';
 

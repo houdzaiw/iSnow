@@ -23,6 +23,7 @@ import '../classes/profile/relations/profile_relation_page.dart';
 import '../classes/profile/settings_page.dart';
 import '../classes/rank/rank_page.dart';
 import '../classes/room/room_page.dart';
+import '../classes/wallet/wallet_page.dart';
 import '../classes/launch_page.dart';
 import '../classes/oauth/login_detail_page.dart';
 import '../classes/oauth/register_page.dart';
@@ -95,6 +96,14 @@ final GoRouter goRouter = GoRouter(
         final hiddenAppBar =
             state.uri.queryParameters['hiddenAppBar'] == 'true';
         return WebViewPage(title: title, uri: uri, hiddenAppBar: hiddenAppBar);
+      },
+    ),
+    GoRoute(
+      path: '/wallet',
+      name: 'wallet',
+      builder: (context, state) {
+        final tab = int.tryParse(state.uri.queryParameters['tab'] ?? '') ?? 0;
+        return WalletPage(initialTab: tab);
       },
     ),
     GoRoute(
