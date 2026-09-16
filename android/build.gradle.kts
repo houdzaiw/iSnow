@@ -19,15 +19,15 @@ subprojects {
 
 subprojects {
     if (name == "isar_flutter_libs") {
+        // Isar 3.1 hardcodes compileSdk 30; finalize its DSL at the app SDK level.
         plugins.withId("com.android.library") {
-            extensions.findByName("android")?.let { androidExtension ->
-                val setNamespace =
-                    androidExtension.javaClass.methods.firstOrNull {
-                        it.name == "setNamespace" &&
-                            it.parameterTypes.size == 1 &&
-                            it.parameterTypes[0] == String::class.java
-                    }
-                setNamespace?.invoke(androidExtension, "dev.isar.isar_flutter_libs")
+            extensions.configure<
+                com.android.build.api.variant.LibraryAndroidComponentsExtension
+            > {
+                finalizeDsl { extension ->
+                    extension.namespace = "dev.isar.isar_flutter_libs"
+                    extension.compileSdk = 36
+                }
             }
         }
     }

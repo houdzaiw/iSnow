@@ -20,8 +20,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.mood.xyz"
+        applicationId = "com.nady.dev"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -32,20 +31,34 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("mood.jks")
-            storePassword = "Moodnote@20260330"
+            storeFile = file("simi.jks")
+            storePassword = "simi@2025"
             keyAlias = "key0"
-            keyPassword = "Moodnote@20260330"
+            keyPassword = "simi@2025"
             enableV1Signing = true
             enableV2Signing = true
         }
     }
 
     buildTypes {
-        getByName("release") {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+        getByName("debug") {
             signingConfig = signingConfigs.getByName("release")
+        }
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("release")
+            ndk {
+                abiFilters += listOf("armeabi-v7a", "arm64-v8a")
+                debugSymbolLevel = "FULL"
+            }
+            isCrunchPngs = false
+            isDebuggable = false
+            isZipAlignEnabled = true
+            isMinifyEnabled = false
+            isShrinkResources = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }
