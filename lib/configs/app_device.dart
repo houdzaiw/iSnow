@@ -23,6 +23,7 @@ class AppDevice {
   String? _os;
   String? _osVersion;
   String? _deviceBrand;
+  bool _isPhysicalDevice = true;
 
   /// 初始化设备信息
   Future<void> init() async {
@@ -44,6 +45,7 @@ class AppDevice {
     _osVersion =
         '|${androidInfo.version.codename}|${androidInfo.version.sdkInt}|${androidInfo.version.incremental}|${androidInfo.version.baseOS}|';
     _deviceBrand = androidInfo.brand;
+    _isPhysicalDevice = androidInfo.isPhysicalDevice;
 
     // 生成设备ID
     final androidId = androidInfo.id;
@@ -58,6 +60,7 @@ class AppDevice {
     _os = 'ios';
     _osVersion = iosInfo.systemVersion;
     _deviceBrand = 'Apple';
+    _isPhysicalDevice = iosInfo.isPhysicalDevice;
 
     // 生成设备ID
     final vendorId = iosInfo.identifierForVendor ?? '';
@@ -85,6 +88,8 @@ class AppDevice {
 
   /// 获取设备品牌
   String get deviceBrand => _deviceBrand ?? '';
+
+  bool get isPhysicalDevice => _isPhysicalDevice;
 
   /// 获取应用版本号
   String get appVersion => _packageInfo?.version ?? '1.0.0';

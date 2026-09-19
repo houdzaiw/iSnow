@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>iSnow × Travel · 启动配置迁移原型</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: '#111A2F',
+            navy: '#172445',
+            blue: '#5276F5',
+            mint: '#85E2BF',
+            canvas: '#F4F6FA',
+            line: '#DDE3EF'
+          },
+          boxShadow: {
+            phone: '0 24px 70px rgba(20, 34, 73, .24)',
+            panel: '0 12px 32px rgba(20, 34, 73, .09)'
+          },
+          fontFamily: {
+            sans: ['Avenir Next', 'PingFang SC', 'Microsoft YaHei', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body { margin: 0; background: #f4f6fa; color: #111a2f; font-family: "Avenir Next", "PingFang SC", "Microsoft YaHei", sans-serif; }
+    button, input { font: inherit; }
+    button:focus-visible, input:focus-visible { outline: 3px solid rgba(82, 118, 245, .36); outline-offset: 2px; }
+    .app-shell { min-height: 100vh; }
+    .phone { width: min(390px, calc(100vw - 32px)); height: 844px; max-height: calc(100vh - 112px); min-height: 680px; }
+    .phone-scroll { height: 100%; overflow: auto; scrollbar-width: thin; scrollbar-color: #b8c3da transparent; }
+    .phone-scroll::-webkit-scrollbar { width: 5px; }
+    .phone-scroll::-webkit-scrollbar-thumb { background: #b8c3da; border-radius: 99px; }
+    .ambient { background: radial-gradient(circle at 70% 5%, rgba(117, 148, 255, .28), transparent 37%), #111a2f; }
+    .ambient::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .08; background-image: linear-gradient(120deg, transparent 0 48%, #fff 49% 50%, transparent 51%); background-size: 24px 24px; }
+    .float-in { animation: float-in .5s cubic-bezier(.2,.8,.2,1) both; }
+    @keyframes float-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .spin { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .locked { pointer-events: none !important; opacity: .34 !important; filter: grayscale(.35); }
+    .screen-button { transition: transform .16s ease, box-shadow .16s ease, background .16s ease; }
+    .screen-button:active { transform: translateY(1px); }
+    .state-button.active { color: #fff; background: #5276f5; border-color: #5276f5; box-shadow: 0 8px 18px rgba(82,118,245,.22); }
+    @media (max-width: 900px) {
+      .phone { max-height: none; height: 820px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="border-b border-line bg-white/90 backdrop-blur">
+      <div class="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 lg:px-8">
+        <div class="flex items-center gap-3">
+          <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-ink text-sm font-bold text-white">iS</div>
+          <div>
+            <p class="text-sm font-semibold tracking-tight text-ink">iSnow × Travel</p>
+            <p class="text-[11px] text-slate-500">启动配置迁移原型 · v1.0</p>
+          </div>
+        </div>
+        <div class="hidden items-center gap-2 text-xs text-slate-500 sm:flex">
+          <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+          交互演示，不连接真实接口
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto grid max-w-6xl gap-8 px-5 py-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:px-8 lg:py-12">
+      <section class="flex flex-col items-center justify-center" data-feature="phone">
+        <div class="mb-4 flex w-full max-w-[390px] items-center justify-between px-1 text-xs text-slate-500">
+          <span>模拟设备 · 390 × 844</span>
+          <span class="rounded-full bg-white px-2.5 py-1 font-medium text-slate-600 shadow-sm">test 环境</span>
+        </div>
+
+        <div class="phone relative overflow-hidden rounded-[34px] border-[8px] border-[#202B46] bg-white shadow-phone" aria-label="iSnow App 手机预览">
+          <div class="absolute left-1/2 top-0 z-20 h-6 w-32 -translate-x-1/2 rounded-b-2xl bg-[#202B46]"></div>
+          <div id="phone-content" class="phone-scroll"></div>
+        </div>
+      </section>
+
+      <aside class="space-y-5" data-feature="controls">
+        <div class="rounded-2xl border border-line bg-white p-5 shadow-panel">
+          <div class="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <p class="text-[11px] font-bold uppercase tracking-[.14em] text-blue">Prototype controls</p>
+              <h1 class="mt-1 text-xl font-bold tracking-tight text-ink">状态审查台</h1>
+            </div>
+            <span id="focus-badge" class="hidden rounded-full bg-[#edf2ff] px-2.5 py-1 text-[11px] font-semibold text-blue"></span>
+          </div>
+          <p class="mb-4 text-sm leading-6 text-slate-500">切换关键状态，检查启动配置成功、失败阻断、Retry、登录与首页加载路径。</p>
+          <div class="grid grid-cols-2 gap-2" role="group" aria-label="切换原型状态">
+            <button class="state-button rounded-xl border border-line px-3 py-2.5 text-left text-xs font-semibold text-slate-600 transition hover:border-blue" data-state="startup">启动中</button>
+            <button class="state-button rounded-xl border border-line px-3 py-2.5 text-left text-xs font-semibold text-slate-600 transition hover:border-blue" data-state="bootstrap-failed">Bootstrap 失败</button>
+            <button class="state-button rounded-xl border border-line px-3 py-2.5 text-left text-xs font-semibold text-slate-600 transition hover:border-blue" data-state="login">登录页</button>
+            <button class="state-button rounded-xl border border-line px-3 py-2.5 text-left text-xs font-semibold text-slate-600 transition hover:border-blue" data-state="home">首页成功</button>
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-line bg-white p-5 shadow-panel" data-feature="inspection">
+          <p class="mb-3 text-xs font-bold uppercase tracking-[.14em] text-slate-400">Acceptance checklist</p>
+          <div class="space-y-3 text-sm">
+            <div class="flex items-center gap-3"><span class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">✓</span><span class="text-slate-600">只使用 test 环境</span></div>
+            <div class="flex items-center gap-3"><span class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">✓</span><span class="text-slate-600">失败不回退旧地址</span></div>
+            <div class="flex items-center gap-3"><span class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">✓</span><span class="text-slate-600">登录成功并保存会话</span></div>
+            <div class="flex items-center gap-3"><span class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">✓</span><span class="text-slate-600">首页数据正确展示</span></div>
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-[#cfdaff] bg-[#f1f4ff] p-5" data-feature="focus-help">
+          <p class="text-xs font-bold text-blue">Focus mode</p>
+          <p class="mt-2 text-xs leading-5 text-slate-600">使用 <code class="rounded bg-white px-1.5 py-0.5 text-[11px]">?sandbox=true&focus=bootstrap</code> 锁定其他区域，仅演示 Bootstrap 相关交互。</p>
+          <p id="focus-copy" class="mt-2 hidden text-xs font-semibold text-blue"></p>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const focus = params.get('focus');
+    const sandbox = params.get('sandbox') === 'true';
+    const allowedFocus = ['startup', 'bootstrap', 'login', 'home'];
+    const focusLabels = { startup: '启动流程', bootstrap: 'Bootstrap', login: '登录', home: '首页' };
+    const focusTargets = {
+      startup: ['phone', 'controls', 'inspection', 'focus-help'],
+      bootstrap: ['phone', 'controls', 'focus-help'],
+      login: ['phone', 'controls', 'focus-help'],
+      home: ['phone', 'controls', 'inspection', 'focus-help']
+    };
+    const stateFromHash = () => {
+      const raw = window.location.hash.replace('#', '');
+      return ['startup', 'bootstrap-failed', 'login', 'home'].includes(raw) ? raw : (focus === 'login' ? 'login' : focus === 'home' ? 'home' : 'startup');
+    };
+    let currentState = stateFromHash();
+    let loginLoading = false;
+    let retryTimer = null;
+
+    const icon = (name, className = 'h-5 w-5') => {
+      const icons = {
+        shield: '<path d="M12 3 5 6v5c0 4.7 2.8 8 7 10 4.2-2 7-5.3 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/>',
+        alert: '<path d="M10.3 4.3 2.7 17a2 2 0 0 0 1.7 3h15.2a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/>',
+        arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+        refresh: '<path d="M20 11a8.1 8.1 0 0 0-14.7-4.7L3 9"/><path d="M3 4v5h5M4 13a8.1 8.1 0 0 0 14.7 4.7L21 15"/><path d="M21 20v-5h-5"/>',
+        home: '<path d="m3 10 9-7 9 7v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9Z"/><path d="M9 21v-6h6v6"/>',
+        lock: '<rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
+        check: '<path d="m5 12 4 4L19 6"/>'
+      };
+      return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[name]}</svg>`;
+    };
+
+    const setHashState = (state) => {
+      currentState = state;
+      window.history.replaceState({}, '', `${window.location.pathname}${window.location.search}#${state}`);
+      render();
+    };
+
+    const header = (title, subtitle, light = false) => `
+      <div class="flex items-center justify-between px-5 pt-12 ${light ? 'text-white' : 'text-ink'}">
+        <div><p class="text-[11px] font-bold uppercase tracking-[.16em] ${light ? 'text-white/60' : 'text-slate-400'}">iSnow</p><p class="mt-1 text-lg font-bold tracking-tight">${title}</p></div>
+        <span class="rounded-full ${light ? 'bg-white/10 text-white/80' : 'bg-[#edf2ff] text-blue'} px-2.5 py-1 text-[11px] font-semibold">${subtitle}</span>
+      </div>`;
+
+    const startupScreen = () => `
+      <div class="ambient relative flex min-h-full flex-col overflow-hidden text-white">
+        ${header('Starting securely', 'TEST', true)}
+        <div class="relative z-10 flex flex-1 flex-col items-center justify-center px-7 pb-16 text-center">
+          <div class="mb-7 flex h-24 w-24 items-center justify-center rounded-[28px] border border-white/20 bg-white/10 shadow-2xl shadow-black/20 backdrop-blur-sm">${icon('shield', 'h-11 w-11 text-mint')}</div>
+          <p class="text-2xl font-bold tracking-tight">Preparing your space</p>
+          <p class="mt-3 max-w-[270px] text-sm leading-6 text-white/60">Connecting to Travel test services and checking the latest app configuration.</p>
+          <div class="mt-8 flex items-center gap-3 rounded-full border border-white/10 bg-white/10 px-4 py-2.5 text-xs text-white/80"><span class="spin h-3.5 w-3.5 rounded-full border-2 border-white/30 border-t-mint"></span> Bootstrap in progress</div>
+          <div class="mt-8 w-full max-w-[275px] space-y-3 text-left text-xs">
+            ${['Read device identity', 'Load Travel Bootstrap', 'Resolve API base URL'].map((item, index) => `<div class="flex items-center gap-3 text-white/${index === 0 ? '80' : '40'}"><span class="flex h-5 w-5 items-center justify-center rounded-full ${index === 0 ? 'bg-mint text-ink' : 'border border-white/20'}">${index === 0 ? icon('check', 'h-3 w-3') : ''}</span>${item}</div>`).join('')}
+          </div>
+          <button class="screen-button mt-9 flex items-center gap-2 rounded-full bg-white px-5 py-3 text-xs font-bold text-ink shadow-lg shadow-black/10 hover:bg-mint" data-action="fail-bootstrap">演示启动失败 ${icon('arrow', 'h-4 w-4')}</button>
+        </div>
+        <p class="relative z-10 pb-7 text-center text-[10px] tracking-wide text-white/35">Configuration is loaded for this session only</p>
+      </div>`;
+
+    const failureScreen = () => `
+      <div class="flex min-h-full flex-col bg-[#f8f9fc] text-ink">
+        ${header('Service setup', 'TEST')}
+        <div class="float-in flex flex-1 flex-col justify-center px-6 pb-12">
+          <div class="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#fff0ed] text-[#d55347]">${icon('alert', 'h-7 w-7')}</div>
+          <p class="text-2xl font-bold tracking-tight">We could not connect</p>
+          <p class="mt-3 text-sm leading-6 text-slate-500">The test service configuration could not be loaded. iSnow will not use the previous API address.</p>
+          <div class="mt-6 rounded-2xl border border-[#f2d4cf] bg-white p-4">
+            <div class="flex items-center justify-between text-xs"><span class="font-semibold text-slate-700">Bootstrap</span><span class="font-semibold text-[#d55347]">Failed</span></div>
+            <div class="mt-3 h-px bg-[#f2e4e1]"></div>
+            <div class="mt-3 flex items-start gap-2 text-xs leading-5 text-slate-500">${icon('lock', 'mt-0.5 h-4 w-4 shrink-0 text-slate-400')}<span>Old environment is blocked until a valid configuration is received.</span></div>
+          </div>
+          <button class="screen-button mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-ink/15 hover:bg-navy" data-action="retry">${icon('refresh', 'h-4 w-4')} Try again</button>
+          <button class="mt-3 w-full rounded-xl px-4 py-3 text-xs font-semibold text-slate-500 hover:bg-slate-100" data-action="switch-login">Continue to login demo</button>
+        </div>
+      </div>`;
+
+    const loginScreen = () => `
+      <div class="flex min-h-full flex-col bg-[#f8f9fc] text-ink">
+        ${header('Welcome back', 'TEST')}
+        <div class="flex-1 px-6 pb-10 pt-16">
+          <div class="float-in">
+            <div class="mb-7 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#edf2ff] text-blue">${icon('shield', 'h-7 w-7')}</div>
+            <p class="text-2xl font-bold tracking-tight">Sign in to continue</p>
+            <p class="mt-2 text-sm leading-6 text-slate-500">Your session is ready on the Travel test API.</p>
+          </div>
+          <form class="mt-9 space-y-4" data-action="login-form">
+            <label class="block"><span class="mb-2 block text-xs font-semibold text-slate-600">Phone number</span><div class="flex overflow-hidden rounded-xl border border-line bg-white focus-within:border-blue"><span class="flex items-center border-r border-line px-3 text-sm text-slate-500">+86</span><input required class="min-w-0 flex-1 px-3 py-3 text-sm text-ink outline-none" placeholder="Enter phone number" value="138 0000 0000" /></div></label>
+            <label class="block"><span class="mb-2 block text-xs font-semibold text-slate-600">Verification code</span><div class="flex overflow-hidden rounded-xl border border-line bg-white focus-within:border-blue"><input required minlength="4" maxlength="6" class="min-w-0 flex-1 px-3 py-3 text-sm text-ink outline-none" placeholder="6-digit code" value="123456" /><button type="button" class="border-l border-line px-3 text-xs font-semibold text-blue">Get code</button></div></label>
+            <label class="flex items-center gap-2 pt-1 text-xs text-slate-500"><input type="checkbox" checked class="h-4 w-4 accent-blue" /> I agree to the User Agreement and Privacy Policy</label>
+            <button class="screen-button mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-ink/15 hover:bg-navy" type="submit" ${loginLoading ? 'disabled' : ''}>${loginLoading ? '<span class="spin h-4 w-4 rounded-full border-2 border-white/30 border-t-white"></span> Signing in' : `Sign in ${icon('arrow', 'h-4 w-4')}`}</button>
+          </form>
+          <div class="mt-8 flex items-center gap-3 text-[11px] text-slate-400"><span class="h-px flex-1 bg-line"></span><span>API session ready</span><span class="h-px flex-1 bg-line"></span></div>
+        </div>
+      </div>`;
+
+    const homeScreen = () => `
+      <div class="min-h-full bg-[#f8f9fc] text-ink">
+        ${header('Good morning', 'CONNECTED')}
+        <div class="px-5 pb-10 pt-8">
+          <div class="float-in rounded-2xl bg-ink p-5 text-white shadow-lg shadow-ink/20">
+            <div class="flex items-start justify-between"><div><p class="text-xs text-white/55">Travel test session</p><p class="mt-1 text-xl font-bold">Everything is ready.</p></div><span class="flex h-9 w-9 items-center justify-center rounded-xl bg-mint text-ink">${icon('check', 'h-5 w-5')}</span></div>
+            <div class="mt-6 flex items-center justify-between border-t border-white/10 pt-4 text-[11px] text-white/60"><span>API base URL</span><span class="font-mono text-mint">resolved at runtime</span></div>
+          </div>
+          <div class="mt-7 flex items-center justify-between"><div><p class="text-xs font-bold uppercase tracking-[.14em] text-slate-400">Your feed</p><p class="mt-1 text-lg font-bold">Fresh from the community</p></div><button class="rounded-lg p-2 text-slate-400 hover:bg-white">${icon('refresh', 'h-4 w-4')}</button></div>
+          <div class="mt-4 space-y-3">
+            ${[['Mina shared a new mood', '2 min ago', 'Breathe in the small wins.'], ['Your weekly check-in is ready', 'Today', 'A calm moment is waiting for you.']].map((item, i) => `<div class="rounded-2xl border border-line bg-white p-4 shadow-sm"><div class="flex items-center justify-between"><span class="text-xs font-semibold text-blue">${item[0]}</span><span class="text-[10px] text-slate-400">${item[1]}</span></div><p class="mt-2 text-sm leading-6 text-slate-600">${item[2]}</p><div class="mt-3 flex items-center gap-2 text-[11px] text-emerald-600"><span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span> Loaded from test API</div></div>`).join('')}
+          </div>
+        </div>
+      </div>`;
+
+    const render = () => {
+      const content = document.getElementById('phone-content');
+      if (currentState === 'bootstrap-failed') content.innerHTML = failureScreen();
+      else if (currentState === 'login') content.innerHTML = loginScreen();
+      else if (currentState === 'home') content.innerHTML = homeScreen();
+      else content.innerHTML = startupScreen();
+
+      document.querySelectorAll('.state-button').forEach((button) => button.classList.toggle('active', button.dataset.state === currentState));
+      bindActions();
+    };
+
+    const bindActions = () => {
+      document.querySelectorAll('[data-state]').forEach((button) => button.addEventListener('click', () => setHashState(button.dataset.state)));
+      document.querySelectorAll('[data-action="fail-bootstrap"]').forEach((button) => button.addEventListener('click', () => setHashState('bootstrap-failed')));
+      document.querySelectorAll('[data-action="retry"]').forEach((button) => button.addEventListener('click', () => {
+        setHashState('startup');
+        clearTimeout(retryTimer);
+        retryTimer = setTimeout(() => setHashState('login'), 900);
+      }));
+      document.querySelectorAll('[data-action="switch-login"]').forEach((button) => button.addEventListener('click', () => setHashState('login')));
+      document.querySelectorAll('[data-action="login-form"]').forEach((form) => form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        loginLoading = true;
+        render();
+        setTimeout(() => { loginLoading = false; setHashState('home'); }, 900);
+      }));
+    };
+
+    const applyFocusMode = () => {
+      if (!sandbox || !allowedFocus.includes(focus)) return;
+      const allowed = focusTargets[focus];
+      document.querySelectorAll('[data-feature]').forEach((node) => {
+        if (!allowed.includes(node.dataset.feature)) node.classList.add('locked');
+      });
+      const badge = document.getElementById('focus-badge');
+      const copy = document.getElementById('focus-copy');
+      badge.textContent = `Focus: ${focusLabels[focus]}`;
+      badge.classList.remove('hidden');
+      copy.textContent = `已锁定为「${focusLabels[focus]}」专注审查`;
+      copy.classList.remove('hidden');
+    };
+
+    window.addEventListener('hashchange', () => { currentState = stateFromHash(); render(); });
+    render();
+    applyFocusMode();
+  </script>
+</body>
+</html>

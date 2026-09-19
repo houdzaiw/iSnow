@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>iSnow × Travel test API 迁移 · 最终 PRD v1.0</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    :root{--ink:#172033;--muted:#647087;--line:#e3e8f1;--blue:#3e63dd;--soft:#eef2ff;--bg:#f5f7fb;--panel:#fff}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.72 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}a{color:var(--blue)}
+    .layout{display:grid;grid-template-columns:245px minmax(0,1fr);min-height:100vh}aside{position:sticky;top:0;height:100vh;padding:26px 18px;background:#111b34;color:#cbd7f6}aside h1{margin:0 0 24px;font-size:15px;color:#fff}aside small{display:block;margin-top:3px;color:#91a4d2;font-weight:400}nav a{display:block;padding:7px 10px;border-radius:8px;color:#b6c5eb;font-size:13px;text-decoration:none}nav a:hover{background:#ffffff12;color:#fff}.main{width:min(1160px,100%);margin:auto;padding:40px 52px 80px}.hero,.module,.meta-card{border:1px solid var(--line);border-radius:17px;background:var(--panel);box-shadow:0 16px 42px #243b6a0b}.hero{padding:34px 38px;background:linear-gradient(135deg,#fff,#f1f4ff)}.eyebrow{font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--blue)}h1{font-size:clamp(28px,4vw,42px);line-height:1.2;margin:8px 0 12px;letter-spacing:-.03em}h2{margin:46px 0 14px;font-size:25px;line-height:1.3}h3{margin:24px 0 8px;font-size:17px}.lead{max-width:850px;color:#43506a;font-size:16px}.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}.chip{padding:4px 10px;border-radius:999px;background:var(--soft);color:#3155c8;font-size:12px;font-weight:700}.chip.green{background:#e8f8f0;color:#17835c}.meta-card,.module{padding:22px 26px;margin-top:14px}.version{float:right;border:1px solid var(--line);border-radius:8px;padding:7px 10px;background:#fff;color:var(--ink)}table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}th,td{border:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:top}th{background:#f7f9fc;color:#394661}.journey td:first-child{white-space:nowrap;font-weight:700;color:#354566}.feature{display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:22px;align-items:start}.feature iframe{width:390px;height:760px;border:0;border-radius:28px;background:transparent;box-shadow:0 14px 32px #243b6a20}.rule{padding:12px 14px;border-left:3px solid var(--blue);background:var(--soft);border-radius:7px;margin:12px 0}.mermaid{overflow:auto;padding:10px;background:#fbfcff;border:1px solid var(--line);border-radius:10px}.status{display:inline-block;padding:2px 8px;border-radius:5px;background:#edf0f5;color:#5a667a;font-size:11px}.p0{background:#ffe8e5;color:#ad372c}.p1{background:#fff1d7;color:#916000}code{padding:2px 5px;border-radius:4px;background:#f0f2f7;color:#26395f;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em}footer{margin-top:45px;color:var(--muted);font-size:12px;text-align:center}
+    @media(max-width:900px){.layout{display:block}aside{position:static;height:auto;padding:16px}nav{display:flex;gap:4px;overflow:auto}nav a{white-space:nowrap}.main{padding:22px 15px 50px}.hero{padding:27px 22px}.feature{display:block}.feature iframe{display:block;width:min(390px,100%);margin:18px auto}}
+  </style>
+</head>
+<body>
+<div class="layout">
+  <aside><h1>iSnow × Travel<small>test API 迁移 · v1.0</small></h1><nav>
+    <a href="#info">项目信息</a><a href="#background">一、需求背景</a><a href="#goals">二、需求目标</a><a href="#users">三、用户与场景</a><a href="#features">四、功能清单</a><a href="#solution">五、详细方案</a><a href="#flow">六、流程图</a><a href="#edge">七、异常边界</a><a href="#tracking">八、数据追踪</a><a href="#roadmap">九、未来演进</a><a href="#annex">十、附件</a>
+  </nav></aside>
+  <main class="main">
+    <header class="hero" id="info"><select class="version" onchange="if(this.value)location.href=this.value"><option value="prd_v1.0_final.html">v1.0 最终版</option><option value="prd_v1.0.html">v1.0 第一版</option></select><div class="eyebrow">Final Product Requirement Document</div><h1>iSnow 切换 Travel test API 与启动配置</h1><p class="lead">将 iSnow 当前固定环境和本地登录态启动分流，迁移为 travel 项目的 Bootstrap 启动会话。启动成功后只使用服务端返回的动态 API 基地址，登录和首页通过同一套测试环境完成请求。</p><div class="chips"><span class="chip green">已落地：启动 Bootstrap</span><span class="chip green">已落地：动态公共 API</span><span class="chip">目标环境：test</span><span class="chip">验收：启动 / 登录 / 首页</span></div></header>
+    <div class="meta-card"><h3>版本记录</h3><table><thead><tr><th>版本</th><th>状态</th><th>变更</th></tr></thead><tbody><tr><td>v1.0 第一版</td><td>历史草稿</td><td>完成背景、目标、用户旅程和基础业务逻辑。</td></tr><tr><td>v1.0 最终版</td><td>当前版本</td><td>补充原型切片、Mermaid 流程、异常边界、数据字典和实现验收结果。</td></tr></tbody></table></div>
+
+    <section id="background"><h2>一、需求背景</h2><div class="meta-card"><p>iSnow 原先通过 <code>AppConfig/AppEnv</code> 和 <code>HttpDioManager</code> 固定选择域名；启动页只检查本地登录态。travel 项目则先请求 Bootstrap，解析服务端返回的 API 基地址和混淆路由，再按登录态继续 client.init。</p><p>本次以 travel 的 test 材料为唯一启动配置来源，保留 iSnow 现有页面、登录模型和首页 UI，仅替换底层启动流程和公共 API 调用链。</p><div class="rule"><strong>范围边界：</strong>本次不替换 WebSocket、H5、CDN、支付等非公共 API；启动配置失败时不得回退旧域名。</div></div></section>
+
+    <section id="goals"><h2>二、需求目标</h2><div class="meta-card"><table><thead><tr><th>目标</th><th>描述</th><th>指标</th><th>目标值</th></tr></thead><tbody><tr><td>test 环境</td><td>默认读取 travel test Bootstrap 材料</td><td>环境标识</td><td><code>test</code></td></tr><tr><td>启动配置</td><td>完成 Bootstrap、路由解析、必要的 client.init</td><td>启动阶段</td><td>成功进入登录或首页</td></tr><tr><td>登录</td><td>现有登录 UI 使用 Travel 混淆登录接口</td><td>登录业务响应</td><td>返回成功并保存会话</td></tr><tr><td>首页</td><td>首页公共请求走运行时 API 会话</td><td>首屏数据</td><td>成功请求并展示</td></tr><tr><td>失败安全</td><td>网络/配置/校验失败阻断启动</td><td>旧地址请求数</td><td>0</td></tr></tbody></table></div></section>
+
+    <section id="users"><h2>三、用户与使用场景</h2><div class="meta-card"><p><strong>测试人员和开发联调人员</strong>打开 iSnow 测试包，等待服务端启动配置，完成登录并确认首页数据来自 travel test 服务。</p><table class="journey"><thead><tr><th>阶段</th><th>触点</th><th>行为</th><th>痛点</th><th>机会点</th></tr></thead><tbody><tr><td>启动</td><td>启动页</td><td>等待配置</td><td>不清楚是否卡住</td><td>展示启动状态和可恢复错误</td></tr><tr><td>Bootstrap</td><td>后台请求</td><td>等待 API 地址</td><td>旧环境误请求</td><td>严格校验并阻断回退</td></tr><tr><td>登录</td><td>登录页</td><td>提交手机号/密码或验证码</td><td>环境不一致</td><td>绑定当前运行会话</td></tr><tr><td>首页</td><td>首页</td><td>查看数据</td><td>无法判断接口来源</td><td>展示 test 会话成功状态</td></tr></tbody></table></div></section>
+
+    <section id="features"><h2>四、需求功能清单</h2><div class="meta-card"><table><thead><tr><th>优先级</th><th>模块</th><th>逻辑</th><th>状态</th></tr></thead><tbody><tr><td><span class="status p0">P0</span></td><td>test 构建配置</td><td>Bootstrap URL、AAD path、kid、公钥、channel、路由 Token 由 travel 材料提供。</td><td>已落地</td></tr><tr><td><span class="status p0">P0</span></td><td>启动握手</td><td>读取设备身份，调用 Bootstrap，校验动态 API 地址并建立运行时路由。</td><td>已落地</td></tr><tr><td><span class="status p0">P0</span></td><td>公共 API</td><td>HttpDioManager 通过 TravelSessionManager 发送 Bootstrap/AES 业务信封。</td><td>已落地</td></tr><tr><td><span class="status p0">P0</span></td><td>失败阻断</td><td>错误页展示原因和 Retry，不允许旧域名继续请求。</td><td>已落地</td></tr><tr><td><span class="status p1">P1</span></td><td>诊断日志</td><td>只记录阶段、耗时、错误类型，禁止记录凭据和密钥。</td><td>基础支持</td></tr></tbody></table></div></section>
+
+    <section id="solution"><h2>五、详细方案</h2>
+      <div class="module feature"><div><h3>5.1 启动 Bootstrap 与动态 API 会话</h3><div class="mermaid">flowchart TD
+        A[启动页] --> B[读取设备身份]
+        B --> C[Travel Bootstrap]
+        C --> D{校验 apiBaseUrl}
+        D -- 失败 --> E[错误页 + Retry]
+        D -- 成功 --> F[保存运行时 Routes]
+        F --> G{本地登录态}
+        G -- 无 --> H[登录页]
+        G -- 有 --> I[client.init]
+        I --> J{成功?}
+        J -- 否 --> E
+        J -- 是 --> K[业务 AES Session]
+      </div><h3>规则</h3><ul><li>启动参数原样包含平台、包名、版本、设备 ID、设备品牌、系统语言、App 语言、渠道和 build number。</li><li>API 地址必须符合当前 test 的协议策略；非法、缺失或解密失败均阻断。</li><li>Retry 重新执行完整 Bootstrap，不使用旧运行时地址。</li></ul><p><a href="../flowcharts/startup_and_api_flow.md">查看完整 Mermaid 流程</a></p></div><iframe title="Bootstrap 专注模式" src="../prototype/prototype_v1.0.html?sandbox=true&amp;focus=bootstrap#bootstrap-failed" sandbox="allow-scripts allow-same-origin"></iframe></div>
+      <div class="module feature"><div><h3>5.2 登录与 client.init</h3><div class="mermaid">sequenceDiagram
+        participant U as 用户
+        participant P as 登录页
+        participant S as TravelSession
+        participant API as Test API
+        U->>P: 提交登录信息
+        P->>S: 调用公共请求
+        S->>API: Bootstrap 混淆登录路由
+        API-->>S: token + uid
+        S->>API: client.init
+        API-->>S: crypto 会话材料
+        S-->>P: 登录完成
+        P-->>U: 进入首页
+      </div><h3>规则</h3><ul><li>保留 iSnow 现有登录 UI 和 LoginResponse 模型。</li><li>登录响应成功后立即调用 client.init，成功后才允许登录后公共 API。</li><li>Token 失效清理本地登录态并回登录页；登录失败保留当前页面提示。</li></ul></div><iframe title="登录专注模式" src="../prototype/prototype_v1.0.html?sandbox=true&amp;focus=login#login" sandbox="allow-scripts allow-same-origin"></iframe></div>
+      <div class="module feature"><div><h3>5.3 首页公共 API 加载</h3><div class="mermaid">flowchart LR
+        A[首页进入] --> B[读取 RuntimeSession]
+        B --> C[AES-GCM 业务信封]
+        C --> D[动态 API Base + Route Token]
+        D --> E{响应成功?}
+        E -- 是 --> F[展示首页数据]
+        E -- 否 --> G[现有错误/空状态]
+        G --> H[不回退旧域名]
+      </div><h3>规则</h3><ul><li>首页请求只从内存 RuntimeSession 获取基地址和 crypto 材料。</li><li>业务请求携带 Travel 要求的认证头和 <code>v/b</code> 签名。</li><li>响应失败可展示现有页面错误状态，但不得重新启用旧 API 地址。</li></ul></div><iframe title="首页专注模式" src="../prototype/prototype_v1.0.html?sandbox=true&amp;focus=home#home" sandbox="allow-scripts allow-same-origin"></iframe></div>
+    </section>
+
+    <section id="flow"><h2>六、业务流程图</h2><div class="meta-card"><p>完整流程图文件：<a href="../flowcharts/startup_and_api_flow.md">startup_and_api_flow.md</a>。核心主线是“启动配置 → 动态 API → 登录/client.init → 首页请求”，异常分支为“配置失败 → 错误页 → Retry”，不允许旧域名兜底。</p></div></section>
+    <section id="edge"><h2>七、异常与边界处理</h2><div class="meta-card"><table><thead><tr><th>异常</th><th>处理</th></tr></thead><tbody><tr><td>Bootstrap 超时/断网</td><td>启动页展示错误和 Retry，阻止登录和首页请求。</td></tr><tr><td>API 地址缺失或非法</td><td>判定配置失败，不写入运行会话，不使用旧地址。</td></tr><tr><td>client.init 失败</td><td>配置/网络错误停留错误页；Token 失效清理登录态并进入登录页。</td></tr><tr><td>登录失败</td><td>保留登录页，展示服务端安全错误文案。</td></tr><tr><td>首页接口失败</td><td>使用现有错误/空状态，不回退固定域名。</td></tr></tbody></table></div></section>
+    <section id="tracking"><h2>八、数据追踪与埋点</h2><div class="meta-card"><p>本次不新增用户行为埋点。debug 仅记录启动阶段、耗时、环境标识、HTTP 状态和业务 code；禁止记录 token、AES key、salt、x-auth-token、完整手机号和请求体。</p></div></section>
+    <section id="roadmap"><h2>九、未来演进规划</h2><div class="meta-card"><table><thead><tr><th>版本</th><th>规划</th></tr></thead><tbody><tr><td>v1.0</td><td>test Bootstrap、动态公共 API、登录与首页验收。</td></tr><tr><td>v1.1</td><td>补充开发/生产环境材料与构建切换脚本。</td></tr><tr><td>v1.2</td><td>扩展聊天、钱包、资料等业务并增加端到端测试。</td></tr></tbody></table></div></section>
+    <section id="annex"><h2>十、附件</h2><div class="meta-card"><p><a href="../annex/test_environment_data_dictionary.md">test_environment_data_dictionary.md</a>：环境字段、会话材料和安全约束。</p><p>实现入口：<code>lib/core/travel_bootstrap/</code>、<code>lib/manager/http_dio_manager.dart</code>、<code>lib/classes/launch_page.dart</code>。</p></div></section>
+    <footer>v1.0 最终版 · 原型、流程图和代码实现已同步</footer>
+  </main>
+</div>
+<script>mermaid.initialize({startOnLoad:true,theme:'base',themeVariables:{primaryColor:'#eef2ff',primaryTextColor:'#172033',primaryBorderColor:'#5276f5',lineColor:'#647087',secondaryColor:'#e8f8f0'}});</script>
+</body>
+</html>

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/travel_bootstrap/travel_bootstrap_exception.dart';
+import '../core/travel_bootstrap/travel_session_manager.dart';
 import '../manager/auth_session.dart';
 import '../theme/app_theme.dart';
 
@@ -12,28 +14,43 @@ class LaunchPage extends StatefulWidget {
 }
 
 class _LaunchPageState extends State<LaunchPage> {
+  bool _loading = true;
+  String? _errorMessage;
+
   @override
   void initState() {
     super.initState();
-    _checkLoginStatus();
+    _initializeTravelSession();
   }
 
-  Future<void> _checkLoginStatus() async {
-    // 模拟检查登录状态的异步操作
-    await Future.delayed(const Duration(seconds: 1));
-
-    if (!mounted) return;
-
-    final bool isLoggedIn = await _isUserLoggedIn();
-
-    if (!mounted) return;
-
-    if (isLoggedIn) {
-      // 已登录，跳转到首页
-      context.go('/home');
-    } else {
-      // 未登录，跳转到登录页
-      context.go('/login');
+  Future<void> _initializeTravelSession() async {
+    if (mounted) {
+      setState(() {
+        _loading = true;
+        _errorMessage = null;
+      });
+    }
+    try {
+      await TravelSessionManager.shared.start();
+      if (!mounted) return;
+      final isLoggedIn = await _isUserLoggedIn();
+      if (!mounted) return;
+      context.go(isLoggedIn ? '/home' : '/login');
+    } on TravelBootstrapException catch (error) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _errorMessage = error.message;
+        });
+      }
+    } on Object {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _errorMessage =
+              'Unable to initialize the test service. Please try again.';
+        });
+      }
     }
   }
 
@@ -55,6 +72,41 @@ class _LaunchPageState extends State<LaunchPage> {
             fit: BoxFit.cover,
           ),
         ),
+        child: _errorMessage == null
+            ? (_loading
+                  ? const Center(
+                      child: CircularProgressIndicator(color: Colors.white),
+                    )
+                  : const SizedBox.shrink())
+            : Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 28),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.58),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _errorMessage!,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                          const SizedBox(height: 14),
+                          FilledButton(
+                            onPressed: _initializeTravelSession,
+                            child: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
       ),
     );
   }

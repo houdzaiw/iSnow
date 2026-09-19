@@ -1,4 +1,10 @@
 enum AppEnv {
+  test(
+    "https://www.lvyoutest.xyz/lvy/api/x9",
+    "https://www.lvyoutest.xyz",
+    "https://www.lvyoutest.xyz",
+    false,
+  ),
   dev(
     "http://simi2.w1.luyouxia.net/simi",
     "https://www.simijoy.com",

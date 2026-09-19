@@ -7,7 +7,7 @@ import 'lib_main.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await AppConfig.shared.run(AppEnv.dev);
+  await AppConfig.shared.run(AppEnv.test);
   await initializeDateFormatting('zh_CN');
 
   SystemChrome.setSystemUIOverlayStyle(

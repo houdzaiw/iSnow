@@ -53,6 +53,7 @@ dependencies:
   device_info_plus: ^12.3.0
   package_info_plus: ^9.0.0
   crypto: ^3.0.3
+  pointycastle: ^3.9.1
   retrofit: ^4.9.0
   logger: ^2.6.0  # for logging purpose
   json_annotation: ^4.9.0
@@ -62,6 +63,7 @@ dependencies:
   cryptography: ^2.9.0
   cached_network_image: ^3.4.1
   convert: ^3.1.2
+  asn1lib: ^1.6.5
   shared_preferences: ^2.5.4
   country_flags: ^4.1.2
 

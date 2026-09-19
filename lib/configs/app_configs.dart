@@ -8,8 +8,8 @@ import 'app_enum.dart';
 class AppConfig with WidgetsBindingObserver {
   AppConfig.privateConstructor();
 
-  // TODO: 打包时需要修改
-  AppEnv appEnv = AppEnv.dev;
+  /// 当前版本固定使用 Travel test 环境；不允许启动阶段回退旧环境。
+  AppEnv appEnv = AppEnv.test;
   static final AppConfig shared = AppConfig.privateConstructor();
 
   /// 项目运行入口

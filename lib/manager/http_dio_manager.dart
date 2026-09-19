@@ -7,6 +7,8 @@ import 'package:flutter/foundation.dart';
 import '../configs/app_configs.dart';
 import '../configs/app_device.dart';
 import '../configs/app_enum.dart';
+import '../core/travel_bootstrap/travel_bootstrap_config.dart';
+import '../core/travel_bootstrap/travel_session_manager.dart';
 import 'auth_session.dart';
 
 class HttpDioManager {
@@ -74,6 +76,7 @@ class HttpDioManager {
 
   String get _baseUrl {
     return switch (AppConfig.shared.appEnv) {
+      AppEnv.test => TravelBootstrapConfig.bootstrapUrl,
       AppEnv.product => prodBaseUrl,
       AppEnv.qa => qaBaseUrl,
       AppEnv.dev => devBaseUrl,
@@ -151,12 +154,19 @@ class HttpDioManager {
     Options? options,
   }) async {
     try {
+      return await TravelSessionManager.shared.request(
+        path: path,
+        method: 'GET',
+        queryParameters: queryParameters,
+      );
+      /*
       final response = await _dio.get(
         path,
         queryParameters: queryParameters,
         options: options,
       );
       return response.data;
+      */
     } on DioException catch (e) {
       _handleError(e);
       rethrow;
@@ -170,6 +180,13 @@ class HttpDioManager {
     Options? options,
   }) async {
     try {
+      return await TravelSessionManager.shared.request(
+        path: path,
+        method: 'POST',
+        data: data is Map ? Map<String, dynamic>.from(data) : null,
+        queryParameters: queryParameters,
+      );
+      /*
       final response = await _dio.post(
         path,
         data: data,
@@ -177,6 +194,7 @@ class HttpDioManager {
         options: options,
       );
       return response.data;
+      */
     } on DioException catch (e) {
       _handleError(e);
       rethrow;
@@ -190,6 +208,13 @@ class HttpDioManager {
     Options? options,
   }) async {
     try {
+      return await TravelSessionManager.shared.request(
+        path: path,
+        method: 'PUT',
+        data: data is Map ? Map<String, dynamic>.from(data) : null,
+        queryParameters: queryParameters,
+      );
+      /*
       final response = await _dio.put(
         path,
         data: data,
@@ -197,6 +222,7 @@ class HttpDioManager {
         options: options,
       );
       return response.data;
+      */
     } on DioException catch (e) {
       _handleError(e);
       rethrow;
@@ -210,6 +236,13 @@ class HttpDioManager {
     Options? options,
   }) async {
     try {
+      return await TravelSessionManager.shared.request(
+        path: path,
+        method: 'DELETE',
+        data: data is Map ? Map<String, dynamic>.from(data) : null,
+        queryParameters: queryParameters,
+      );
+      /*
       final response = await _dio.delete(
         path,
         data: data,
@@ -217,6 +250,7 @@ class HttpDioManager {
         options: options,
       );
       return response.data;
+      */
     } on DioException catch (e) {
       _handleError(e);
       rethrow;
@@ -230,6 +264,13 @@ class HttpDioManager {
     Options? options,
   }) async {
     try {
+      return await TravelSessionManager.shared.request(
+        path: path,
+        method: 'PATCH',
+        data: data is Map ? Map<String, dynamic>.from(data) : null,
+        queryParameters: queryParameters,
+      );
+      /*
       final response = await _dio.patch(
         path,
         data: data,
@@ -237,6 +278,7 @@ class HttpDioManager {
         options: options,
       );
       return response.data;
+      */
     } on DioException catch (e) {
       _handleError(e);
       rethrow;
