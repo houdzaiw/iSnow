@@ -10,6 +10,7 @@ import 'travel_bootstrap_client.dart';
 import 'travel_bootstrap_config.dart';
 import 'travel_bootstrap_exception.dart';
 import 'travel_protocol.dart';
+import 'travel_route_resolver.dart';
 
 /// 负责启动 Bootstrap、登录后 client.init 和公共 API 动态路由的单例会话。
 final class TravelSessionManager {
@@ -107,8 +108,8 @@ final class TravelSessionManager {
     Map<String, dynamic>? queryParameters,
   }) async {
     await start();
-    final routeName = _routeName(path);
-    final routeToken = TravelBootstrapConfig.tokenFor(routeName);
+    final routeName = TravelRouteResolver.routeNameForPath(path);
+    final routeToken = TravelRouteResolver.tokenForPath(path);
     final body = <String, Object?>{
       if (queryParameters != null) ...queryParameters,
       if (data != null) ...data,
@@ -233,32 +234,6 @@ final class TravelSessionManager {
       throw const TravelBootstrapException('Travel response data is invalid.');
     }
     return data.map<String, Object?>((key, value) => MapEntry('$key', value));
-  }
-
-  String _routeName(String path) {
-    const routes = <String, String>{
-      '/country-list/default-country': 'country.default',
-      '/country-list/hot': 'country.hot',
-      '/country-list/supported': 'country.supported',
-      '/api/user/hasUser': 'user.hasUser',
-      '/oauth2/sendSms': 'oauth2.sendSms',
-      '/oauth2/login': 'oauth2.login',
-      '/oauth2/setPassword': 'oauth2.setPassword',
-      '/oauth2/verify/code': 'oauth2.verifyCode',
-      '/api/user/complete': 'user.complete',
-      '/api/user/mine': 'user.mine',
-      '/api/user/modifyUser': 'user.modify',
-      '/api/resource/header-upload-param': 'resource.headerUploadParam',
-      '/oauth2/logout': 'oauth2.logout',
-      '/api/user/logoff': 'user.logoff',
-    };
-    final route = routes[path];
-    if (route == null) {
-      throw TravelBootstrapException(
-        'Travel route is not configured for $path.',
-      );
-    }
-    return route;
   }
 
   String _stringOf(Object? value, {String fallback = ''}) =>

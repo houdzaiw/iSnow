@@ -8,6 +8,7 @@ import 'travel_bootstrap_config.dart';
 import 'travel_bootstrap_exception.dart';
 import 'travel_crypto.dart';
 import 'travel_protocol.dart';
+import 'travel_route_resolver.dart';
 
 /// Travel Bootstrap 与业务 AES 信封客户端。
 final class TravelBootstrapClient {
@@ -317,8 +318,7 @@ final class TravelBootstrapClient {
   }
 
   Uri _routeUri(Uri base, String token) {
-    final path = base.path.replaceFirst(RegExp(r'/$'), '');
-    final uri = base.replace(path: '$path/api/r/$token');
+    final uri = TravelRouteResolver.resolve(base, token);
     if (!_allowsUri(uri)) {
       throw const TravelBootstrapException('Travel API URL is invalid.');
     }
