@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:project/core/travel_bootstrap/travel_bootstrap_config.dart';
 import 'package:project/core/travel_bootstrap/travel_route_resolver.dart';
+import 'package:project/manager/http_api.dart';
 
 void main() {
   test('maps hasUser to the Travel obfuscated token', () {
@@ -11,6 +12,12 @@ void main() {
     expect(
       TravelRouteResolver.tokenForPath('/api/user/hasUser'),
       expectedToken,
+    );
+    expect(HttpApi.hasUser, expectedToken);
+    expect(TravelRouteResolver.tokenForPath(HttpApi.hasUser), expectedToken);
+    expect(
+      TravelRouteResolver.routeNameForPath(HttpApi.hasUser),
+      'user.hasUser',
     );
   });
 
