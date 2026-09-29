@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:convert/convert.dart';
-import 'package:crypto/crypto.dart' as crypto;
 import 'package:cryptography/cryptography.dart';
 import 'package:dio/dio.dart';
+import 'package:fext_aliyun_oss/fext_aliyun_oss.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../configs/app_device.dart';
@@ -332,22 +332,82 @@ class LoginProvider {
     required String signature,
     required Object birth,
   }) async {
-    final response = await _httpManager.post(
-      HttpApi.modifyUser,
-      data: {
+    try {
+      final requestData = <String, dynamic>{
         'nick': nick,
         'gender': gender,
         'avatar': avatar,
         'signature': signature,
-        'birth': birth,
-      },
-    );
-    final user = _requireData(
-      response,
-      (json) => UserData.fromJson((json as Map).cast<String, dynamic>()),
-    );
-    await _authSession.saveUser(user);
-    return user;
+        'birth': _formatProfileBirth(birth),
+      };
+      debugPrint(
+        '[ProfileAPI] -> POST ${HttpApi.modifyUser} '
+        'params=${jsonEncode(requestData)}',
+      );
+
+      final response = await _httpManager.post(
+        HttpApi.modifyUser,
+        data: requestData,
+      );
+      debugPrint(
+        '[ProfileAPI] <- POST ${HttpApi.modifyUser} '
+        'response=${_debugJson(response)}',
+      );
+
+      final server = _server<dynamic>(response, null);
+      if (!server.isSuccess) {
+        throw server.toException();
+      }
+
+      // Nady refreshes user.mine after user.modify. The modify endpoint can
+      // succeed with data=null, so its response is only used as an envelope.
+      debugPrint(
+        '[ProfileAPI] modifyUser success code=${server.code} '
+        'traceId=${server.traceId}; refreshing current profile',
+      );
+      final user = await getMyUserInfo();
+      debugPrint(
+        '[ProfileAPI] profile refresh success uid=${user.uid} '
+        'nick=${user.nick}',
+      );
+      return user;
+    } catch (error, stackTrace) {
+      debugPrint('[ProfileAPI] modifyUser failed: $error');
+      debugPrintStack(
+        label: '[ProfileAPI] modifyUser stack trace',
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  String _formatProfileBirth(Object birth) {
+    if (birth is String) {
+      final parsed = DateTime.tryParse(birth);
+      if (parsed == null) {
+        throw ArgumentError.value(birth, 'birth', 'Invalid birthday');
+      }
+      return _formatDate(parsed);
+    }
+    if (birth is! num) {
+      throw ArgumentError.value(birth, 'birth', 'Expected milliseconds');
+    }
+    return _formatDate(DateTime.fromMillisecondsSinceEpoch(birth.toInt()));
+  }
+
+  String _formatDate(DateTime date) {
+    final year = date.year.toString().padLeft(4, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    return '$year-$month-$day';
+  }
+
+  String _debugJson(Object? value) {
+    try {
+      return jsonEncode(value);
+    } catch (_) {
+      return value.toString();
+    }
   }
 
   Future<UploadParam> getUploadParam() async {
@@ -359,51 +419,62 @@ class LoginProvider {
   }
 
   Future<String> uploadAvatarFile(String filePath) async {
-    final uploadParam = await getUploadParam();
-    final bytes = await File(filePath).readAsBytes();
-    final extension = filePath.split('.').last.toLowerCase();
-    final safeExtension = extension == filePath ? 'jpg' : extension;
-    final uploadPath = '${uploadParam.path}.$safeExtension';
-    final endpoint = uploadParam.endpoint.startsWith('http')
-        ? uploadParam.endpoint
-        : 'https://${uploadParam.endpoint}';
-    final endpointUri = Uri.parse(endpoint);
-    final objectUri = Uri(
-      scheme: endpointUri.scheme,
-      host: '${uploadParam.bucket}.${endpointUri.host}',
-      port: endpointUri.hasPort ? endpointUri.port : null,
-      path: '/$uploadPath',
-    );
-    const contentType = 'image/jpeg';
-    final date = HttpDate.format(DateTime.now().toUtc());
-    final canonicalizedHeaders =
-        'x-oss-security-token:${uploadParam.securityToken}\n';
-    final canonicalizedResource = '/${uploadParam.bucket}/$uploadPath';
-    final stringToSign =
-        'PUT\n\n$contentType\n$date\n$canonicalizedHeaders$canonicalizedResource';
-    final signature = base64Encode(
-      crypto.Hmac(
-        crypto.sha1,
-        utf8.encode(uploadParam.accessKeySecret),
-      ).convert(utf8.encode(stringToSign)).bytes,
-    );
+    try {
+      debugPrint('[AvatarUpload] requesting temporary OSS parameters');
+      final uploadParam = await getUploadParam();
+      _validateUploadParam(uploadParam);
 
-    final dio = Dio();
-    await dio.putUri(
-      objectUri,
-      data: Stream.fromIterable([bytes]),
-      options: Options(
-        headers: {
-          'Date': date,
-          'Content-Type': contentType,
-          'Authorization': 'OSS ${uploadParam.accessKeyId}:$signature',
-          'x-oss-security-token': uploadParam.securityToken,
-          'Content-Length': bytes.length,
-        },
-        responseType: ResponseType.plain,
-      ),
-    );
-    return uploadPath;
+      final bytes = await File(filePath).readAsBytes();
+      if (bytes.isEmpty) {
+        throw const NadyApiException(message: 'Avatar file is empty');
+      }
+
+      final extension = filePath.split('.').last.toLowerCase();
+      final safeExtension = extension == filePath ? 'jpg' : extension;
+      final uploadPath = '${uploadParam.path}.$safeExtension';
+      debugPrint(
+        '[AvatarUpload] -> OSS endpoint=${uploadParam.endpoint} '
+        'bucket=${uploadParam.bucket} path=$uploadPath bytes=${bytes.length}',
+      );
+
+      final uploaded = await FextAliyunOss().putBytesObject(
+        endpoint: uploadParam.endpoint,
+        accessKeyId: uploadParam.accessKeyId,
+        accessKeySecret: uploadParam.accessKeySecret,
+        securityToken: uploadParam.securityToken,
+        bucketName: uploadParam.bucket,
+        uploadPath: uploadPath,
+        uploadBytes: bytes,
+      );
+      debugPrint('[AvatarUpload] <- OSS success=$uploaded path=$uploadPath');
+      if (!uploaded) {
+        throw const NadyApiException(message: 'OSS rejected avatar upload');
+      }
+      return uploadPath;
+    } catch (error, stackTrace) {
+      debugPrint('[AvatarUpload] failed: $error');
+      debugPrintStack(
+        label: '[AvatarUpload] stack trace',
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  void _validateUploadParam(UploadParam uploadParam) {
+    final missingFields = <String>[
+      if (uploadParam.endpoint.isEmpty) 'endpoint',
+      if (uploadParam.accessKeyId.isEmpty) 'accessKeyId',
+      if (uploadParam.accessKeySecret.isEmpty) 'accessKeySecret',
+      if (uploadParam.securityToken.isEmpty) 'securityToken',
+      if (uploadParam.bucket.isEmpty) 'bucket',
+      if (uploadParam.path.isEmpty) 'path',
+    ];
+    if (missingFields.isNotEmpty) {
+      throw NadyApiException(
+        message: 'Invalid OSS upload parameters: ${missingFields.join(', ')}',
+      );
+    }
   }
 
   Future<void> logout() async {

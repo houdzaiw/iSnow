@@ -8,22 +8,22 @@ import 'travel_bootstrap_exception.dart';
 final class TravelRouteResolver {
   const TravelRouteResolver._();
 
-  static const pathToRouteName = <String, String>{
-    '/country-list/default-country': 'country.default',
-    '/country-list/hot': 'country.hot',
-    '/country-list/supported': 'country.supported',
-    '/api/user/hasUser': 'user.hasUser',
-    '/oauth2/sendSms': 'oauth2.sendSms',
-    '/oauth2/login': 'oauth2.login',
-    '/oauth2/setPassword': 'oauth2.setPassword',
-    '/oauth2/verify/code': 'oauth2.verifyCode',
-    '/api/user/complete': 'user.complete',
-    '/api/user/mine': 'user.mine',
-    '/api/user/modifyUser': 'user.modify',
-    '/api/resource/header-upload-param': 'resource.headerUploadParam',
-    '/oauth2/logout': 'oauth2.logout',
-    '/api/user/logoff': 'user.logoff',
-  };
+  // static const pathToRouteName = <String, String>{
+  //   '/country-list/default-country': 'country.default',
+  //   '/country-list/hot': 'country.hot',
+  //   '/country-list/supported': 'country.supported',
+  //   '/api/user/hasUser': 'user.hasUser',
+  //   '/oauth2/sendSms': 'oauth2.sendSms',
+  //   '/oauth2/login': 'oauth2.login',
+  //   '/oauth2/setPassword': 'oauth2.setPassword',
+  //   '/oauth2/verify/code': 'oauth2.verifyCode',
+  //   '/api/user/complete': 'user.complete',
+  //   '/api/user/mine': 'user.mine',
+  //   '/api/user/modifyUser': 'user.modify',
+  //   '/api/resource/header-upload-param': 'resource.headerUploadParam',
+  //   '/oauth2/logout': 'oauth2.logout',
+  //   '/api/user/logoff': 'user.logoff',
+  // };
 
   static final routeTokenToName = <String, String>{
     for (final entry in TravelBootstrapConfig.routeTokens.entries)
@@ -34,8 +34,8 @@ final class TravelRouteResolver {
   ///
   /// 同时接受旧的接口路径和已替换到 [HttpApi] 中的混淆 Token。
   static String routeNameForPath(String pathOrToken) {
-    final routeName =
-        pathToRouteName[pathOrToken] ?? routeTokenToName[pathOrToken];
+    // final routeName = pathToRouteName[pathOrToken] ?? routeTokenToName[pathOrToken];
+    final routeName = routeTokenToName[pathOrToken];
     if (routeName == null) {
       throw TravelBootstrapException(
         'Travel route is not configured for $pathOrToken.',

@@ -66,6 +66,9 @@ dependencies:
   asn1lib: ^1.6.5
   shared_preferences: ^2.5.4
   country_flags: ^4.1.2
+  # Keep avatar OSS uploads aligned with Nady's native STS implementation.
+  fext_aliyun_oss:
+    path: ../../.pub-cache/git/fext-aliyun-oss-b55ed303afb1e6fe5dbdedd54991fa4b4ebcddac
 
 dev_dependencies:
   flutter_test:

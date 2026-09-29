@@ -73,5 +73,20 @@ void main() {
         contains('traceId=trace-401 invalid token'),
       );
     });
+
+    test('does not invoke the data converter when data is null', () {
+      var converterCalled = false;
+      final response = NadyServerResponse<UserData>.fromJson(
+        {'code': 200, 'message': 'success', 'data': null},
+        (json) {
+          converterCalled = true;
+          return UserData.fromJson((json as Map).cast<String, dynamic>());
+        },
+      );
+
+      expect(response.isSuccess, isTrue);
+      expect(response.data, isNull);
+      expect(converterCalled, isFalse);
+    });
   });
 }

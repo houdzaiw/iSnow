@@ -21,14 +21,13 @@ class NadyServerResponse<T> {
     Map<String, dynamic> json,
     T Function(Object? json)? fromJsonT,
   ) {
+    final rawData = json['data'];
     return NadyServerResponse<T>(
       code: (json['code'] as num?)?.toInt() ?? 0,
       message: json['message']?.toString() ?? '',
       timestamp: json['timestamp']?.toString() ?? '',
       traceId: json['traceId']?.toString(),
-      data: json.containsKey('data') && fromJsonT != null
-          ? fromJsonT(json['data'])
-          : null,
+      data: rawData != null && fromJsonT != null ? fromJsonT(rawData) : null,
     );
   }
 
