@@ -146,7 +146,11 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
     try {
       _iapAvailable ??= await _paymentService.isAvailable();
       if (!(_iapAvailable ?? false)) {
-        return const <WalletRechargeProduct>[];
+        debugPrint(
+          '[WalletPayment] billing unavailable; showing '
+          '${rechargeProducts.length} server recharge products',
+        );
+        return rechargeProducts;
       }
       final serverIds = rechargeProducts.map((product) => product.id).toSet();
       final response = await _paymentService.queryProducts(serverIds);
@@ -154,7 +158,7 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
         debugPrint(
           '[WalletPayment] queryProductDetails failed: ${response.error}',
         );
-        return const <WalletRechargeProduct>[];
+        return rechargeProducts;
       }
 
       final platformIds = response.productDetails
@@ -172,12 +176,10 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
           '${response.notFoundIDs.join(', ')}',
         );
       }
-      return rechargeProducts
-          .where((product) => visibleIds.contains(product.id))
-          .toList(growable: false);
+      return rechargeProducts;
     } catch (error, stackTrace) {
       debugPrint('[WalletPayment] product loading failed: $error\n$stackTrace');
-      return const <WalletRechargeProduct>[];
+      return rechargeProducts;
     }
   }
 
