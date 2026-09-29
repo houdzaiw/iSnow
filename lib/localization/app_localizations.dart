@@ -156,6 +156,8 @@ const Map<String, Map<String, String>> _localizedValues = {
     'profile.userId': 'User ID',
     'profile.bio': 'Bio',
     'profile.bioHint': 'Enter bio',
+    'profile.bioSensitive':
+        'Your bio contains sensitive content. Please revise it and try again.',
     'profile.notSet': 'Not set',
     'profile.avatarUploaded': 'Avatar uploaded',
     'profile.avatarUploadFailed': 'Avatar upload failed',
@@ -291,6 +293,7 @@ const Map<String, Map<String, String>> _localizedValues = {
     'profile.userId': '用户ID',
     'profile.bio': '个人简介',
     'profile.bioHint': '请输入个人简介',
+    'profile.bioSensitive': '个人简介包含敏感内容，请修改后重试',
     'profile.notSet': '未设置',
     'profile.avatarUploaded': '头像已上传',
     'profile.avatarUploadFailed': '头像上传失败',

@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../configs/consts.dart';
 import '../../localization/app_localizations.dart';
+import '../../model/server_response.dart';
 import '../../model/user_profile.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/custom_scaffold.dart';
@@ -20,6 +21,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final _formKey = GlobalKey<FormState>();
   final _nicknameController = TextEditingController();
   final _bioController = TextEditingController();
+  final _bioFocusNode = FocusNode();
   final _loginProvider = LoginProvider();
   final _imagePicker = ImagePicker();
 
@@ -27,8 +29,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
   String _avatar = '';
   int _selectedGender = 0;
   DateTime? _selectedBirthday;
-  bool _isLoading = false;
+  bool _isLoading = true;
   bool _isSaving = false;
+  bool _isAvatarUploading = false;
+  String? _bioErrorText;
 
   @override
   void initState() {
@@ -40,22 +44,31 @@ class _EditProfilePageState extends State<EditProfilePage> {
   void dispose() {
     _nicknameController.dispose();
     _bioController.dispose();
+    _bioFocusNode.dispose();
     super.dispose();
   }
 
   Future<void> _loadProfile() async {
-    setState(() => _isLoading = true);
+    UserData? cached;
     try {
-      final cached = await _loginProvider.cachedUser();
+      cached = await _loginProvider.cachedUser();
       if (cached != null && mounted) {
-        _applyUser(cached);
+        _applyUser(cached, stopLoading: true);
       }
+    } catch (error, stackTrace) {
+      debugPrint('[EditProfile] failed to read cached user: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+
+    try {
       final remote = await _loginProvider.getMyUserInfo();
       if (mounted) {
         _applyUser(remote);
       }
-    } catch (_) {
-      if (mounted) {
+    } catch (error, stackTrace) {
+      debugPrint('[EditProfile] failed to refresh remote user: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      if (mounted && cached == null) {
         _showMessage(context.l10n.t('profile.loadFailed'));
       }
     } finally {
@@ -65,28 +78,58 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
-  void _applyUser(UserData user) {
+  void _applyUser(UserData user, {bool stopLoading = false}) {
+    final previousNickname = _user?.nick ?? context.l10n.t('profile.nickname');
+    final previousBio = _user?.userDesc ?? '';
+    final previousAvatar = _user?.avatar ?? '';
+    final previousGender = _user?.gender ?? 0;
+    final previousBirth = _user?.birth;
+    final canRefreshNickname =
+        _nicknameController.text.isEmpty ||
+        _nicknameController.text == previousNickname;
+    final canRefreshBio =
+        _bioController.text.isEmpty || _bioController.text == previousBio;
+    final canRefreshAvatar = _avatar == previousAvatar;
+    final canRefreshGender = _selectedGender == previousGender;
+    final selectedBirth = _selectedBirthday?.millisecondsSinceEpoch;
+    final canRefreshBirth =
+        selectedBirth == previousBirth ||
+        (selectedBirth == null &&
+            (previousBirth == null || previousBirth == 0));
+
     setState(() {
       _user = user;
-      _avatar = user.avatar ?? '';
-      _selectedGender = user.gender;
-      if (_nicknameController.text.isEmpty) {
+      if (canRefreshAvatar) {
+        _avatar = user.avatar ?? '';
+      }
+      if (canRefreshGender) {
+        _selectedGender = user.gender;
+      }
+      if (canRefreshNickname) {
         _nicknameController.text =
             user.nick ?? context.l10n.t('profile.nickname');
       }
-      if (_bioController.text.isEmpty) {
+      if (canRefreshBio) {
         _bioController.text = user.userDesc ?? '';
       }
       final birth = user.birth;
-      if (birth != null && birth > 0) {
-        _selectedBirthday = DateTime.fromMillisecondsSinceEpoch(birth);
+      if (canRefreshBirth) {
+        _selectedBirthday = birth != null && birth > 0
+            ? DateTime.fromMillisecondsSinceEpoch(birth)
+            : null;
+      }
+      if (stopLoading) {
+        _isLoading = false;
       }
     });
   }
 
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
-    setState(() => _isSaving = true);
+    setState(() {
+      _isSaving = true;
+      _bioErrorText = null;
+    });
     try {
       final updated = await _loginProvider.modifyUser(
         nick: _nicknameController.text.trim(),
@@ -99,6 +142,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
       _applyUser(updated);
       _showMessage(context.l10n.t('profile.saved'));
       context.pop();
+    } on NadyApiException catch (error) {
+      if (!mounted) return;
+      if (error.code == 3021) {
+        setState(() {
+          _bioErrorText = context.l10n.t('profile.bioSensitive');
+        });
+        _bioFocusNode.requestFocus();
+      } else {
+        _showMessage(error.message);
+      }
     } catch (e) {
       if (!mounted) return;
       _showMessage(e.toString());
@@ -129,7 +182,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       rightText: _isSaving
           ? context.l10n.t('app.saving')
           : context.l10n.t('app.save'),
-      onRightIconTap: _isSaving ? null : _saveProfile,
+      onRightIconTap: _isSaving || _isAvatarUploading ? null : _saveProfile,
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Align(
@@ -238,7 +291,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  if (showAvatar) _AvatarPreview(avatar: _avatar),
+                  if (showAvatar)
+                    _AvatarPreview(
+                      avatar: _avatar,
+                      isLoading: _isAvatarUploading,
+                    ),
                   if (valueText != null)
                     Flexible(
                       child: Text(
@@ -309,17 +366,25 @@ class _EditProfilePageState extends State<EditProfilePage> {
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
       child: TextFormField(
         controller: _bioController,
+        focusNode: _bioFocusNode,
         maxLines: 3,
         maxLength: 120,
+        onChanged: (_) {
+          if (_bioErrorText != null) {
+            setState(() => _bioErrorText = null);
+          }
+        },
         decoration: InputDecoration(
           labelText: context.l10n.t('profile.bio'),
           hintText: context.l10n.t('profile.bioHint'),
+          errorText: _bioErrorText,
         ),
       ),
     );
   }
 
   void _showAvatarOptions(BuildContext context) {
+    if (_isAvatarUploading) return;
     showAvatarOptions(
       context,
       onAlbumSelected: () => _pickAndUploadAvatar(ImageSource.gallery),
@@ -328,6 +393,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   Future<void> _pickAndUploadAvatar(ImageSource source) async {
+    if (_isAvatarUploading) return;
     final image = await _imagePicker.pickImage(
       source: source,
       maxWidth: 1024,
@@ -336,7 +402,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
     if (image == null) return;
 
-    setState(() => _isSaving = true);
+    setState(() => _isAvatarUploading = true);
     try {
       final avatarPath = await _loginProvider.uploadAvatarFile(image.path);
       if (!mounted) return;
@@ -347,7 +413,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       _showMessage(context.l10n.t('profile.avatarUploadFailed'));
     } finally {
       if (mounted) {
-        setState(() => _isSaving = false);
+        setState(() => _isAvatarUploading = false);
       }
     }
   }
@@ -441,9 +507,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
 }
 
 class _AvatarPreview extends StatelessWidget {
-  const _AvatarPreview({required this.avatar});
+  const _AvatarPreview({required this.avatar, required this.isLoading});
 
   final String avatar;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -456,17 +523,36 @@ class _AvatarPreview extends StatelessWidget {
         color: AppColors.avatarPlaceholder,
         shape: BoxShape.circle,
       ),
-      child: avatar.isEmpty || !avatar.startsWith('http')
-          ? const Icon(Icons.person, color: AppColors.textInverse, size: 20)
-          : Image.network(
-              avatar,
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => const Icon(
-                Icons.person,
-                color: AppColors.textInverse,
-                size: 20,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          avatar.isEmpty || !avatar.startsWith('http')
+              ? const Icon(Icons.person, color: AppColors.textInverse, size: 20)
+              : Image.network(
+                  avatar,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, _, _) => const Icon(
+                    Icons.person,
+                    color: AppColors.textInverse,
+                    size: 20,
+                  ),
+                ),
+          if (isLoading)
+            const ColoredBox(
+              color: AppColors.overlay,
+              child: Center(
+                child: SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(
+                    key: ValueKey('avatar_upload_loading'),
+                    strokeWidth: 2,
+                    color: AppColors.textInverse,
+                  ),
+                ),
               ),
             ),
+        ],
+      ),
     );
   }
 }
