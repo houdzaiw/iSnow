@@ -68,10 +68,13 @@ class AppColors {
   static const Color missingAsset = Color(0xFFFF2D2D);
   static const Color danger = Color(0xFFFF4D4F);
 
-  static const Color walletBackground = Color(0xFF211D1B);
-  static const Color walletPanelStart = Color(0xF533281E);
-  static const Color walletPanelEnd = Color(0xFF423822);
-  static const Color walletPanelDivider = Color(0x1AFFFFFF);
-  static const Color walletBalanceText = Color(0xFF402810);
-  static const Color walletActionText = Color(0xFF4A321B);
+  static const Color walletBackground = Color(0xFFF6F6F6);
+  static const Color walletBrandOrange = Color(0xFFFF6231);
+  static const Color walletProductSurface = Color(0xFFFEFFFE);
+  static const Color walletProductBorder = Color(0xFFECECEC);
+  static const Color walletSelectedBorder = Color(0xFFF2BB6C);
+  static const Color walletSelectedAmount = Color(0xFFFF501A);
+  static const Color walletSelectedSubtitle = Color(0xFFCD994F);
+  static const Color walletProductText = Color(0xFF484848);
+  static const Color walletProductPriceDisabled = Color(0xFFC0C0C0);
 }

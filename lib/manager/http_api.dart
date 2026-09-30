@@ -133,9 +133,6 @@ class HttpApi {
   static const walletRechargeGoogleCreation =
       '/api/recharge/record/google/creation';
 
-  /// 获取钱包兑换说明
-  static const walletConvertProportion = '/api/revenue/purse/convertProportion';
-
   /// 用户排行榜
   static const rankCommonly = '/api/rank/commonly';
 

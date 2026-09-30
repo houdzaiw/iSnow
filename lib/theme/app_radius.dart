@@ -32,4 +32,20 @@ class AppRadius {
   static const BorderRadius pillBorder = BorderRadius.all(
     Radius.circular(pill),
   );
+  static const BorderRadius walletHeaderBorder = BorderRadius.vertical(
+    bottom: Radius.circular(calendar),
+  );
+  static const BorderRadius walletProductCardBorder = BorderRadius.only(
+    topLeft: Radius.circular(lg),
+    topRight: Radius.circular(calendar),
+    bottomLeft: Radius.circular(lg),
+    bottomRight: Radius.circular(lg),
+  );
+  static const BorderRadius walletProductPriceBorder = BorderRadius.vertical(
+    bottom: Radius.circular(lg),
+  );
+  static const BorderRadius walletPromotionBorder = BorderRadius.only(
+    topLeft: Radius.circular(lg),
+    bottomLeft: Radius.circular(lg),
+  );
 }

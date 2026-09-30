@@ -50,17 +50,6 @@ class WalletRepository {
     return products;
   }
 
-  Future<WalletConvertProportion> fetchDiamondReminder() async {
-    final response = await _httpManager.get(
-      HttpApi.walletConvertProportion,
-      queryParameters: const {'currencyType': 2},
-    );
-    return _requireData(
-      response,
-      (json) => WalletConvertProportion.fromJson(_asMap(json)),
-    );
-  }
-
   Future<String> createGoogleRechargeOrder(
     WalletRechargeProduct product,
   ) async {

@@ -68,18 +68,6 @@ class WalletRechargeProduct {
   }
 }
 
-class WalletConvertProportion {
-  const WalletConvertProportion({required this.reminder});
-
-  final String reminder;
-
-  factory WalletConvertProportion.fromJson(Map<String, dynamic> json) {
-    return WalletConvertProportion(
-      reminder: json['reminder']?.toString() ?? '',
-    );
-  }
-}
-
 class WalletRechargeRequest {
   const WalletRechargeRequest({
     required this.productId,

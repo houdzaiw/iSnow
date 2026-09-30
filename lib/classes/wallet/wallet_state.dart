@@ -4,10 +4,9 @@ const Object _walletStateUnset = Object();
 
 class WalletState {
   const WalletState({
-    this.selectedTab = 0,
     this.purse,
     this.products = const <WalletRechargeProduct>[],
-    this.diamondReminder = '',
+    this.selectedProductId,
     this.isLoading = false,
     this.isRefreshing = false,
     this.purchaseProductId,
@@ -15,10 +14,9 @@ class WalletState {
     this.noticeKey,
   });
 
-  final int selectedTab;
   final WalletPurse? purse;
   final List<WalletRechargeProduct> products;
-  final String diamondReminder;
+  final String? selectedProductId;
   final bool isLoading;
   final bool isRefreshing;
   final String? purchaseProductId;
@@ -27,11 +25,17 @@ class WalletState {
 
   bool get isPurchasing => purchaseProductId != null;
 
+  WalletRechargeProduct? get selectedProduct {
+    for (final product in products) {
+      if (product.id == selectedProductId) return product;
+    }
+    return null;
+  }
+
   WalletState copyWith({
-    int? selectedTab,
     WalletPurse? purse,
     List<WalletRechargeProduct>? products,
-    String? diamondReminder,
+    Object? selectedProductId = _walletStateUnset,
     bool? isLoading,
     bool? isRefreshing,
     Object? purchaseProductId = _walletStateUnset,
@@ -39,10 +43,11 @@ class WalletState {
     Object? noticeKey = _walletStateUnset,
   }) {
     return WalletState(
-      selectedTab: selectedTab ?? this.selectedTab,
       purse: purse ?? this.purse,
       products: products ?? this.products,
-      diamondReminder: diamondReminder ?? this.diamondReminder,
+      selectedProductId: identical(selectedProductId, _walletStateUnset)
+          ? this.selectedProductId
+          : selectedProductId as String?,
       isLoading: isLoading ?? this.isLoading,
       isRefreshing: isRefreshing ?? this.isRefreshing,
       purchaseProductId: identical(purchaseProductId, _walletStateUnset)

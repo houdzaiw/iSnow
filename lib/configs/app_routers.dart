@@ -101,10 +101,7 @@ final GoRouter goRouter = GoRouter(
     GoRoute(
       path: '/wallet',
       name: 'wallet',
-      builder: (context, state) {
-        final tab = int.tryParse(state.uri.queryParameters['tab'] ?? '') ?? 0;
-        return WalletPage(initialTab: tab);
-      },
+      builder: (context, state) => const WalletPage(),
     ),
     GoRoute(
       path: '/about-us',

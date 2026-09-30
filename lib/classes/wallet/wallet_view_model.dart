@@ -71,16 +71,17 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
     try {
       final serverProducts = await _repository.fetchRechargePackages();
       final products = await _loadIapProducts(serverProducts);
-      state = state.copyWith(products: products);
+      final currentSelection = state.selectedProductId;
+      final selectedProductId =
+          products.any((product) => product.id == currentSelection)
+          ? currentSelection
+          : products.firstOrNull?.id;
+      state = state.copyWith(
+        products: products,
+        selectedProductId: selectedProductId,
+      );
     } catch (error) {
       firstError ??= error;
-    }
-
-    try {
-      final reminder = await _repository.fetchDiamondReminder();
-      state = state.copyWith(diamondReminder: reminder.reminder);
-    } catch (_) {
-      // The reminder is supplementary; the balance and recharge list stay usable.
     }
 
     state = state.copyWith(
@@ -90,9 +91,10 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
     );
   }
 
-  void selectTab(int index) {
-    if (index < 0 || index > 1 || index == state.selectedTab) return;
-    state = state.copyWith(selectedTab: index);
+  void selectProduct(String productId) {
+    if (state.isPurchasing || productId == state.selectedProductId) return;
+    if (!state.products.any((product) => product.id == productId)) return;
+    state = state.copyWith(selectedProductId: productId);
   }
 
   Future<void> purchase(WalletRechargeProduct product) async {

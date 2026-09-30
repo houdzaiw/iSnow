@@ -155,50 +155,101 @@ class AppTextStyles {
     fontWeight: FontWeight.w400,
   );
 
-  static const TextStyle walletTab = TextStyle(
-    color: Color(0xA6FFFFFF),
-    fontSize: 13,
-    fontWeight: FontWeight.w400,
-  );
-
-  static const TextStyle walletTabSelected = TextStyle(
-    color: AppColors.walletBalanceText,
-    fontSize: 14,
-    fontWeight: FontWeight.w600,
-  );
-
-  static const TextStyle walletBalanceLabel = TextStyle(
+  static const TextStyle walletNavigationTitle = TextStyle(
     color: AppColors.textInverse,
-    fontSize: 13,
-    fontWeight: FontWeight.w600,
+    fontSize: 17,
+    height: 22 / 17,
+    fontWeight: FontWeight.w500,
+  );
+
+  static const TextStyle walletTradingTitle = TextStyle(
+    color: AppColors.textInverse,
+    fontSize: 20,
+    height: 22 / 20,
+    fontWeight: FontWeight.w500,
   );
 
   static const TextStyle walletBalance = TextStyle(
     color: AppColors.textInverse,
-    fontSize: 28,
+    fontSize: 40,
+    height: 1,
     fontWeight: FontWeight.w700,
   );
 
-  static const TextStyle walletSectionTitle = TextStyle(
+  static const TextStyle walletPaymentTitle = TextStyle(
+    color: AppColors.textPrimary,
+    fontSize: 14,
+    height: 16 / 14,
+    fontWeight: FontWeight.w600,
+  );
+
+  static const TextStyle walletProductAmount = TextStyle(
+    color: AppColors.walletProductText,
+    fontSize: 14,
+    height: 1,
+    fontWeight: FontWeight.w500,
+  );
+
+  static const TextStyle walletProductAmountSelected = TextStyle(
+    color: AppColors.walletSelectedAmount,
+    fontSize: 14,
+    height: 1,
+    fontWeight: FontWeight.w500,
+  );
+
+  static const TextStyle walletProductSubtitle = TextStyle(
+    color: AppColors.walletProductText,
+    fontSize: 10,
+    height: 1,
+    fontWeight: FontWeight.w500,
+    decoration: TextDecoration.lineThrough,
+  );
+
+  static const TextStyle walletProductSubtitleSelected = TextStyle(
+    color: AppColors.walletSelectedSubtitle,
+    fontSize: 10,
+    height: 1,
+    fontWeight: FontWeight.w500,
+    decoration: TextDecoration.lineThrough,
+  );
+
+  static const TextStyle walletProductPrice = TextStyle(
+    color: AppColors.walletProductPriceDisabled,
+    fontSize: 14,
+    height: 1,
+    fontWeight: FontWeight.w500,
+  );
+
+  static const TextStyle walletProductPriceSelected = TextStyle(
     color: AppColors.textInverse,
-    fontSize: 16,
-    fontWeight: FontWeight.w600,
+    fontSize: 14,
+    height: 1,
+    fontWeight: FontWeight.w500,
   );
 
-  static const TextStyle walletCoinAmount = TextStyle(
-    color: Color(0xFFE8E8E8),
-    fontSize: 16,
-    fontWeight: FontWeight.w600,
+  static const TextStyle walletPromotion = TextStyle(
+    color: AppColors.textInverse,
+    fontSize: 11,
+    height: 1,
+    fontWeight: FontWeight.w700,
   );
 
-  static const TextStyle walletPrice = TextStyle(
-    color: AppColors.walletActionText,
+  static const TextStyle walletTransfer = TextStyle(
+    color: AppColors.textInverse,
+    fontSize: 20,
+    height: 23 / 20,
+    fontWeight: FontWeight.w900,
+  );
+
+  static const TextStyle walletContact = TextStyle(
+    color: AppColors.walletBrandOrange,
     fontSize: 12,
-    fontWeight: FontWeight.w600,
+    height: 14 / 12,
+    fontWeight: FontWeight.w400,
   );
 
   static const TextStyle walletGuide = TextStyle(
-    color: Color(0xFF9B9C9E),
+    color: AppColors.textSecondary,
     fontSize: 12,
     fontWeight: FontWeight.w400,
   );

@@ -52,4 +52,16 @@ class AppGradients {
     end: Alignment.bottomCenter,
     colors: [Colors.transparent, Color(0x66000000)],
   );
+
+  static const LinearGradient walletSelectedProduct = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFFFDF7EF), Color(0xFFFCEFDE)],
+  );
+
+  static const LinearGradient walletSelectedPrice = LinearGradient(
+    begin: Alignment.centerRight,
+    end: Alignment.centerLeft,
+    colors: [AppColors.walletSelectedBorder, Color(0xFFEBA33C)],
+  );
 }
