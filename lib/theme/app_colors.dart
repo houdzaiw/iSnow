@@ -50,6 +50,17 @@ class AppColors {
   static const Color roomMoreToolSubtle = Color(0x80FFFFFF);
   static const Color roomMoreTagHot = Color(0xFFFF3D54);
   static const Color roomMoreTagNew = Color(0xFF3DDCFF);
+  static const Color roomGiftSheet = Color(0xFF000000);
+  static const Color roomGiftTargetSurface = Color(0x1AFFFFFF);
+  static const Color roomGiftPopupSurface = Color(0xFF251F2B);
+  static const Color roomGiftSelectedBorder = Color(0xFFF8DA8C);
+  static const Color roomGiftSelectedAvatar = Color(0xFFEFB738);
+  static const Color roomGiftGold = Color(0xFFFBD792);
+  static const Color roomGiftText = Color(0xE6FFFFFF);
+  static const Color roomGiftTextMuted = Color(0x99FFFFFF);
+  static const Color roomGiftDivider = Color(0x1AFFFFFF);
+  static const Color roomGiftSendText = Color(0xFF21170C);
+  static const Color roomGiftBadge = Color(0xFFFF3D54);
   static const Color partyCardBackground = Color(0xFF25232B);
   static const Color partyBadgeOverlay = Color(0x66000000);
   static const Color partyActionBackground = Color(0xE6000000);

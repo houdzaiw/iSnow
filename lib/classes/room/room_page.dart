@@ -9,6 +9,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../localization/app_localizations.dart';
 import '../../theme/app_theme.dart';
+import 'gift/models/room_gift_models.dart';
+import 'gift/views/room_gift_sheet.dart';
 import 'models/room_more_tools_models.dart';
 import 'viewmodel/room_state.dart';
 import 'viewmodel/room_more_tools_view_model.dart';
@@ -141,6 +143,7 @@ class RoomPage extends HookConsumerWidget {
                               .toggleLocalMicrophone(),
                           onToggleSpeaker: () =>
                               ref.read(provider.notifier).toggleSpeaker(),
+                          onGiftTap: () => _showRoomGiftPanel(context, state),
                           onMoreTap: () =>
                               _showRoomMoreToolsSheet(context, ref, provider),
                         ),
@@ -318,6 +321,45 @@ void _showRoomComposer(
       );
     },
   );
+}
+
+Future<void> _showRoomGiftPanel(
+  BuildContext context,
+  RoomPageState state,
+) async {
+  final roomId = state.currentRoomId.trim().isNotEmpty
+      ? state.currentRoomId.trim()
+      : state.roomId.trim();
+  if (roomId.isEmpty) return;
+
+  final recipients = state.seats
+      .where((seat) => seat.isOccupied && seat.uid != null)
+      .map(
+        (seat) => RoomGiftRecipient(
+          uid: seat.uid!,
+          nickname: seat.nickname?.trim().isNotEmpty == true
+              ? seat.nickname!.trim()
+              : '${seat.uid}',
+          avatar: seat.avatar,
+          seatPosition: seat.position,
+        ),
+      )
+      .toList(growable: false);
+  final result = await showRoomGiftSheet(
+    context: context,
+    roomId: roomId,
+    onlineCount: state.onlineCount,
+    currentUid: state.currentUid,
+    recipients: recipients,
+  );
+  if (!context.mounted || result == null) return;
+  if (result == RoomGiftSheetResult.openWallet) {
+    context.push('/wallet');
+    return;
+  }
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text(context.l10n.t('room.gift.sent'))));
 }
 
 void _showSeatActions(

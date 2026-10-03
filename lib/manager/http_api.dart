@@ -92,6 +92,18 @@ class HttpApi {
   /// Agora RTC token
   static const agoraToken = '/api/agora/token';
 
+  /// 礼物面板分组列表
+  static const giftTabList = '/api/gift/info/tabGiftList';
+
+  /// 礼物背包
+  static const giftBackpack = '/api/gift/info/getBackpack';
+
+  /// 是否允许给自己送礼
+  static const giftCanSendSelf = '/api/system/config/sendByOneself';
+
+  /// 房间送礼
+  static const giftSend = '/api/gift/send';
+
   /// 首页 Banner
   static const homeResourceBanner = '/api/resource/banner';
 

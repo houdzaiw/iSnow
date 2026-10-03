@@ -128,6 +128,16 @@ class AppAssets {
       'assets/lanhu/room/room_bottom_message.png';
   static const String lanhuRoomBottomMore =
       'assets/lanhu/room/room_bottom_more.png';
+  static const String lanhuRoomGiftCoin =
+      'assets/lanhu/room/room_gift_coin.webp';
+  static const String lanhuRoomGiftBalanceArrow =
+      'assets/lanhu/room/room_gift_balance_arrow.webp';
+  static const String lanhuRoomGiftCountArrow =
+      'assets/lanhu/room/room_gift_count_arrow.webp';
+  static const String lanhuRoomGiftTargetArrow =
+      'assets/lanhu/room/room_gift_target_arrow.webp';
+  static const String lanhuRoomGiftBackpack =
+      'assets/lanhu/room/room_gift_backpack.webp';
   static const String lanhuRoomMoreShare =
       'assets/lanhu/room/room_more_share.png';
   static const String lanhuRoomMoreReport =

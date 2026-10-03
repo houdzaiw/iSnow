@@ -6,6 +6,7 @@ class _RoomBottomBar extends StatelessWidget {
     required this.onChatTap,
     required this.onToggleMic,
     required this.onToggleSpeaker,
+    required this.onGiftTap,
     required this.onMoreTap,
   });
 
@@ -13,6 +14,7 @@ class _RoomBottomBar extends StatelessWidget {
   final VoidCallback onChatTap;
   final VoidCallback onToggleMic;
   final VoidCallback onToggleSpeaker;
+  final VoidCallback onGiftTap;
   final VoidCallback onMoreTap;
 
   @override
@@ -43,7 +45,7 @@ class _RoomBottomBar extends StatelessWidget {
             onTap: onToggleMic,
           ),
           const Spacer(),
-          _GiftButton(onTap: () {}),
+          _GiftButton(onTap: onGiftTap),
           const Spacer(),
           _BottomIconButton(
             asset: state.agoraState.mutedSpeaker
