@@ -1,3 +1,4 @@
+import 'package:extended_tabs/extended_tabs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -7,9 +8,10 @@ import 'package:project/classes/room/gift/models/room_gift_models.dart';
 import 'package:project/classes/room/gift/room_gift_repository.dart';
 import 'package:project/classes/room/gift/views/room_gift_sheet.dart';
 import 'package:project/localization/app_localizations.dart';
+import 'package:project/theme/app_theme.dart';
 
 void main() {
-  testWidgets('gift button opens a usable Nady-style gift panel', (
+  testWidgets('gift panel swipes between synchronized extended tabs', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(375, 812);
@@ -46,6 +48,13 @@ void main() {
     expect(find.text('Popular'), findsOneWidget);
     expect(find.text('Rose'), findsOneWidget);
     expect(find.text('Send'), findsOneWidget);
+
+    await tester.drag(find.byType(ExtendedTabBarView), const Offset(-320, 0));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Crown'), findsOneWidget);
+    final luxuryTab = tester.widget<Text>(find.text('Luxury'));
+    expect(luxuryTab.style, AppTextStyles.roomGiftTabSelected);
     expect(tester.takeException(), isNull);
   });
 }
@@ -93,6 +102,20 @@ class _SheetGiftRepository implements RoomGiftRepository {
               price: 20,
               isCombo: 1,
               tabId: 8,
+            ),
+          ],
+        ),
+        RoomGiftTab(
+          id: 9,
+          name: 'Luxury',
+          gifts: [
+            RoomGift(
+              id: 32,
+              name: 'Crown',
+              icon: '',
+              price: 200,
+              isCombo: 1,
+              tabId: 9,
             ),
           ],
         ),

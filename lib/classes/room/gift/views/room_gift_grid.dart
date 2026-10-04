@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:extended_tabs/extended_tabs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -25,149 +26,184 @@ class RoomGiftCatalogView extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tab = _selectedTab;
-    final pages = _giftPages(tab?.gifts ?? const []);
-    final pageIndex = useState(0);
-    final pageController = usePageController();
+    final selectedTabIndex = _selectedTabIndex;
+    final tabController = useTabController(
+      initialLength: tabs.length,
+      initialIndex: selectedTabIndex,
+      keys: [Object.hashAll(tabs.map((tab) => tab.id))],
+    );
+    final lastNotifiedTabId = useRef<int?>(selectedTabId);
 
     useEffect(() {
-      pageIndex.value = 0;
-      if (pageController.hasClients) pageController.jumpToPage(0);
+      lastNotifiedTabId.value = selectedTabId;
+      if (tabController.index != selectedTabIndex) {
+        tabController.animateTo(selectedTabIndex);
+      }
       return null;
-    }, [tab?.id]);
+    }, [selectedTabId, selectedTabIndex, tabController]);
+
+    useEffect(() {
+      void handleTabChanged() {
+        final index = tabController.index;
+        if (index < 0 || index >= tabs.length) return;
+        final tabId = tabs[index].id;
+        if (lastNotifiedTabId.value == tabId) return;
+        lastNotifiedTabId.value = tabId;
+        onTabSelected(tabId);
+      }
+
+      tabController.addListener(handleTabChanged);
+      return () => tabController.removeListener(handleTabChanged);
+    }, [tabController, tabs, onTabSelected]);
 
     return Column(
       children: [
-        _GiftTabs(
-          tabs: tabs,
-          selectedTabId: selectedTabId,
-          onSelected: onTabSelected,
-        ),
+        _GiftTabs(tabs: tabs, tabController: tabController),
         Expanded(
-          child: pages.isEmpty
-              ? const SizedBox.shrink()
-              : PageView.builder(
-                  controller: pageController,
-                  itemCount: pages.length,
-                  onPageChanged: (value) => pageIndex.value = value,
-                  itemBuilder: (context, index) {
-                    return GridView.builder(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: AppSpacing.roomGiftGridHorizontalInset.w,
-                        vertical: AppSpacing.xs.h,
-                      ),
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 4,
-                        mainAxisSpacing: AppSpacing.roomGiftGridMainSpacing.h,
-                        crossAxisSpacing: AppSpacing.roomGiftGridCrossSpacing.w,
-                        childAspectRatio:
-                            AppSpacing.roomGiftGridChildAspectRatio,
-                      ),
-                      itemCount: pages[index].length,
-                      itemBuilder: (context, giftIndex) {
-                        final gift = pages[index][giftIndex];
-                        return _GiftTile(
-                          gift: gift,
-                          selected: gift.selectionKey == selectedGiftKey,
-                          onTap: () => onGiftSelected(gift),
-                        );
-                      },
-                    );
-                  },
+          child: ExtendedTabBarView(
+            controller: tabController,
+            cacheExtent: tabs.length > 1 ? 1 : 0,
+            children: [
+              for (final tab in tabs)
+                _GiftTabGrid(
+                  key: PageStorageKey<int>(tab.id),
+                  gifts: tab.gifts,
+                  selectedGiftKey: selectedGiftKey,
+                  onGiftSelected: onGiftSelected,
                 ),
+            ],
+          ),
         ),
-        _GiftPageDots(count: pages.length, selectedIndex: pageIndex.value),
         SizedBox(height: AppSpacing.sm.h),
       ],
     );
   }
 
-  RoomGiftTab? get _selectedTab {
-    for (final tab in tabs) {
-      if (tab.id == selectedTabId) return tab;
-    }
-    return tabs.isEmpty ? null : tabs.first;
-  }
-
-  List<List<RoomGift>> _giftPages(List<RoomGift> gifts) {
-    final pages = <List<RoomGift>>[];
-    for (var start = 0; start < gifts.length; start += 8) {
-      final end = (start + 8).clamp(0, gifts.length);
-      pages.add(gifts.sublist(start, end));
-    }
-    return pages;
+  int get _selectedTabIndex {
+    final index = tabs.indexWhere((tab) => tab.id == selectedTabId);
+    return index < 0 ? 0 : index;
   }
 }
 
 class _GiftTabs extends StatelessWidget {
-  const _GiftTabs({
-    required this.tabs,
-    required this.selectedTabId,
-    required this.onSelected,
-  });
+  const _GiftTabs({required this.tabs, required this.tabController});
 
   final List<RoomGiftTab> tabs;
-  final int? selectedTabId;
-  final ValueChanged<int> onSelected;
+  final TabController tabController;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: AppSpacing.roomGiftTabHeight.h,
-      child: ListView.separated(
-        padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg.w),
-        scrollDirection: Axis.horizontal,
-        itemCount: tabs.length,
-        separatorBuilder: (_, __) => SizedBox(width: AppSpacing.lg.w),
-        itemBuilder: (context, index) {
-          final tab = tabs[index];
-          final selected = tab.id == selectedTabId;
-          return InkWell(
-            onTap: () => onSelected(tab.id),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (tab.isBackpack) ...[
-                      Image.asset(
-                        AppAssets.lanhuRoomGiftBackpack,
-                        width: AppSpacing.iconSizeSm.r,
-                        height: AppSpacing.iconSizeSm.r,
-                      ),
-                      SizedBox(width: AppSpacing.xs.w),
-                    ],
-                    Text(
-                      tab.isBackpack
-                          ? context.l10n.t('room.gift.backpack')
-                          : tab.name,
-                      style: selected
-                          ? AppTextStyles.roomGiftTabSelected
-                          : AppTextStyles.roomGiftTab,
-                    ),
-                  ],
+      child: AnimatedBuilder(
+        animation: tabController,
+        builder: (context, _) => ExtendedTabBar(
+          controller: tabController,
+          isScrollable: true,
+          padding: EdgeInsets.symmetric(horizontal: AppSpacing.md.w),
+          indicator: const BoxDecoration(color: AppColors.transparent),
+          indicatorColor: AppColors.transparent,
+          dividerColor: AppColors.transparent,
+          labelPadding: EdgeInsets.symmetric(horizontal: AppSpacing.sm.w),
+          overlayColor: WidgetStateProperty.all(AppColors.transparent),
+          splashFactory: NoSplash.splashFactory,
+          tabs: [
+            for (var index = 0; index < tabs.length; index++)
+              Tab(
+                height: AppSpacing.roomGiftTabHeight.h,
+                child: _GiftTabLabel(
+                  tab: tabs[index],
+                  selected: tabController.index == index,
                 ),
-                SizedBox(height: AppSpacing.xs.h),
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 160),
-                  width: selected
-                      ? AppSpacing.sm.w
-                      : AppSpacing.roomGiftPageDotSize.w,
-                  height: AppSpacing.xxs.h,
-                  decoration: BoxDecoration(
-                    color: selected
-                        ? AppColors.textInverse
-                        : AppColors.transparent,
-                    borderRadius: AppRadius.pillBorder,
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
+              ),
+          ],
+        ),
       ),
+    );
+  }
+}
+
+class _GiftTabLabel extends StatelessWidget {
+  const _GiftTabLabel({required this.tab, required this.selected});
+
+  final RoomGiftTab tab;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (tab.isBackpack) ...[
+              Image.asset(
+                AppAssets.lanhuRoomGiftBackpack,
+                width: AppSpacing.iconSizeSm.r,
+                height: AppSpacing.iconSizeSm.r,
+              ),
+              SizedBox(width: AppSpacing.xs.w),
+            ],
+            Text(
+              tab.isBackpack ? context.l10n.t('room.gift.backpack') : tab.name,
+              style: selected
+                  ? AppTextStyles.roomGiftTabSelected
+                  : AppTextStyles.roomGiftTab,
+            ),
+          ],
+        ),
+        SizedBox(height: AppSpacing.xs.h),
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          width: selected ? AppSpacing.sm.w : AppSpacing.roomGiftPageDotSize.w,
+          height: AppSpacing.xxs.h,
+          decoration: BoxDecoration(
+            color: selected ? AppColors.textInverse : AppColors.transparent,
+            borderRadius: AppRadius.pillBorder,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _GiftTabGrid extends StatelessWidget {
+  const _GiftTabGrid({
+    super.key,
+    required this.gifts,
+    required this.selectedGiftKey,
+    required this.onGiftSelected,
+  });
+
+  final List<RoomGift> gifts;
+  final String? selectedGiftKey;
+  final ValueChanged<RoomGift> onGiftSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    if (gifts.isEmpty) return const SizedBox.shrink();
+    return GridView.builder(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.roomGiftGridHorizontalInset.w,
+        vertical: AppSpacing.xs.h,
+      ),
+      physics: const ClampingScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+        mainAxisSpacing: AppSpacing.roomGiftGridMainSpacing.h,
+        crossAxisSpacing: AppSpacing.roomGiftGridCrossSpacing.w,
+        childAspectRatio: AppSpacing.roomGiftGridChildAspectRatio,
+      ),
+      itemCount: gifts.length,
+      itemBuilder: (context, index) {
+        final gift = gifts[index];
+        return _GiftTile(
+          gift: gift,
+          selected: gift.selectionKey == selectedGiftKey,
+          onTap: () => onGiftSelected(gift),
+        );
+      },
     );
   }
 }
@@ -298,41 +334,6 @@ class _GiftImage extends StatelessWidget {
       width: AppSpacing.roomGiftImageSize.r,
       height: AppSpacing.roomGiftImageSize.r,
       fit: BoxFit.contain,
-    );
-  }
-}
-
-class _GiftPageDots extends StatelessWidget {
-  const _GiftPageDots({required this.count, required this.selectedIndex});
-
-  final int count;
-  final int selectedIndex;
-
-  @override
-  Widget build(BuildContext context) {
-    if (count <= 1) {
-      return SizedBox(height: AppSpacing.roomGiftPageDotSize.h);
-    }
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(count, (index) {
-        final selected = index == selectedIndex;
-        return Container(
-          width:
-              (selected
-                      ? AppSpacing.roomGiftPageDotSelectedWidth
-                      : AppSpacing.roomGiftPageDotSize)
-                  .w,
-          height: AppSpacing.roomGiftPageDotSize.h,
-          margin: EdgeInsets.symmetric(horizontal: AppSpacing.xxs.w),
-          decoration: BoxDecoration(
-            color: selected
-                ? AppColors.roomGiftGold
-                : AppColors.roomGiftTextMuted,
-            borderRadius: AppRadius.pillBorder,
-          ),
-        );
-      }),
     );
   }
 }
