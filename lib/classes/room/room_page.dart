@@ -105,20 +105,17 @@ class RoomPage extends HookConsumerWidget {
                             }
                           },
                         ),
-                        SizedBox(
-                          height: 380.h,
-                          child: _RoomMicGrid(
-                            seats: state.seats,
-                            currentUid: state.currentUid,
-                            pendingSeatPosition: state.pendingSeatPosition,
-                            onSeatTap: (seat) =>
-                                _handleSeatTap(context, ref, provider, seat),
-                            onSeatLongPress: (seat) => _handleSeatLongPress(
-                              context,
-                              ref,
-                              provider,
-                              seat,
-                            ),
+                        _RoomMicGrid(
+                          seats: state.seats,
+                          currentUid: state.currentUid,
+                          pendingSeatPosition: state.pendingSeatPosition,
+                          onSeatTap: (seat) =>
+                              _handleSeatTap(context, ref, provider, seat),
+                          onSeatLongPress: (seat) => _handleSeatLongPress(
+                            context,
+                            ref,
+                            provider,
+                            seat,
                           ),
                         ),
                         _RoomMusicStrip(state: state),
