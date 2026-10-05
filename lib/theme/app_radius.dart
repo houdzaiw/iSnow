@@ -17,8 +17,8 @@ class AppRadius {
   static const double roomMoreSheet = 24;
   static const double roomMoreToolTile = 18;
   static const double roomMoreTag = 7;
-  static const double roomGiftSheet = 24;
-  static const double roomGiftItem = 10;
+  static const double roomGiftSheet = 0;
+  static const double roomGiftItem = 6;
   static const double roomGiftPopup = 12;
   static const double roomGiftRecipientBadge = 8;
   static const double pill = 40;
@@ -60,5 +60,11 @@ class AppRadius {
   );
   static const BorderRadius roomGiftPopupBorder = BorderRadius.all(
     Radius.circular(roomGiftPopup),
+  );
+  static const BorderRadius roomGiftTargetBorder = BorderRadius.all(
+    Radius.circular(xs),
+  );
+  static const BorderRadius roomGiftRecipientBadgeBorder = BorderRadius.all(
+    Radius.circular(roomGiftRecipientBadge),
   );
 }

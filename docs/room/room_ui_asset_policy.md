@@ -30,3 +30,10 @@
 ## Replacement Rule
 
 后续补齐图标时，只替换 `assets/lanhu/room/` 下的语义化图片文件或更新 `AppAssets` 常量，不要改动业务逻辑。
+
+## Gift Panel
+
+- 礼物面板以 `image_id=dd85e4a7-00f5-41c9-a75b-b28a25da69ad` 为资源上下文；下载脚本按该稿的区块和图层名称提取切图，不能使用其他页面的同名图层。
+- 金币、背包、数量/接收人箭头、麦位占位图和 NEW 徽章使用这张设计稿的 PNG 切图，不再使用旧版 Nady WebP 图标。
+- 礼物、头像、价格、库存、数量配置和分类来自接口/缓存；不得把设计稿示例礼物当作业务数据。NEW 仅在接口 `cornerMark` 指定时显示，不伪造 CP、VIP 等标识。
+- 所有礼物面板视觉参数统一维护在 `lib/theme/`。布局和资源说明见 `docs/room/gift_panel_ui.md`。

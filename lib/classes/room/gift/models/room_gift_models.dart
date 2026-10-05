@@ -43,6 +43,8 @@ class RoomGift {
     this.animationType,
     this.giftType,
     this.itemType,
+    this.banner,
+    this.jumpLink,
   });
 
   final int id;
@@ -60,10 +62,27 @@ class RoomGift {
   final int? animationType;
   final int? giftType;
   final String? itemType;
+  final String? banner;
+  final String? jumpLink;
 
   bool get isBackpack => tabId == RoomGiftTab.backpackId;
 
   String get selectionKey => '$tabId:$id:${userBackpackId ?? 0}';
+
+  /// Preserves campaign parameters while adding the current app language.
+  String resolvedCampaignUrl(String languageCode) {
+    final uri = Uri.tryParse(jumpLink?.trim() ?? '');
+    if (uri == null ||
+        !uri.hasAuthority ||
+        (uri.scheme != 'https' && uri.scheme != 'http')) {
+      return '';
+    }
+    return uri
+        .replace(
+          queryParameters: {...uri.queryParameters, 'language': languageCode},
+        )
+        .toString();
+  }
 
   List<int> get countOptions {
     final configured = (defaultGiftNumConfig ?? '')
@@ -93,6 +112,8 @@ class RoomGift {
       animationType: animationType,
       giftType: giftType,
       itemType: itemType,
+      banner: banner,
+      jumpLink: jumpLink,
     );
   }
 
@@ -119,6 +140,8 @@ class RoomGift {
       animationType: _nullableIntValue(json['animationType']),
       giftType: _nullableIntValue(json['giftType']),
       itemType: json['itemType']?.toString(),
+      banner: json['banner']?.toString(),
+      jumpLink: json['jumpLink']?.toString(),
     );
   }
 }

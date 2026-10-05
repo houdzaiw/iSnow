@@ -25,91 +25,98 @@ class RoomGiftTargetBar extends StatelessWidget {
         state.recipients.isNotEmpty;
     return SizedBox(
       height: AppSpacing.roomGiftTargetHeight.h,
-      child: Row(
-        children: [
-          PopupMenuButton<RoomGiftTargetMode>(
-            color: AppColors.roomGiftPopupSurface,
-            position: PopupMenuPosition.under,
-            constraints: BoxConstraints.tightFor(
-              width: AppSpacing.roomGiftMenuWidth.w,
-            ),
-            shape: const RoundedRectangleBorder(
-              borderRadius: AppRadius.roomGiftPopupBorder,
-            ),
-            onSelected: viewModel.selectTargetMode,
-            itemBuilder: (context) => [
-              if (state.recipients.isNotEmpty)
-                _targetMenuItem(
-                  context,
-                  RoomGiftTargetMode.selected,
-                  state.recipients.length,
-                ),
-              if (state.recipients.isNotEmpty)
-                _targetMenuItem(
-                  context,
-                  RoomGiftTargetMode.allMic,
-                  state.recipients.length,
-                ),
-              _targetMenuItem(
-                context,
-                RoomGiftTargetMode.allRoom,
-                state.onlineCount,
-              ),
-            ],
-            child: Container(
-              height: AppSpacing.roomGiftTargetHeight.h,
-              padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg.w),
-              decoration: BoxDecoration(
-                color: AppColors.roomGiftTargetSurface,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(AppRadius.roomGiftSheet.r),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    _targetLabel(context, state.targetMode),
-                    style: AppTextStyles.roomGiftTarget,
-                  ),
-                  SizedBox(width: AppSpacing.xs.w),
-                  Text(
-                    '(${state.targetCount})',
-                    style: AppTextStyles.roomGiftTargetCount,
-                  ),
-                  SizedBox(width: AppSpacing.sm.w),
-                  Image.asset(
-                    AppAssets.lanhuRoomGiftTargetArrow,
-                    width: AppSpacing.roomGiftTargetArrowSize.r,
-                    height: AppSpacing.roomGiftTargetArrowSize.r,
-                    color: AppColors.roomGiftTextMuted,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          if (showRecipients)
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.roomGiftFooterHorizontalInset.w,
+        ),
+        child: Row(
+          children: [
             Expanded(
-              child: ListView.separated(
-                padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm.w),
-                scrollDirection: Axis.horizontal,
-                itemCount: state.recipients.length,
-                separatorBuilder: (_, __) => SizedBox(width: AppSpacing.xs.w),
-                itemBuilder: (context, index) {
-                  final recipient = state.recipients[index];
-                  return _RecipientAvatar(
-                    recipient: recipient,
-                    selected: state.selectedRecipientUids.contains(
-                      recipient.uid,
-                    ),
-                    onTap: () => viewModel.toggleRecipient(recipient.uid),
-                  );
-                },
+              child: showRecipients
+                  ? SizedBox(
+                      height: AppSpacing.roomGiftRecipientAvatarSize.r,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: state.recipients.length,
+                        separatorBuilder: (_, __) =>
+                            SizedBox(width: AppSpacing.roomGiftRecipientGap.w),
+                        itemBuilder: (context, index) {
+                          final recipient = state.recipients[index];
+                          return _RecipientAvatar(
+                            recipient: recipient,
+                            selected: state.selectedRecipientUids.contains(
+                              recipient.uid,
+                            ),
+                            onTap: state.isSending
+                                ? null
+                                : () =>
+                                      viewModel.toggleRecipient(recipient.uid),
+                          );
+                        },
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            SizedBox(width: AppSpacing.lg.w),
+            PopupMenuButton<RoomGiftTargetMode>(
+              enabled: !state.isSending,
+              color: AppColors.roomGiftPopupSurface,
+              position: PopupMenuPosition.under,
+              constraints: BoxConstraints.tightFor(
+                width: AppSpacing.roomGiftMenuWidth.w,
               ),
-            )
-          else
-            const Spacer(),
-        ],
+              shape: const RoundedRectangleBorder(
+                borderRadius: AppRadius.roomGiftPopupBorder,
+              ),
+              onSelected: viewModel.selectTargetMode,
+              itemBuilder: (context) => [
+                if (state.recipients.isNotEmpty)
+                  _targetMenuItem(
+                    context,
+                    RoomGiftTargetMode.selected,
+                    state.recipients.length,
+                  ),
+                if (state.recipients.isNotEmpty)
+                  _targetMenuItem(
+                    context,
+                    RoomGiftTargetMode.allMic,
+                    state.recipients.length,
+                  ),
+                _targetMenuItem(
+                  context,
+                  RoomGiftTargetMode.allRoom,
+                  state.onlineCount,
+                ),
+              ],
+              child: Container(
+                width: AppSpacing.roomGiftTargetWidth.w,
+                height: AppSpacing.roomGiftTargetControlHeight.h,
+                padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs.w),
+                decoration: const BoxDecoration(
+                  color: AppColors.roomGiftTargetSurface,
+                  borderRadius: AppRadius.roomGiftTargetBorder,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        _targetLabel(context, state.targetMode),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.roomGiftTargetCount,
+                      ),
+                    ),
+                    Image.asset(
+                      AppAssets.lanhuRoomGiftTargetArrow,
+                      width: AppSpacing.roomGiftTargetArrowSize.r,
+                      height: AppSpacing.roomGiftTargetArrowSize.r,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -146,44 +153,51 @@ class _RecipientAvatar extends StatelessWidget {
 
   final RoomGiftRecipient recipient;
   final bool selected;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      customBorder: const CircleBorder(),
-      child: Container(
-        padding: EdgeInsets.all(selected ? AppSpacing.xxs.w : 0),
-        decoration: BoxDecoration(
-          color: selected
-              ? AppColors.roomGiftSelectedAvatar
-              : AppColors.transparent,
-          shape: BoxShape.circle,
-        ),
-        child: Stack(
-          children: [
-            ClipOval(child: _RecipientImage(url: recipient.avatar)),
-            PositionedDirectional(
-              end: 0,
-              bottom: 0,
-              child: Container(
-                height: AppSpacing.roomGiftRecipientBadgeHeight.h,
-                padding: EdgeInsets.symmetric(horizontal: AppSpacing.xxs.w),
-                decoration: BoxDecoration(
-                  color: AppColors.overlay,
-                  borderRadius: BorderRadius.circular(
-                    AppRadius.roomGiftRecipientBadge.r,
+    return Semantics(
+      label: recipient.nickname,
+      selected: selected,
+      button: true,
+      child: InkWell(
+        key: ValueKey('room-gift-recipient-${recipient.uid}'),
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: Container(
+          width: AppSpacing.roomGiftRecipientAvatarSize.r,
+          height: AppSpacing.roomGiftRecipientAvatarSize.r,
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: selected
+                  ? AppColors.roomGiftSelectedAvatar
+                  : AppColors.roomGiftTextMuted,
+            ),
+            shape: BoxShape.circle,
+          ),
+          child: Stack(
+            children: [
+              ClipOval(child: _RecipientImage(url: recipient.avatar)),
+              PositionedDirectional(
+                end: 0,
+                bottom: 0,
+                child: Container(
+                  height: AppSpacing.roomGiftRecipientBadgeHeight.h,
+                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.xxs.w),
+                  decoration: const BoxDecoration(
+                    color: AppColors.roomGiftTargetSurface,
+                    borderRadius: AppRadius.roomGiftRecipientBadgeBorder,
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    '${recipient.seatPosition + 1}',
+                    style: AppTextStyles.roomGiftCornerMark,
                   ),
                 ),
-                alignment: Alignment.center,
-                child: Text(
-                  '${recipient.seatPosition + 1}',
-                  style: AppTextStyles.roomGiftCornerMark,
-                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -210,7 +224,7 @@ class _RecipientImage extends StatelessWidget {
 
   Widget _fallback() {
     return Image.asset(
-      AppAssets.lanhuRoomAvatarSample,
+      AppAssets.roomGiftRecipient,
       width: AppSpacing.roomGiftRecipientAvatarSize.r,
       height: AppSpacing.roomGiftRecipientAvatarSize.r,
       fit: BoxFit.cover,

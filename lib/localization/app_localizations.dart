@@ -211,7 +211,7 @@ const Map<String, Map<String, String>> _localizedValues = {
     'room.more.lobbyCloseSuccess': 'Room mode disabled',
     'room.more.lobbyFailed': 'Failed to change room mode',
     'room.more.bannerLoadFailed': 'Failed to load room tools',
-    'room.gift.allMic': 'All Mic',
+    'room.gift.allMic': 'All On Mic',
     'room.gift.allRoom': 'All Room',
     'room.gift.select': 'Select',
     'room.gift.backpack': 'Backpack',

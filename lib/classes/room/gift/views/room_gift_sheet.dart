@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../localization/app_localizations.dart';
@@ -12,6 +13,7 @@ import '../viewmodel/room_gift_state.dart';
 import '../viewmodel/room_gift_view_model.dart';
 import 'room_gift_footer.dart';
 import 'room_gift_grid.dart';
+import 'room_gift_promotion_bar.dart';
 import 'room_gift_target_bar.dart';
 
 enum RoomGiftSheetResult { sent, openWallet }
@@ -29,11 +31,29 @@ Future<RoomGiftSheetResult?> showRoomGiftSheet({
     isScrollControlled: true,
     backgroundColor: AppColors.transparent,
     barrierColor: AppColors.modalScrimStrong,
-    builder: (_) => RoomGiftSheet(
+    builder: (sheetContext) => RoomGiftSheet(
       roomId: roomId,
       onlineCount: onlineCount,
       currentUid: currentUid,
       recipients: recipients,
+      onOpenCampaign: (gift) {
+        final url = gift.resolvedCampaignUrl(
+          Localizations.localeOf(context).languageCode,
+        );
+        if (url.isEmpty) return;
+        Navigator.of(sheetContext).pop();
+        if (!context.mounted) return;
+        context.push(
+          Uri(
+            path: '/web-view',
+            queryParameters: {
+              'title': gift.name,
+              'uri': url,
+              'hiddenAppBar': 'true',
+            },
+          ).toString(),
+        );
+      },
     ),
   );
 }
@@ -45,12 +65,14 @@ class RoomGiftSheet extends HookConsumerWidget {
     required this.onlineCount,
     required this.currentUid,
     required this.recipients,
+    this.onOpenCampaign,
   });
 
   final String roomId;
   final int onlineCount;
   final int? currentUid;
   final List<RoomGiftRecipient> recipients;
+  final ValueChanged<RoomGift>? onOpenCampaign;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -89,34 +111,58 @@ class RoomGiftSheet extends HookConsumerWidget {
     return SizedBox(
       width: double.infinity,
       height: math.min(preferredHeight, maxHeight),
-      child: DecoratedBox(
-        decoration: const BoxDecoration(
-          color: AppColors.roomGiftSheet,
-          borderRadius: AppRadius.roomGiftSheetBorder,
-        ),
-        child: Padding(
-          padding: EdgeInsets.only(bottom: bottomPadding),
-          child: Column(
-            children: [
-              RoomGiftTargetBar(state: state, viewModel: viewModel),
-              const Divider(
-                height: 0,
-                thickness: 1,
-                color: AppColors.roomGiftDivider,
-              ),
-              Expanded(
-                child: _GiftBody(state: state, viewModel: viewModel),
-              ),
-              RoomGiftFooter(
-                state: state,
-                viewModel: viewModel,
-                onOpenWallet: () =>
-                    Navigator.pop(context, RoomGiftSheetResult.openWallet),
-                onSent: () => Navigator.pop(context, RoomGiftSheetResult.sent),
-              ),
-            ],
+      child: Column(
+        children: [
+          RoomGiftPromotionBar(
+            bannerUrl: state.selectedGift?.banner,
+            onOpenCampaign:
+                state.selectedGift?.banner?.isNotEmpty == true &&
+                    state.selectedGift!
+                        .resolvedCampaignUrl(
+                          Localizations.localeOf(context).languageCode,
+                        )
+                        .isNotEmpty &&
+                    onOpenCampaign != null
+                ? () => onOpenCampaign!(state.selectedGift!)
+                : null,
+            onOpenWallet: () =>
+                Navigator.pop(context, RoomGiftSheetResult.openWallet),
           ),
-        ),
+          Expanded(
+            child: DecoratedBox(
+              decoration: const BoxDecoration(
+                color: AppColors.roomGiftSheet,
+                border: Border(
+                  top: BorderSide(
+                    color: AppColors.roomGiftDivider,
+                    width: AppSpacing.hairline,
+                  ),
+                ),
+              ),
+              child: Padding(
+                padding: EdgeInsets.only(bottom: bottomPadding),
+                child: Column(
+                  children: [
+                    RoomGiftTargetBar(state: state, viewModel: viewModel),
+                    Expanded(
+                      child: _GiftBody(state: state, viewModel: viewModel),
+                    ),
+                    RoomGiftFooter(
+                      state: state,
+                      viewModel: viewModel,
+                      onOpenWallet: () => Navigator.pop(
+                        context,
+                        RoomGiftSheetResult.openWallet,
+                      ),
+                      onSent: () =>
+                          Navigator.pop(context, RoomGiftSheetResult.sent),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -132,7 +178,7 @@ class _GiftBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return switch (state.status) {
       RoomGiftLoadStatus.initial || RoomGiftLoadStatus.loading => const Center(
-        child: CircularProgressIndicator(color: AppColors.roomGiftGold),
+        child: CircularProgressIndicator(color: AppColors.roomGiftAccent),
       ),
       RoomGiftLoadStatus.error => _GiftStatus(
         message: state.loadErrorMessage?.isNotEmpty == true

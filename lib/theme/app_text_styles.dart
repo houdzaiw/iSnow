@@ -315,32 +315,34 @@ class AppTextStyles {
   );
 
   static const TextStyle roomGiftTargetCount = TextStyle(
-    color: AppColors.brandYellow,
+    color: AppColors.roomGiftAccent,
     fontSize: 12,
     fontWeight: FontWeight.w400,
   );
 
   static const TextStyle roomGiftTab = TextStyle(
     color: AppColors.roomGiftTextMuted,
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: FontWeight.w400,
   );
 
   static const TextStyle roomGiftTabSelected = TextStyle(
     color: AppColors.textInverse,
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: FontWeight.w600,
   );
 
   static const TextStyle roomGiftName = TextStyle(
     color: AppColors.roomGiftText,
-    fontSize: 12,
+    fontSize: 10,
+    height: 1.2,
     fontWeight: FontWeight.w400,
   );
 
   static const TextStyle roomGiftPrice = TextStyle(
     color: AppColors.roomGiftTextMuted,
-    fontSize: 11,
+    fontSize: 10,
+    height: 1.2,
     fontWeight: FontWeight.w400,
   );
 
@@ -352,20 +354,26 @@ class AppTextStyles {
 
   static const TextStyle roomGiftBalance = TextStyle(
     color: AppColors.textInverse,
-    fontSize: 14,
-    fontWeight: FontWeight.w600,
+    fontSize: 12,
+    fontWeight: FontWeight.w400,
   );
 
   static const TextStyle roomGiftCount = TextStyle(
-    color: AppColors.roomGiftGold,
-    fontSize: 14,
+    color: AppColors.roomGiftAccent,
+    fontSize: 12,
+    fontWeight: FontWeight.w400,
+  );
+
+  static const TextStyle roomGiftCountInactive = TextStyle(
+    color: AppColors.roomGiftCountMuted,
+    fontSize: 12,
     fontWeight: FontWeight.w400,
   );
 
   static const TextStyle roomGiftSend = TextStyle(
     color: AppColors.roomGiftSendText,
-    fontSize: 14,
-    fontWeight: FontWeight.w600,
+    fontSize: 12,
+    fontWeight: FontWeight.w500,
   );
 
   static const TextStyle roomGiftStatus = TextStyle(

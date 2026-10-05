@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download room UI image assets from a Lanhu exported HTML file.
+"""Download room UI image assets from Lanhu HTML or a supported design URL.
 
 Usage:
   python3 tools/download_lanhu_room_assets.py \
@@ -9,6 +9,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import gzip
 import json
 import os
 import re
@@ -73,6 +74,23 @@ ROOM_MORE_SEMANTIC_FILES = {
     ],
 }
 
+ROOM_GIFT_DESIGN_ID = "dd85e4a7-00f5-41c9-a75b-b28a25da69ad"
+ROOM_GIFT_SEMANTIC_FILES = {
+    "bg": {
+        "Frame_1312319043": "room_gift_first_recharge.png",
+        "水果-土耳其_1": "room_gift_campaign.png",
+    },
+    "钱包&send": {
+        "300x300-金币_1": "room_gift_coin.png",
+        "Vector_8467": "room_gift_balance_arrow.png",
+        "Polygon_25": "room_gift_count_arrow.png",
+    },
+    "栏目": {"背包": "room_gift_backpack.png"},
+    "all on mic": {"Polygon_25": "room_gift_target_arrow.png"},
+    "座位": {"ic_room_micsize": "room_gift_recipient.png"},
+    "礼物": {"Frame_1312319194": "room_gift_new_badge.png"},
+}
+
 ASSET_DIR = Path("assets/lanhu/room")
 MISSING_ICON = "room_icon_missing.png"
 MANIFEST = "lanhu_room_assets_manifest.json"
@@ -102,7 +120,7 @@ def main() -> None:
 
     manifest = _load_manifest(args.output / MANIFEST)
     if args.design_url:
-        assets = _fetch_room_more_assets(args.design_url)
+        assets = _fetch_design_assets(args.design_url)
     else:
         if args.html is None:
             parser.error("provide an HTML path or --design-url")
@@ -138,8 +156,12 @@ class _AssetMarkupParser(HTMLParser):
         super().__init__()
         self.base_dir = base_dir
         self.urls: dict[str, str] = {}
+        self.css_blocks: list[str] = []
+        self.in_style = False
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag == "style":
+            self.in_style = True
         attributes = dict(attrs)
         class_names = (attributes.get("class") or "").split()
         candidates = []
@@ -154,6 +176,14 @@ class _AssetMarkupParser(HTMLParser):
                     self.urls.setdefault(class_name, normalized)
                     break
 
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "style":
+            self.in_style = False
+
+    def handle_data(self, data: str) -> None:
+        if self.in_style:
+            self.css_blocks.append(data)
+
 
 def _extract_image_urls(html: str, base_dir: Path | None = None) -> dict[str, str]:
     """Extract remote/local image sources from img tags and CSS backgrounds."""
@@ -163,7 +193,7 @@ def _extract_image_urls(html: str, base_dir: Path | None = None) -> dict[str, st
     # Exported Lanhu HTML usually puts background URLs in a class selector,
     # for example `.group_6 { background: url(...) }`.
     css_rule = re.compile(r"([^{}]+)\{([^{}]*url\([^{}]+\)[^{}]*)\}")
-    for selector, body in css_rule.findall(html):
+    for selector, body in css_rule.findall("\n".join(parser.css_blocks)):
         selectors = re.findall(r"\.([\w-]+)", selector)
         candidates = _extract_css_urls(body)
         for class_name in selectors:
@@ -201,7 +231,7 @@ def _load_manifest(path: Path) -> dict[str, str]:
     return value if isinstance(value, dict) else {}
 
 
-def _fetch_room_more_assets(design_url: str) -> list[tuple[str, str]]:
+def _fetch_design_assets(design_url: str) -> list[tuple[str, str]]:
     params = parse_qs(urlparse(design_url).fragment.split("?", 1)[-1])
     project_id = _first_query_value(params, "pid")
     image_id = _first_query_value(params, "image_id")
@@ -230,6 +260,9 @@ def _fetch_room_more_assets(design_url: str) -> list[tuple[str, str]]:
         raise RuntimeError("Lanhu design has no exported Figma JSON")
     sketch = _fetch_json(versions[0]["json_url"])
 
+    if image_id == ROOM_GIFT_DESIGN_ID:
+        return _room_gift_assets(sketch)
+
     assets: list[tuple[str, str]] = []
     for section_name, filenames in ROOM_MORE_SEMANTIC_FILES.items():
         section = _find_layer(sketch.get("artboard") or {}, section_name)
@@ -247,6 +280,32 @@ def _fetch_room_more_assets(design_url: str) -> list[tuple[str, str]]:
     return assets
 
 
+def _room_gift_assets(sketch: dict) -> list[tuple[str, str]]:
+    assets: list[tuple[str, str]] = []
+    for section_name, names in ROOM_GIFT_SEMANTIC_FILES.items():
+        section = _find_layer(sketch.get("artboard") or {}, section_name)
+        if section is None:
+            raise RuntimeError(f"Gift design section missing: {section_name}")
+        for layer_name, filename in names.items():
+            url = _named_export_url(section, layer_name)
+            if not url:
+                raise RuntimeError(f"Gift design export missing: {layer_name}")
+            assets.append((filename, url))
+    return assets
+
+
+def _named_export_url(layer: dict, name: str) -> str | None:
+    image = layer.get("image") or {}
+    if layer.get("name") == name and image.get("imageUrl"):
+        return image["imageUrl"]
+    for child in layer.get("layers") or []:
+        if isinstance(child, dict):
+            url = _named_export_url(child, name)
+            if url:
+                return url
+    return None
+
+
 def _first_query_value(params: dict[str, list[str]], key: str) -> str | None:
     values = params.get(key) or []
     return values[0] if values else None
@@ -262,7 +321,10 @@ def _fetch_json(url: str, cookie: str = "") -> dict:
         headers["Cookie"] = cookie
     request = Request(url, headers=headers)
     with urlopen(request, timeout=30) as response:
-        value = json.loads(response.read().decode("utf-8"))
+        payload = response.read()
+        if payload.startswith(b"\x1f\x8b"):
+            payload = gzip.decompress(payload)
+        value = json.loads(payload.decode("utf-8"))
     if not isinstance(value, dict):
         raise RuntimeError(f"Expected JSON object from {url}")
     return value

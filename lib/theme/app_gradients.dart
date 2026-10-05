@@ -50,7 +50,7 @@ class AppGradients {
   static const LinearGradient roomGiftSend = LinearGradient(
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
-    colors: [Color(0xFFAD8A64), Color(0xFFFFDE8F), Color(0xFFC49E72)],
+    colors: [Color(0xFFF75460), Color(0xFFF937AA)],
   );
 
   static const LinearGradient partyCoverScrim = LinearGradient(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../localization/app_localizations.dart';
@@ -30,31 +31,37 @@ class RoomGiftFooter extends StatelessWidget {
         ),
         child: Row(
           children: [
-            InkWell(
-              onTap: onOpenWallet,
-              child: Row(
-                children: [
-                  Image.asset(
-                    AppAssets.lanhuRoomGiftCoin,
-                    width: AppSpacing.roomGiftCoinSize.r,
-                    height: AppSpacing.roomGiftCoinSize.r,
-                  ),
-                  SizedBox(width: AppSpacing.xs.w),
-                  Text(
-                    '${state.balance}',
-                    style: AppTextStyles.roomGiftBalance,
-                  ),
-                  SizedBox(width: AppSpacing.xs.w),
-                  Image.asset(
-                    AppAssets.lanhuRoomGiftBalanceArrow,
-                    width: AppSpacing.roomGiftBalanceArrowSize.r,
-                    height: AppSpacing.roomGiftBalanceArrowSize.r,
-                    color: AppColors.roomGiftTextMuted,
-                  ),
-                ],
+            Expanded(
+              child: InkWell(
+                onTap: onOpenWallet,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset(
+                      AppAssets.lanhuRoomGiftCoin,
+                      width: AppSpacing.roomGiftCoinSize.r,
+                      height: AppSpacing.roomGiftCoinSize.r,
+                    ),
+                    SizedBox(width: AppSpacing.xs.w),
+                    Flexible(
+                      child: Text(
+                        '${state.balance}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.roomGiftBalance,
+                      ),
+                    ),
+                    SizedBox(width: AppSpacing.xs.w),
+                    Image.asset(
+                      AppAssets.lanhuRoomGiftBalanceArrow,
+                      width: AppSpacing.roomGiftBalanceArrowWidth.r,
+                      height: AppSpacing.roomGiftBalanceArrowSize.r,
+                    ),
+                  ],
+                ),
               ),
             ),
-            const Spacer(),
+            SizedBox(width: AppSpacing.sm.w),
             _GiftSendControl(
               state: state,
               viewModel: viewModel,
@@ -81,16 +88,41 @@ class _GiftSendControl extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final options = state.selectedGift?.countOptions ?? const [1, 8, 18, 888];
+    final quickOptions = options.take(4).toList();
+    if (!quickOptions.contains(state.giftCount)) {
+      if (quickOptions.length == 4) quickOptions.removeLast();
+      quickOptions.add(state.giftCount);
+    }
     return Container(
+      width: AppSpacing.roomGiftSendControlWidth.w,
       height: AppSpacing.roomGiftSendHeight.h,
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.roomGiftSelectedBorder),
+      decoration: const BoxDecoration(
+        color: AppColors.roomGiftQuantitySurface,
         borderRadius: AppRadius.pillBorder,
       ),
       clipBehavior: Clip.hardEdge,
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
+          for (final count in quickOptions)
+            Expanded(
+              child: InkWell(
+                key: ValueKey('room-gift-count-$count'),
+                onTap: state.isSending
+                    ? null
+                    : () => viewModel.setGiftCount(count),
+                child: Center(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      '$count',
+                      style: state.giftCount == count
+                          ? AppTextStyles.roomGiftCount
+                          : AppTextStyles.roomGiftCountInactive,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           PopupMenuButton<int>(
             enabled: !state.isSending,
             color: AppColors.roomGiftPopupSurface,
@@ -128,22 +160,15 @@ class _GiftSendControl extends StatelessWidget {
                   child: Text('$count', style: AppTextStyles.roomGiftTarget),
                 ),
             ],
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm.w),
-              child: Row(
-                children: [
-                  Text(
-                    '${state.giftCount}',
-                    style: AppTextStyles.roomGiftCount,
-                  ),
-                  SizedBox(width: AppSpacing.xs.w),
-                  Image.asset(
-                    AppAssets.lanhuRoomGiftCountArrow,
-                    width: AppSpacing.roomGiftCountArrowSize.r,
-                    height: AppSpacing.roomGiftCountArrowSize.r,
-                    color: AppColors.roomGiftTextMuted,
-                  ),
-                ],
+            child: SizedBox(
+              width: AppSpacing.xxl.w,
+              height: AppSpacing.roomGiftSendHeight.h,
+              child: Center(
+                child: Image.asset(
+                  AppAssets.lanhuRoomGiftCountArrow,
+                  width: AppSpacing.roomGiftCountArrowSize.r,
+                  height: AppSpacing.roomGiftCountArrowSize.r,
+                ),
               ),
             ),
           ),
@@ -152,9 +177,9 @@ class _GiftSendControl extends StatelessWidget {
                 ? null
                 : () async {
                     final sent = await viewModel.sendSelectedGift();
-                    if (sent) onSent();
+                    if (sent && context.mounted) onSent();
                   },
-            child: Ink(
+            child: Container(
               width: AppSpacing.roomGiftSendWidth.w,
               height: AppSpacing.roomGiftSendHeight.h,
               decoration: const BoxDecoration(
@@ -183,55 +208,61 @@ class _GiftSendControl extends StatelessWidget {
   }
 }
 
-Future<int?> _showCustomCountDialog(
-  BuildContext context,
-  int currentCount,
-) async {
-  final controller = TextEditingController(text: '$currentCount');
-  final count = await showDialog<int>(
+Future<int?> _showCustomCountDialog(BuildContext context, int currentCount) {
+  return showDialog<int>(
     context: context,
-    builder: (dialogContext) {
-      return AlertDialog(
-        backgroundColor: AppColors.roomGiftPopupSurface,
-        shape: const RoundedRectangleBorder(
-          borderRadius: AppRadius.roomGiftPopupBorder,
-        ),
-        title: Text(
-          context.l10n.t('room.gift.customCount'),
-          style: AppTextStyles.roomMoreSectionTitle,
-        ),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          keyboardType: TextInputType.number,
-          style: AppTextStyles.roomGiftCount,
-          decoration: InputDecoration(
-            hintText: context.l10n.t('room.gift.countHint'),
-            hintStyle: AppTextStyles.roomGiftStatus,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(
-              context.l10n.t('app.cancel'),
-              style: AppTextStyles.roomGiftTarget,
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              final value = int.tryParse(controller.text.trim());
-              Navigator.pop(dialogContext, value);
-            },
-            child: Text(
-              context.l10n.t('room.gift.confirm'),
-              style: AppTextStyles.roomGiftCount,
-            ),
-          ),
-        ],
-      );
-    },
+    builder: (_) => _GiftCountDialog(currentCount: currentCount),
   );
-  controller.dispose();
-  return count;
+}
+
+class _GiftCountDialog extends HookWidget {
+  const _GiftCountDialog({required this.currentCount});
+
+  final int currentCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = useTextEditingController(text: '$currentCount');
+    return AlertDialog(
+      backgroundColor: AppColors.roomGiftPopupSurface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: AppRadius.roomGiftPopupBorder,
+      ),
+      title: Text(
+        context.l10n.t('room.gift.customCount'),
+        style: AppTextStyles.roomMoreSectionTitle,
+      ),
+      content: TextField(
+        controller: controller,
+        autofocus: true,
+        keyboardType: TextInputType.number,
+        style: AppTextStyles.roomGiftCount,
+        decoration: InputDecoration(
+          hintText: context.l10n.t('room.gift.countHint'),
+          hintStyle: AppTextStyles.roomGiftStatus,
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(
+            context.l10n.t('app.cancel'),
+            style: AppTextStyles.roomGiftTarget,
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            final value = int.tryParse(controller.text.trim());
+            if (value != null && value > 0) {
+              Navigator.pop(context, value);
+            }
+          },
+          child: Text(
+            context.l10n.t('room.gift.confirm'),
+            style: AppTextStyles.roomGiftCount,
+          ),
+        ),
+      ],
+    );
+  }
 }

@@ -129,15 +129,23 @@ class AppAssets {
   static const String lanhuRoomBottomMore =
       'assets/lanhu/room/room_bottom_more.png';
   static const String lanhuRoomGiftCoin =
-      'assets/lanhu/room/room_gift_coin.webp';
+      'assets/lanhu/room/room_gift_coin.png';
   static const String lanhuRoomGiftBalanceArrow =
-      'assets/lanhu/room/room_gift_balance_arrow.webp';
+      'assets/lanhu/room/room_gift_balance_arrow.png';
   static const String lanhuRoomGiftCountArrow =
-      'assets/lanhu/room/room_gift_count_arrow.webp';
+      'assets/lanhu/room/room_gift_count_arrow.png';
   static const String lanhuRoomGiftTargetArrow =
-      'assets/lanhu/room/room_gift_target_arrow.webp';
+      'assets/lanhu/room/room_gift_target_arrow.png';
   static const String lanhuRoomGiftBackpack =
-      'assets/lanhu/room/room_gift_backpack.webp';
+      'assets/lanhu/room/room_gift_backpack.png';
+  static const String roomGiftFirstRecharge =
+      'assets/lanhu/room/room_gift_first_recharge.png';
+  static const String roomGiftCampaign =
+      'assets/lanhu/room/room_gift_campaign.png';
+  static const String roomGiftRecipient =
+      'assets/lanhu/room/room_gift_recipient.png';
+  static const String roomGiftNewBadge =
+      'assets/lanhu/room/room_gift_new_badge.png';
   static const String lanhuRoomMoreShare =
       'assets/lanhu/room/room_more_share.png';
   static const String lanhuRoomMoreReport =
