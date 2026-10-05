@@ -41,6 +41,11 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
   }
 
   Future<void> load() async {
+    final cachedCatalog = _repository.cachedCatalog;
+    if (cachedCatalog != null) {
+      _applyCatalog(cachedCatalog);
+      return;
+    }
     state = state.copyWith(
       status: RoomGiftLoadStatus.loading,
       loadErrorMessage: null,
@@ -49,32 +54,7 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
     );
     try {
       final catalog = await _repository.fetchCatalog();
-      final availableRecipients = catalog.canSendSelf
-          ? _sourceRecipients
-          : _sourceRecipients
-                .where((recipient) => recipient.uid != state.currentUid)
-                .toList(growable: false);
-      final firstTab = catalog.tabs.isEmpty ? null : catalog.tabs.first;
-      final firstGift = firstTab?.gifts.isEmpty == false
-          ? firstTab!.gifts.first
-          : null;
-      final recipientUids = availableRecipients
-          .map((recipient) => recipient.uid)
-          .toSet();
-      state = state.copyWith(
-        status: RoomGiftLoadStatus.ready,
-        balance: catalog.balance,
-        canSendSelf: catalog.canSendSelf,
-        tabs: catalog.tabs,
-        recipients: availableRecipients,
-        targetMode: recipientUids.isEmpty
-            ? RoomGiftTargetMode.allRoom
-            : RoomGiftTargetMode.allMic,
-        selectedRecipientUids: recipientUids,
-        selectedTabId: firstTab?.id,
-        selectedGiftKey: firstGift?.selectionKey,
-        giftCount: firstGift?.defaultGiftNum ?? 1,
-      );
+      _applyCatalog(catalog);
     } catch (error) {
       state = state.copyWith(
         status: RoomGiftLoadStatus.error,
@@ -188,7 +168,16 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
       final nextBalance = gift.isBackpack
           ? state.balance
           : state.balance - gift.price * totalCount;
-      state = state.copyWith(isSending: false, balance: nextBalance);
+      _repository.recordGiftSent(
+        gift: gift,
+        totalCount: totalCount,
+        balance: nextBalance,
+      );
+      state = state.copyWith(
+        isSending: false,
+        balance: nextBalance,
+        tabs: _repository.cachedCatalog?.tabs ?? state.tabs,
+      );
       return true;
     } catch (error) {
       state = state.copyWith(
@@ -218,6 +207,38 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
 
   void _setIssue(RoomGiftIssue issue) {
     state = state.copyWith(issue: issue, issueMessage: null);
+  }
+
+  void _applyCatalog(RoomGiftCatalog catalog) {
+    final availableRecipients = catalog.canSendSelf
+        ? _sourceRecipients
+        : _sourceRecipients
+              .where((recipient) => recipient.uid != state.currentUid)
+              .toList(growable: false);
+    final firstTab = catalog.tabs.isEmpty ? null : catalog.tabs.first;
+    final firstGift = firstTab?.gifts.isEmpty == false
+        ? firstTab!.gifts.first
+        : null;
+    final recipientUids = availableRecipients
+        .map((recipient) => recipient.uid)
+        .toSet();
+    state = state.copyWith(
+      status: RoomGiftLoadStatus.ready,
+      balance: catalog.balance,
+      canSendSelf: catalog.canSendSelf,
+      tabs: catalog.tabs,
+      recipients: availableRecipients,
+      targetMode: recipientUids.isEmpty
+          ? RoomGiftTargetMode.allRoom
+          : RoomGiftTargetMode.allMic,
+      selectedRecipientUids: recipientUids,
+      selectedTabId: firstTab?.id,
+      selectedGiftKey: firstGift?.selectionKey,
+      giftCount: firstGift?.defaultGiftNum ?? 1,
+      loadErrorMessage: null,
+      issue: null,
+      issueMessage: null,
+    );
   }
 
   String _errorMessage(Object error) {

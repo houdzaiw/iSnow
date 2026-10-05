@@ -36,6 +36,28 @@ void main() {
     },
   );
 
+  test('initialization uses cached catalog without fetching again', () async {
+    final catalog = _catalog();
+    final repository = _FakeGiftRepository(
+      catalog: catalog,
+      cachedCatalogValue: catalog,
+    );
+    final viewModel = RoomGiftViewModel(
+      repository: repository,
+      roomId: 'room-1',
+    );
+
+    await viewModel.initialize(
+      recipients: const [friend],
+      onlineCount: 1,
+      currentUid: self.uid,
+    );
+
+    expect(repository.fetchCatalogCalls, 0);
+    expect(viewModel.state.status, RoomGiftLoadStatus.ready);
+    expect(viewModel.state.selectedGift?.name, 'Rose');
+  });
+
   test('single selected recipient maps to sendType single', () async {
     final repository = _FakeGiftRepository(catalog: _catalog());
     final viewModel = RoomGiftViewModel(
@@ -116,6 +138,8 @@ void main() {
     expect(sent, isTrue);
     expect(repository.sentRequests.single.giftSource, 2);
     expect(repository.sentRequests.single.userBackpackId, 900);
+    expect(repository.recordedBalance, 0);
+    expect(repository.recordedTotalCount, 1);
   });
 }
 
@@ -138,16 +162,36 @@ RoomGiftCatalog _catalog({int balance = 1000, bool canSendSelf = true}) {
 }
 
 class _FakeGiftRepository implements RoomGiftRepository {
-  _FakeGiftRepository({required this.catalog});
+  _FakeGiftRepository({required this.catalog, this.cachedCatalogValue});
 
   final RoomGiftCatalog catalog;
+  final RoomGiftCatalog? cachedCatalogValue;
   final List<SendRoomGiftRequest> sentRequests = [];
+  int fetchCatalogCalls = 0;
+  int? recordedBalance;
+  int? recordedTotalCount;
 
   @override
-  Future<RoomGiftCatalog> fetchCatalog() async => catalog;
+  RoomGiftCatalog? get cachedCatalog => cachedCatalogValue;
+
+  @override
+  Future<RoomGiftCatalog> fetchCatalog() async {
+    fetchCatalogCalls += 1;
+    return catalog;
+  }
 
   @override
   Future<int> fetchBalance() async => catalog.balance;
+
+  @override
+  void recordGiftSent({
+    required RoomGift gift,
+    required int totalCount,
+    required int balance,
+  }) {
+    recordedBalance = balance;
+    recordedTotalCount = totalCount;
+  }
 
   @override
   Future<RoomGiftSendResult> sendGift(SendRoomGiftRequest request) async {

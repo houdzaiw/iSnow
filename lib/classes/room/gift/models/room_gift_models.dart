@@ -76,6 +76,26 @@ class RoomGift {
     return configured.isEmpty ? const [1, 8, 18, 888] : configured;
   }
 
+  RoomGift copyWith({int? amount}) {
+    return RoomGift(
+      id: id,
+      name: name,
+      icon: icon,
+      price: price,
+      isCombo: isCombo,
+      tabId: tabId,
+      cornerMark: cornerMark,
+      amount: amount ?? this.amount,
+      userBackpackId: userBackpackId,
+      defaultGiftNum: defaultGiftNum,
+      defaultGiftNumConfig: defaultGiftNumConfig,
+      animationUrl: animationUrl,
+      animationType: animationType,
+      giftType: giftType,
+      itemType: itemType,
+    );
+  }
+
   factory RoomGift.fromJson(
     Map<String, dynamic> json, {
     required int fallbackTabId,
@@ -118,6 +138,10 @@ class RoomGiftTab {
 
   bool get isBackpack => id == backpackId;
 
+  RoomGiftTab copyWith({List<RoomGift>? gifts}) {
+    return RoomGiftTab(id: id, name: name, gifts: gifts ?? this.gifts);
+  }
+
   factory RoomGiftTab.fromJson(Map<String, dynamic> json) {
     final id = _intValue(json['tabId']);
     return RoomGiftTab(
@@ -141,6 +165,18 @@ class RoomGiftCatalog {
   final int balance;
   final bool canSendSelf;
   final List<RoomGiftTab> tabs;
+
+  RoomGiftCatalog copyWith({
+    int? balance,
+    bool? canSendSelf,
+    List<RoomGiftTab>? tabs,
+  }) {
+    return RoomGiftCatalog(
+      balance: balance ?? this.balance,
+      canSendSelf: canSendSelf ?? this.canSendSelf,
+      tabs: tabs ?? this.tabs,
+    );
+  }
 }
 
 class SendRoomGiftRequest {

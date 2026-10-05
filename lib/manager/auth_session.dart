@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../model/login_response.dart';
 import '../model/user_profile.dart';
+import 'room_gift_manager.dart';
 
 class AuthSession {
   AuthSession._();
@@ -23,6 +24,7 @@ class AuthSession {
     required String areaCode,
     required String countryCode,
   }) async {
+    RoomGiftManager.instance.clear();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_tokenKey, response.token ?? '');
     await prefs.setInt(_uidKey, response.uid ?? 0);
@@ -98,6 +100,7 @@ class AuthSession {
   }
 
   Future<void> clear() async {
+    RoomGiftManager.instance.clear();
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_tokenKey);
     await prefs.remove(_uidKey);

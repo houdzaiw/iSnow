@@ -84,7 +84,7 @@ class _GiftSheetHarness extends StatelessWidget {
   }
 }
 
-class _SheetGiftRepository implements RoomGiftRepository {
+class _SheetGiftRepository extends RoomGiftRepository {
   @override
   Future<RoomGiftCatalog> fetchCatalog() async {
     return const RoomGiftCatalog(

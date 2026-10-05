@@ -1,29 +1,61 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../manager/auth_session.dart';
 import '../../../manager/http_api.dart';
 import '../../../manager/http_dio_manager.dart';
+import '../../../manager/room_gift_manager.dart';
 import '../../../model/server_response.dart';
 import 'models/room_gift_models.dart';
 
 final roomGiftRepositoryProvider = Provider<RoomGiftRepository>((ref) {
-  return NadyRoomGiftRepository(HttpDioManager());
+  return NadyRoomGiftRepository(
+    HttpDioManager(),
+    authSession: AuthSession.instance,
+    giftManager: RoomGiftManager.instance,
+  );
 });
 
 abstract class RoomGiftRepository {
+  RoomGiftCatalog? get cachedCatalog => null;
+
   Future<RoomGiftCatalog> fetchCatalog();
 
   Future<int> fetchBalance();
 
   Future<RoomGiftSendResult> sendGift(SendRoomGiftRequest request);
+
+  void recordGiftSent({
+    required RoomGift gift,
+    required int totalCount,
+    required int balance,
+  }) {}
 }
 
 class NadyRoomGiftRepository implements RoomGiftRepository {
-  const NadyRoomGiftRepository(this._httpManager);
+  NadyRoomGiftRepository(
+    this._httpManager, {
+    AuthSession? authSession,
+    RoomGiftManager? giftManager,
+  }) : _authSession = authSession ?? AuthSession.instance,
+       _giftManager = giftManager ?? RoomGiftManager.instance;
 
   final HttpDioManager _httpManager;
+  final AuthSession _authSession;
+  final RoomGiftManager _giftManager;
+
+  @override
+  RoomGiftCatalog? get cachedCatalog => _giftManager.catalog;
 
   @override
   Future<RoomGiftCatalog> fetchCatalog() async {
+    final uid = await _authSession.uid();
+    return _giftManager.getOrLoad(
+      cacheKey: 'user:${uid ?? 0}',
+      loader: _fetchCatalogFromNetwork,
+    );
+  }
+
+  Future<RoomGiftCatalog> _fetchCatalogFromNetwork() async {
     final tabFuture = _fetchGiftTabs();
     final backpackFuture = _fetchBackpackSafely();
     final balanceFuture = _fetchBalanceSafely();
@@ -42,6 +74,19 @@ class NadyRoomGiftRepository implements RoomGiftRepository {
       balance: purseBalance ?? tabResult.balance,
       canSendSelf: canSendSelf,
       tabs: tabs,
+    );
+  }
+
+  @override
+  void recordGiftSent({
+    required RoomGift gift,
+    required int totalCount,
+    required int balance,
+  }) {
+    _giftManager.recordGiftSent(
+      gift: gift,
+      totalCount: totalCount,
+      balance: balance,
     );
   }
 
@@ -174,4 +219,13 @@ class _GiftTabResult {
 
   final int balance;
   final List<RoomGiftTab> tabs;
+}
+
+Future<void> preloadRoomGiftCatalog() async {
+  if (!await AuthSession.instance.isLoggedIn()) return;
+  try {
+    await NadyRoomGiftRepository(HttpDioManager()).fetchCatalog();
+  } catch (_) {
+    // Opening the gift panel retries whenever the singleton cache is empty.
+  }
 }
