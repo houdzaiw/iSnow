@@ -236,6 +236,7 @@ String _targetLabel(BuildContext context, RoomGiftTargetMode mode) {
   return switch (mode) {
     RoomGiftTargetMode.allMic => context.l10n.t('room.gift.allMic'),
     RoomGiftTargetMode.allRoom => context.l10n.t('room.gift.allRoom'),
+    RoomGiftTargetMode.room => context.l10n.t('room.gift.room'),
     RoomGiftTargetMode.selected => context.l10n.t('room.gift.select'),
   };
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../manager/app_socket_manager.dart';
 import '../../manager/auth_session.dart';
@@ -12,6 +13,11 @@ import '../../model/room_models.dart';
 import '../../model/room_socket_message.dart';
 import '../../model/server_response.dart';
 import '../../model/user_profile.dart';
+import 'gift/models/room_gift_models.dart';
+
+final roomRepositoryProvider = Provider<RoomRepository>(
+  (ref) => RoomRepository(),
+);
 
 class RoomRepository {
   RoomRepository({
@@ -36,6 +42,22 @@ class RoomRepository {
   AppSocketState get socketState => _roomManager.socketState;
   RoomAgoraState get agoraState => _roomManager.agoraState;
   Stream<RoomSocketMessage> get socketMessages => _socketManager.messages;
+
+  RoomGiftAudience giftAudience(String roomId) => RoomGiftAudience(
+    isInRoom: roomState.isInRoom && roomState.currentRoomId == roomId,
+    onlineCount: roomState.roomInfo?.audienceCount ?? 0,
+    recipients: [
+      for (final mic in roomState.micList)
+        if ((mic.uid ?? 0) > 0)
+          RoomGiftRecipient(
+            uid: mic.uid!,
+            seatPosition: mic.position,
+            nickname:
+                '${mic.userInfo?['nick'] ?? mic.userInfo?['nickname'] ?? ''}',
+            avatar: mic.userInfo?['avatar']?.toString(),
+          ),
+    ],
+  );
 
   void addListener(VoidCallback listener) {
     _roomManager.addListener(listener);

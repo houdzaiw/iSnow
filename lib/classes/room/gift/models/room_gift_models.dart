@@ -1,4 +1,15 @@
-enum RoomGiftTargetMode { allMic, allRoom, selected }
+enum RoomGiftTargetMode { allMic, allRoom, selected, room }
+
+class RoomGiftAudience {
+  const RoomGiftAudience({
+    required this.isInRoom,
+    required this.onlineCount,
+    required this.recipients,
+  });
+  final bool isInRoom;
+  final int onlineCount;
+  final List<RoomGiftRecipient> recipients;
+}
 
 enum RoomGiftSendType {
   single(1),
@@ -45,6 +56,8 @@ class RoomGift {
     this.itemType,
     this.banner,
     this.jumpLink,
+    this.direction,
+    this.videoMode,
   });
 
   final int id;
@@ -64,10 +77,58 @@ class RoomGift {
   final String? itemType;
   final String? banner;
   final String? jumpLink;
+  final int? direction;
+  final int? videoMode;
 
   bool get isBackpack => tabId == RoomGiftTab.backpackId;
 
   String get selectionKey => '$tabId:$id:${userBackpackId ?? 0}';
+
+  // Value equality keeps animation-family providers stable across combo rebuilds.
+  @override
+  bool operator ==(Object other) =>
+      other is RoomGift &&
+      id == other.id &&
+      tabId == other.tabId &&
+      name == other.name &&
+      icon == other.icon &&
+      price == other.price &&
+      isCombo == other.isCombo &&
+      amount == other.amount &&
+      userBackpackId == other.userBackpackId &&
+      animationUrl == other.animationUrl &&
+      animationType == other.animationType &&
+      direction == other.direction &&
+      videoMode == other.videoMode &&
+      cornerMark == other.cornerMark &&
+      defaultGiftNum == other.defaultGiftNum &&
+      defaultGiftNumConfig == other.defaultGiftNumConfig &&
+      giftType == other.giftType &&
+      itemType == other.itemType &&
+      banner == other.banner &&
+      jumpLink == other.jumpLink;
+  @override
+  int get hashCode => Object.hashAll([
+    id,
+    tabId,
+    name,
+    icon,
+    price,
+    isCombo,
+    amount,
+    userBackpackId,
+    animationUrl,
+    animationType,
+    direction,
+    videoMode,
+    cornerMark,
+    defaultGiftNum,
+    defaultGiftNumConfig,
+    giftType,
+    itemType,
+    banner,
+    jumpLink,
+  ]);
 
   /// Preserves campaign parameters while adding the current app language.
   String resolvedCampaignUrl(String languageCode) {
@@ -95,7 +156,7 @@ class RoomGift {
     return configured.isEmpty ? const [1, 8, 18, 888] : configured;
   }
 
-  RoomGift copyWith({int? amount}) {
+  RoomGift copyWith({int? amount, String? animationUrl}) {
     return RoomGift(
       id: id,
       name: name,
@@ -108,12 +169,14 @@ class RoomGift {
       userBackpackId: userBackpackId,
       defaultGiftNum: defaultGiftNum,
       defaultGiftNumConfig: defaultGiftNumConfig,
-      animationUrl: animationUrl,
+      animationUrl: animationUrl ?? this.animationUrl,
       animationType: animationType,
       giftType: giftType,
       itemType: itemType,
       banner: banner,
       jumpLink: jumpLink,
+      direction: direction,
+      videoMode: videoMode,
     );
   }
 
@@ -123,7 +186,7 @@ class RoomGift {
   }) {
     final defaultGiftNum = _nullableIntValue(json['defaultGiftNum']);
     return RoomGift(
-      id: _intValue(json['id']),
+      id: _intValue(json['goodsId'] ?? json['id']),
       name: json['name']?.toString() ?? '',
       icon: json['icon']?.toString() ?? '',
       price: _intValue(json['price']),
@@ -142,6 +205,8 @@ class RoomGift {
       itemType: json['itemType']?.toString(),
       banner: json['banner']?.toString(),
       jumpLink: json['jumpLink']?.toString(),
+      direction: _nullableIntValue(json['direction']),
+      videoMode: _nullableIntValue(json['videoMode']),
     );
   }
 }
@@ -247,6 +312,11 @@ class RoomGiftSendResult {
   const RoomGiftSendResult({this.comboId});
 
   final String? comboId;
+
+  factory RoomGiftSendResult.fromJson(Object? value) {
+    final id = value is Map ? value['comboId'] : value;
+    return RoomGiftSendResult(comboId: id is String ? id : null);
+  }
 }
 
 int _intValue(Object? value) => _nullableIntValue(value) ?? 0;

@@ -171,12 +171,16 @@ class _RoomMicSeat extends StatelessWidget {
       onLongPress: onLongPress,
       child: Column(
         children: [
-          _SeatCircle(
-            seat: seat,
-            isMine: isMine,
-            isPending: isPending,
-            circleSize: circleSize,
-            avatarSize: avatarSize,
+          RoomGiftSeatAnchor(
+            uid: seat.uid,
+            position: seat.position,
+            child: _SeatCircle(
+              seat: seat,
+              isMine: isMine,
+              isPending: isPending,
+              circleSize: circleSize,
+              avatarSize: avatarSize,
+            ),
           ),
           SizedBox(height: 6.h),
           Text(

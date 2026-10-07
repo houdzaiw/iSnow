@@ -1,4 +1,12 @@
 class AppAssets {
+  // Optional CDN-to-local mappings; keep resource paths out of room Views.
+  static const Map<String, String> roomGiftLocalImages = {};
+  static const Map<int, String> roomGiftLocalAnimations = {};
+  static const roomGiftComboEffect =
+      'assets/room_gift/combo_button_animation.pag';
+  static const roomGiftJackpotEffect =
+      'assets/room_gift/jackpot_full_screen_anim.mp4';
+  static const roomGiftLuckyEffect = 'assets/room_gift/luck_win_small.mp4';
   const AppAssets._();
 
   static const String iconMissing = 'assets/lanhu/common/icon_missing.png';

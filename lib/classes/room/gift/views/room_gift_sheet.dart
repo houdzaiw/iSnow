@@ -147,6 +147,17 @@ class RoomGiftSheet extends HookConsumerWidget {
                     Expanded(
                       child: _GiftBody(state: state, viewModel: viewModel),
                     ),
+                    SizedBox(
+                      height: AppSpacing.giftPanelSummaryHeight.h,
+                      child: Text(
+                        state.selectedGift?.isBackpack == true
+                            ? '${state.targetCount} recipients · ${state.totalGiftCount} gifts'
+                            : '${state.targetCount} recipients · ${state.totalCoinCost} coins',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.roomGiftStatus,
+                      ),
+                    ),
                     RoomGiftFooter(
                       state: state,
                       viewModel: viewModel,
@@ -240,6 +251,9 @@ String _issueText(BuildContext context, RoomGiftState state) {
     RoomGiftIssue.noRecipient => context.l10n.t('room.gift.noRecipient'),
     RoomGiftIssue.notEnoughCoin => context.l10n.t('room.gift.notEnoughCoin'),
     RoomGiftIssue.notEnoughGift => context.l10n.t('room.gift.notEnoughGift'),
+    RoomGiftIssue.roomUnavailable => context.l10n.t(
+      'room.gift.roomUnavailable',
+    ),
     RoomGiftIssue.requestFailed =>
       state.issueMessage?.isNotEmpty == true
           ? state.issueMessage!

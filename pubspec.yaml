@@ -71,6 +71,14 @@ dependencies:
   centrifuge: ^0.20.0
   in_app_purchase: 3.2.2
   in_app_purchase_android: 0.4.0+10
+  flutter_cache_manager: ^3.4.1
+  video_player: ^2.9.1
+  svgaplayer_flutter:
+    path: packages/room_svga
+  pag:
+    path: packages/room_pag
+  flutter_vap_plus:
+    path: packages/room_vap
 
 dev_dependencies:
   flutter_test:
@@ -110,3 +118,4 @@ flutter:
     - assets/lanhu/room/
     - assets/lanhu/wallet/
     - assets/wallet/
+    - assets/room_gift/

@@ -1,4 +1,16 @@
 class AppSpacing {
+  static const double giftTrajectoryArcHeight = 32;
+  static const double giftTrajectoryIconSize = 40;
+  static const double giftSlotHeight = 52;
+  static const double giftSlotAvatarSize = 34;
+  static const double giftSlotIconSize = 42;
+  static const double giftSlotComboSize = 46;
+  static const double giftBannerHeight = 52;
+  static const double giftBannerTop = 64;
+  static const double giftLuckyBottom = 190;
+  static const double giftOverlayBottom = 82;
+  static const double giftPanelSummaryHeight = 20;
+  static const double giftSlotAreaMaxRatio = 0.6;
   const AppSpacing._();
 
   static const double xxs = 2;

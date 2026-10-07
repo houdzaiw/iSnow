@@ -2,6 +2,7 @@ import '../../../manager/app_socket_manager.dart';
 import '../../../manager/room_agora_manager.dart';
 import '../../../manager/room_manager.dart';
 import '../../../model/room_models.dart';
+import '../gift/models/room_gift_event_models.dart';
 
 enum RoomChatFilter { all, chat, gift }
 
@@ -85,6 +86,7 @@ class RoomChatEntry {
     this.senderAvatar,
     this.senderUid,
     this.isLocal = false,
+    this.gift,
   });
 
   final String id;
@@ -95,6 +97,7 @@ class RoomChatEntry {
   final String? senderAvatar;
   final int? senderUid;
   final bool isLocal;
+  final RoomGiftPublicMessage? gift;
 
   bool get isGift => kind == RoomChatEntryKind.gift;
   bool get isChat =>
@@ -122,6 +125,7 @@ class RoomPageState {
     this.roomNo = '',
     this.roomDesc,
     this.onlineCount = 0,
+    this.roomWeekVal = 0,
     this.roomInfo,
     this.enterResponse,
     this.seats = const [],
@@ -149,6 +153,7 @@ class RoomPageState {
   final String roomNo;
   final String? roomDesc;
   final int onlineCount;
+  final int roomWeekVal;
   final RoomInfo? roomInfo;
   final EnterRoomResp? enterResponse;
   final List<RoomSeatViewData> seats;
@@ -218,6 +223,7 @@ class RoomPageState {
     String? roomNo,
     Object? roomDesc = _sentinel,
     int? onlineCount,
+    int? roomWeekVal,
     RoomInfo? roomInfo,
     Object? enterResponse = _sentinel,
     List<RoomSeatViewData>? seats,
@@ -249,6 +255,7 @@ class RoomPageState {
           ? this.roomDesc
           : roomDesc as String?,
       onlineCount: onlineCount ?? this.onlineCount,
+      roomWeekVal: roomWeekVal ?? this.roomWeekVal,
       roomInfo: roomInfo ?? this.roomInfo,
       enterResponse: identical(enterResponse, _sentinel)
           ? this.enterResponse

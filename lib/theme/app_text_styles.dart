@@ -3,6 +3,26 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 class AppTextStyles {
+  static const TextStyle giftEffectTitle = TextStyle(
+    color: AppColors.roomGiftGold,
+    fontSize: 13,
+    fontWeight: FontWeight.w700,
+  );
+  static const TextStyle giftEffectSubtitle = TextStyle(
+    color: AppColors.roomGiftText,
+    fontSize: 11,
+    fontWeight: FontWeight.w400,
+  );
+  static const TextStyle giftComboCount = TextStyle(
+    color: AppColors.roomGiftGold,
+    fontSize: 22,
+    fontWeight: FontWeight.w800,
+  );
+  static const TextStyle giftLuckyAmount = TextStyle(
+    color: AppColors.roomGiftGold,
+    fontSize: 24,
+    fontWeight: FontWeight.w800,
+  );
   const AppTextStyles._();
 
   static const TextStyle navTitle = TextStyle(

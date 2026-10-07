@@ -74,17 +74,21 @@ class _RoomHeader extends StatelessWidget {
                       SizedBox(width: 6.w),
                       _MetricChip(
                         asset: AppAssets.lanhuRoomHeaderMicSeat,
-                        text: '$occupiedCount/20',
+                        text: '$occupiedCount/${state.seats.length}',
                       ),
                     ],
                   ),
+                  if (state.roomWeekVal > 0)
+                    Text(
+                      'Week · ${_formatCompact(state.roomWeekVal)}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.giftEffectSubtitle,
+                    ),
                 ],
               ),
             ),
-            _HeaderIconButton(
-              asset: AppAssets.lanhuRoomPower,
-              onTap: onExit,
-            ),
+            _HeaderIconButton(asset: AppAssets.lanhuRoomPower, onTap: onExit),
           ],
         ),
       ),

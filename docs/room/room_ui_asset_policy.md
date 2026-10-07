@@ -37,3 +37,10 @@
 - 金币、背包、数量/接收人箭头、麦位占位图和 NEW 徽章使用这张设计稿的 PNG 切图，不再使用旧版 Nady WebP 图标。
 - 礼物、头像、价格、库存、数量配置和分类来自接口/缓存；不得把设计稿示例礼物当作业务数据。NEW 仅在接口 `cornerMark` 指定时显示，不伪造 CP、VIP 等标识。
 - 所有礼物面板视觉参数统一维护在 `lib/theme/`。布局和资源说明见 `docs/room/gift_panel_ui.md`。
+
+## Gift Effects
+
+- 送礼动效允许复用 PRD 指定的 Nady SVGA/PAG/VAP 资源，放入 `assets/room_gift/`，在该目录 manifest 记录来源，并通过 `AppAssets` 声明；不能把动效资源当作蓝湖图标替代品。
+- 礼物图标优先使用本地 `AppAssets.roomGiftLocalImages` 映射，其次使用服务端图标及图片缓存；无法加载时继续显示红色缺省图。
+- 动画资源类型、缓存、本地映射与降级统一由 `RoomGiftAssetResolver` 处理，不得在多个 UI 层分别猜测格式。
+- 麦位轨迹只使用 Flutter 原生动画；礼物面板、公屏、卡槽、横幅和动效层仍禁止使用 Flutter `Icon`/`Icons.*`。

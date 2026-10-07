@@ -4,12 +4,16 @@ import '../../../../model/server_response.dart';
 import '../models/room_gift_models.dart';
 import '../room_gift_repository.dart';
 import 'room_gift_state.dart';
+import 'room_gift_send_controller.dart';
 
 final roomGiftViewModelProvider = StateNotifierProvider.autoDispose
     .family<RoomGiftViewModel, RoomGiftState, String>((ref, roomId) {
       return RoomGiftViewModel(
         repository: ref.watch(roomGiftRepositoryProvider),
         roomId: roomId,
+        sendController: ref.watch(
+          roomGiftSendControllerProvider(roomId).notifier,
+        ),
       );
     });
 
@@ -17,10 +21,15 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
   RoomGiftViewModel({
     required RoomGiftRepository repository,
     required String roomId,
+    RoomGiftSendController? sendController,
   }) : _repository = repository,
+       _sender = sendController ?? RoomGiftSendController(repository, roomId),
+       _ownsSender = sendController == null,
        super(RoomGiftState(roomId: roomId));
 
   final RoomGiftRepository _repository;
+  final RoomGiftSendController _sender;
+  final bool _ownsSender;
   bool _initialized = false;
   List<RoomGiftRecipient> _sourceRecipients = const [];
 
@@ -54,8 +63,10 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
     );
     try {
       final catalog = await _repository.fetchCatalog();
+      if (!mounted) return;
       _applyCatalog(catalog);
     } catch (error) {
+      if (!mounted) return;
       state = state.copyWith(
         status: RoomGiftLoadStatus.error,
         loadErrorMessage: _errorMessage(error),
@@ -64,6 +75,7 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
   }
 
   void selectTab(int tabId) {
+    if (state.isSending) return;
     final tab = state.tabs.where((item) => item.id == tabId).firstOrNull;
     if (tab == null) return;
     final gift = tab.gifts.isEmpty ? null : tab.gifts.first;
@@ -77,6 +89,7 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
   }
 
   void selectGift(RoomGift gift) {
+    if (state.isSending) return;
     state = state.copyWith(
       selectedTabId: gift.tabId,
       selectedGiftKey: gift.selectionKey,
@@ -87,10 +100,12 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
   }
 
   void selectTargetMode(RoomGiftTargetMode mode) {
+    if (state.isSending) return;
     var selected = state.selectedRecipientUids;
     if (mode == RoomGiftTargetMode.allMic) {
       selected = state.recipients.map((recipient) => recipient.uid).toSet();
-    } else if (mode == RoomGiftTargetMode.allRoom) {
+    } else if (mode == RoomGiftTargetMode.allRoom ||
+        mode == RoomGiftTargetMode.room) {
       selected = const <int>{};
     } else if ((state.targetMode != RoomGiftTargetMode.selected ||
             selected.isEmpty) &&
@@ -106,6 +121,10 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
   }
 
   void toggleRecipient(int uid) {
+    if (state.isSending ||
+        !state.recipients.any((recipient) => recipient.uid == uid)) {
+      return;
+    }
     final selected = {...state.selectedRecipientUids};
     if (!selected.add(uid)) selected.remove(uid);
     final allSelected =
@@ -121,12 +140,20 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
   }
 
   void setGiftCount(int count) {
-    if (count <= 0) return;
+    if (!mounted || state.isSending || count <= 0) return;
     state = state.copyWith(giftCount: count, issue: null, issueMessage: null);
   }
 
   Future<bool> sendSelectedGift() async {
-    if (state.isSending) return false;
+    if (state.isSending || _sender.snapshot.isSending) return false;
+    final audience = _sender.audience;
+    if (audience != null) {
+      if (!audience.isInRoom) {
+        _setIssue(RoomGiftIssue.roomUnavailable);
+        return false;
+      }
+      updateRecipients(audience.recipients, audience.onlineCount);
+    }
     final gift = state.selectedGift;
     if (gift == null) {
       _setIssue(RoomGiftIssue.chooseGift);
@@ -134,13 +161,19 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
     }
 
     final targetUids = _targetUids();
-    if (state.targetMode != RoomGiftTargetMode.allRoom && targetUids.isEmpty) {
+    if ((state.targetMode != RoomGiftTargetMode.allRoom &&
+            state.targetMode != RoomGiftTargetMode.room &&
+            targetUids.isEmpty) ||
+        state.targetCount <= 0) {
       _setIssue(RoomGiftIssue.noRecipient);
       return false;
     }
 
     final totalCount = state.giftCount * state.targetCount;
-    if (gift.isBackpack && (gift.amount ?? 0) < totalCount) {
+    if (gift.isBackpack &&
+        ((gift.amount ?? 0) < totalCount ||
+            gift.userBackpackId == null ||
+            gift.userBackpackId! <= 0)) {
       _setIssue(RoomGiftIssue.notEnoughGift);
       return false;
     }
@@ -151,8 +184,8 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
 
     state = state.copyWith(isSending: true, issue: null, issueMessage: null);
     try {
-      await _repository.sendGift(
-        SendRoomGiftRequest(
+      final updated = await _sender.send(
+        request: SendRoomGiftRequest(
           targetUids: targetUids.isEmpty ? null : targetUids,
           sendType: _sendType(targetUids),
           roomId: state.roomId,
@@ -164,25 +197,32 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
           price: gift.price,
           userBackpackId: gift.userBackpackId,
         ),
-      );
-      final nextBalance = gift.isBackpack
-          ? state.balance
-          : state.balance - gift.price * totalCount;
-      _repository.recordGiftSent(
         gift: gift,
-        totalCount: totalCount,
-        balance: nextBalance,
+        targetCount: state.targetCount,
+        catalog: RoomGiftCatalog(
+          balance: state.balance,
+          canSendSelf: state.canSendSelf,
+          tabs: state.tabs,
+        ),
       );
+      if (!mounted) return updated != null;
+      if (updated == null) {
+        state = state.copyWith(isSending: false);
+        return false;
+      }
       state = state.copyWith(
         isSending: false,
-        balance: nextBalance,
-        tabs: _repository.cachedCatalog?.tabs ?? state.tabs,
+        balance: updated.balance,
+        tabs: updated.tabs,
       );
       return true;
     } catch (error) {
+      if (!mounted) return false;
       state = state.copyWith(
         isSending: false,
-        issue: RoomGiftIssue.requestFailed,
+        issue: error is RoomGiftSendException
+            ? error.issue
+            : RoomGiftIssue.requestFailed,
         issueMessage: _errorMessage(error),
       );
       return false;
@@ -190,14 +230,37 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
   }
 
   List<int> _targetUids() {
-    if (state.targetMode == RoomGiftTargetMode.allRoom) return const [];
+    if (state.targetMode == RoomGiftTargetMode.allRoom ||
+        state.targetMode == RoomGiftTargetMode.room) {
+      return const [];
+    }
     return state.selectedRecipientUids.toList(growable: false);
+  }
+
+  void updateRecipients(List<RoomGiftRecipient> recipients, int onlineCount) {
+    _sourceRecipients = recipients;
+    final available = recipients
+        .where(
+          (user) =>
+              user.uid > 0 &&
+              (state.canSendSelf || user.uid != state.currentUid),
+        )
+        .toList();
+    final uids = available.map((user) => user.uid).toSet();
+    state = state.copyWith(
+      recipients: available,
+      onlineCount: onlineCount,
+      selectedRecipientUids: state.targetMode == RoomGiftTargetMode.allMic
+          ? uids
+          : state.selectedRecipientUids.intersection(uids),
+    );
   }
 
   RoomGiftSendType _sendType(List<int> targetUids) {
     return switch (state.targetMode) {
       RoomGiftTargetMode.allMic => RoomGiftSendType.onMic,
       RoomGiftTargetMode.allRoom => RoomGiftSendType.onRoom,
+      RoomGiftTargetMode.room => RoomGiftSendType.room,
       RoomGiftTargetMode.selected =>
         targetUids.length == 1
             ? RoomGiftSendType.single
@@ -244,5 +307,11 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
   String _errorMessage(Object error) {
     if (error is NadyApiException) return error.message;
     return error.toString();
+  }
+
+  @override
+  void dispose() {
+    if (_ownsSender) _sender.dispose();
+    super.dispose();
   }
 }

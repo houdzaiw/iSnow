@@ -1,0 +1,33 @@
+name: flutter_vap_plus
+description: Is a native plugin for playing alpha video animation
+version: 1.2.10
+homepage: https://github.com/Astra1427/flutter_vap_plus
+
+environment:
+  sdk: '>=3.4.3 <4.0.0'
+  flutter: '>=3.3.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter.
+flutter:
+  # This section identifies this Flutter project as a plugin project.
+  # The 'pluginClass' and Android 'package' identifiers should not ordinarily
+  # be modified. They are used by the tooling to maintain consistency when
+  # adding or updating assets for this project.
+  plugin:
+    platforms:
+      android:
+        package: com.nell.flutter_vap_plus
+        pluginClass: FlutterVapPlugin
+      ios:
+        pluginClass: FlutterVapPlugin

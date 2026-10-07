@@ -11,6 +11,11 @@ import '../../localization/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import 'gift/models/room_gift_models.dart';
 import 'gift/views/room_gift_sheet.dart';
+import 'gift/views/room_gift_overlay.dart';
+import 'gift/views/room_gift_slot_layer.dart';
+import 'gift/views/room_gift_public_screen_item.dart';
+import 'gift/event/room_gift_event_provider.dart';
+import 'gift/trajectory/room_gift_seat_registry.dart';
 import 'models/room_more_tools_models.dart';
 import 'viewmodel/room_state.dart';
 import 'viewmodel/room_more_tools_view_model.dart';
@@ -42,6 +47,13 @@ class RoomPage extends HookConsumerWidget {
     final provider = roomViewModelProvider(roomId);
     final state = ref.watch(provider);
     final messageController = useTextEditingController();
+    final giftRootKey = useMemoized(() => GlobalKey(), [roomId]);
+    final giftRegistry = useMemoized(() => RoomGiftSeatRegistry(giftRootKey), [
+      roomId,
+    ]);
+    final giftSlots = ref.watch(
+      roomGiftEventManagerProvider(roomId).select((value) => value.slots),
+    );
 
     useEffect(() {
       Future.microtask(() {
@@ -88,66 +100,109 @@ class RoomPage extends HookConsumerWidget {
               ),
               child: SafeArea(
                 bottom: false,
-                child: Stack(
-                  children: [
-                    Column(
-                      children: [
-                        _RoomHeader(
-                          state: state,
-                          onMinimize: () {
-                            ref.read(provider.notifier).minimizeRoom();
-                            context.pop();
-                          },
-                          onExit: () async {
-                            await ref.read(provider.notifier).leaveRoom();
-                            if (context.mounted && context.canPop()) {
-                              context.pop();
-                            }
-                          },
-                        ),
-                        _RoomMicGrid(
-                          seats: state.seats,
-                          currentUid: state.currentUid,
-                          pendingSeatPosition: state.pendingSeatPosition,
-                          onSeatTap: (seat) =>
-                              _handleSeatTap(context, ref, provider, seat),
-                          onSeatLongPress: (seat) => _handleSeatLongPress(
-                            context,
-                            ref,
-                            provider,
-                            seat,
-                          ),
-                        ),
-                        _RoomMusicStrip(state: state),
-                        Expanded(
-                          child: _RoomChatPanel(
+                child: RoomGiftSeatScope(
+                  registry: giftRegistry,
+                  child: Stack(
+                    key: giftRootKey,
+                    children: [
+                      Column(
+                        children: [
+                          _RoomHeader(
                             state: state,
-                            onFilterChanged: (filter) => ref
+                            onMinimize: () {
+                              ref.read(provider.notifier).minimizeRoom();
+                              context.pop();
+                            },
+                            onExit: () async {
+                              await ref.read(provider.notifier).leaveRoom();
+                              if (context.mounted && context.canPop()) {
+                                context.pop();
+                              }
+                            },
+                          ),
+                          _RoomMicGrid(
+                            seats: state.seats,
+                            currentUid: state.currentUid,
+                            pendingSeatPosition: state.pendingSeatPosition,
+                            onSeatTap: (seat) =>
+                                _handleSeatTap(context, ref, provider, seat),
+                            onSeatLongPress: (seat) => _handleSeatLongPress(
+                              context,
+                              ref,
+                              provider,
+                              seat,
+                            ),
+                          ),
+                          _RoomMusicStrip(state: state),
+                          Expanded(
+                            child: LayoutBuilder(
+                              builder: (context, constraints) => Column(
+                                children: [
+                                  if (giftSlots.any((slot) => slot != null))
+                                    SizedBox(
+                                      height:
+                                          ((AppSpacing.giftSlotHeight +
+                                                      AppSpacing.xs) *
+                                                  2)
+                                              .h
+                                              .clamp(
+                                                0,
+                                                constraints.maxHeight *
+                                                    AppSpacing
+                                                        .giftSlotAreaMaxRatio,
+                                              ),
+                                      child: SingleChildScrollView(
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: AppSpacing.lg.w,
+                                          ),
+                                          child: RoomGiftSlotLayer(
+                                            slots: giftSlots,
+                                            roomId: roomId,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  Expanded(
+                                    child: _RoomChatPanel(
+                                      state: state,
+                                      onFilterChanged: (filter) => ref
+                                          .read(provider.notifier)
+                                          .setChatFilter(filter),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          _RoomBottomBar(
+                            state: state,
+                            onChatTap: () => _showRoomComposer(
+                              context,
+                              ref,
+                              provider,
+                              messageController,
+                            ),
+                            onToggleMic: () => ref
                                 .read(provider.notifier)
-                                .setChatFilter(filter),
+                                .toggleLocalMicrophone(),
+                            onToggleSpeaker: () =>
+                                ref.read(provider.notifier).toggleSpeaker(),
+                            onGiftTap: () => _showRoomGiftPanel(context, state),
+                            onMoreTap: () =>
+                                _showRoomMoreToolsSheet(context, ref, provider),
                           ),
+                        ],
+                      ),
+                      Positioned.fill(
+                        child: RoomGiftOverlay(
+                          roomId: roomId,
+                          registry: giftRegistry,
                         ),
-                        _RoomBottomBar(
-                          state: state,
-                          onChatTap: () => _showRoomComposer(
-                            context,
-                            ref,
-                            provider,
-                            messageController,
-                          ),
-                          onToggleMic: () => ref
-                              .read(provider.notifier)
-                              .toggleLocalMicrophone(),
-                          onToggleSpeaker: () =>
-                              ref.read(provider.notifier).toggleSpeaker(),
-                          onGiftTap: () => _showRoomGiftPanel(context, state),
-                          onMoreTap: () =>
-                              _showRoomMoreToolsSheet(context, ref, provider),
-                        ),
-                      ],
-                    ),
-                    if (state.isLoading) const _RoomLoadingOverlay(),
-                  ],
+                      ),
+                      if (state.isLoading) const _RoomLoadingOverlay(),
+                    ],
+                  ),
                 ),
               ),
             ),

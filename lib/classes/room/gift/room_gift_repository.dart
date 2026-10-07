@@ -109,7 +109,7 @@ class NadyRoomGiftRepository implements RoomGiftRepository {
     );
     final server = NadyServerResponse<RoomGiftSendResult>.fromJson(
       _asMap(response),
-      (json) => RoomGiftSendResult(comboId: json?.toString()),
+      RoomGiftSendResult.fromJson,
     );
     if (!server.isSuccess) throw server.toException();
     return server.data ?? const RoomGiftSendResult();

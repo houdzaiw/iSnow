@@ -1,0 +1,10 @@
+{
+  "source": "nady/assets/animations",
+  "purpose": "Room gift effects approved by room_gift_flow_v1.0.md",
+  "assets": [
+    {"file": "combo_button_animation.pag", "usage": "Server-confirmed combo button background"},
+    {"file": "jackpot_full_screen_anim.mp4", "usage": "Jackpot full-screen VAP"},
+    {"file": "luck_win_small.mp4", "usage": "Lucky result VAP background"}
+  ],
+  "icons": "Use assets/lanhu/room assets; unavailable icons retain the red missing placeholder"
+}

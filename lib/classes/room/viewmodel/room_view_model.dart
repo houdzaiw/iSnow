@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../manager/app_socket_manager.dart';
@@ -8,41 +9,53 @@ import '../../../manager/room_manager.dart';
 import '../../../model/room_models.dart';
 import '../../../model/room_socket_message.dart';
 import '../room_repository.dart';
+import '../gift/event/room_gift_event_manager.dart';
+import '../gift/event/room_gift_event_parser.dart';
+import '../gift/event/room_gift_event_provider.dart';
+import '../gift/models/room_gift_event_models.dart';
 import 'room_state.dart';
 
-final roomRepositoryProvider = Provider<RoomRepository>((ref) {
-  return RoomRepository();
-});
+export '../room_repository.dart' show roomRepositoryProvider;
 
 final roomViewModelProvider = StateNotifierProvider.autoDispose
     .family<RoomViewModel, RoomPageState, String>((ref, roomId) {
       return RoomViewModel(
         repository: ref.read(roomRepositoryProvider),
         roomId: roomId,
+        giftManager: ref.watch(roomGiftEventManagerProvider(roomId).notifier),
       );
     });
 
 class RoomViewModel extends StateNotifier<RoomPageState> {
-  RoomViewModel({required RoomRepository repository, required String roomId})
-    : _repository = repository,
-      _roomId = roomId,
-      super(RoomPageState.initial(roomId)) {
+  RoomViewModel({
+    required RoomRepository repository,
+    required String roomId,
+    RoomGiftEventManager? giftManager,
+  }) : _repository = repository,
+       _giftManager = giftManager,
+       _roomId = roomId,
+       super(RoomPageState.initial(roomId)) {
     _repository.addListener(_syncFromManager);
     _socketSubscription = _repository.socketMessages.listen(
       _handleSocketMessage,
     );
     unawaited(_loadCurrentUser());
     _syncFromManager();
+    _removeGiftListener = _giftManager?.addListener(_syncGiftState);
   }
 
   final RoomRepository _repository;
+  final RoomGiftEventManager? _giftManager;
+  VoidCallback? _removeGiftListener;
   final String _roomId;
   late final StreamSubscription<RoomSocketMessage> _socketSubscription;
   bool _entering = false;
+  Map<String, RoomGiftPublicMessage> _giftMessages = const {};
 
   Future<void> enterRoom({String roomPassword = '', int followUid = 0}) async {
     if (_entering) return;
     _entering = true;
+    _giftMessages = const {};
     state = RoomPageState.initial(_roomId).copyWith(
       currentUid: state.currentUid,
       currentUserName: state.currentUserName,
@@ -58,6 +71,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
         followUid: followUid,
       );
       _syncFromManager();
+      if (_giftManager != null) _syncGiftState(_giftManager.snapshot);
     } catch (error) {
       state = state.copyWith(
         status: RoomStatus.error,
@@ -318,8 +332,10 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
 
   void _handleSocketMessage(RoomSocketMessage message) {
     if (!_isCurrentRoomMessage(message)) return;
+    if (RoomGiftEventParser.events.contains(message.event)) return;
 
     if (message.event == 'RoomScreenSystemClear') {
+      _giftManager?.reset(clearHistory: true);
       state = state.copyWith(
         messages: [RoomChatEntry.system('Screen has been cleared.')],
       );
@@ -343,6 +359,43 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
     final entry = _chatEntryFromSocket(message);
     if (entry == null) return;
     state = state.copyWith(messages: _appendMessage(entry));
+  }
+
+  void _syncGiftState(RoomGiftEventState gifts) {
+    if (!mounted) return;
+    final previous = _giftMessages;
+    _giftMessages = {for (final gift in gifts.publicMessages) gift.key: gift};
+    final entries = [...state.messages];
+    var changed = false;
+    for (final gift in gifts.publicMessages) {
+      if (identical(previous[gift.key], gift)) continue;
+      final id = 'gift-${gift.key}';
+      final entry = RoomChatEntry(
+        id: id,
+        kind: RoomChatEntryKind.gift,
+        text: '${gift.gift.name} x${gift.count} → ${gift.targetLabel}',
+        createdAt: gift.createdAt,
+        senderName: gift.sender.name,
+        senderAvatar: gift.sender.avatar,
+        senderUid: gift.sender.uid,
+        gift: gift,
+      );
+      final index = entries.indexWhere((entry) => entry.id == id);
+      if (index >= 0) {
+        entries[index] = entry;
+        changed = true;
+      } else if (!previous.containsKey(gift.key)) {
+        entries.add(entry);
+        changed = true;
+      }
+    }
+    if (!changed && gifts.roomWeekVal == state.roomWeekVal) return;
+    state = state.copyWith(
+      roomWeekVal: gifts.roomWeekVal,
+      messages: entries.length > 80
+          ? entries.sublist(entries.length - 80)
+          : entries,
+    );
   }
 
   bool _isCurrentRoomMessage(RoomSocketMessage message) {
@@ -539,6 +592,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
 
   @override
   void dispose() {
+    _removeGiftListener?.call();
     _repository.removeListener(_syncFromManager);
     unawaited(_socketSubscription.cancel());
     super.dispose();

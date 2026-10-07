@@ -8,6 +8,7 @@ enum RoomGiftIssue {
   notEnoughCoin,
   notEnoughGift,
   requestFailed,
+  roomUnavailable,
 }
 
 class RoomGiftState {
@@ -72,9 +73,16 @@ class RoomGiftState {
     return switch (targetMode) {
       RoomGiftTargetMode.allMic ||
       RoomGiftTargetMode.selected => selectedRecipientUids.length,
-      RoomGiftTargetMode.allRoom => onlineCount > 0 ? onlineCount : 1,
+      RoomGiftTargetMode.allRoom => (onlineCount - (canSendSelf ? 0 : 1)).clamp(
+        0,
+        onlineCount,
+      ),
+      RoomGiftTargetMode.room => 1,
     };
   }
+
+  int get totalGiftCount => giftCount * targetCount;
+  int get totalCoinCost => (selectedGift?.price ?? 0) * totalGiftCount;
 
   RoomGiftState copyWith({
     RoomGiftLoadStatus? status,

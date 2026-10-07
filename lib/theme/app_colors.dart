@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
+  static const Color giftSlotBackground = Color(0xCC202026);
+  static const Color giftBannerBackground = Color(0xE6292330);
+  static const Color giftLuckyBackground = Color(0xE63E2435);
   const AppColors._();
 
   static const Color primaryPink = Color(0xFFFF5390);

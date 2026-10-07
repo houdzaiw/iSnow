@@ -306,6 +306,7 @@ class _RoomChatMessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (message.gift != null) return RoomGiftPublicScreenItem(message: message.gift!);
     final isSystem = message.kind == RoomChatEntryKind.system;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
