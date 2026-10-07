@@ -72,7 +72,16 @@ class RoomInfo {
         data['roomUid'] ?? data['roomUID'] ?? data['ownerUid'],
       ),
       roomLock: _asBool(data['roomLock']),
-      audienceCount: _asInt(data['audienceCount'] ?? data['roomAudience']),
+      audienceCount: _asInt(
+        data['audienceCount'] ??
+            data['roomAudience'] ??
+            data['onlineNum'] ??
+            data['inRoomNum'] ??
+            json['audienceCount'] ??
+            json['roomAudience'] ??
+            json['onlineNum'] ??
+            json['inRoomNum'],
+      ),
       raw: json,
     );
   }

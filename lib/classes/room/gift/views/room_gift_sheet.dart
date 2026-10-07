@@ -91,22 +91,17 @@ class RoomGiftSheet extends HookConsumerWidget {
       return null;
     }, [roomId]);
 
-    ref.listen<RoomGiftState>(provider, (previous, next) {
-      if (next.issue == null ||
-          (previous?.issue == next.issue &&
-              previous?.issueMessage == next.issueMessage)) {
-        return;
-      }
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(_issueText(context, next))));
-    });
-
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
     final preferredHeight = AppSpacing.roomGiftPanelHeight.h + bottomPadding;
     final maxHeight =
         MediaQuery.sizeOf(context).height *
         AppSpacing.roomGiftPanelMaxHeightRatio;
+    final hasIssue = state.issue != null;
+    final summary = hasIssue
+        ? _issueText(context, state)
+        : state.selectedGift?.isBackpack == true
+        ? '${state.targetCount} recipients · ${state.totalGiftCount} gifts'
+        : '${state.targetCount} recipients · ${state.totalCoinCost} coins';
 
     return SizedBox(
       width: double.infinity,
@@ -149,13 +144,21 @@ class RoomGiftSheet extends HookConsumerWidget {
                     ),
                     SizedBox(
                       height: AppSpacing.giftPanelSummaryHeight.h,
-                      child: Text(
-                        state.selectedGift?.isBackpack == true
-                            ? '${state.targetCount} recipients · ${state.totalGiftCount} gifts'
-                            : '${state.targetCount} recipients · ${state.totalCoinCost} coins',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.roomGiftStatus,
+                      child: Semantics(
+                        liveRegion: hasIssue,
+                        child: Tooltip(
+                          message: summary,
+                          child: Text(
+                            summary,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: hasIssue
+                                ? AppTextStyles.roomGiftStatus.copyWith(
+                                    color: AppColors.danger,
+                                  )
+                                : AppTextStyles.roomGiftStatus,
+                          ),
+                        ),
                       ),
                     ),
                     RoomGiftFooter(

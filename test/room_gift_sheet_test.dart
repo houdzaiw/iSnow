@@ -11,7 +11,10 @@ import 'package:project/classes/room/gift/models/room_gift_models.dart';
 import 'package:project/classes/room/gift/room_gift_repository.dart';
 import 'package:project/classes/room/gift/views/room_gift_sheet.dart';
 import 'package:project/classes/room/gift/viewmodel/room_gift_view_model.dart';
+import 'package:project/classes/room/gift/viewmodel/room_gift_send_controller.dart';
 import 'package:project/localization/app_localizations.dart';
+import 'package:project/model/room_models.dart';
+import 'package:project/model/server_response.dart';
 import 'package:project/theme/app_theme.dart';
 
 void main() {
@@ -150,6 +153,94 @@ void main() {
     expect(result, RoomGiftSheetResult.openWallet);
   });
 
+  testWidgets('Send uses onlineNum from the live room for all-room gifting', (
+    tester,
+  ) async {
+    final repository = _SheetGiftRepository();
+    final roomInfo = RoomInfo.fromJson({
+      'roomInfoDTO': {'roomId': 'room-1', 'onlineNum': 5},
+    });
+    RoomGiftSheetResult? result;
+    await _openPanel(
+      tester,
+      repository: repository,
+      onlineCount: 5,
+      recipients: const [],
+      audience: RoomGiftAudience(
+        isInRoom: true,
+        onlineCount: roomInfo.audienceCount ?? 0,
+        recipients: const [],
+      ),
+      onResult: (value) => result = value,
+    );
+
+    await tester.tap(find.text('Send'));
+    await tester.pumpAndSettle();
+
+    expect(repository.lastRequest?.sendType, RoomGiftSendType.onRoom);
+    expect(repository.lastRequest?.targetUids, isNull);
+    expect(repository.lastRequest?.giftId, 31);
+    expect(result, RoomGiftSheetResult.sent);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('invalid live recipients show an error inside the gift panel', (
+    tester,
+  ) async {
+    final repository = _SheetGiftRepository();
+    await _openPanel(
+      tester,
+      repository: repository,
+      audience: const RoomGiftAudience(
+        isInRoom: true,
+        onlineCount: 2,
+        recipients: [],
+      ),
+    );
+
+    await tester.tap(find.text('Send'));
+    await tester.pumpAndSettle();
+
+    expect(repository.lastRequest, isNull);
+    expect(find.byType(RoomGiftSheet), findsOneWidget);
+    expect(
+      find.text('Please choose a recipient').hitTestable(),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'Send errors are visible and leave the panel available to retry',
+    (tester) async {
+      final repository = _SheetGiftRepository(
+        sendError: const NadyApiException(
+          message: 'Gift unavailable',
+          code: 1002,
+        ),
+      );
+      RoomGiftSheetResult? result;
+      await _openPanel(
+        tester,
+        repository: repository,
+        onResult: (value) => result = value,
+      );
+
+      await tester.tap(find.text('Send'));
+      await tester.pumpAndSettle();
+
+      expect(repository.lastRequest, isNotNull);
+      expect(result, isNull);
+      expect(find.text('Gift unavailable').hitTestable(), findsOneWidget);
+      expect(find.text('Send').hitTestable(), findsOneWidget);
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(RoomGiftSheet)),
+      );
+      expect(container.read(roomGiftViewModelProvider('room-1')).balance, 1000);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('quantity menu retains custom counts in the compact footer', (
     tester,
   ) async {
@@ -237,7 +328,11 @@ Future<void> _openPanel(
   double bottomPadding = 0,
   _SheetGiftRepository? repository,
   ValueChanged<RoomGiftSheetResult?>? onResult,
+  RoomGiftAudience? audience,
+  int onlineCount = 2,
+  List<RoomGiftRecipient>? recipients,
 }) async {
+  final giftRepository = repository ?? _SheetGiftRepository();
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   tester.view.padding = FakeViewPadding(bottom: bottomPadding);
@@ -248,9 +343,13 @@ Future<void> _openPanel(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        roomGiftRepositoryProvider.overrideWithValue(
-          repository ?? _SheetGiftRepository(),
-        ),
+        roomGiftRepositoryProvider.overrideWithValue(giftRepository),
+        if (audience != null)
+          roomGiftSendControllerProvider('room-1').overrideWith(
+            (ref) =>
+                RoomGiftSendController(giftRepository, 'room-1')
+                  ..audience = audience,
+          ),
       ],
       child: ScreenUtilInit(
         designSize: const Size(375, 812),
@@ -267,7 +366,11 @@ Future<void> _openPanel(
             key: const ValueKey('gift-test-screen'),
             child: child!,
           ),
-          home: _GiftSheetHarness(onResult: onResult),
+          home: _GiftSheetHarness(
+            onResult: onResult,
+            onlineCount: onlineCount,
+            recipients: recipients,
+          ),
         ),
       ),
     ),
@@ -279,9 +382,15 @@ Future<void> _openPanel(
 }
 
 class _GiftSheetHarness extends StatelessWidget {
-  const _GiftSheetHarness({this.onResult});
+  const _GiftSheetHarness({
+    this.onResult,
+    this.onlineCount = 2,
+    this.recipients,
+  });
 
   final ValueChanged<RoomGiftSheetResult?>? onResult;
+  final int onlineCount;
+  final List<RoomGiftRecipient>? recipients;
 
   @override
   Widget build(BuildContext context) {
@@ -293,12 +402,22 @@ class _GiftSheetHarness extends StatelessWidget {
             final result = await showRoomGiftSheet(
               context: context,
               roomId: 'room-1',
-              onlineCount: 2,
+              onlineCount: onlineCount,
               currentUid: 10,
-              recipients: const [
-                RoomGiftRecipient(uid: 10, nickname: 'Self', seatPosition: 0),
-                RoomGiftRecipient(uid: 20, nickname: 'Friend', seatPosition: 1),
-              ],
+              recipients:
+                  recipients ??
+                  const [
+                    RoomGiftRecipient(
+                      uid: 10,
+                      nickname: 'Self',
+                      seatPosition: 0,
+                    ),
+                    RoomGiftRecipient(
+                      uid: 20,
+                      nickname: 'Friend',
+                      seatPosition: 1,
+                    ),
+                  ],
             );
             onResult?.call(result);
           },
@@ -310,9 +429,10 @@ class _GiftSheetHarness extends StatelessWidget {
 }
 
 class _SheetGiftRepository extends RoomGiftRepository {
-  _SheetGiftRepository({this.catalog = _catalog});
+  _SheetGiftRepository({this.catalog = _catalog, this.sendError});
 
   final RoomGiftCatalog catalog;
+  final Object? sendError;
   SendRoomGiftRequest? lastRequest;
 
   @override
@@ -329,6 +449,7 @@ class _SheetGiftRepository extends RoomGiftRepository {
   @override
   Future<RoomGiftSendResult> sendGift(SendRoomGiftRequest request) async {
     lastRequest = request;
+    if (sendError != null) throw sendError!;
     return const RoomGiftSendResult();
   }
 }

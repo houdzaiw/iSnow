@@ -3,6 +3,43 @@ import 'package:project/classes/room/viewmodel/room_state.dart';
 import 'package:project/model/room_models.dart';
 
 void main() {
+  test('room audience count accepts the Nady onlineNum field', () {
+    final roomInfo = RoomInfo.fromJson({
+      'roomInfoDTO': {'roomId': '1001', 'onlineNum': 5},
+    });
+
+    expect(roomInfo.audienceCount, 5);
+  });
+
+  test('audience count aliases preserve numeric strings and explicit zero', () {
+    for (final field in [
+      'audienceCount',
+      'roomAudience',
+      'onlineNum',
+      'inRoomNum',
+    ]) {
+      expect(
+        RoomInfo.fromJson({'roomId': '1001', field: '5'}).audienceCount,
+        5,
+      );
+    }
+    expect(
+      RoomInfo.fromJson({
+        'onlineNum': 5,
+        'roomInfoDTO': {'roomId': '1001'},
+      }).audienceCount,
+      5,
+    );
+    expect(
+      RoomInfo.fromJson({
+        'roomId': '1001',
+        'audienceCount': 0,
+        'onlineNum': 5,
+      }).audienceCount,
+      0,
+    );
+  });
+
   test('parses zero-based mic position and nested room user data', () {
     final mic = RoomMicModel.fromJson({
       'position': 0,

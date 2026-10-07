@@ -51,3 +51,10 @@
 - 运行方式：`flutter test test/room_gift_*_test.dart`、`flutter analyze`、`flutter build apk --debug -t lib/lib_dev.dart`。
 - 实际收费送礼、多设备广播与 iOS 原生播放仍需要测试账号/真机验收；自动化测试不会向真实账户发起扣费请求。
 - 全量测试中已有的 login_detail_page_test 默认区号 +996 断言失败与本次修改无关，未修改登录流程。
+
+## Send Button Fix (2026-10-07)
+
+- Nady 房间详情中的在线人数可能使用 `onlineNum`。RoomInfo 统一兼容 `audienceCount`、`roomAudience`、`onlineNum`、`inRoomNum`，包括嵌套房间信息和外层人数，防止发送前读取实时数据时误把全房目标数量变为 0；显式的 0 不会被其他字段覆盖。
+- 发送校验和接口错误直接显示在面板底部，不再依赖被 ModalBottomSheet 遮挡的房间 SnackBar。请求失败保留面板与余额，成功才关闭面板。
+- 开发模式的 `[RoomGiftSend][roomId]` 日志区分 `blocked`、`submit`、`success`、`failed`，提交日志包含目标模式、每人数量、目标人数及总价，不包含鉴权信息。
+- 新增在线人数解析、真实面板点击 Send、目标失效、服务端错误以及请求期间关闭面板的回归测试。送礼和房间模型相关共 60 项测试通过，原有 320/375 面板截图基线保持不变；未向真实账号发起扣费请求。

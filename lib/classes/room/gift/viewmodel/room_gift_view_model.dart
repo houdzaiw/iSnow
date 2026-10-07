@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../model/server_response.dart';
@@ -145,7 +146,11 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
   }
 
   Future<bool> sendSelectedGift() async {
-    if (state.isSending || _sender.snapshot.isSending) return false;
+    if (!mounted) return false;
+    if (state.isSending || _sender.snapshot.isSending) {
+      _log('blocked: requestInFlight');
+      return false;
+    }
     final audience = _sender.audience;
     if (audience != null) {
       if (!audience.isInRoom) {
@@ -183,6 +188,11 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
     }
 
     state = state.copyWith(isSending: true, issue: null, issueMessage: null);
+    _log(
+      'submit: giftId=${gift.id}, mode=${state.targetMode.name}, '
+      'giftCount=${state.giftCount}, targetCount=${state.targetCount}, '
+      'onlineCount=${state.onlineCount}, totalCost=${state.totalCoinCost}',
+    );
     try {
       final updated = await _sender.send(
         request: SendRoomGiftRequest(
@@ -215,8 +225,10 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
         balance: updated.balance,
         tabs: updated.tabs,
       );
+      _log('success: giftId=${gift.id}');
       return true;
     } catch (error) {
+      _log('failed: $error');
       if (!mounted) return false;
       state = state.copyWith(
         isSending: false,
@@ -269,7 +281,17 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
   }
 
   void _setIssue(RoomGiftIssue issue) {
+    _log(
+      'blocked: ${issue.name}, mode=${state.targetMode.name}, '
+      'targetCount=${state.targetCount}, onlineCount=${state.onlineCount}',
+    );
     state = state.copyWith(issue: issue, issueMessage: null);
+  }
+
+  void _log(String message) {
+    if (kDebugMode && mounted) {
+      debugPrint('[RoomGiftSend][${state.roomId}] $message');
+    }
   }
 
   void _applyCatalog(RoomGiftCatalog catalog) {

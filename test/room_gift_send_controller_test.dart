@@ -203,6 +203,29 @@ void main() {
     },
   );
 
+  test(
+    'closing the panel during a failed request does not read disposed state',
+    () async {
+      final vm = RoomGiftViewModel(
+        repository: repository,
+        roomId: '123',
+        sendController: sender,
+      );
+      await vm.initialize(
+        recipients: recipients,
+        onlineCount: 3,
+        currentUid: 10,
+      );
+      repository.pending = Completer();
+      final sending = vm.sendSelectedGift();
+      vm.dispose();
+      repository.pending!.completeError(StateError('request failed'));
+
+      expect(await sending, isFalse);
+      expect(repository.recordCount, 0);
+    },
+  );
+
   for (final mode in RoomGiftTargetMode.values) {
     test(
       'target mode ${mode.name} has compatible type, UIDs and total price',
