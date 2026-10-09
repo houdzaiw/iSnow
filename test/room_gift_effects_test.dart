@@ -100,6 +100,61 @@ void main() {
   );
 
   testWidgets(
+    'audience sender flies from the gift-button anchor without a mic seat',
+    (tester) async {
+      final root = GlobalKey();
+      final registry = RoomGiftSeatRegistry(root);
+      var consumed = 0;
+      await tester.pumpWidget(
+        app(
+          Stack(
+            key: root,
+            children: [
+              const Positioned(
+                left: 180,
+                top: 650,
+                child: RoomGiftSeatAnchor(
+                  uid: null,
+                  position: -1,
+                  isOrigin: true,
+                  child: SizedBox(width: 40, height: 40),
+                ),
+              ),
+              const Positioned(
+                left: 100,
+                top: 80,
+                child: RoomGiftSeatAnchor(
+                  uid: 20,
+                  position: 1,
+                  child: SizedBox(width: 40, height: 40),
+                ),
+              ),
+              Positioned.fill(
+                child: RoomGiftTrajectoryLayer(
+                  events: [sample()],
+                  registry: registry,
+                  onConsumed: (_) => consumed++,
+                ),
+              ),
+            ],
+          ),
+          registry: registry,
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(registry.coordinate(10), isNull);
+      expect(registry.sourceCoordinate(10)!.position, -1);
+      expect(find.byType(RoomGiftImage), findsOneWidget);
+      expect(consumed, 1);
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pump();
+      expect(find.byType(RoomGiftImage), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'trajectory completes and cancels after a seat moves or is removed',
     (tester) async {
       final root = GlobalKey();

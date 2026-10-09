@@ -48,6 +48,7 @@ class _RoomGiftTrajectoryLayerState extends State<RoomGiftTrajectoryLayer> {
         for (final task in RoomGiftTrajectoryTask.fromEvent(
           event,
           widget.registry.coordinate,
+          sourceCoordinate: widget.registry.sourceCoordinate,
         )) {
           if (_tasks.length < 32) _tasks[task.key] = task;
         }
@@ -114,7 +115,9 @@ class _FlyingGiftState extends State<_FlyingGift>
   }
 
   bool _matches(RoomGiftSeatCoordinate original) {
-    final current = widget.registry.coordinate(original.uid);
+    final current = original.position == -1
+        ? widget.registry.sourceCoordinate(original.uid)
+        : widget.registry.coordinate(original.uid);
     return current != null &&
         current.position == original.position &&
         (current.offset - original.offset).distance < AppSpacing.xs;

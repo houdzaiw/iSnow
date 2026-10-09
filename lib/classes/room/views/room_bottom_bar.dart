@@ -45,7 +45,12 @@ class _RoomBottomBar extends StatelessWidget {
             onTap: onToggleMic,
           ),
           const Spacer(),
-          _GiftButton(onTap: onGiftTap),
+          RoomGiftSeatAnchor(
+            uid: null,
+            position: -1,
+            isOrigin: true,
+            child: _GiftButton(onTap: onGiftTap),
+          ),
           const Spacer(),
           _BottomIconButton(
             asset: state.agoraState.mutedSpeaker

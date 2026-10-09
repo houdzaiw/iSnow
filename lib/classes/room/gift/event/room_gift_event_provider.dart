@@ -18,7 +18,7 @@ final roomGiftEventManagerProvider = StateNotifierProvider.autoDispose
         messages: repository.socketMessages,
         onSelfGift: sender.acknowledge,
         onComboEnd: (id) {
-          if (id.isEmpty || sender.snapshot.message?.comboId == id) {
+          if (id.isEmpty || sender.snapshot.comboId == id) {
             sender.resetCombo();
           }
         },
@@ -36,7 +36,10 @@ final roomGiftEventManagerProvider = StateNotifierProvider.autoDispose
       });
       unawaited(
         repository.currentUid().then((uid) {
-          if (manager.isAlive) manager.currentUid = uid;
+          if (manager.isAlive) {
+            manager.currentUid = uid;
+            sender.currentUid = uid;
+          }
         }),
       );
       ref.onDispose(binding.dispose);
@@ -89,12 +92,7 @@ class _RoomGiftLifecycle with WidgetsBindingObserver {
       manager.reset();
     }
     _socketStatus = status;
-    manager.setVisible(
-      inRoom &&
-          !room.isMinimized &&
-          _foreground &&
-          status == AppSocketStatus.ready,
-    );
+    manager.setVisible(inRoom && !room.isMinimized && _foreground);
   }
 
   @override

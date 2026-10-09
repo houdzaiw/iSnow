@@ -5,6 +5,7 @@ class AppSpacing {
   static const double giftSlotAvatarSize = 34;
   static const double giftSlotIconSize = 42;
   static const double giftSlotComboSize = 46;
+  static const double giftComboButtonSize = 100;
   static const double giftBannerHeight = 52;
   static const double giftBannerTop = 64;
   static const double giftLuckyBottom = 190;

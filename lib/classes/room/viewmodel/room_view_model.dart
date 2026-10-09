@@ -440,6 +440,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
       'RoomScreenImageEvent' => RoomChatEntryKind.image,
       'RoomScreenExpressionEvent' => RoomChatEntryKind.expression,
       'roomScreenSendGiftComboEvent' => RoomChatEntryKind.gift,
+      'RoomSendGiftComboPublicScreenEvent' => RoomChatEntryKind.gift,
       'RoomSendGiftPublicScreenEvent' => RoomChatEntryKind.gift,
       'CustomPublicScreenMsg' => RoomChatEntryKind.system,
       'RoomScreenLuckyBagSendEvent' => RoomChatEntryKind.gift,

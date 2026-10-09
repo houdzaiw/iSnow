@@ -2,6 +2,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:project/classes/room/gift/models/room_gift_models.dart';
 
 void main() {
+  test('successful send string data is the authoritative combo ID', () {
+    expect(
+      RoomGiftSendResult.fromJson('2026100822360620019602').comboId,
+      '2026100822360620019602',
+    );
+  });
   group('RoomGift', () {
     test('parses Nady gift fields and configured counts', () {
       final gift = RoomGift.fromJson({

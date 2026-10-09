@@ -68,7 +68,7 @@ void main() {
   );
 
   test(
-    'HTTP success updates money without inventing a combo or visual event',
+    'HTTP success enables the confirmed combo without inventing a visual event',
     () async {
       await sender.send(
         request: request(),
@@ -78,17 +78,66 @@ void main() {
       );
       expect(sender.snapshot.catalog!.balance, 960);
       expect(sender.snapshot.message, isNull);
-      expect(sender.snapshot.canContinue, isFalse);
+      expect(sender.snapshot.comboId, 'server-combo');
+      expect(sender.snapshot.canContinue, isTrue);
       sender.acknowledge(echo(), DateTime.now());
       expect(sender.snapshot.canContinue, isTrue);
       await sender.continueCombo();
       expect(repository.requests.last.comboId, 'server-combo');
-      expect(repository.requests.last.comboCount, 2);
+      expect(repository.requests.last.comboCount, 1);
       expect(sender.snapshot.catalog!.balance, 920);
-      expect(sender.snapshot.awaitingEcho, isTrue);
-      expect(await sender.continueCombo(), isFalse);
+      expect(sender.snapshot.awaitingEcho, isFalse);
+      expect(sender.snapshot.canContinue, isTrue);
       sender.acknowledge(echo(count: 2), DateTime.now());
       expect(sender.snapshot.canContinue, isTrue);
+    },
+  );
+
+  test('missing HTTP combo ID can fall back to the matching echo', () async {
+    repository.result = const RoomGiftSendResult();
+    await sender.send(
+      request: request(),
+      gift: gift,
+      targetCount: 1,
+      catalog: catalog,
+    );
+    expect(sender.snapshot.canContinue, isFalse);
+    sender.acknowledge(echo(), DateTime.now());
+    expect(sender.snapshot.canContinue, isTrue);
+  });
+
+  test(
+    'confirmed combo rejects a different echo and locks repeated taps',
+    () async {
+      await sender.send(
+        request: request(),
+        gift: gift,
+        targetCount: 1,
+        catalog: catalog,
+      );
+      sender.acknowledge(
+        RoomScreenGiftMsg(
+          gift: gift,
+          uid: 10,
+          userInfo: const RoomGiftUser(uid: 10),
+          uids: const [20],
+          giftCount: 2,
+          comboId: 'unrelated-combo',
+          roomId: '123',
+        ),
+        DateTime.now(),
+      );
+      expect(sender.snapshot.message, isNull);
+      repository.pending = Completer();
+      final continuation = sender.continueCombo();
+      expect(sender.snapshot.isSending, isTrue);
+      expect(await sender.continueCombo(), isFalse);
+      repository.pending!.complete(
+        const RoomGiftSendResult(comboId: 'server-combo'),
+      );
+      expect(await continuation, isTrue);
+      expect(repository.requests, hasLength(2));
+      expect(repository.requests.last.comboCount, 1);
     },
   );
 
@@ -330,6 +379,7 @@ class _Repository extends RoomGiftRepository {
   final RoomGiftCatalog catalog;
   final List<SendRoomGiftRequest> requests = [];
   Completer<RoomGiftSendResult>? pending;
+  RoomGiftSendResult result = const RoomGiftSendResult(comboId: 'server-combo');
   int recordCount = 0;
   @override
   Future<int> fetchBalance() async => catalog.balance;
@@ -338,9 +388,7 @@ class _Repository extends RoomGiftRepository {
   @override
   Future<RoomGiftSendResult> sendGift(SendRoomGiftRequest request) async {
     requests.add(request);
-    return pending == null
-        ? const RoomGiftSendResult(comboId: 'http-id')
-        : await pending!.future;
+    return pending == null ? result : await pending!.future;
   }
 
   @override

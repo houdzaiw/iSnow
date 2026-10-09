@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:pag/pag.dart';
 
 import '../../../../theme/app_theme.dart';
 import '../queue/room_gift_slot_queue.dart';
 import '../viewmodel/room_gift_send_controller.dart';
+import 'room_gift_combo_button.dart';
 import 'room_gift_image.dart';
 
 class RoomGiftSlotLayer extends ConsumerWidget {
@@ -32,11 +32,8 @@ class RoomGiftSlotLayer extends ConsumerWidget {
                     key: ValueKey(slot.key),
                     slot: slot,
                     comboEnabled:
-                        sender.canContinue &&
-                        sender.message?.comboKey == slot.message.comboKey,
-                    sending:
-                        sender.isSending &&
-                        sender.message?.comboKey == slot.message.comboKey,
+                        sender.canContinue && sender.matches(slot.message),
+                    sending: sender.isSending && sender.matches(slot.message),
                     onCombo: () => ref
                         .read(roomGiftSendControllerProvider(roomId).notifier)
                         .continueCombo(),
@@ -132,41 +129,10 @@ class _GiftSlotCard extends StatelessWidget {
           width: AppSpacing.giftSlotComboSize.r,
           height: AppSpacing.giftSlotComboSize.r,
           child: comboEnabled || sending
-              ? Material(
-                  color: AppColors.roomGiftAccent,
-                  shape: const CircleBorder(),
-                  child: Stack(
-                    children: [
-                      Positioned.fill(
-                        child: IgnorePointer(
-                          child: PAGView.asset(
-                            AppAssets.roomGiftComboEffect,
-                            autoPlay: true,
-                            repeatCount: PAGView.REPEAT_COUNT_LOOP,
-                          ),
-                        ),
-                      ),
-                      InkWell(
-                        customBorder: const CircleBorder(),
-                        onTap: comboEnabled ? onCombo : null,
-                        child: Center(
-                          child: sending
-                              ? SizedBox(
-                                  width: AppSpacing.iconSizeSm.r,
-                                  height: AppSpacing.iconSizeSm.r,
-                                  child: const CircularProgressIndicator(
-                                    color: AppColors.textInverse,
-                                    strokeWidth: AppSpacing.xxs,
-                                  ),
-                                )
-                              : Text(
-                                  'Combo',
-                                  style: AppTextStyles.giftEffectSubtitle,
-                                ),
-                        ),
-                      ),
-                    ],
-                  ),
+              ? RoomGiftComboButton(
+                  enabled: comboEnabled,
+                  sending: sending,
+                  onTap: onCombo,
                 )
               : null,
         ),

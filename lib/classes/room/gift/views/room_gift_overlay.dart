@@ -10,6 +10,7 @@ import '../trajectory/room_gift_seat_registry.dart';
 import '../trajectory/room_gift_trajectory_layer.dart';
 import '../viewmodel/room_gift_send_controller.dart';
 import 'room_gift_banner_layer.dart';
+import 'room_gift_combo_button.dart';
 import 'room_lucky_gift_layer.dart';
 
 class RoomGiftOverlay extends ConsumerWidget {
@@ -23,6 +24,7 @@ class RoomGiftOverlay extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final gifts = ref.watch(roomGiftEventManagerProvider(roomId));
+    final sender = ref.watch(roomGiftSendControllerProvider(roomId));
     final manager = ref.read(roomGiftEventManagerProvider(roomId).notifier);
     ref.listen(roomGiftSendControllerProvider(roomId), (previous, next) {
       if (next.issue == null || next.issue == previous?.issue) return;
@@ -71,6 +73,25 @@ class RoomGiftOverlay extends ConsumerWidget {
               key: ValueKey(gifts.lucky.first.key),
               result: gifts.lucky.first,
               onEnd: () => manager.completeLucky(gifts.lucky.first.key),
+            ),
+          ),
+        // A confirmed send must not wait for a broadcast slot to expose Combo.
+        if ((sender.canContinue ||
+                sender.isSending && sender.comboId.isNotEmpty) &&
+            !gifts.slots.any(
+              (slot) => slot != null && sender.matches(slot.message),
+            ))
+          Positioned(
+            bottom: AppSpacing.giftOverlayBottom.h,
+            right: AppSpacing.lg.w,
+            child: RoomGiftComboButton(
+              key: const ValueKey('room-gift-confirmed-combo'),
+              size: AppSpacing.giftComboButtonSize,
+              enabled: sender.canContinue,
+              sending: sender.isSending,
+              onTap: () => ref
+                  .read(roomGiftSendControllerProvider(roomId).notifier)
+                  .continueCombo(),
             ),
           ),
       ],

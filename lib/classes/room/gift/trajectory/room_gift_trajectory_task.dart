@@ -14,9 +14,10 @@ class RoomGiftTrajectoryTask {
 
   static List<RoomGiftTrajectoryTask> fromEvent(
     RoomGiftEffectTask event,
-    RoomGiftSeatCoordinate? Function(int) coordinate,
-  ) {
-    final source = coordinate(event.message.uid);
+    RoomGiftSeatCoordinate? Function(int) coordinate, {
+    RoomGiftSeatCoordinate? Function(int)? sourceCoordinate,
+  }) {
+    final source = (sourceCoordinate ?? coordinate)(event.message.uid);
     if (source == null) return const [];
     return [
       for (final uid in event.message.targetUids.toSet())

@@ -178,4 +178,7 @@ class HttpApi {
 
   /// 长连接 connection token
   static const longLinkToken = '/token/long-link';
+
+  /// 当前 API 环境对应的 WebSocket 地址
+  static const longLinkUrl = '/config/long-link-url';
 }

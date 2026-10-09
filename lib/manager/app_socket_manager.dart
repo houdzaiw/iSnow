@@ -66,11 +66,34 @@ class AppSocketState {
 }
 
 class AppSocketManager extends ChangeNotifier {
-  AppSocketManager._();
+  AppSocketManager._({
+    centrifuge.Client Function(String, centrifuge.ClientConfig)? clientFactory,
+    Future<dynamic> Function(String, {Map<String, dynamic>? queryParameters})?
+    get,
+  }) : _clientFactory = clientFactory ?? centrifuge.createClient,
+       _get = get;
+
+  @visibleForTesting
+  AppSocketManager.forTesting({
+    required centrifuge.Client Function(String, centrifuge.ClientConfig)
+    clientFactory,
+    required Future<dynamic> Function(
+      String, {
+      Map<String, dynamic>? queryParameters,
+    })
+    get,
+  }) : this._(clientFactory: clientFactory, get: get);
 
   static final AppSocketManager instance = AppSocketManager._();
 
   final HttpDioManager _httpManager = HttpDioManager();
+  final centrifuge.Client Function(String, centrifuge.ClientConfig)
+  _clientFactory;
+  final Future<dynamic> Function(
+    String, {
+    Map<String, dynamic>? queryParameters,
+  })?
+  _get;
   final StreamController<RoomSocketMessage> _messageController =
       StreamController<RoomSocketMessage>.broadcast();
   final Map<String, centrifuge.Subscription> _subscriptions = {};
@@ -90,12 +113,12 @@ class AppSocketManager extends ChangeNotifier {
     final client = _client;
     if (client != null && _socketUrl == url) {
       if (client.state == centrifuge.State.connected) {
-        _setState(_state.copyWith(status: AppSocketStatus.connected));
+        _syncConnectedState();
         return;
       }
       if (client.state == centrifuge.State.connecting) {
-        await client.ready();
-        _setState(_state.copyWith(status: AppSocketStatus.connected));
+        await client.ready().timeout(const Duration(seconds: 12));
+        _syncConnectedState();
         return;
       }
     }
@@ -104,7 +127,7 @@ class AppSocketManager extends ChangeNotifier {
     _socketUrl = url;
     _setState(const AppSocketState(status: AppSocketStatus.connecting));
 
-    final newClient = centrifuge.createClient(
+    final newClient = _clientFactory(
       url,
       centrifuge.ClientConfig(getToken: (_) => _fetchConnectionToken()),
     );
@@ -112,9 +135,9 @@ class AppSocketManager extends ChangeNotifier {
     _bindClient(newClient);
 
     try {
-      await newClient.connect();
+      await newClient.connect().timeout(const Duration(seconds: 12));
       await newClient.ready().timeout(const Duration(seconds: 12));
-      _setState(_state.copyWith(status: AppSocketStatus.connected));
+      _syncConnectedState();
     } catch (error) {
       _setState(
         _state.copyWith(
@@ -126,9 +149,32 @@ class AppSocketManager extends ChangeNotifier {
     }
   }
 
-  Future<void> joinRoom(String roomId, {required String url}) async {
+  Future<void> joinRoom(String roomId, {String? url}) async {
     final generation = ++_roomJoinGeneration;
-    await connect(url: url);
+    try {
+      // Nady resolves this from the API environment, not the website host.
+      final endpoint =
+          url ?? _socketUrl ?? await _fetchString(HttpApi.longLinkUrl);
+      if (!_isActiveRoomJoin(generation)) return;
+      final uri = Uri.tryParse(endpoint);
+      if (uri == null ||
+          !{'ws', 'wss'}.contains(uri.scheme) ||
+          uri.host.isEmpty) {
+        throw const NadyApiException(message: 'Invalid WebSocket endpoint');
+      }
+      _log('connect endpoint=${uri.scheme}://${uri.host}${uri.path}');
+      await connect(url: endpoint);
+    } catch (error) {
+      if (_isActiveRoomJoin(generation)) {
+        _setState(
+          _state.copyWith(
+            status: AppSocketStatus.error,
+            errorMessage: error.toString(),
+          ),
+        );
+      }
+      rethrow;
+    }
     if (!_isActiveRoomJoin(generation)) return;
     final client = _client;
     if (client == null) {
@@ -147,33 +193,35 @@ class AppSocketManager extends ChangeNotifier {
     );
 
     final roomChannel = 'room:$roomId';
-    await _subscribeChannel(client, roomChannel);
+    try {
+      await _subscribeChannel(client, roomChannel);
+    } catch (error) {
+      if (_isActiveRoomJoin(generation)) {
+        _setState(
+          _state.copyWith(
+            status: AppSocketStatus.error,
+            errorMessage: error.toString(),
+          ),
+        );
+      }
+      rethrow;
+    }
     if (!_isActiveRoomJoin(generation)) {
       await _unsubscribeChannel(roomChannel);
       return;
     }
 
-    var broadcastSubscribed = false;
     try {
       await _subscribeChannel(client, 'room');
-      broadcastSubscribed = true;
     } catch (error) {
-      debugPrint('Room broadcast socket subscribe failed: $error');
+      _log('optional channel=room subscribe failed: $error');
     }
     if (!_isActiveRoomJoin(generation)) {
       await _unsubscribeChannel(roomChannel);
       return;
     }
 
-    _setState(
-      _state.copyWith(
-        status: AppSocketStatus.ready,
-        roomId: roomId,
-        roomChannelSubscribed: true,
-        broadcastChannelSubscribed: broadcastSubscribed,
-        subscribedChannels: _subscriptions.keys.toList(growable: false),
-      ),
-    );
+    _syncConnectedState();
   }
 
   Future<void> leaveRoom(String roomId) async {
@@ -230,25 +278,47 @@ class AppSocketManager extends ChangeNotifier {
   void _bindClient(centrifuge.Client client) {
     _clientListeners
       ..add(
-        client.connected.listen(
-          (_) => _setState(_state.copyWith(status: AppSocketStatus.connected)),
-        ),
+        client.connected.listen((_) {
+          if (identical(client, _client)) _syncConnectedState();
+        }),
       )
       ..add(
-        client.disconnected.listen(
-          (_) =>
-              _setState(_state.copyWith(status: AppSocketStatus.disconnected)),
-        ),
+        client.connecting.listen((_) {
+          if (!identical(client, _client)) return;
+          _setState(
+            _state.copyWith(
+              status: AppSocketStatus.connecting,
+              roomChannelSubscribed: false,
+              broadcastChannelSubscribed: false,
+              subscribedChannels: const [],
+            ),
+          );
+        }),
       )
       ..add(
-        client.error.listen(
-          (event) => _setState(
+        client.disconnected.listen((_) {
+          if (!identical(client, _client)) return;
+          _setState(
+            _state.copyWith(
+              status: AppSocketStatus.disconnected,
+              roomChannelSubscribed: false,
+              broadcastChannelSubscribed: false,
+              subscribedChannels: const [],
+            ),
+          );
+        }),
+      )
+      ..add(
+        client.error.listen((event) {
+          if (!identical(client, _client)) return;
+          _log('connection error: ${event.error}');
+          _setState(
             _state.copyWith(
               status: AppSocketStatus.error,
               errorMessage: event.error.toString(),
             ),
-          ),
-        ),
+          );
+        }),
       );
   }
 
@@ -256,7 +326,12 @@ class AppSocketManager extends ChangeNotifier {
     centrifuge.Client client,
     String channel,
   ) async {
-    if (_subscriptions.containsKey(channel)) return;
+    final existing = _subscriptions[channel];
+    if (existing != null) {
+      await existing.ready().timeout(const Duration(seconds: 12));
+      _syncConnectedState();
+      return;
+    }
 
     final subscription = client.newSubscription(
       channel,
@@ -265,33 +340,29 @@ class AppSocketManager extends ChangeNotifier {
       ),
     );
 
-    final subscribed = subscription.subscribed.first.timeout(
-      const Duration(seconds: 12),
-    );
     final listeners = <StreamSubscription<dynamic>>[
+      subscription.subscribed.listen((_) => _syncConnectedState()),
+      subscription.subscribing.listen((_) => _syncConnectedState()),
+      subscription.unsubscribed.listen((event) {
+        _log('unsubscribed channel=$channel code=${event.code}');
+        _syncConnectedState();
+      }),
       subscription.publication.listen(
         (event) => _handlePublication(channel, event),
       ),
-      subscription.error.listen(
-        (event) => _setState(
-          _state.copyWith(
-            status: AppSocketStatus.error,
-            errorMessage: event.error.toString(),
-          ),
-        ),
-      ),
+      subscription.error.listen((event) {
+        _log('subscription error channel=$channel: ${event.error}');
+        // Optional broadcasts must not disable the live room channel.
+        _syncConnectedState();
+      }),
     ];
     _subscriptions[channel] = subscription;
     _subscriptionListeners[channel] = listeners;
 
     try {
-      await subscription.subscribe();
-      await subscribed;
-      _setState(
-        _state.copyWith(
-          subscribedChannels: _subscriptions.keys.toList(growable: false),
-        ),
-      );
+      await subscription.subscribe().timeout(const Duration(seconds: 12));
+      await subscription.ready().timeout(const Duration(seconds: 12));
+      _syncConnectedState();
     } catch (_) {
       await _unsubscribeChannel(channel);
       rethrow;
@@ -307,6 +378,41 @@ class AppSocketManager extends ChangeNotifier {
       }
     }
     await subscription?.unsubscribe();
+    if (subscription != null) await _client?.removeSubscription(subscription);
+    _syncConnectedState();
+  }
+
+  void _syncConnectedState() {
+    final connected = _client?.state == centrifuge.State.connected;
+    final channels = connected
+        ? _subscriptions.entries
+              .where(
+                (entry) =>
+                    entry.value.state ==
+                    centrifuge.SubscriptionState.subscribed,
+              )
+              .map((entry) => entry.key)
+              .toList(growable: false)
+        : <String>[];
+    final roomReady =
+        _state.roomId != null && channels.contains('room:${_state.roomId}');
+    _setState(
+      _state.copyWith(
+        status: !connected
+            ? (_client?.state == centrifuge.State.connecting
+                  ? AppSocketStatus.connecting
+                  : AppSocketStatus.disconnected)
+            : roomReady
+            ? AppSocketStatus.ready
+            : _state.roomId != null
+            ? AppSocketStatus.subscribing
+            : AppSocketStatus.connected,
+        roomChannelSubscribed: roomReady,
+        broadcastChannelSubscribed: channels.contains('room'),
+        subscribedChannels: channels,
+        errorMessage: null,
+      ),
+    );
   }
 
   void _handlePublication(String channel, centrifuge.PublicationEvent event) {
@@ -314,12 +420,16 @@ class AppSocketManager extends ChangeNotifier {
     try {
       final decoded = jsonDecode(rawText);
       if (decoded is Map) {
-        _messageController.add(
-          RoomSocketMessage.fromJson(
-            decoded.cast<String, dynamic>(),
-            channel: channel,
-          ),
+        final message = RoomSocketMessage.fromJson(
+          decoded.cast<String, dynamic>(),
+          channel: channel,
         );
+        _log(
+          'receive channel=$channel event=${message.event} '
+          'msgId=${message.msgId} timestamp=${message.timestamp} '
+          'payloadType=${message.payload.runtimeType} bytes=${event.data.length}',
+        );
+        _messageController.add(message);
         return;
       }
       _messageController.add(
@@ -358,7 +468,7 @@ class AppSocketManager extends ChangeNotifier {
     String path, {
     Map<String, dynamic>? queryParameters,
   }) async {
-    final response = await _httpManager.get(
+    final response = await (_get ?? _httpManager.get)(
       path,
       queryParameters: queryParameters,
     );
@@ -391,8 +501,20 @@ class AppSocketManager extends ChangeNotifier {
   }
 
   void _setState(AppSocketState value) {
+    if (value.status != _state.status ||
+        value.roomChannelSubscribed != _state.roomChannelSubscribed ||
+        value.broadcastChannelSubscribed != _state.broadcastChannelSubscribed) {
+      _log(
+        'state=${value.status.name} roomId=${value.roomId} '
+        'channels=${value.subscribedChannels}',
+      );
+    }
     _state = value;
     notifyListeners();
+  }
+
+  void _log(String message) {
+    if (kDebugMode) debugPrint('[RoomSocket] $message');
   }
 }
 

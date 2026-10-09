@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../models/room_gift_event_models.dart';
@@ -20,21 +21,29 @@ class RoomGiftSendState {
     this.isSending = false,
     this.awaitingEcho = false,
     this.message,
+    this.gift,
+    this.confirmedComboId = '',
     this.request,
     this.catalog,
     this.issue,
   });
   final bool isSending, awaitingEcho;
   final RoomScreenGiftMsg? message;
+  final RoomGift? gift;
+  final String confirmedComboId;
+  String get comboId =>
+      confirmedComboId.isNotEmpty ? confirmedComboId : message?.comboId ?? '';
   final SendRoomGiftRequest? request;
   final RoomGiftCatalog? catalog;
   final String? issue;
   bool get canContinue =>
-      !isSending &&
-      !awaitingEcho &&
-      message?.gift.isCombo == 1 &&
-      message!.comboId.isNotEmpty &&
-      request != null;
+      !isSending && gift?.isCombo == 1 && comboId.isNotEmpty && request != null;
+
+  bool matches(RoomScreenGiftMsg other) =>
+      comboId.isNotEmpty &&
+      comboId == other.comboId &&
+      gift?.id == other.gift.id &&
+      request?.giftSource == other.giftSource;
 }
 
 class RoomGiftSendException implements Exception {
@@ -42,7 +51,7 @@ class RoomGiftSendException implements Exception {
   final RoomGiftIssue issue;
 }
 
-/// Shares submission locking and the authoritative combo between panel and slot.
+/// HTTP confirms the combo button; only broadcasts supply visual gift events.
 class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
   RoomGiftSendController(this._repository, this.roomId)
     : super(const RoomGiftSendState());
@@ -54,6 +63,7 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
   int _generation = 0;
   DateTime? _startedAt;
   RoomGiftAudience? audience;
+  int? currentUid;
   bool _inFlight = false;
   Timer? _echoTimeout;
 
@@ -86,14 +96,18 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
     _targetCount = targetCount;
     _startedAt = DateTime.now();
     final previousMessage = request.comboId.isEmpty ? null : state.message;
+    final previousComboId = request.comboId;
+    _echoTimeout?.cancel();
     state = RoomGiftSendState(
       isSending: true,
       request: request,
       catalog: catalog,
       message: previousMessage,
+      gift: gift,
+      confirmedComboId: previousComboId,
     );
     try {
-      await _repository.sendGift(request);
+      final result = await _repository.sendGift(request);
       final nextBalance = gift.isBackpack
           ? catalog.balance
           : (catalog.balance - gift.price * total).clamp(0, catalog.balance);
@@ -106,15 +120,21 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
           _repository.cachedCatalog ??
           deductGift(catalog, gift, total, nextBalance);
       if (!mounted || generation != _generation) return updated;
-      final echoed =
-          state.message != null &&
-          (request.comboId.isEmpty ||
-              state.message!.comboCount >= request.comboCount);
+      final confirmedId = result.comboId?.isNotEmpty == true
+          ? result.comboId!
+          : previousComboId;
       state = RoomGiftSendState(
         request: request,
         catalog: updated,
         message: state.message,
-        awaitingEcho: !echoed && gift.isCombo == 1,
+        gift: gift,
+        confirmedComboId: confirmedId,
+        awaitingEcho:
+            confirmedId.isEmpty && state.message == null && gift.isCombo == 1,
+      );
+      _log(
+        'confirmed giftId=${gift.id} comboId=${state.comboId} '
+        'comboEnabled=${state.canContinue}',
       );
       _echoTimeout?.cancel();
       _echoTimeout = Timer(const Duration(seconds: 5), resetCombo);
@@ -125,8 +145,13 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
           request: request,
           catalog: catalog,
           message: previousMessage,
+          gift: gift,
+          confirmedComboId: previousComboId,
           issue: error.toString(),
         );
+        if (previousComboId.isNotEmpty) {
+          _echoTimeout = Timer(const Duration(seconds: 5), resetCombo);
+        }
       }
       rethrow;
     } finally {
@@ -149,7 +174,7 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
             createdAt.isBefore(
               _startedAt!.subtract(const Duration(seconds: 1)),
             )) ||
-        (request.comboId.isNotEmpty && message.comboId != request.comboId)) {
+        (state.comboId.isNotEmpty && message.comboId != state.comboId)) {
       return;
     }
     final expected = request.targetUids?.toSet();
@@ -166,7 +191,8 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
       request: request,
       catalog: state.catalog,
       message: message,
-      awaitingEcho: message.comboCount < request.comboCount,
+      gift: state.gift,
+      confirmedComboId: state.confirmedComboId,
     );
     _echoTimeout?.cancel();
     _echoTimeout = Timer(const Duration(seconds: 5), resetCombo);
@@ -175,11 +201,11 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
   Future<bool> continueCombo() async {
     if (!state.canContinue) return false;
     final previous = state.request!;
-    final message = state.message!;
+    final comboId = state.comboId;
     final catalog = _repository.cachedCatalog ?? state.catalog;
     if (catalog == null || _gift == null) return false;
     final eligible = audience?.recipients
-        .where((user) => catalog.canSendSelf || user.uid != message.uid)
+        .where((user) => catalog.canSendSelf || user.uid != currentUid)
         .map((user) => user.uid)
         .toSet();
     if (eligible != null &&
@@ -209,8 +235,9 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
           giftId: gift.id,
           giftCount: previous.giftCount,
           giftSource: previous.giftSource,
-          comboId: message.comboId,
-          comboCount: message.comboCount + 1,
+          comboId: comboId,
+          // Nady sends the number of taps in this request, not a running total.
+          comboCount: 1,
           price: gift.price,
           userBackpackId: gift.userBackpackId,
         ),
@@ -225,6 +252,8 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
           request: state.request,
           catalog: state.catalog,
           message: state.message,
+          gift: state.gift,
+          confirmedComboId: state.confirmedComboId,
           issue: error is RoomGiftSendException
               ? error.issue.name
               : error.toString(),
@@ -242,6 +271,10 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
     if (mounted) {
       state = RoomGiftSendState(catalog: state.catalog, isSending: _inFlight);
     }
+  }
+
+  void _log(String message) {
+    if (kDebugMode) debugPrint('[RoomGiftSend][$roomId] $message');
   }
 
   @override

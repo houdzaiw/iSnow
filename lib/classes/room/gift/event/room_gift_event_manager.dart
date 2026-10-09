@@ -83,7 +83,13 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
     try {
       final now = _now();
       final event = _parser.parse(message, roomId, now);
-      if (event == null || _seen.containsKey(event.key)) return;
+      if (event == null || _seen.containsKey(event.key)) {
+        _log(
+          'drop event=${message.event} msgId=${message.msgId} '
+          'reason=${event == null ? 'channel' : 'duplicate'}',
+        );
+        return;
+      }
       _seen[event.key] = now;
       while (_seen.length > 300) {
         _seen.remove(_seen.keys.first);
@@ -95,8 +101,16 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
       if (!state.isVisible ||
           (_acceptAfter != null && event.createdAt.isBefore(_acceptAfter!)) ||
           now.difference(event.createdAt) > const Duration(seconds: 10)) {
+        _log(
+          'drop event=${message.event} msgId=${message.msgId} '
+          'visible=${state.isVisible} ageMs=${now.difference(event.createdAt).inMilliseconds} '
+          'acceptAfter=${_acceptAfter?.millisecondsSinceEpoch}',
+        );
         return;
       }
+      _log(
+        'accept event=${message.event} msgId=${message.msgId} comboId=${event.comboId}',
+      );
       switch (event.kind) {
         case RoomGiftEventKind.gift:
           _receiveGift(event);

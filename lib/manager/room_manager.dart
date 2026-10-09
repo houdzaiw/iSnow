@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
-import '../configs/app_configs.dart';
 import '../configs/app_device.dart';
 import '../model/room_models.dart';
 import '../model/room_socket_message.dart';
@@ -176,12 +175,7 @@ class RoomManager extends ChangeNotifier {
           errorMessage: null,
         ),
       );
-      unawaited(
-        _joinSocketBestEffort(
-          roomId: effectiveRoomId,
-          url: socketUrl ?? _defaultSocketUrl(),
-        ),
-      );
+      unawaited(_joinSocketBestEffort(roomId: effectiveRoomId, url: socketUrl));
       unawaited(refreshRoomData());
     } catch (error) {
       final cleanupRoomId = enterResponse?.roomId.isNotEmpty == true
@@ -379,7 +373,7 @@ class RoomManager extends ChangeNotifier {
 
   Future<void> _joinSocketBestEffort({
     required String roomId,
-    required String url,
+    String? url,
   }) async {
     try {
       await _socketManager.joinRoom(roomId, url: url);
@@ -489,21 +483,6 @@ class RoomManager extends ChangeNotifier {
       throw const NadyApiException(message: 'Not in room');
     }
     return roomId;
-  }
-
-  String _defaultSocketUrl() {
-    final raw = AppConfig.shared.appEnv.socketHost;
-    final uri = Uri.tryParse(raw);
-    if (uri == null || uri.scheme.isEmpty) return raw;
-    final scheme = switch (uri.scheme) {
-      'http' => 'ws',
-      'https' => 'wss',
-      _ => uri.scheme,
-    };
-    final path = uri.path.isEmpty || uri.path == '/'
-        ? '/connection/websocket'
-        : uri.path;
-    return uri.replace(scheme: scheme, path: path).toString();
   }
 
   void _setState(RoomState value) {

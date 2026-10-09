@@ -9,8 +9,8 @@
 
 `RoomRepository.socketMessages -> RoomGiftEventManager -> typed render states`
 
-- 面板与卡槽共用房间级发送控制器，统一锁定请求。HTTP 成功仅扣减本地余额或背包；不创建收礼事件。
-- 首次发送使用空 comboId / comboCount=1；服务端本人广播确认后，卡槽才开放 Combo 按钮。下一次发送等待新的服务端次数回执，不自动重试。
+- 面板与卡槽共用房间级发送控制器，统一锁定请求。HTTP 成功扣减本地余额或背包，并使用返回的 comboId 开放 Combo；不创建收礼事件。
+- 首次发送使用空 comboId / comboCount=1；后续点击沿用成功回执的 comboId。与 Nady 一致，comboCount 表示本次请求的点击次数，单次点击发送 1，不发送广播中的累计次数；等待 HTTP 完成后才允许下一次点击，不自动重试。
 - 发送前重新读取当前麦位与在线人数；过滤无效 UID 和禁止赠送的自己。背包必须有 userBackpackId，库存按每人数量乘目标人数扣减。
 - 支持 sendType 1/2/3/4/6，其中 4 保留 ViewModel/API 兼容入口；原有面板仍展示单选/多选、全麦、全房选项。
 
@@ -27,9 +27,9 @@
 
 ## Visual Layers
 
-- 公屏：头像、礼物图片、名称、累计数量、接收目标、最终中奖金币。
-- 卡槽：原生入数缩放动画、累计数量和服务端确认的 Combo 入口。
-- 轨迹：在 RoomPage Stack 的局部坐标内注册麦位头像中心；按目标拆分原生曲线动画。坐标缺失跳过，麦位移动/离开时取消，结束/销毁释放 controller。
+- 公屏：头像、礼物图片、名称、累计数量、接收目标、最终中奖金币；兼容 Nady 的 RoomSendGiftComboPublicScreenEvent 文本消息。
+- 卡槽：原生入数缩放动画、累计数量和服务端确认的 Combo 入口。广播未到达或卡槽已过期时，已确认的 Combo 单独显示在房间右下角；出现匹配卡槽后只保留卡槽中的入口，不重复展示。
+- 轨迹：在 RoomPage Stack 的局部坐标内注册麦位头像中心；按目标拆分原生曲线动画。发送人不在麦位上时使用底部礼物按钮中心作为起点；目标坐标缺失跳过，麦位移动/离开时取消，结束/销毁释放 controller。
 - 横幅：独立滑入、计时队列；支持服务端 bannerEffectUrl/effectUrl 和 upperEffect。
 - 幸运结果：只展示累计值增量，遵守隐藏标记及 playWinGoldCount；支持小/大倍率、Jackpot、本地 Nady VAP 背景。
 - 全屏：SVGA、PAG、普通 MP4（animationType=6）、透明 VAP 与原生静态礼物降级。播放失败或结束推进下一项，播放器有 25 秒看门狗。
@@ -58,3 +58,13 @@
 - 发送校验和接口错误直接显示在面板底部，不再依赖被 ModalBottomSheet 遮挡的房间 SnackBar。请求失败保留面板与余额，成功才关闭面板。
 - 开发模式的 `[RoomGiftSend][roomId]` 日志区分 `blocked`、`submit`、`success`、`failed`，提交日志包含目标模式、每人数量、目标人数及总价，不包含鉴权信息。
 - 新增在线人数解析、真实面板点击 Send、目标失效、服务端错误以及请求期间关闭面板的回归测试。送礼和房间模型相关共 60 项测试通过，原有 320/375 面板截图基线保持不变；未向真实账号发起扣费请求。
+
+## Successful Send Feedback Fix (2026-10-08)
+
+- 根因之一是忽略 `/api/gift/send` 返回的字符串 comboId，而且 Combo 只挂在广播卡槽上。现在 HTTP 成功即开放独立连击入口，不依赖 Socket 回包，也不伪造公屏、卡槽或礼物动效。缺少 HTTP comboId 时仍可使用匹配的本人广播回执。
+- 默认 Socket 地址改为通过 `HttpApi.longLinkUrl` 请求 `/config/long-link-url`，与 Nady 使用同一 API 环境的连接配置；不再从网站域名拼接 `/connection/websocket`。显式传入的测试地址仍可覆盖配置。
+- 持续监听 SDK 的 connecting/subscribing/subscribed/unsubscribed，房间频道恢复订阅即恢复 ready；可选全局 room 频道失败不影响当前房间。退房时同时从 SDK 移除订阅，保证同房间再次进入可重新订阅。
+- 房间前台可见状态与 Socket ready 分离，避免已确认的连击按钮因为连接尚未就绪而隐藏。断线仍清空视觉队列和旧连击，最小化/后台/退房仍停止展示，不补播历史事件。
+- 开发模式日志：`[RoomSocket]` 显示安全的 endpoint、状态、频道、event、msgId、时间戳和 payload 类型；`[RoomGift][roomId]` 显示接收、重复、不可见、过期和解析失败原因；`[RoomGiftSend][roomId] confirmed` 显示 HTTP 确认的 comboId。日志不输出鉴权 token 或完整用户 payload。
+- 补充 Socket 地址、失败、同房重入、重连后公屏/动效分发、HTTP 独立连击、重复点击锁、320/375 连击布局、非麦位起点及 Nady 文本公屏测试。真机送礼及跨设备广播仍需实际账号验证，自动化不会触发真实扣费。
+- 本次验证：礼物、房间模型与 Socket 相关 75 项测试通过，原有 320/375 截图基线通过，`flutter analyze --no-pub` 无问题。

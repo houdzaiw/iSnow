@@ -15,6 +15,13 @@ class RoomGiftSeatRegistry {
   RoomGiftSeatRegistry(this.rootKey);
   final GlobalKey rootKey;
   final Map<int, ({int position, GlobalKey key})> _anchors = {};
+  GlobalKey? _originKey;
+
+  void registerOrigin(GlobalKey key) => _originKey = key;
+
+  void unregisterOrigin(GlobalKey key) {
+    if (_originKey == key) _originKey = null;
+  }
 
   void register(int uid, int position, GlobalKey key) {
     if (uid > 0) _anchors[uid] = (position: position, key: key);
@@ -26,23 +33,35 @@ class RoomGiftSeatRegistry {
 
   RoomGiftSeatCoordinate? coordinate(int uid) {
     final anchor = _anchors[uid];
+    final offset = _center(anchor?.key);
+    if (anchor == null || offset == null) return null;
+    return RoomGiftSeatCoordinate(
+      uid: uid,
+      position: anchor.position,
+      offset: offset,
+    );
+  }
+
+  RoomGiftSeatCoordinate? sourceCoordinate(int uid) {
+    final seat = coordinate(uid);
+    if (seat != null) return seat;
+    final offset = _center(_originKey);
+    return offset == null
+        ? null
+        : RoomGiftSeatCoordinate(uid: uid, position: -1, offset: offset);
+  }
+
+  Offset? _center(GlobalKey? key) {
     final root = rootKey.currentContext?.findRenderObject();
-    final box = anchor?.key.currentContext?.findRenderObject();
-    if (anchor == null ||
-        root is! RenderBox ||
+    final box = key?.currentContext?.findRenderObject();
+    if (root is! RenderBox ||
         box is! RenderBox ||
         !root.attached ||
         !box.attached ||
         !box.hasSize) {
       return null;
     }
-    return RoomGiftSeatCoordinate(
-      uid: uid,
-      position: anchor.position,
-      offset: root.globalToLocal(
-        box.localToGlobal(box.size.center(Offset.zero)),
-      ),
-    );
+    return root.globalToLocal(box.localToGlobal(box.size.center(Offset.zero)));
   }
 }
 
@@ -66,10 +85,12 @@ class RoomGiftSeatAnchor extends StatefulWidget {
     required this.uid,
     required this.position,
     required this.child,
+    this.isOrigin = false,
   });
   final int? uid;
   final int position;
   final Widget child;
+  final bool isOrigin;
   @override
   State<RoomGiftSeatAnchor> createState() => _RoomGiftSeatAnchorState();
 }
@@ -93,12 +114,15 @@ class _RoomGiftSeatAnchorState extends State<RoomGiftSeatAnchor> {
   }
 
   void _register() {
-    if (widget.uid != null) {
+    if (widget.isOrigin) {
+      _registry?.registerOrigin(_key);
+    } else if (widget.uid != null) {
       _registry?.register(widget.uid!, widget.position, _key);
     }
   }
 
   void _unregister(int? uid) {
+    _registry?.unregisterOrigin(_key);
     if (uid != null) _registry?.unregister(uid, _key);
   }
 

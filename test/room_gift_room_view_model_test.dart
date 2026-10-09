@@ -69,6 +69,18 @@ void main() {
     );
   });
 
+  test('Nady combo public-screen text is not silently ignored', () {
+    repository.messages.add(
+      socket(
+        '{"from":{"uid":10,"nick":"Sender"},"msg":"Sent Rose x1"}',
+        event: 'RoomSendGiftComboPublicScreenEvent',
+        id: 'combo-text',
+      ),
+    );
+    expect(snapshot.messages.last.text, 'Sent Rose x1');
+    expect(snapshot.messages.last.kind, RoomChatEntryKind.gift);
+  });
+
   test(
     'combo public-screen updates preserve chat order and restore history',
     () async {
