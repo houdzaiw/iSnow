@@ -133,7 +133,8 @@ class RoomPage extends HookConsumerWidget {
                               seat,
                             ),
                           ),
-                          _RoomMusicStrip(state: state),
+                          // _RoomMusicStrip(state: state),
+                          SizedBox(height: 20),
                           Expanded(
                             child: LayoutBuilder(
                               builder: (context, constraints) => Column(

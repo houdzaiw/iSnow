@@ -23,6 +23,7 @@ class AppSpacing {
   static const double xxl = 20;
   static const double xxxl = 24;
   static const double section = 32;
+  static const double toolbarItemSpacing = 18;
 
   static const double iconSizeXs = 12;
   static const double iconSizeSm = 16;

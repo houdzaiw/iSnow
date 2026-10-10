@@ -36,14 +36,16 @@ class _RoomBottomBar extends StatelessWidget {
             onTap: onChatTap,
             badge: state.messages.length > 99 ? '99+' : null,
           ),
-          SizedBox(width: 18.w),
-          _BottomIconButton(
-            asset: state.agoraState.mutedMicrophone
-                ? AppAssets.lanhuRoomBottomMicMuted
-                : AppAssets.lanhuRoomBottomMic,
-            selected: !state.agoraState.mutedMicrophone && state.isOnMic,
-            onTap: onToggleMic,
-          ),
+          if (state.isOnMic) ...[
+            SizedBox(width: AppSpacing.toolbarItemSpacing.w),
+            _BottomIconButton(
+              asset: state.agoraState.mutedMicrophone
+                  ? AppAssets.lanhuRoomBottomMicMuted
+                  : AppAssets.lanhuRoomBottomMic,
+              selected: !state.agoraState.mutedMicrophone,
+              onTap: onToggleMic,
+            ),
+          ],
           const Spacer(),
           RoomGiftSeatAnchor(
             uid: null,
@@ -58,7 +60,7 @@ class _RoomBottomBar extends StatelessWidget {
                 : AppAssets.lanhuRoomBottomMessage,
             onTap: onToggleSpeaker,
           ),
-          SizedBox(width: 18.w),
+          SizedBox(width: AppSpacing.toolbarItemSpacing.w),
           _BottomIconButton(
             asset: AppAssets.lanhuRoomBottomMore,
             onTap: onMoreTap,
