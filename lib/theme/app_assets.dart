@@ -10,6 +10,9 @@ class AppAssets {
   const AppAssets._();
 
   static const String iconMissing = 'assets/lanhu/common/icon_missing.png';
+  static const String roomExitKeep = 'assets/lanhu/room/room_exit_keep.webp';
+  static const String roomExitClose = 'assets/lanhu/room/room_exit_close.webp';
+  static const String roomMiniClose = 'assets/lanhu/room/room_mini_close.webp';
   static const String lanhuLoginBackground =
       'assets/lanhu/base/login_background.png';
   static const String lanhuAuthButtonPrimary =

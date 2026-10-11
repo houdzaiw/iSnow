@@ -1,12 +1,13 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../model/login_response.dart';
 import '../model/user_profile.dart';
 import 'room_gift_manager.dart';
 
-class AuthSession {
+class AuthSession extends ChangeNotifier {
   AuthSession._();
 
   static final AuthSession instance = AuthSession._();
@@ -39,6 +40,7 @@ class AuthSession {
     if (user != null) {
       await prefs.setString(_userKey, jsonEncode(user.toJson()));
     }
+    notifyListeners();
   }
 
   Future<void> saveUser(UserData user) async {
@@ -108,5 +110,6 @@ class AuthSession {
     await prefs.remove(_phoneKey);
     await prefs.remove(_areaCodeKey);
     await prefs.remove(_countryCodeKey);
+    notifyListeners();
   }
 }

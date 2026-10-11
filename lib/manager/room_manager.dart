@@ -12,6 +12,7 @@ import 'auth_session.dart';
 import 'http_api.dart';
 import 'http_dio_manager.dart';
 import 'room_agora_manager.dart';
+import 'room_background_audio_manager.dart';
 
 enum RoomStatus { idle, entering, ready, leaving, error }
 
@@ -72,8 +73,19 @@ class RoomState {
 }
 
 class RoomManager extends ChangeNotifier {
-  RoomManager._() {
-    _dependencyListener = notifyListeners;
+  RoomManager._({
+    HttpDioManager? httpManager,
+    AppSocketManager? socketManager,
+    RoomAgoraManager? agoraManager,
+    AuthSession? authSession,
+    RoomBackgroundAudioManager? backgroundAudioManager,
+  }) : _api = _RoomApiClient(httpManager ?? HttpDioManager()),
+       _socketManager = socketManager ?? AppSocketManager.instance,
+       _agoraManager = agoraManager ?? RoomAgoraManager.instance,
+       _authSession = authSession ?? AuthSession.instance,
+       _backgroundAudio =
+           backgroundAudioManager ?? RoomBackgroundAudioManager.instance {
+    _dependencyListener = _onDependencyChanged;
     _socketMessages = _socketManager.messages.listen(_handleSocketMessage);
     _socketManager.addListener(_dependencyListener);
     _agoraManager.addListener(_dependencyListener);
@@ -81,14 +93,36 @@ class RoomManager extends ChangeNotifier {
 
   static final RoomManager instance = RoomManager._();
 
-  final _RoomApiClient _api = _RoomApiClient();
-  final AppSocketManager _socketManager = AppSocketManager.instance;
-  final RoomAgoraManager _agoraManager = RoomAgoraManager.instance;
-  final AuthSession _authSession = AuthSession.instance;
+  @visibleForTesting
+  factory RoomManager.forTesting({
+    required HttpDioManager httpManager,
+    required AppSocketManager socketManager,
+    required RoomAgoraManager agoraManager,
+    required AuthSession authSession,
+    RoomBackgroundAudioManager? backgroundAudioManager,
+  }) => RoomManager._(
+    httpManager: httpManager,
+    socketManager: socketManager,
+    agoraManager: agoraManager,
+    authSession: authSession,
+    backgroundAudioManager: backgroundAudioManager,
+  );
+
+  final _RoomApiClient _api;
+  final AppSocketManager _socketManager;
+  final RoomAgoraManager _agoraManager;
+  final AuthSession _authSession;
+  final RoomBackgroundAudioManager _backgroundAudio;
 
   late final VoidCallback _dependencyListener;
   late final StreamSubscription<RoomSocketMessage> _socketMessages;
   RoomState _state = const RoomState();
+  Future<void>? _enterTask;
+  Future<void>? _leaveTask;
+  Future<void>? _joinTask;
+  String? _requestedRoomId;
+  String? _serverRoomId;
+  int _generation = 0;
 
   RoomState get state => _state;
   AppSocketState get socketState => _socketManager.state;
@@ -121,14 +155,53 @@ class RoomManager extends ChangeNotifier {
     String? socketUrl,
     String? agoraAppId,
   }) async {
-    if (_state.isInRoom && _state.currentRoomId == roomId) {
+    final leaving = _leaveTask;
+    if (leaving != null) await leaving;
+    if (_enterTask != null && _requestedRoomId == roomId) {
+      return _enterTask;
+    }
+    if (_state.status == RoomStatus.ready &&
+        _state.isInRoom &&
+        _state.currentRoomId == roomId) {
       restoreRoom();
       return;
     }
-    if (_state.isInRoom && _state.currentRoomId != roomId) {
+    if (_state.currentRoomId != null || _enterTask != null) {
       await leaveRoom();
     }
 
+    final completion = Completer<void>();
+    _enterTask = completion.future;
+    _requestedRoomId = roomId;
+    final generation = ++_generation;
+    unawaited(() async {
+      try {
+        await _enterRoom(
+          roomId: roomId,
+          roomPassword: roomPassword,
+          followUid: followUid,
+          socketUrl: socketUrl,
+          agoraAppId: agoraAppId,
+          generation: generation,
+        );
+        completion.complete();
+      } catch (error, stack) {
+        completion.completeError(error, stack);
+      } finally {
+        if (identical(_enterTask, completion.future)) _enterTask = null;
+      }
+    }());
+    return completion.future;
+  }
+
+  Future<void> _enterRoom({
+    required String roomId,
+    required String roomPassword,
+    required int followUid,
+    required int generation,
+    String? socketUrl,
+    String? agoraAppId,
+  }) async {
     EnterRoomResp? enterResponse;
     _setState(
       _state.copyWith(
@@ -137,6 +210,7 @@ class RoomManager extends ChangeNotifier {
         isInRoom: false,
         isMinimized: false,
         clearRoomInfo: true,
+        clearEnterResponse: true,
         micList: const [],
         errorMessage: null,
       ),
@@ -151,18 +225,13 @@ class RoomManager extends ChangeNotifier {
       final effectiveRoomId = enterResponse.roomId.isEmpty
           ? roomId
           : enterResponse.roomId;
+      // Exit waits for this request so even a late canonical ID is exited.
+      _serverRoomId = effectiveRoomId;
+      if (generation != _generation) return;
       _setState(
         _state.copyWith(
           currentRoomId: effectiveRoomId,
           enterResponse: enterResponse,
-        ),
-      );
-
-      unawaited(
-        _joinAgoraBestEffort(
-          roomId: effectiveRoomId,
-          enterResponse: enterResponse,
-          appId: agoraAppId ?? const String.fromEnvironment('AGORA_APPID'),
         ),
       );
 
@@ -175,15 +244,20 @@ class RoomManager extends ChangeNotifier {
           errorMessage: null,
         ),
       );
-      unawaited(_joinSocketBestEffort(roomId: effectiveRoomId, url: socketUrl));
+      if (generation != _generation) return;
+      _joinTask = Future.wait<void>([
+        _joinAgoraBestEffort(
+          roomId: effectiveRoomId,
+          enterResponse: enterResponse,
+          generation: generation,
+          appId: agoraAppId ?? const String.fromEnvironment('AGORA_APPID'),
+        ),
+        _joinSocketBestEffort(roomId: effectiveRoomId, url: socketUrl),
+      ]).then((_) {});
+      unawaited(_joinTask!);
       unawaited(refreshRoomData());
     } catch (error) {
-      final cleanupRoomId = enterResponse?.roomId.isNotEmpty == true
-          ? enterResponse!.roomId
-          : roomId;
-      if (cleanupRoomId.isNotEmpty) {
-        unawaited(_cleanupAfterEnterFailure(cleanupRoomId));
-      }
+      if (generation != _generation) return;
       _setState(
         _state.copyWith(
           status: RoomStatus.error,
@@ -192,12 +266,14 @@ class RoomManager extends ChangeNotifier {
           errorMessage: error.toString(),
         ),
       );
+      // Run after the enter task settles; leaveRoom also drains pending joins.
+      unawaited(Future<void>.microtask(() => leaveRoom()));
       rethrow;
     }
   }
 
   void minimizeRoom() {
-    if (!_state.isInRoom) return;
+    if (!_state.isInRoom || _state.status != RoomStatus.ready) return;
     _setState(
       _state.copyWith(
         status: RoomStatus.ready,
@@ -208,7 +284,7 @@ class RoomManager extends ChangeNotifier {
   }
 
   void restoreRoom() {
-    if (!_state.isInRoom) return;
+    if (!_state.isInRoom || _state.status != RoomStatus.ready) return;
     _setState(
       _state.copyWith(
         status: RoomStatus.ready,
@@ -222,36 +298,75 @@ class RoomManager extends ChangeNotifier {
     return leaveRoom();
   }
 
-  Future<void> leaveRoom() async {
-    final roomId = _state.currentRoomId;
-    if (roomId == null || roomId.isEmpty) {
-      await _agoraManager.leaveRoom();
-      await _socketManager.disconnect();
-      _setState(const RoomState());
-      return;
+  Future<void> leaveRoom() {
+    if (_leaveTask != null) return _leaveTask!;
+    if (_state.status == RoomStatus.idle && _enterTask == null) {
+      return Future<void>.value();
     }
+    final completion = Completer<void>();
+    _leaveTask = completion.future;
+    _generation += 1;
+    _setState(_state.copyWith(status: RoomStatus.leaving, isMinimized: false));
+    unawaited(() async {
+      try {
+        // Drain in-flight work before teardown so it cannot rejoin after Exit.
+        final entering = _enterTask;
+        if (entering != null) {
+          await _cleanupStep('pending enter', () => entering);
+        }
+        final joining = _joinTask;
+        if (joining != null) await _cleanupStep('pending joins', () => joining);
+        final roomId = _serverRoomId ?? _state.currentRoomId;
+        if (roomId != null && roomId.isNotEmpty) {
+          await _cleanupStep('exit API', () => _api.exitRoom(roomId));
+        }
+        await _cleanupStep('Agora leave', _agoraManager.leaveRoom);
+        if (roomId != null && roomId.isNotEmpty) {
+          await _cleanupStep(
+            'Socket leave',
+            () => _socketManager.leaveRoom(roomId),
+          );
+        }
+        await _cleanupStep('Socket disconnect', _socketManager.disconnect);
+        await _cleanupStep('background audio stop', _backgroundAudio.stop);
+      } finally {
+        _serverRoomId = null;
+        _requestedRoomId = null;
+        _joinTask = null;
+        _setState(const RoomState());
+        _leaveTask = null;
+        completion.complete();
+      }
+    }());
+    return completion.future;
+  }
 
-    _setState(_state.copyWith(status: RoomStatus.leaving));
-    Object? leaveError;
-
+  Future<void> _cleanupStep(String name, Future<void> Function() action) async {
     try {
-      await _api.exitRoom(roomId);
-    } catch (error) {
-      leaveError = error;
-      debugPrint('Room exit API failed: $error');
+      await action();
+    } catch (error, stack) {
+      debugPrint('[RoomExit] $name failed: $error\n$stack');
     }
+  }
 
-    await Future.wait<void>([
-      _agoraManager.leaveRoom(),
-      _socketManager.leaveRoom(roomId).then((_) => _socketManager.disconnect()),
-    ], eagerError: false);
+  bool _isCurrentSession(String roomId, int generation) =>
+      generation == _generation &&
+      _state.status == RoomStatus.ready &&
+      _state.isInRoom &&
+      _state.currentRoomId == roomId;
 
-    _setState(
-      RoomState(
-        status: leaveError == null ? RoomStatus.idle : RoomStatus.error,
-        errorMessage: leaveError?.toString(),
-      ),
-    );
+  void _onDependencyChanged() {
+    if (_state.status == RoomStatus.ready &&
+        (_socketManager.state.isTerminal || _agoraManager.state.isTerminal)) {
+      unawaited(leaveRoom());
+    }
+    if (_state.status == RoomStatus.ready &&
+        (_agoraManager.state.joining || _agoraManager.state.joined)) {
+      unawaited(
+        _backgroundAudio.start(useMicrophone: _agoraManager.state.publishing),
+      );
+    }
+    notifyListeners();
   }
 
   Future<void> refreshRoomData() async {
@@ -263,39 +378,49 @@ class RoomManager extends ChangeNotifier {
 
   Future<void> refreshRoomInfo() async {
     final roomId = _requireCurrentRoomId();
+    final generation = _generation;
     try {
       final roomInfo = await _api.getRoomInfo(roomId);
+      if (!_isCurrentSession(roomId, generation)) return;
       _setState(_state.copyWith(roomInfo: roomInfo, errorMessage: null));
     } catch (error) {
+      if (!_isCurrentSession(roomId, generation)) return;
       _setState(_state.copyWith(errorMessage: error.toString()));
     }
   }
 
   Future<void> refreshMicList() async {
     final roomId = _requireCurrentRoomId();
+    final generation = _generation;
     try {
       final micList = await _api.getMicList(roomId);
+      if (!_isCurrentSession(roomId, generation)) return;
       _setState(_state.copyWith(micList: micList, errorMessage: null));
     } catch (error) {
+      if (!_isCurrentSession(roomId, generation)) return;
       _setState(_state.copyWith(errorMessage: error.toString()));
     }
   }
 
   Future<RoomMicOperateResp> upMic(int position) async {
     final roomId = _requireCurrentRoomId();
+    final generation = _generation;
     final response = await _api.upMic(roomId: roomId, position: position);
+    if (!_isCurrentSession(roomId, generation)) return response;
     _applyMicOperateResponse(response);
     await _agoraManager.publish(position: position);
-    unawaited(refreshMicList());
+    if (_isCurrentSession(roomId, generation)) unawaited(refreshMicList());
     return response;
   }
 
   Future<RoomMicOperateResp> downMic(int position) async {
     final roomId = _requireCurrentRoomId();
+    final generation = _generation;
     final response = await _api.downMic(roomId: roomId, position: position);
+    if (!_isCurrentSession(roomId, generation)) return response;
     _applyMicOperateResponse(response);
     await _agoraManager.stopPublish(position: position);
-    unawaited(refreshMicList());
+    if (_isCurrentSession(roomId, generation)) unawaited(refreshMicList());
     return response;
   }
 
@@ -304,17 +429,19 @@ class RoomManager extends ChangeNotifier {
     required int targetUid,
   }) async {
     final roomId = _requireCurrentRoomId();
+    final generation = _generation;
     final response = await _api.kickDownMic(
       roomId: roomId,
       position: position,
       targetUid: targetUid,
     );
+    if (!_isCurrentSession(roomId, generation)) return response;
     _applyMicOperateResponse(response);
     final uid = await _authSession.uid();
-    if (uid == targetUid) {
+    if (uid == targetUid && _isCurrentSession(roomId, generation)) {
       await _agoraManager.stopPublish(position: position);
     }
-    unawaited(refreshMicList());
+    if (_isCurrentSession(roomId, generation)) unawaited(refreshMicList());
     return response;
   }
 
@@ -323,9 +450,11 @@ class RoomManager extends ChangeNotifier {
     required bool mute,
   }) async {
     final roomId = _requireCurrentRoomId();
+    final generation = _generation;
     final response = mute
         ? await _api.muteMicSeat(roomId: roomId, position: position)
         : await _api.unmuteMicSeat(roomId: roomId, position: position);
+    if (!_isCurrentSession(roomId, generation)) return response;
     _applyMicOperateResponse(response);
     unawaited(refreshMicList());
     return response;
@@ -336,11 +465,13 @@ class RoomManager extends ChangeNotifier {
     required bool isLock,
   }) async {
     final roomId = _requireCurrentRoomId();
+    final generation = _generation;
     final response = await _api.lockMicSeat(
       roomId: roomId,
       position: position,
       isLock: isLock,
     );
+    if (!_isCurrentSession(roomId, generation)) return response;
     _applyMicOperateResponse(response);
     unawaited(refreshMicList());
     return response;
@@ -350,6 +481,7 @@ class RoomManager extends ChangeNotifier {
     required String roomId,
     required EnterRoomResp enterResponse,
     required String appId,
+    required int generation,
   }) async {
     try {
       final uid = await _authSession.uid();
@@ -360,6 +492,7 @@ class RoomManager extends ChangeNotifier {
       final token = responseToken == null || responseToken.isEmpty
           ? await _api.getAgoraToken(roomId)
           : responseToken;
+      if (!_isCurrentSession(roomId, generation)) return;
       await _agoraManager.joinRoom(
         roomId: roomId,
         token: token,
@@ -382,21 +515,11 @@ class RoomManager extends ChangeNotifier {
     }
   }
 
-  Future<void> _cleanupAfterEnterFailure(String roomId) async {
-    try {
-      if (roomId.isNotEmpty) {
-        await _api.exitRoom(roomId);
-        await _socketManager.leaveRoom(roomId);
-      }
-      await _agoraManager.leaveRoom();
-    } catch (error) {
-      debugPrint('Room enter cleanup failed: $error');
-    }
-  }
-
   void _handleSocketMessage(RoomSocketMessage message) {
     final roomId = _state.currentRoomId;
-    if (roomId == null || roomId.isEmpty) return;
+    if (roomId == null || roomId.isEmpty || _state.status != RoomStatus.ready) {
+      return;
+    }
     if (message.channel != 'room:$roomId' && message.channel != 'room') return;
 
     switch (message.event) {
@@ -411,8 +534,23 @@ class RoomManager extends ChangeNotifier {
         unawaited(refreshRoomInfo());
         break;
       case 'RoomKickOutEvent':
-        unawaited(leaveRoom());
+        unawaited(_handleKickOut(roomId, message.payload));
         break;
+    }
+  }
+
+  Future<void> _handleKickOut(String roomId, Object? payload) async {
+    final generation = _generation;
+    final decoded = _decodePayload(payload);
+    if (decoded is! Map) return;
+    if (decoded['roomId']?.toString() != roomId) return;
+    final from = decoded['from'];
+    final targetUid = from is Map ? from['uid'] : decoded['uid'];
+    final uid = await _authSession.uid();
+    if (uid != null &&
+        targetUid?.toString() == uid.toString() &&
+        _isCurrentSession(roomId, generation)) {
+      await leaveRoom();
     }
   }
 
@@ -479,7 +617,10 @@ class RoomManager extends ChangeNotifier {
 
   String _requireCurrentRoomId() {
     final roomId = _state.currentRoomId;
-    if (roomId == null || roomId.isEmpty || !_state.isInRoom) {
+    if (roomId == null ||
+        roomId.isEmpty ||
+        !_state.isInRoom ||
+        _state.status != RoomStatus.ready) {
       throw const NadyApiException(message: 'Not in room');
     }
     return roomId;
@@ -500,7 +641,8 @@ class RoomManager extends ChangeNotifier {
 }
 
 class _RoomApiClient {
-  final HttpDioManager _httpManager = HttpDioManager();
+  _RoomApiClient(this._httpManager);
+  final HttpDioManager _httpManager;
 
   Future<EnterRoomResp> enterRoom({
     required String roomId,

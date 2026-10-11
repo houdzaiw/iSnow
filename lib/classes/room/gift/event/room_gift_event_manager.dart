@@ -75,11 +75,16 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
   StreamSubscription<RoomSocketMessage>? _subscription;
   Timer? _timer;
   DateTime? _acceptAfter;
+  bool _sessionActive = true;
   int? get currentUid => _slotQueue.currentUid;
   set currentUid(int? uid) => _slotQueue.currentUid = uid;
 
   void receive(RoomSocketMessage message) {
-    if (!mounted || !RoomGiftEventParser.events.contains(message.event)) return;
+    if (!mounted ||
+        !_sessionActive ||
+        !RoomGiftEventParser.events.contains(message.event)) {
+      return;
+    }
     try {
       final now = _now();
       final event = _parser.parse(message, roomId, now);
@@ -98,14 +103,27 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
         _emit(roomWeekVal: event.roomWeekVal);
         return;
       }
-      if (!state.isVisible ||
-          (_acceptAfter != null && event.createdAt.isBefore(_acceptAfter!)) ||
+      if ((_acceptAfter != null && event.createdAt.isBefore(_acceptAfter!)) ||
           now.difference(event.createdAt) > const Duration(seconds: 10)) {
         _log(
           'drop event=${message.event} msgId=${message.msgId} '
           'visible=${state.isVisible} ageMs=${now.difference(event.createdAt).inMilliseconds} '
           'acceptAfter=${_acceptAfter?.millisecondsSinceEpoch}',
         );
+        return;
+      }
+      if (!state.isVisible) {
+        // Keep/background preserve acknowledgements and chat, never animations.
+        switch (event.kind) {
+          case RoomGiftEventKind.gift:
+            _receiveGift(event, render: false);
+          case RoomGiftEventKind.finalCombo:
+            _finishCombo(event);
+          case RoomGiftEventKind.publicScreen:
+            _receivePublic(event.publicMessage!);
+          default:
+            break;
+        }
         return;
       }
       _log(
@@ -156,7 +174,7 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
     }
   }
 
-  void _receiveGift(RoomGiftEvent event) {
+  void _receiveGift(RoomGiftEvent event, {bool render = true}) {
     final gift = event.gift!;
     if (gift.comboId.isNotEmpty && _ended.containsKey(gift.comboId)) return;
     final key = gift.comboId.isEmpty ? event.key : gift.comboKey;
@@ -172,7 +190,7 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
       _combos.remove(_combos.keys.first);
     }
     final now = _now();
-    _slotQueue.add(gift, event.key, now);
+    if (render) _slotQueue.add(gift, event.key, now);
     if (gift.uid == currentUid) onSelfGift?.call(gift, event.createdAt);
     final public = RoomGiftPublicMessage(
       key: gift.comboId.isEmpty ? key : gift.comboId,
@@ -183,6 +201,17 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
       createdAt: event.createdAt,
       sendType: gift.sendType,
     );
+    if (!render) {
+      _emit(
+        publicMessages: _merge(
+          state.publicMessages,
+          public,
+          (item) => item.key,
+          80,
+        ),
+      );
+      return;
+    }
     final delta = gift.displayCount - (previous?.displayCount ?? 0);
     final coinDelta = gift.totalCoinCount - (previous?.totalCoinCount ?? 0);
     final task = RoomGiftEffectTask(
@@ -361,7 +390,12 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
 
   void setVisible(bool visible) {
     if (visible == state.isVisible) return;
-    reset(visible: visible);
+    reset(visible: visible, resetCombo: false);
+  }
+
+  void setSessionActive(bool active) {
+    _sessionActive = active;
+    if (!active) reset(visible: false, clearHistory: true);
   }
 
   void reset({
@@ -370,6 +404,11 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
     bool resetCombo = true,
   }) {
     _slotQueue.clear();
+    if (clearHistory) {
+      _seen.clear();
+      _combos.clear();
+      _ended.clear();
+    }
     // Socket timestamps can be second-resolution; accept fresh same-second events.
     final time = _now().millisecondsSinceEpoch;
     _acceptAfter = DateTime.fromMillisecondsSinceEpoch(time ~/ 1000 * 1000);

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="room_audio_title">语音房间</string>
+    <string name="room_audio_active">房间语音正在运行</string>
+</resources>

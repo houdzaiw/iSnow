@@ -27,6 +27,7 @@ class AppSocketState {
     this.broadcastChannelSubscribed = false,
     this.subscribedChannels = const [],
     this.errorMessage,
+    this.isTerminal = false,
   });
 
   final AppSocketStatus status;
@@ -35,6 +36,7 @@ class AppSocketState {
   final bool broadcastChannelSubscribed;
   final List<String> subscribedChannels;
   final String? errorMessage;
+  final bool isTerminal;
 
   bool get isConnected =>
       status == AppSocketStatus.connected ||
@@ -48,6 +50,7 @@ class AppSocketState {
     bool? roomChannelSubscribed,
     bool? broadcastChannelSubscribed,
     List<String>? subscribedChannels,
+    bool? isTerminal,
     Object? errorMessage = _sentinel,
   }) {
     return AppSocketState(
@@ -58,6 +61,7 @@ class AppSocketState {
       broadcastChannelSubscribed:
           broadcastChannelSubscribed ?? this.broadcastChannelSubscribed,
       subscribedChannels: subscribedChannels ?? this.subscribedChannels,
+      isTerminal: isTerminal ?? this.isTerminal,
       errorMessage: identical(errorMessage, _sentinel)
           ? this.errorMessage
           : errorMessage as String?,
@@ -104,6 +108,8 @@ class AppSocketManager extends ChangeNotifier {
   centrifuge.Client? _client;
   String? _socketUrl;
   int _roomJoinGeneration = 0;
+  String? _joiningRoomId;
+  bool _intentionalDisconnect = false;
   AppSocketState _state = const AppSocketState();
 
   AppSocketState get state => _state;
@@ -151,6 +157,7 @@ class AppSocketManager extends ChangeNotifier {
 
   Future<void> joinRoom(String roomId, {String? url}) async {
     final generation = ++_roomJoinGeneration;
+    _joiningRoomId = roomId;
     try {
       // Nady resolves this from the API environment, not the website host.
       final endpoint =
@@ -189,6 +196,7 @@ class AppSocketManager extends ChangeNotifier {
         broadcastChannelSubscribed: false,
         subscribedChannels: const [],
         errorMessage: null,
+        isTerminal: false,
       ),
     );
 
@@ -226,8 +234,12 @@ class AppSocketManager extends ChangeNotifier {
 
   Future<void> leaveRoom(String roomId) async {
     _roomJoinGeneration += 1;
-    await _unsubscribeChannel('room:$roomId');
-    await _unsubscribeChannel('room');
+    _joiningRoomId = null;
+    await _cleanup(
+      'room unsubscribe',
+      () => _unsubscribeChannel('room:$roomId'),
+    );
+    await _cleanup('broadcast unsubscribe', () => _unsubscribeChannel('room'));
     _setState(
       _state.copyWith(
         status: _client?.state == centrifuge.State.connected
@@ -238,27 +250,39 @@ class AppSocketManager extends ChangeNotifier {
         broadcastChannelSubscribed: false,
         subscribedChannels: const [],
         errorMessage: null,
+        isTerminal: false,
       ),
     );
   }
 
   Future<void> disconnect() async {
     _roomJoinGeneration += 1;
+    _joiningRoomId = null;
+    _intentionalDisconnect = true;
     await leaveCurrentRoomSubscriptions();
-    await _client?.disconnect();
+    await _cleanup('disconnect', () async {
+      try {
+        await _client?.disconnect();
+      } catch (_) {
+        await _client?.close();
+        rethrow;
+      }
+    });
     _setState(const AppSocketState(status: AppSocketStatus.disconnected));
+    _intentionalDisconnect = false;
   }
 
   Future<void> close({bool invalidateRoomJoin = true}) async {
     if (invalidateRoomJoin) {
       _roomJoinGeneration += 1;
+      _joiningRoomId = null;
     }
     await leaveCurrentRoomSubscriptions();
     for (final listener in _clientListeners) {
       await listener.cancel();
     }
     _clientListeners.clear();
-    await _client?.close();
+    await _cleanup('close', () async => _client?.close());
     _client = null;
     _socketUrl = null;
     _setState(const AppSocketState(status: AppSocketStatus.idle));
@@ -271,7 +295,10 @@ class AppSocketManager extends ChangeNotifier {
   Future<void> leaveCurrentRoomSubscriptions() async {
     final channels = _subscriptions.keys.toList(growable: false);
     for (final channel in channels) {
-      await _unsubscribeChannel(channel);
+      await _cleanup(
+        'unsubscribe $channel',
+        () => _unsubscribeChannel(channel),
+      );
     }
   }
 
@@ -296,7 +323,7 @@ class AppSocketManager extends ChangeNotifier {
         }),
       )
       ..add(
-        client.disconnected.listen((_) {
+        client.disconnected.listen((event) {
           if (!identical(client, _client)) return;
           _setState(
             _state.copyWith(
@@ -304,6 +331,10 @@ class AppSocketManager extends ChangeNotifier {
               roomChannelSubscribed: false,
               broadcastChannelSubscribed: false,
               subscribedChannels: const [],
+              isTerminal:
+                  !_intentionalDisconnect &&
+                  (_state.roomId != null || _joiningRoomId != null),
+              errorMessage: '${event.code}: ${event.reason}',
             ),
           );
         }),
@@ -346,6 +377,15 @@ class AppSocketManager extends ChangeNotifier {
       subscription.unsubscribed.listen((event) {
         _log('unsubscribed channel=$channel code=${event.code}');
         _syncConnectedState();
+        // Connecting/subscribing events are recoverable. Unsubscribed is final.
+        if (channel == 'room:${_state.roomId}') {
+          _setState(
+            _state.copyWith(
+              isTerminal: true,
+              errorMessage: '${event.code}: ${event.reason}',
+            ),
+          );
+        }
       }),
       subscription.publication.listen(
         (event) => _handlePublication(channel, event),
@@ -377,9 +417,25 @@ class AppSocketManager extends ChangeNotifier {
         await listener.cancel();
       }
     }
-    await subscription?.unsubscribe();
-    if (subscription != null) await _client?.removeSubscription(subscription);
-    _syncConnectedState();
+    try {
+      await subscription?.unsubscribe();
+    } finally {
+      if (subscription != null) {
+        await _cleanup(
+          'remove $channel',
+          () async => _client?.removeSubscription(subscription),
+        );
+      }
+      _syncConnectedState();
+    }
+  }
+
+  Future<void> _cleanup(String name, Future<void> Function() action) async {
+    try {
+      await action();
+    } catch (error) {
+      _log('$name failed: $error');
+    }
   }
 
   void _syncConnectedState() {

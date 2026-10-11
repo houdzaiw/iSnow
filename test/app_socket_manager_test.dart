@@ -174,6 +174,52 @@ void main() {
       container.dispose();
     },
   );
+
+  test(
+    'unsubscribe failure still removes both SDK subscriptions and disconnects',
+    () async {
+      await socket.joinRoom('123');
+      client.channels['room:123']!.failUnsubscribe = true;
+      await socket.leaveRoom('123');
+      await socket.disconnect();
+      expect(client.channels, isEmpty);
+      expect(client.state, centrifuge.State.disconnected);
+      expect(socket.state.roomId, isNull);
+      expect(socket.state.isTerminal, isFalse);
+    },
+  );
+
+  test('disconnect failure falls back to transport close', () async {
+    await socket.joinRoom('123');
+    client.failDisconnect = true;
+    await socket.disconnect();
+    expect(client.closeCalls, 1);
+    expect(client.state, centrifuge.State.disconnected);
+    expect(socket.state.isTerminal, isFalse);
+  });
+
+  test(
+    'only permanent SDK disconnect/unsubscribe signals terminal room state',
+    () async {
+      await socket.joinRoom('123');
+      client.reconnect();
+      expect(socket.state.isTerminal, isFalse);
+      client.markConnected();
+      client.channels['room:123']!.markSubscribed();
+      client.channels['room:123']!.unsubscribedEvents.add(
+        centrifuge.UnsubscribedEvent(2500, 'room unavailable'),
+      );
+      expect(socket.state.isTerminal, isTrue);
+      await socket.leaveRoom('123');
+      await socket.joinRoom('123');
+      expect(socket.state.isTerminal, isFalse);
+      client.state = centrifuge.State.disconnected;
+      client.disconnectedEvents.add(
+        centrifuge.DisconnectedEvent(3500, 'banned'),
+      );
+      expect(socket.state.isTerminal, isTrue);
+    },
+  );
 }
 
 class _Client implements centrifuge.Client {
@@ -190,6 +236,8 @@ class _Client implements centrifuge.Client {
   final Map<String, _Subscription> channels = {};
   final List<_Subscription> created = [];
   String? failedChannel;
+  bool failDisconnect = false;
+  int closeCalls = 0;
   @override
   Stream<centrifuge.ConnectedEvent> get connected => connectedEvents.stream;
   @override
@@ -204,9 +252,20 @@ class _Client implements centrifuge.Client {
   @override
   Future<void> ready() async {}
   @override
-  Future<void> disconnect() async => state = centrifuge.State.disconnected;
+  Future<void> disconnect() async {
+    if (failDisconnect) throw StateError('disconnect failed');
+    state = centrifuge.State.disconnected;
+    disconnectedEvents.add(
+      centrifuge.DisconnectedEvent(0, 'client disconnect'),
+    );
+  }
+
   @override
-  Future<void> close() => disconnect();
+  Future<void> close() async {
+    closeCalls++;
+    state = centrifuge.State.disconnected;
+  }
+
   @override
   centrifuge.Subscription newSubscription(
     String channel, [
@@ -252,6 +311,7 @@ class _Client implements centrifuge.Client {
 class _Subscription implements centrifuge.Subscription {
   _Subscription(this.channel, {this.fail = false});
   final bool fail;
+  bool failUnsubscribe = false;
   @override
   final String channel;
   @override
@@ -290,8 +350,11 @@ class _Subscription implements centrifuge.Subscription {
   @override
   Future<void> ready() async {}
   @override
-  Future<void> unsubscribe() async =>
-      state = centrifuge.SubscriptionState.unsubscribed;
+  Future<void> unsubscribe() async {
+    if (failUnsubscribe) throw StateError('unsubscribe failed');
+    state = centrifuge.SubscriptionState.unsubscribed;
+  }
+
   void markSubscribed() {
     state = centrifuge.SubscriptionState.subscribed;
     subscribedEvents.add(

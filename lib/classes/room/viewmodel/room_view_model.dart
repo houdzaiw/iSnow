@@ -62,11 +62,12 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
   late final StreamSubscription<RoomSocketMessage> _socketSubscription;
   bool _entering = false;
   bool _leaving = false;
+  String? _sessionRoomId;
   Map<String, RoomGiftPublicMessage> _giftMessages = const {};
 
   /// Bind to the server's canonical room ID after entering, not the route alias.
   void bindGiftManager(RoomGiftEventManager manager) {
-    if (identical(_giftManager, manager)) return;
+    if (!mounted || identical(_giftManager, manager)) return;
     _removeGiftListener?.call();
     _giftManager = manager;
     _giftMessages = const {};
@@ -74,7 +75,14 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
   }
 
   Future<void> enterRoom({String roomPassword = '', int followUid = 0}) async {
-    if (_entering) return;
+    if (!mounted || _entering) return;
+    final current = _repository.roomState;
+    if (current.status == RoomStatus.ready &&
+        current.isInRoom &&
+        current.currentRoomId == _roomId) {
+      _syncFromManager();
+      return;
+    }
     _entering = true;
     _giftMessages = const {};
     state = RoomPageState.initial(_roomId).copyWith(
@@ -91,10 +99,13 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
         roomPassword: roomPassword,
         followUid: followUid,
       );
+      if (!mounted) return;
+      _sessionRoomId = _repository.roomState.currentRoomId;
       _syncFromManager();
       final gifts = _giftManager;
       if (gifts != null) _syncGiftState(gifts.snapshot);
     } catch (error) {
+      if (!mounted) return;
       state = state.copyWith(
         status: RoomStatus.error,
         isInRoom: false,
@@ -106,17 +117,22 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
   }
 
   Future<void> refresh() async {
+    if (!mounted || !state.isReady || _leaving) return;
     try {
       await _repository.refreshRoomData();
       _syncFromManager();
     } catch (error) {
+      if (!mounted || !state.isReady) return;
       state = state.copyWith(errorMessage: error.toString());
     }
   }
 
-  void minimizeRoom() {
+  bool minimizeRoom() {
+    if (!mounted || _leaving || !state.isReady) return false;
     _repository.minimizeRoom();
     _syncFromManager();
+    return _repository.roomState.isMinimized &&
+        _repository.roomState.status == RoomStatus.ready;
   }
 
   void restoreRoom() {
@@ -137,6 +153,12 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
       if (mounted) _syncFromManager();
       return !_repository.roomState.isInRoom;
     } catch (error) {
+      // The server exit request may fail after local Agora/socket cleanup has
+      // completed. Local room state is the source of truth for page teardown.
+      if (!_repository.roomState.isInRoom) {
+        if (mounted) _syncFromManager();
+        return true;
+      }
       if (mounted) {
         state = state.copyWith(errorMessage: error.toString());
       }
@@ -151,6 +173,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
   }
 
   Future<void> sendMessage(String text) async {
+    if (!mounted || !state.isReady || _leaving) return;
     final message = text.trim();
     if (message.isEmpty || state.sendingMessage) return;
 
@@ -174,8 +197,10 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
 
     try {
       await _repository.sendTextMessage(roomId: roomId, text: message);
+      if (!mounted || !state.isReady) return;
       state = state.copyWith(sendingMessage: false, errorMessage: null);
     } catch (error) {
+      if (!mounted || !state.isReady) return;
       state = state.copyWith(
         sendingMessage: false,
         errorMessage: error.toString(),
@@ -229,19 +254,23 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
   }
 
   Future<void> toggleLocalMicrophone() async {
+    if (!mounted || !state.isReady || _leaving) return;
     try {
       await _repository.muteLocalMicrophone(!state.agoraState.mutedMicrophone);
       _syncFromManager();
     } catch (error) {
+      if (!mounted) return;
       state = state.copyWith(errorMessage: error.toString());
     }
   }
 
   Future<void> toggleSpeaker() async {
+    if (!mounted || !state.isReady || _leaving) return;
     try {
       await _repository.muteSpeaker(!state.agoraState.mutedSpeaker);
       _syncFromManager();
     } catch (error) {
+      if (!mounted) return;
       state = state.copyWith(errorMessage: error.toString());
     }
   }
@@ -250,12 +279,18 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
     int position,
     Future<void> Function() operation,
   ) async {
-    if (state.pendingSeatPosition != null) return;
+    if (!mounted ||
+        !state.isReady ||
+        _leaving ||
+        state.pendingSeatPosition != null) {
+      return;
+    }
     state = state.copyWith(pendingSeatPosition: position, errorMessage: null);
     try {
       await operation();
       _syncFromManager();
     } catch (error) {
+      if (!mounted) return;
       state = state.copyWith(errorMessage: error.toString());
     } finally {
       if (mounted) {
@@ -278,6 +313,15 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
   void _syncFromManager() {
     if (!mounted) return;
     final roomState = _repository.roomState;
+    if (_sessionRoomId == null) {
+      if (roomState.currentRoomId != _roomId || !roomState.isInRoom) return;
+      _sessionRoomId = roomState.currentRoomId;
+    }
+    // A new page must not mistake the old room's teardown for its own Exit.
+    if (roomState.currentRoomId != null &&
+        roomState.currentRoomId != _sessionRoomId) {
+      return;
+    }
     final socketState = _repository.socketState;
     final agoraState = _repository.agoraState;
     final roomInfo = roomState.roomInfo;
@@ -361,6 +405,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
   }
 
   void _handleSocketMessage(RoomSocketMessage message) {
+    if (!mounted || !state.isReady) return;
     if (!_isCurrentRoomMessage(message)) return;
     if (RoomGiftEventParser.events.contains(message.event)) return;
 
@@ -378,6 +423,14 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
     }
 
     if (message.event == 'RoomKickOutEvent') {
+      final payload = _payloadMap(message.payload);
+      final from = payload['from'];
+      final targetUid = from is Map ? from['uid'] : payload['uid'];
+      if (payload['roomId']?.toString() != _effectiveRoomId ||
+          state.currentUid == null ||
+          targetUid?.toString() != state.currentUid.toString()) {
+        return;
+      }
       state = state.copyWith(
         messages: _appendMessage(
           RoomChatEntry.system('You were removed from the room.'),

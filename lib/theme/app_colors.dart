@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
+  static const Color roomExitScrim = Color(0xB3000000);
+  static const Color roomMiniSurface = Color(0xFF25232B);
+  static const Color roomMiniWave = primaryPink;
   static const Color giftSlotBackground = Color(0xCC202026);
   static const Color giftBannerBackground = Color(0xE6292330);
   static const Color giftLuckyBackground = Color(0xE63E2435);

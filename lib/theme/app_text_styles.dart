@@ -3,6 +3,12 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 class AppTextStyles {
+  static const TextStyle roomExitLabel = TextStyle(
+    color: AppColors.textInverse,
+    fontSize: 12,
+    height: 1.2,
+    letterSpacing: 0,
+  );
   static const TextStyle giftComboLabel = TextStyle(
     color: AppColors.textInverse,
     fontSize: 16,

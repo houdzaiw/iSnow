@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../../manager/app_socket_manager.dart';
 import '../../../../manager/room_manager.dart';
 import '../../room_repository.dart';
+import '../models/room_gift_models.dart';
 import '../viewmodel/room_gift_send_controller.dart';
 import 'room_gift_event_manager.dart';
 
@@ -75,13 +76,22 @@ class _RoomGiftLifecycle with WidgetsBindingObserver {
   void _sync() {
     final room = repository.roomState;
     sender.audience = repository.giftAudience(roomId);
-    final inRoom = room.currentRoomId == roomId && room.isInRoom;
-    if (!inRoom || room.status == RoomStatus.leaving) {
-      manager.reset(visible: false, clearHistory: true);
+    final inRoom =
+        room.currentRoomId == roomId &&
+        room.isInRoom &&
+        room.status == RoomStatus.ready;
+    if (!inRoom) {
+      sender.audience = const RoomGiftAudience(
+        isInRoom: false,
+        onlineCount: 0,
+        recipients: [],
+      );
+      manager.setSessionActive(false);
       _keepAlive?.close();
       _keepAlive = null;
       return;
     }
+    manager.setSessionActive(true);
     _keepAlive ??= retain();
     final status = repository.socketState.status;
     if (_socketStatus == AppSocketStatus.ready &&

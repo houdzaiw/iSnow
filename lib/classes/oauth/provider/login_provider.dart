@@ -11,6 +11,7 @@ import '../../../configs/app_device.dart';
 import '../../../manager/auth_session.dart';
 import '../../../manager/http_api.dart';
 import '../../../manager/http_dio_manager.dart';
+import '../../../manager/room_manager.dart';
 import '../../../model/country_info.dart';
 import '../../../model/login_response.dart';
 import '../../../model/server_response.dart';
@@ -18,9 +19,18 @@ import '../../../model/upload_param.dart';
 import '../../../model/user_profile.dart';
 
 class LoginProvider {
-  final HttpDioManager _httpManager = HttpDioManager();
+  LoginProvider({
+    HttpDioManager? httpManager,
+    AuthSession? authSession,
+    RoomManager? roomManager,
+  }) : _httpManager = httpManager ?? HttpDioManager(),
+       _authSession = authSession ?? AuthSession.instance,
+       _roomManager = roomManager ?? RoomManager.instance;
+
+  final HttpDioManager _httpManager;
   final AppDevice _appDevice = AppDevice();
-  final AuthSession _authSession = AuthSession.instance;
+  final AuthSession _authSession;
+  final RoomManager _roomManager;
 
   Future<String> _encryptPassword(String password) async {
     final algorithm = Chacha20.poly1305Aead();
@@ -308,6 +318,7 @@ class LoginProvider {
   }
 
   Future<MeModel> getMyProfileInfo() async {
+    final token = await _authSession.token();
     final response = await _httpManager.get(HttpApi.myUserInfo);
     final me = _requireData(
       response,
@@ -321,6 +332,9 @@ class LoginProvider {
       areaCode: me.userBaseInfo.areaCode ?? cachedAreaCode,
       countryCode: me.userBaseInfo.countryCode ?? cachedCountryCode,
     );
+    if (token == null || token != await _authSession.token()) {
+      throw const NadyApiException(message: 'Login session changed');
+    }
     await _authSession.saveUser(user);
     return MeModel(
       followingNum: me.followingNum,
@@ -428,10 +442,15 @@ class LoginProvider {
   }
 
   Future<void> logout() async {
+    // Room exit needs the old credentials for outRoom and any pending token work.
     try {
+      await _roomManager.leaveRoom();
       final response = await _httpManager.post(HttpApi.logout, data: {});
       final server = _server<dynamic>(response, null);
       if (!server.isSuccess) throw server.toException();
+    } catch (error) {
+      // Match Nady: remote logout failure must not retain a local login session.
+      debugPrint('[Logout] Remote cleanup failed: $error');
     } finally {
       await _authSession.clear();
     }
@@ -439,6 +458,7 @@ class LoginProvider {
 
   Future<void> logoff() async {
     try {
+      await _roomManager.leaveRoom();
       final response = await _httpManager.post(HttpApi.logoff);
       final server = _server<dynamic>(response, null);
       if (!server.isSuccess) throw server.toException();

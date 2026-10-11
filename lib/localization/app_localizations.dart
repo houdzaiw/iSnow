@@ -51,6 +51,9 @@ class _AppLocalizationsDelegate
 
 const Map<String, Map<String, String>> _localizedValues = {
   'en': {
+    'room.keep': 'Keep',
+    'room.exit': 'Exit',
+    'room.restore': 'Restore room',
     'app.language': 'Language',
     'app.english': 'English',
     'app.chinese': 'Chinese',
@@ -386,6 +389,9 @@ const Map<String, Map<String, String>> _localizedValues = {
     'picker.cameraSelected': 'Camera selected',
   },
   'zh': {
+    'room.keep': '保持',
+    'room.exit': '退出',
+    'room.restore': '返回房间',
     'app.language': '语言',
     'app.english': '英文',
     'app.chinese': '中文',

@@ -1,4 +1,14 @@
 class AppSpacing {
+  static const double roomExitChoiceSize = 82;
+  static const double roomExitChoiceGap = 100;
+  static const double roomMiniSize = 84;
+  static const double roomMiniAvatarSize = 56;
+  static const double roomMiniCloseSize = 28;
+  static const double roomMiniCloseIconSize = 16;
+  static const double roomMiniEdgeInset = 12;
+  static const double roomMiniBottomInset = 100;
+  static const double roomMiniWaveStroke = 2;
+  static const double roomMiniWaveMaxOpacity = 0.5;
   static const double giftTrajectoryIconSize = 48;
   static const double giftTrajectoryCenterSize = 90;
   static const double giftTrajectoryScatterWidthRatio = 0.34;

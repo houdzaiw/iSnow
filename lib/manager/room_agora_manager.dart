@@ -22,6 +22,7 @@ class RoomAgoraState {
     this.upstreamQuality,
     this.downstreamQuality,
     this.errorMessage,
+    this.isTerminal = false,
   });
 
   final bool initialized;
@@ -36,6 +37,7 @@ class RoomAgoraState {
   final QualityType? upstreamQuality;
   final QualityType? downstreamQuality;
   final String? errorMessage;
+  final bool isTerminal;
 
   RoomAgoraState copyWith({
     bool? initialized,
@@ -50,6 +52,7 @@ class RoomAgoraState {
     Map<int, int>? volumeLevels,
     QualityType? upstreamQuality,
     QualityType? downstreamQuality,
+    bool? isTerminal,
     Object? errorMessage = _sentinel,
   }) {
     return RoomAgoraState(
@@ -64,6 +67,7 @@ class RoomAgoraState {
       volumeLevels: volumeLevels ?? this.volumeLevels,
       upstreamQuality: upstreamQuality ?? this.upstreamQuality,
       downstreamQuality: downstreamQuality ?? this.downstreamQuality,
+      isTerminal: isTerminal ?? this.isTerminal,
       errorMessage: identical(errorMessage, _sentinel)
           ? this.errorMessage
           : errorMessage as String?,
@@ -72,16 +76,28 @@ class RoomAgoraState {
 }
 
 class RoomAgoraManager extends ChangeNotifier {
-  RoomAgoraManager._();
+  RoomAgoraManager._({
+    RtcEngine Function()? engineFactory,
+    AuthSession? authSession,
+  }) : _engineFactory = engineFactory ?? createAgoraRtcEngine,
+       _authSession = authSession ?? AuthSession.instance;
+
+  @visibleForTesting
+  RoomAgoraManager.forTesting({
+    required RtcEngine Function() engineFactory,
+    AuthSession? authSession,
+  }) : this._(engineFactory: engineFactory, authSession: authSession);
 
   static final RoomAgoraManager instance = RoomAgoraManager._();
 
   final HttpDioManager _httpManager = HttpDioManager();
-  final AuthSession _authSession = AuthSession.instance;
+  final AuthSession _authSession;
+  final RtcEngine Function() _engineFactory;
 
   RtcEngine? _engine;
   String? _appId;
   RoomAgoraState _state = const RoomAgoraState();
+  String? _expectedRoomId;
 
   RoomAgoraState get state => _state;
 
@@ -95,7 +111,7 @@ class RoomAgoraManager extends ChangeNotifier {
     await release();
     _appId = appId;
     try {
-      final engine = createAgoraRtcEngine();
+      final engine = _engineFactory();
       _engine = engine;
       await engine.initialize(
         RtcEngineContext(
@@ -139,6 +155,7 @@ class RoomAgoraManager extends ChangeNotifier {
     await init(appId: appId);
     final engine = _engine;
     if (engine == null || !_state.initialized) return;
+    _expectedRoomId = roomId;
 
     _setState(
       _state.copyWith(
@@ -146,6 +163,7 @@ class RoomAgoraManager extends ChangeNotifier {
         joined: false,
         roomId: roomId,
         errorMessage: null,
+        isTerminal: false,
       ),
     );
 
@@ -164,6 +182,7 @@ class RoomAgoraManager extends ChangeNotifier {
         ),
       );
     } catch (error) {
+      if (_expectedRoomId != roomId || !identical(_engine, engine)) return;
       _setState(
         _state.copyWith(
           joining: false,
@@ -175,35 +194,41 @@ class RoomAgoraManager extends ChangeNotifier {
   }
 
   Future<void> leaveRoom() async {
+    _expectedRoomId = null;
     final engine = _engine;
     if (engine == null) {
       _setState(const RoomAgoraState());
       return;
     }
 
+    await _cleanup(
+      'stop publishing',
+      () => engine.setClientRole(role: ClientRoleType.clientRoleAudience),
+    );
     try {
-      await engine.setClientRole(role: ClientRoleType.clientRoleAudience);
       await engine.leaveChannel();
+      // Reused engines must not carry mute flags into the next room.
+      await _cleanup(
+        'reset microphone',
+        () => engine.muteLocalAudioStream(false),
+      );
+      await _cleanup(
+        'reset speaker',
+        () => engine.muteAllRemoteAudioStreams(false),
+      );
     } catch (error) {
       debugPrint('Agora leave room failed: $error');
+      await release();
     }
-
-    _setState(
-      _state.copyWith(
-        joining: false,
-        joined: false,
-        clearRoomId: true,
-        clientRole: ClientRoleType.clientRoleAudience,
-        publishing: false,
-        volumeLevels: const {},
-        errorMessage: null,
-      ),
-    );
+    _setState(RoomAgoraState(initialized: _engine != null));
   }
 
   Future<void> publish({int? position}) async {
+    final roomId = _expectedRoomId;
+    if (roomId == null) return;
     try {
       await _engine?.setClientRole(role: ClientRoleType.clientRoleBroadcaster);
+      if (_expectedRoomId != roomId) return;
       _setState(
         _state.copyWith(
           clientRole: ClientRoleType.clientRoleBroadcaster,
@@ -212,14 +237,18 @@ class RoomAgoraManager extends ChangeNotifier {
         ),
       );
     } catch (error) {
+      if (_expectedRoomId != roomId) return;
       _setState(_state.copyWith(errorMessage: error.toString()));
       rethrow;
     }
   }
 
   Future<void> stopPublish({int? position}) async {
+    final roomId = _expectedRoomId;
+    if (roomId == null) return;
     try {
       await _engine?.setClientRole(role: ClientRoleType.clientRoleAudience);
+      if (_expectedRoomId != roomId) return;
       _setState(
         _state.copyWith(
           clientRole: ClientRoleType.clientRoleAudience,
@@ -228,18 +257,25 @@ class RoomAgoraManager extends ChangeNotifier {
         ),
       );
     } catch (error) {
+      if (_expectedRoomId != roomId) return;
       _setState(_state.copyWith(errorMessage: error.toString()));
       rethrow;
     }
   }
 
   Future<void> muteMicrophone(bool mute) async {
+    final roomId = _expectedRoomId;
+    if (roomId == null) return;
     await _engine?.muteLocalAudioStream(mute);
+    if (_expectedRoomId != roomId) return;
     _setState(_state.copyWith(mutedMicrophone: mute));
   }
 
   Future<void> muteSpeaker(bool mute) async {
+    final roomId = _expectedRoomId;
+    if (roomId == null) return;
     await _engine?.muteAllRemoteAudioStreams(mute);
+    if (_expectedRoomId != roomId) return;
     _setState(_state.copyWith(mutedSpeaker: mute));
   }
 
@@ -250,31 +286,43 @@ class RoomAgoraManager extends ChangeNotifier {
 
     try {
       final token = await _fetchAgoraToken(roomId);
+      if (_expectedRoomId != roomId || !identical(_engine, engine)) return;
       await engine.renewToken(token);
+      if (_expectedRoomId != roomId || !identical(_engine, engine)) return;
       _setState(_state.copyWith(errorMessage: null));
     } catch (error) {
+      if (_expectedRoomId != roomId || !identical(_engine, engine)) return;
       _setState(_state.copyWith(errorMessage: error.toString()));
     }
   }
 
   Future<void> release() async {
+    _expectedRoomId = null;
     final engine = _engine;
     _engine = null;
     _appId = null;
     if (engine != null) {
-      try {
-        await engine.leaveChannel();
-        await engine.release();
-      } catch (error) {
-        debugPrint('Agora release failed: $error');
-      }
+      await _cleanup('leave before release', engine.leaveChannel);
+      await _cleanup('release', engine.release);
     }
     _setState(const RoomAgoraState());
   }
 
+  Future<void> _cleanup(String name, Future<void> Function() action) async {
+    try {
+      await action();
+    } catch (error) {
+      debugPrint('Agora $name failed: $error');
+    }
+  }
+
+  bool _accepts(RtcConnection connection) =>
+      _expectedRoomId != null && connection.channelId == _expectedRoomId;
+
   RtcEngineEventHandler _eventHandler() {
     return RtcEngineEventHandler(
       onJoinChannelSuccess: (connection, elapsed) {
+        if (!_accepts(connection)) return;
         _setState(
           _state.copyWith(
             joining: false,
@@ -284,18 +332,10 @@ class RoomAgoraManager extends ChangeNotifier {
           ),
         );
       },
-      onLeaveChannel: (connection, stats) {
-        _setState(
-          _state.copyWith(
-            joining: false,
-            joined: false,
-            clearRoomId: true,
-            publishing: false,
-            volumeLevels: const {},
-          ),
-        );
-      },
+      // leaveRoom owns this reset. A late leave callback may refer to a channel
+      // that has already been rejoined with the same ID.
       onNetworkQuality: (connection, remoteUid, txQuality, rxQuality) {
+        if (!_accepts(connection)) return;
         if (remoteUid == 0) {
           _setState(
             _state.copyWith(
@@ -308,6 +348,7 @@ class RoomAgoraManager extends ChangeNotifier {
       onAudioVolumeIndication:
           (connection, speakers, speakerNumber, totalVolume) async {
             final uid = await _authSession.uid();
+            if (!_accepts(connection)) return;
             final nextLevels = <int, int>{};
             for (final speaker in speakers) {
               final rawUid = speaker.uid ?? 0;
@@ -321,6 +362,7 @@ class RoomAgoraManager extends ChangeNotifier {
           },
       onAudioPublishStateChanged:
           (channel, oldState, newState, elapseSinceLastState) {
+            if (_expectedRoomId == null || channel != _expectedRoomId) return;
             _setState(
               _state.copyWith(
                 publishing:
@@ -330,6 +372,7 @@ class RoomAgoraManager extends ChangeNotifier {
             );
           },
       onClientRoleChanged: (connection, oldRole, newRole, newRoleOptions) {
+        if (!_accepts(connection)) return;
         _setState(
           _state.copyWith(
             clientRole: newRole,
@@ -339,6 +382,7 @@ class RoomAgoraManager extends ChangeNotifier {
         );
       },
       onClientRoleChangeFailed: (connection, reason, currentRole) {
+        if (!_accepts(connection)) return;
         _setState(
           _state.copyWith(
             clientRole: currentRole,
@@ -354,7 +398,18 @@ class RoomAgoraManager extends ChangeNotifier {
         unawaited(renewCurrentToken());
       },
       onError: (error, message) {
+        if (_expectedRoomId == null) return;
         _setState(_state.copyWith(errorMessage: '$error $message'));
+      },
+      onConnectionStateChanged: (connection, state, reason) {
+        if (!_accepts(connection)) return;
+        if (state == ConnectionStateType.connectionStateFailed ||
+            reason ==
+                ConnectionChangedReasonType.connectionChangedBannedByServer) {
+          _setState(
+            _state.copyWith(isTerminal: true, errorMessage: reason.name),
+          );
+        }
       },
     );
   }

@@ -19,6 +19,37 @@ void main() {
   });
   tearDown(() => manager.dispose());
 
+  test(
+    'Keep keeps gift acknowledgements and final combo business state without visuals',
+    () {
+      final acknowledged = <String>[];
+      final ended = <String>[];
+      final hidden = RoomGiftEventManager(
+        roomId: '123',
+        startTimer: false,
+        now: () => now,
+        onSelfGift: (gift, _) => acknowledged.add(gift.comboId),
+        onComboEnd: ended.add,
+      )..currentUid = 10;
+      addTearDown(hidden.dispose);
+      hidden.setVisible(false);
+      hidden.receive(socket(payload(), id: 'kept'));
+      expect(acknowledged, ['combo']);
+      expect(hidden.state.publicMessages, hasLength(1));
+      expect(hidden.state.slots.whereType<Object>(), isEmpty);
+      expect(hidden.state.effects, isEmpty);
+      expect(hidden.state.flights, isEmpty);
+      hidden.setVisible(true);
+      expect(hidden.state.effects, isEmpty);
+      expect(ended, isEmpty);
+      hidden.setSessionActive(false);
+      hidden.receive(socket(payload(combo: 'late'), id: 'late-after-exit'));
+      expect(acknowledged, ['combo']);
+      expect(hidden.state.publicMessages, isEmpty);
+      expect(ended, ['']);
+    },
+  );
+
   test('typed model accepts defaults and numeric strings', () {
     final gift = RoomScreenGiftMsg.fromJson(payload());
     expect(gift.gift.direction, 2);

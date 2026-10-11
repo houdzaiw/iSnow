@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../localization/app_localizations.dart';
+import '../../manager/room_manager.dart';
 import '../../theme/app_theme.dart';
 import 'gift/models/room_gift_models.dart';
 import 'gift/views/room_gift_sheet.dart';
@@ -20,6 +21,7 @@ import 'models/room_more_tools_models.dart';
 import 'viewmodel/room_state.dart';
 import 'viewmodel/room_more_tools_view_model.dart';
 import 'viewmodel/room_view_model.dart';
+import 'views/room_exit_dialog.dart';
 
 part 'views/room_bottom_bar.dart';
 part 'views/room_chat_panel.dart';
@@ -48,6 +50,11 @@ class RoomPage extends HookConsumerWidget {
     final state = ref.watch(provider);
     final viewModel = ref.read(provider.notifier);
     final isExiting = useState(false);
+    final exitDialog = useRef<DialogRoute<RoomExitAction>?>(null);
+    final closingPage = useRef(false);
+    final hadRoom = useRef(state.isInRoom);
+    final pageRoute = ModalRoute.of(context);
+    final rootNavigator = Navigator.of(context, rootNavigator: true);
     final giftRoomId = state.currentRoomId.trim().isNotEmpty
         ? state.currentRoomId.trim()
         : roomId;
@@ -69,7 +76,103 @@ class RoomPage extends HookConsumerWidget {
       return null;
     }, [roomId, roomPassword, followUid]);
 
+    void dismissRoomModals() {
+      if (pageRoute == null || !pageRoute.isActive) return;
+      final path = GoRouter.of(context).state.uri.path;
+      if (path != '/room/${Uri.encodeComponent(roomId)}') {
+        final dialog = exitDialog.value;
+        if (dialog != null && dialog.isActive) {
+          rootNavigator.removeRoute(dialog);
+        }
+        exitDialog.value = null;
+        return;
+      }
+      rootNavigator.popUntil((route) => identical(route, pageRoute));
+      exitDialog.value = null;
+    }
+
+    void closePage() {
+      if (!context.mounted ||
+          closingPage.value ||
+          pageRoute?.isActive != true) {
+        return;
+      }
+      closingPage.value = true;
+      dismissRoomModals();
+      if (!pageRoute!.isCurrent) {
+        // Room routes are outside ShellRoute. Preserve newer pushed pages when
+        // the old room terminates; page-based routes cannot use removeRoute.
+        final router = GoRouter.of(context);
+        final configuration = router.routerDelegate.currentConfiguration;
+        final page = pageRoute.settings;
+        if (page is Page) {
+          final matches = configuration.matches
+              .where((match) => match.pageKey != page.key)
+              .toList();
+          if (matches.length != configuration.matches.length &&
+              matches.isNotEmpty) {
+            for (final match in configuration.matches) {
+              if (match.pageKey == page.key && match is ImperativeRouteMatch) {
+                match.complete(null);
+              }
+            }
+            router.restore(
+              RouteMatchList(
+                matches: matches,
+                uri: configuration.uri,
+                pathParameters: configuration.pathParameters,
+                extra: configuration.extra,
+              ),
+            );
+          }
+        }
+        return;
+      }
+      if (context.canPop()) {
+        context.pop();
+      } else {
+        context.go('/party');
+      }
+    }
+
+    Future<void> showExitChoices() async {
+      if (isExiting.value || closingPage.value || exitDialog.value != null) {
+        return;
+      }
+      final dialog = DialogRoute<RoomExitAction>(
+        context: context,
+        barrierColor: AppColors.roomExitScrim,
+        builder: (_) => const RoomExitDialog(),
+      );
+      exitDialog.value = dialog;
+      final action = await rootNavigator.push(dialog);
+      if (identical(exitDialog.value, dialog)) exitDialog.value = null;
+      if (!context.mounted || closingPage.value || !viewModel.mounted) return;
+      if (action == RoomExitAction.keep) {
+        if (viewModel.minimizeRoom()) closePage();
+      } else if (action == RoomExitAction.exit) {
+        isExiting.value = true;
+        final didLeave = await viewModel.leaveRoom();
+        if (!context.mounted) return;
+        if (didLeave) {
+          closePage();
+        } else {
+          isExiting.value = false;
+        }
+      }
+    }
+
     ref.listen<RoomPageState>(provider, (previous, next) {
+      if (next.isInRoom) hadRoom.value = true;
+      if (hadRoom.value &&
+          (next.status == RoomStatus.leaving || !next.isInRoom)) {
+        // A kick/logout/switch wins over an open Keep dialog or gift sheet.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!context.mounted || closingPage.value) return;
+          dismissRoomModals();
+          if (!next.isInRoom && !isExiting.value) closePage();
+        });
+      }
       final message = next.errorMessage;
       if (message == null || message == previous?.errorMessage) return;
       ScaffoldMessenger.of(context)
@@ -83,11 +186,9 @@ class RoomPage extends HookConsumerWidget {
         systemNavigationBarColor: const Color(0xFF555563),
       ),
       child: PopScope<void>(
-        canPop: !isExiting.value,
+        canPop: false,
         onPopInvokedWithResult: (didPop, _) {
-          if (didPop && !isExiting.value && viewModel.mounted) {
-            viewModel.minimizeRoom();
-          }
+          if (!didPop) showExitChoices();
         },
         child: Scaffold(
           resizeToAvoidBottomInset: true,
@@ -117,24 +218,9 @@ class RoomPage extends HookConsumerWidget {
                             state: state,
                             onMinimize: () {
                               if (isExiting.value) return;
-                              viewModel.minimizeRoom();
-                              context.pop();
+                              if (viewModel.minimizeRoom()) closePage();
                             },
-                            onExit: () async {
-                              if (isExiting.value) return;
-                              isExiting.value = true;
-                              final didLeave = await viewModel.leaveRoom();
-                              if (!context.mounted) return;
-                              if (!didLeave) {
-                                isExiting.value = false;
-                                return;
-                              }
-                              if (context.canPop()) {
-                                context.pop();
-                              } else {
-                                context.go('/party');
-                              }
-                            },
+                            onExit: showExitChoices,
                           ),
                           _RoomMicGrid(
                             seats: state.seats,

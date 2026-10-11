@@ -1,4 +1,7 @@
 {
+  "room_exit_keep.webp": "Nady reference requested for missing UI: assets/images/room_exit_minimize.webp; replace when Lanhu Keep icon is supplied",
+  "room_exit_close.webp": "Nady reference requested for missing UI: assets/images/room_exit_close.webp",
+  "room_mini_close.webp": "Nady reference requested for missing UI: assets/images/ic_outline_close.webp; white tint as in nady_room_button.dart",
   "room_home_indicator.png": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaDDSSlicePNGc26b54443862c6ad6832ce1cdc2de840.png",
   "room_avatar_sample.png": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaDDSSlicePNGe892636f14382a7a744780fd9bd21f46.png",
   "room_power.png": "https://lanhu-dds-backend.oss-cn-beijing.aliyuncs.com/merge_image/imgs/5088e10773b145b8bb65d21835ee3f0e_mergeImage.png",

@@ -31,6 +31,12 @@
 
 后续补齐图标时，只替换 `assets/lanhu/room/` 下的语义化图片文件或更新 `AppAssets` 常量，不要改动业务逻辑。
 
+## Keep/Exit Reference UI
+
+- 用户指定缺少 UI 时对照 Nady 的退出弹窗；本次 Keep/Exit 使用其 `room_exit_minimize.webp`、`room_exit_close.webp`，迷你入口关闭使用 `ic_outline_close.webp` 并沿用白色着色，复制为本地语义化资源并在 manifest 明确标记 Nady 来源，不冒充蓝湖切图。
+- 迷你房间封面来自当前房间接口；无封面时使用红色缺省图。音浪以 Flutter 原生圆形边框动画实现，不引入悬浮窗库或 Flutter 内置图标。
+- 后续提供对应蓝湖设计稿时优先替换这两个参考资源；未明确授权的其他缺失图标仍遵守红色缺省图规则。
+
 ## Gift Panel
 
 - 礼物面板以 `image_id=dd85e4a7-00f5-41c9-a75b-b28a25da69ad` 为资源上下文；下载脚本按该稿的区块和图层名称提取切图，不能使用其他页面的同名图层。

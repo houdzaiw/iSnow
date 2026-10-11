@@ -71,6 +71,14 @@ class RoomRepository {
     return _authSession.uid();
   }
 
+  Future<bool> isLoggedIn() => _authSession.isLoggedIn();
+
+  void addAuthListener(VoidCallback listener) =>
+      _authSession.addListener(listener);
+
+  void removeAuthListener(VoidCallback listener) =>
+      _authSession.removeListener(listener);
+
   Future<UserData?> currentUser() {
     return _authSession.user();
   }

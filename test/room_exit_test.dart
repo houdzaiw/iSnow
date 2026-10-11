@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,6 +16,9 @@ import 'package:project/classes/room/gift/viewmodel/room_gift_send_controller.da
 import 'package:project/classes/room/room_page.dart';
 import 'package:project/classes/room/room_repository.dart';
 import 'package:project/classes/room/viewmodel/room_view_model.dart';
+import 'package:project/classes/room/viewmodel/room_session_view_model.dart';
+import 'package:project/classes/room/views/room_exit_dialog.dart';
+import 'package:project/classes/room/views/room_mini_overlay.dart';
 import 'package:project/localization/app_localizations.dart';
 import 'package:project/manager/app_socket_manager.dart';
 import 'package:project/manager/room_agora_manager.dart';
@@ -23,6 +28,16 @@ import 'package:project/model/user_profile.dart';
 import 'package:project/theme/app_theme.dart';
 
 void main() {
+  setUpAll(() async {
+    final font = FontLoader('Roboto')
+      ..addFont(
+        File(
+          'test/fixtures/fonts/Roboto-Regular.ttf',
+        ).readAsBytes().then(ByteData.sublistView),
+      );
+    await font.load();
+  });
+
   for (final pushed in [false, true]) {
     testWidgets('exit disposes room controllers with pushed=$pushed', (
       tester,
@@ -41,7 +56,7 @@ void main() {
       expect(model.mounted, isTrue);
       expect(repository.messages.hasListener, isTrue);
 
-      await tester.tap(_exitButton);
+      await _chooseExit(tester);
       await tester.pumpAndSettle();
       await tester.pump();
 
@@ -62,7 +77,7 @@ void main() {
         roomViewModelProvider('alias').notifier,
       );
       expect(next, isNot(same(model)));
-      await tester.tap(_exitButton);
+      await _chooseExit(tester);
       await tester.pumpAndSettle();
       expect(next.mounted, isFalse);
       expect(repository.leaveCalls, 2);
@@ -76,7 +91,7 @@ void main() {
   ) async {
     final repository = _RoomRepository()..leaveGate = Completer<void>();
     final harness = await _openRoom(tester, repository);
-    await tester.tap(_exitButton);
+    await _chooseExit(tester);
     await tester.pump();
     await tester.tap(_exitButton);
     await tester.pump();
@@ -107,7 +122,12 @@ void main() {
     final gifts = harness.container.read(
       roomGiftEventManagerProvider('canonical').notifier,
     );
-    harness.router.pop();
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.byType(RoomExitDialog), findsOneWidget);
+    expect(repository.leaveCalls, 0);
+    expect(repository.minimizeCalls, 0);
+    await tester.tap(find.byKey(const ValueKey('room-exit-keep')));
     await tester.pumpAndSettle();
     expect(model.mounted, isFalse);
     expect(gifts.isAlive, isTrue);
@@ -124,6 +144,90 @@ void main() {
     expect(repository.messages.hasListener, isFalse);
   });
 
+  testWidgets('dismissing Keep/Exit leaves the room and controller untouched', (
+    tester,
+  ) async {
+    final repository = _RoomRepository();
+    final harness = await _openRoom(tester, repository);
+    final model = harness.container.read(
+      roomViewModelProvider('alias').notifier,
+    );
+    await tester.tap(_exitButton);
+    await tester.pumpAndSettle();
+    await tester.tapAt(const Offset(15, 35));
+    await tester.pumpAndSettle();
+    expect(find.byType(RoomExitDialog), findsNothing);
+    expect(find.byType(RoomPage), findsOneWidget);
+    expect(repository.roomState.isInRoom, isTrue);
+    expect(repository.leaveCalls, 0);
+    expect(repository.minimizeCalls, 0);
+    expect(model.mounted, isTrue);
+    await _chooseExit(tester);
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('background pauses visual effects without exiting a kept room', (
+    tester,
+  ) async {
+    final repository = _RoomRepository();
+    await _openRoom(tester, repository, miniOverlay: true);
+    await tester.tap(_exitButton);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('room-exit-keep')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    await tester.pump();
+    expect(repository.roomState.isInRoom, isTrue);
+    expect(repository.roomState.isMinimized, isTrue);
+    expect(repository.messages.hasListener, isTrue);
+    expect(repository.leaveCalls, 0);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+    expect(find.byKey(const ValueKey('room-mini-entry')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('room-mini-exit')));
+    await tester.pumpAndSettle();
+    expect(repository.leaveCalls, 1);
+  });
+
+  for (final failed in [false, true]) {
+    testWidgets(
+      'pending chat/refresh ignore disposed controller with failed=$failed',
+      (tester) async {
+        final repository = _RoomRepository()
+          ..sendGate = Completer<void>()
+          ..refreshGate = Completer<void>();
+        final harness = await _openRoom(tester, repository);
+        final model = harness.container.read(
+          roomViewModelProvider('alias').notifier,
+        );
+        final sending = model.sendMessage('Pending message');
+        final refreshing = model.refresh();
+        await tester.tap(_exitButton);
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('room-exit-keep')));
+        await tester.pumpAndSettle();
+        expect(model.mounted, isFalse);
+        if (failed) {
+          repository.sendGate!.completeError(StateError('Late chat failure'));
+          repository.refreshGate!.completeError(
+            StateError('Late refresh failure'),
+          );
+        } else {
+          repository.sendGate!.complete();
+          repository.refreshGate!.complete();
+        }
+        await sending;
+        await refreshing;
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+        expect(repository.roomState.isMinimized, isTrue);
+        await repository.leaveRoom();
+        await tester.pumpAndSettle();
+      },
+    );
+  }
+
   testWidgets('pending exit can finish after another route removes the page', (
     tester,
   ) async {
@@ -132,7 +236,7 @@ void main() {
     final model = harness.container.read(
       roomViewModelProvider('alias').notifier,
     );
-    await tester.tap(_exitButton);
+    await _chooseExit(tester);
     await tester.pump();
     harness.router.go('/party');
     await tester.pumpAndSettle();
@@ -145,25 +249,21 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('failed exit stays in the page and can retry', (tester) async {
+  testWidgets('failed exit still tears down the page after local cleanup', (
+    tester,
+  ) async {
     final repository = _RoomRepository()
       ..leaveError = StateError('Exit failed');
     final harness = await _openRoom(tester, repository);
     final model = harness.container.read(
       roomViewModelProvider('alias').notifier,
     );
-    await tester.tap(_exitButton);
+    await _chooseExit(tester);
     await tester.pumpAndSettle();
-    expect(find.byType(RoomPage), findsOneWidget);
-    expect(model.mounted, isTrue);
-    expect(repository.leaveCalls, 1);
-    expect(find.text('Bad state: Exit failed'), findsOneWidget);
-    repository.leaveError = null;
-    await tester.tap(_exitButton);
-    await tester.pumpAndSettle();
-    expect(model.mounted, isFalse);
     expect(find.byType(RoomPage), findsNothing);
-    expect(repository.leaveCalls, 2);
+    expect(model.mounted, isFalse);
+    expect(repository.leaveCalls, 1);
+    expect(repository.roomState.isInRoom, isFalse);
     expect(repository.messages.hasListener, isFalse);
     expect(tester.takeException(), isNull);
   });
@@ -206,6 +306,259 @@ void main() {
     expect(repository.hasActiveListeners, isFalse);
     expect(repository.messages.hasListener, isFalse);
   });
+
+  testWidgets('terminal exit dismisses the Keep dialog and room controller', (
+    tester,
+  ) async {
+    final repository = _RoomRepository();
+    final harness = await _openRoom(tester, repository);
+    final model = harness.container.read(
+      roomViewModelProvider('alias').notifier,
+    );
+    await tester.tap(_exitButton);
+    await tester.pumpAndSettle();
+    expect(find.byType(RoomExitDialog), findsOneWidget);
+    await repository.leaveRoom();
+    await tester.pumpAndSettle();
+    expect(find.byType(RoomExitDialog), findsNothing);
+    expect(find.byType(RoomPage), findsNothing);
+    expect(model.mounted, isFalse);
+    expect(repository.minimizeCalls, 0);
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final width in [320.0, 375.0, 430.0]) {
+    testWidgets('Keep mini-room restores without re-entering at $width px', (
+      tester,
+    ) async {
+      final repository = _RoomRepository();
+      final harness = await _openRoom(
+        tester,
+        repository,
+        miniOverlay: true,
+        width: width,
+      );
+      final model = harness.container.read(
+        roomViewModelProvider('alias').notifier,
+      );
+      await tester.tap(_exitButton);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('room-exit-keep')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump();
+      await tester.pump();
+      expect(model.mounted, isFalse);
+      expect(repository.leaveCalls, 0);
+      expect(repository.enterCalls, 1);
+      final mini = find.byKey(const ValueKey('room-mini-entry'));
+      expect(mini, findsOneWidget);
+      final initial = tester.getRect(mini);
+      expect(initial.right, lessThan(width));
+      expect(initial.bottom, lessThan(730));
+      await tester.drag(mini, const Offset(-500, -150));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      final moved = tester.getRect(mini);
+      expect(moved.left, greaterThan(0));
+      expect(moved.left, lessThan(25));
+      expect(moved.top, lessThan(initial.top));
+      await tester.tap(find.byKey(const ValueKey('room-mini-restore')));
+      await tester.pumpAndSettle();
+      expect(find.byType(RoomPage), findsOneWidget);
+      expect(find.byKey(const ValueKey('room-mini-entry')), findsNothing);
+      expect(repository.enterCalls, 1);
+      expect(repository.restoreCalls, 1);
+      expect(repository.roomState.isMinimized, isFalse);
+      expect(repository.roomState.currentRoomId, 'canonical');
+      await _chooseExit(tester);
+      await tester.pumpAndSettle();
+      expect(repository.leaveCalls, 1);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('mini-room exit cleans up and hidden auth routes never show it', (
+    tester,
+  ) async {
+    final repository = _RoomRepository();
+    final harness = await _openRoom(tester, repository, miniOverlay: true);
+    await tester.tap(_exitButton);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('room-exit-keep')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    unawaited(harness.router.push('/login'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('room-mini-entry')), findsNothing);
+    expect(repository.roomState.isInRoom, isTrue);
+    harness.router.pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byKey(const ValueKey('room-mini-entry')), findsOneWidget);
+    harness.router.go('/login');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('room-mini-entry')), findsNothing);
+    expect(repository.roomState.isInRoom, isTrue);
+    harness.router.go('/party');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tap(find.byKey(const ValueKey('room-mini-exit')));
+    await tester.pumpAndSettle();
+    expect(repository.leaveCalls, 1);
+    expect(repository.roomState.isInRoom, isFalse);
+    expect(find.byKey(const ValueKey('room-mini-entry')), findsNothing);
+    expect(repository.messages.hasListener, isFalse);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('mini-room is rooted across primary pages and wallet', (
+    tester,
+  ) async {
+    final repository = _RoomRepository();
+    final harness = await _openRoom(tester, repository, miniOverlay: true);
+    final model = harness.container.read(
+      roomViewModelProvider('alias').notifier,
+    );
+    await tester.tap(_exitButton);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('room-exit-keep')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    for (final path in ['/home', '/message', '/profile', '/wallet', '/party']) {
+      harness.router.go(path);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(
+        find.byKey(const ValueKey('room-mini-entry')),
+        findsOneWidget,
+        reason: path,
+      );
+      expect(repository.roomState.isInRoom, isTrue);
+      expect(repository.leaveCalls, 0);
+      expect(repository.enterCalls, 1);
+      expect(model.mounted, isFalse);
+    }
+    await tester.tap(find.byKey(const ValueKey('room-mini-exit')));
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets(
+    'Keep/Exit dialog and mini-room render the reference image assets',
+    (tester) async {
+      final repository = _RoomRepository();
+      await _openRoom(tester, repository, miniOverlay: true);
+      await tester.tap(_exitButton);
+      await tester.pumpAndSettle();
+      await expectLater(
+        find.byKey(const ValueKey('room-lifecycle-snapshot')),
+        matchesGoldenFile('goldens/room_exit_choices.png'),
+      );
+      await tester.tap(find.byKey(const ValueKey('room-exit-keep')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      await expectLater(
+        find.byKey(const ValueKey('room-lifecycle-snapshot')),
+        matchesGoldenFile('goldens/room_mini_kept.png'),
+      );
+      await tester.tap(find.byKey(const ValueKey('room-mini-exit')));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'terminal exit cancels restore lock so the next room remains usable',
+    (tester) async {
+      final repository = _RoomRepository();
+      final harness = await _openRoom(tester, repository, miniOverlay: true);
+      await tester.tap(_exitButton);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('room-exit-keep')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      final session = harness.container.read(
+        roomSessionViewModelProvider.notifier,
+      );
+      expect(session.restoreRoom(), 'canonical');
+      expect(
+        harness.container.read(roomSessionViewModelProvider).isBusy,
+        isTrue,
+      );
+      // Simulate termination before the restore navigation Future completes.
+      await repository.leaveRoom();
+      await tester.pumpAndSettle();
+      expect(
+        harness.container.read(roomSessionViewModelProvider).isBusy,
+        isFalse,
+      );
+      await tester.tap(find.text('Open room'));
+      await tester.pumpAndSettle();
+      await tester.tap(_exitButton);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('room-exit-keep')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.tap(find.byKey(const ValueKey('room-mini-exit')));
+      await tester.pumpAndSettle();
+      expect(repository.leaveCalls, 2);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('auth invalidation exits a minimized room', (tester) async {
+    final repository = _RoomRepository();
+    await _openRoom(tester, repository, miniOverlay: true);
+    await tester.tap(_exitButton);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('room-exit-keep')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    repository.loggedIn = false;
+    for (final listener in repository.authListeners.toList()) {
+      listener();
+    }
+    await tester.pumpAndSettle();
+    expect(repository.leaveCalls, 1);
+    expect(find.byKey(const ValueKey('room-mini-entry')), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final kept in [false, true]) {
+    testWidgets('switching rooms keeps the new page open with kept=$kept', (
+      tester,
+    ) async {
+      final repository = _RoomRepository();
+      final harness = await _openRoom(tester, repository);
+      final oldModel = harness.container.read(
+        roomViewModelProvider('alias').notifier,
+      );
+      if (kept) {
+        await tester.tap(_exitButton);
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('room-exit-keep')));
+        await tester.pumpAndSettle();
+      }
+      unawaited(harness.router.push('/room/second'));
+      await tester.pumpAndSettle();
+      expect(repository.roomState.currentRoomId, 'second');
+      expect(repository.leaveCalls, 1);
+      expect(oldModel.mounted, isFalse);
+      expect(find.byType(RoomPage), findsOneWidget);
+      expect(tester.widget<RoomPage>(find.byType(RoomPage)).roomId, 'second');
+      await _chooseExit(tester);
+      await tester.pumpAndSettle();
+      expect(find.byType(RoomPage), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+  }
+}
+
+Future<void> _chooseExit(WidgetTester tester) async {
+  await tester.tap(_exitButton);
+  await tester.pumpAndSettle();
+  expect(find.byType(RoomExitDialog), findsOneWidget);
+  await tester.tap(find.byKey(const ValueKey('room-exit-exit')));
 }
 
 Finder get _exitButton => find.byWidgetPredicate(
@@ -219,14 +572,25 @@ Future<({ProviderContainer container, GoRouter router})> _openRoom(
   WidgetTester tester,
   _RoomRepository repository, {
   bool pushed = true,
+  bool miniOverlay = false,
+  double width = 375,
 }) async {
-  tester.view.physicalSize = const Size(375, 812);
+  tester.view.physicalSize = Size(width, 812);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
   final router = GoRouter(
     initialLocation: pushed ? '/party' : '/room/alias',
     routes: [
+      for (final path in ['/home', '/message', '/profile', '/wallet'])
+        GoRoute(
+          path: path,
+          builder: (_, __) => Scaffold(body: Text(path)),
+        ),
+      GoRoute(
+        path: '/login',
+        builder: (_, __) => const Scaffold(body: Text('Login')),
+      ),
       GoRoute(
         path: '/party',
         builder: (context, _) => Scaffold(
@@ -264,6 +628,12 @@ Future<({ProviderContainer container, GoRouter router})> _openRoom(
         designSize: const Size(375, 812),
         builder: (_, __) => MaterialApp.router(
           routerConfig: router,
+          builder: (_, child) => RepaintBoundary(
+            key: const ValueKey('room-lifecycle-snapshot'),
+            child: miniOverlay
+                ? RoomMiniOverlay(router: router, child: child!)
+                : child!,
+          ),
           localizationsDelegates: const [
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
@@ -292,7 +662,13 @@ class _RoomRepository extends ChangeNotifier implements RoomRepository {
   final messages = StreamController<RoomSocketMessage>.broadcast(sync: true);
   int leaveCalls = 0;
   int minimizeCalls = 0;
+  int enterCalls = 0;
+  int restoreCalls = 0;
+  bool loggedIn = true;
+  final authListeners = <VoidCallback>[];
   Completer<void>? leaveGate;
+  Completer<void>? sendGate;
+  Completer<void>? refreshGate;
   Object? leaveError;
 
   @override
@@ -308,6 +684,27 @@ class _RoomRepository extends ChangeNotifier implements RoomRepository {
   @override
   Future<UserData?> currentUser() async => null;
   @override
+  Future<bool> isLoggedIn() async => loggedIn;
+  @override
+  void addAuthListener(VoidCallback listener) => authListeners.add(listener);
+  @override
+  void removeAuthListener(VoidCallback listener) =>
+      authListeners.remove(listener);
+  @override
+  Future<int?> sendTextMessage({
+    required String roomId,
+    required String text,
+  }) async {
+    await sendGate?.future;
+    return null;
+  }
+
+  @override
+  Future<void> refreshRoomData() async {
+    await refreshGate?.future;
+  }
+
+  @override
   RoomGiftAudience giftAudience(String roomId) => RoomGiftAudience(
     isInRoom: room.isInRoom && room.currentRoomId == roomId,
     onlineCount: 1,
@@ -319,11 +716,13 @@ class _RoomRepository extends ChangeNotifier implements RoomRepository {
     String roomPassword = '',
     int followUid = 0,
   }) async {
+    enterCalls++;
+    if (room.isInRoom && roomId == 'second') await leaveRoom();
     room = RoomState(status: RoomStatus.entering, currentRoomId: roomId);
     notifyListeners();
-    room = const RoomState(
+    room = RoomState(
       status: RoomStatus.ready,
-      currentRoomId: 'canonical',
+      currentRoomId: roomId == 'second' ? 'second' : 'canonical',
       isInRoom: true,
     );
     notifyListeners();
@@ -332,11 +731,12 @@ class _RoomRepository extends ChangeNotifier implements RoomRepository {
   @override
   Future<void> leaveRoom() async {
     leaveCalls++;
-    room = room.copyWith(status: RoomStatus.leaving);
+    room = room.copyWith(status: RoomStatus.leaving, isMinimized: false);
     notifyListeners();
     await leaveGate?.future;
     if (leaveError != null) {
-      room = room.copyWith(status: RoomStatus.ready);
+      // Simulate a failed server exit after local cleanup has completed.
+      room = const RoomState();
       notifyListeners();
       throw leaveError!;
     }
@@ -346,10 +746,22 @@ class _RoomRepository extends ChangeNotifier implements RoomRepository {
 
   @override
   void minimizeRoom() {
+    if (room.status != RoomStatus.ready) return;
     minimizeCalls++;
     room = room.copyWith(isMinimized: true);
     notifyListeners();
   }
+
+  @override
+  void restoreRoom() {
+    if (room.status != RoomStatus.ready) return;
+    restoreCalls++;
+    room = room.copyWith(isMinimized: false);
+    notifyListeners();
+  }
+
+  @override
+  Future<void> exitMinimizedRoom() => leaveRoom();
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
