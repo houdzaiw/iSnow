@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
+import '../configs/app_configs.dart';
 import '../configs/app_device.dart';
 import '../model/room_models.dart';
 import '../model/room_socket_message.dart';
@@ -120,6 +121,7 @@ class RoomManager extends ChangeNotifier {
   Future<void>? _enterTask;
   Future<void>? _leaveTask;
   Future<void>? _joinTask;
+  Future<void>? _agoraJoinTask;
   String? _requestedRoomId;
   String? _serverRoomId;
   int _generation = 0;
@@ -245,13 +247,14 @@ class RoomManager extends ChangeNotifier {
         ),
       );
       if (generation != _generation) return;
+      _agoraJoinTask = _joinAgoraBestEffort(
+        roomId: effectiveRoomId,
+        enterResponse: enterResponse,
+        generation: generation,
+        appId: agoraAppId ?? AppConfig.shared.appEnv.agoraAppId,
+      );
       _joinTask = Future.wait<void>([
-        _joinAgoraBestEffort(
-          roomId: effectiveRoomId,
-          enterResponse: enterResponse,
-          generation: generation,
-          appId: agoraAppId ?? const String.fromEnvironment('AGORA_APPID'),
-        ),
+        _agoraJoinTask!,
         _joinSocketBestEffort(roomId: effectiveRoomId, url: socketUrl),
       ]).then((_) {});
       unawaited(_joinTask!);
@@ -333,6 +336,7 @@ class RoomManager extends ChangeNotifier {
         _serverRoomId = null;
         _requestedRoomId = null;
         _joinTask = null;
+        _agoraJoinTask = null;
         _setState(const RoomState());
         _leaveTask = null;
         completion.complete();
@@ -408,6 +412,8 @@ class RoomManager extends ChangeNotifier {
     final response = await _api.upMic(roomId: roomId, position: position);
     if (!_isCurrentSession(roomId, generation)) return response;
     _applyMicOperateResponse(response);
+    await _agoraJoinTask;
+    if (!_isCurrentSession(roomId, generation)) return response;
     await _agoraManager.publish(position: position);
     if (_isCurrentSession(roomId, generation)) unawaited(refreshMicList());
     return response;
@@ -422,6 +428,14 @@ class RoomManager extends ChangeNotifier {
     await _agoraManager.stopPublish(position: position);
     if (_isCurrentSession(roomId, generation)) unawaited(refreshMicList());
     return response;
+  }
+
+  Future<void> muteLocalMicrophone(bool mute) async {
+    final roomId = _requireCurrentRoomId();
+    final generation = _generation;
+    await _agoraJoinTask;
+    if (!_isCurrentSession(roomId, generation)) return;
+    await _agoraManager.muteMicrophone(mute);
   }
 
   Future<RoomMicOperateResp> kickDownMic({

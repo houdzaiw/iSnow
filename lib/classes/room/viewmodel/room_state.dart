@@ -139,6 +139,7 @@ class RoomPageState {
     this.socketErrorMessage,
     this.agoraState = const RoomAgoraState(),
     this.sendingMessage = false,
+    this.togglingMicrophone = false,
     this.pendingSeatPosition,
     this.errorMessage,
   });
@@ -167,6 +168,7 @@ class RoomPageState {
   final String? socketErrorMessage;
   final RoomAgoraState agoraState;
   final bool sendingMessage;
+  final bool togglingMicrophone;
   final int? pendingSeatPosition;
   final String? errorMessage;
 
@@ -237,6 +239,7 @@ class RoomPageState {
     Object? socketErrorMessage = _sentinel,
     RoomAgoraState? agoraState,
     bool? sendingMessage,
+    bool? togglingMicrophone,
     Object? pendingSeatPosition = _sentinel,
     Object? errorMessage = _sentinel,
   }) {
@@ -279,6 +282,7 @@ class RoomPageState {
           : socketErrorMessage as String?,
       agoraState: agoraState ?? this.agoraState,
       sendingMessage: sendingMessage ?? this.sendingMessage,
+      togglingMicrophone: togglingMicrophone ?? this.togglingMicrophone,
       pendingSeatPosition: identical(pendingSeatPosition, _sentinel)
           ? this.pendingSeatPosition
           : pendingSeatPosition as int?,

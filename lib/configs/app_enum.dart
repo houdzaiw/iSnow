@@ -5,6 +5,7 @@ enum AppEnv {
     "https://analytics-preview.habilive.net",
     "https://www.simijoy.com/h5/wallet/index.html",
     false,
+    agoraAppId: 'd5167c704aa4448c867a77f5989fdc66',
   ),
   qa(
     "https://www.simijoy.com/simi",
@@ -12,6 +13,7 @@ enum AppEnv {
     "https://analytics-preview.habilive.net",
     "https://www.simijoy.com/h5/wallet/index.html",
     false,
+    agoraAppId: 'd5167c704aa4448c867a77f5989fdc66',
   ),
   product(
     "https://www.simisoul.com/simi",
@@ -19,6 +21,7 @@ enum AppEnv {
     "https://analytics.habilive.net",
     "https://www.simisoul.com/h5/wallet/index.html",
     true,
+    agoraAppId: 'f4dffe3fe2564e50b4cd897a9aa9a781',
   );
 
   final String baseUrl;
@@ -26,13 +29,21 @@ enum AppEnv {
   final String h5Url;
   final String h5WalletUrl;
   final bool isLocal;
+  final String _agoraAppId;
+
+  String get agoraAppId {
+    const override = String.fromEnvironment('AGORA_APPID');
+    return override.isNotEmpty ? override : _agoraAppId;
+  }
+
   const AppEnv(
     this.baseUrl,
     this.socketHost,
     this.h5Url,
     this.h5WalletUrl,
-    this.isLocal,
-  );
+    this.isLocal, {
+    required String agoraAppId,
+  }) : _agoraAppId = agoraAppId;
 }
 
 enum ErrorCode {

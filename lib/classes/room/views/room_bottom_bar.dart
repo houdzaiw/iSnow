@@ -39,11 +39,12 @@ class _RoomBottomBar extends StatelessWidget {
           if (state.isOnMic) ...[
             SizedBox(width: AppSpacing.toolbarItemSpacing.w),
             _BottomIconButton(
+              key: const ValueKey('room-microphone-toggle'),
               asset: state.agoraState.mutedMicrophone
                   ? AppAssets.lanhuRoomBottomMicMuted
                   : AppAssets.lanhuRoomBottomMic,
               selected: !state.agoraState.mutedMicrophone,
-              onTap: onToggleMic,
+              onTap: state.togglingMicrophone ? null : onToggleMic,
             ),
           ],
           const Spacer(),
@@ -68,6 +69,7 @@ class _RoomBottomBar extends StatelessWidget {
 
 class _BottomIconButton extends StatelessWidget {
   const _BottomIconButton({
+    super.key,
     required this.asset,
     required this.onTap,
     this.selected = false,
@@ -75,7 +77,7 @@ class _BottomIconButton extends StatelessWidget {
   });
 
   final String asset;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final bool selected;
   final String? badge;
 

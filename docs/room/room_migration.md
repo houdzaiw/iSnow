@@ -455,7 +455,7 @@ flowchart TD
 | 上麦发布 | `publish(pos)` | `setClientRole(Broadcaster)` |
 | 下麦停止发布 | `stopPublish(pos)` | `setClientRole(Audience)` |
 | 离房 | `leaveRoom(roomID)` | `setClientRole(Audience)` + `leaveChannel()` |
-| 麦克风静音 | `muteMicrophone(mute)` | `engine.muteLocalAudioStream(mute)` |
+| 麦克风静音 | `muteMicrophone(mute)` | `engine.muteLocalAudioStream(false)` + `engine.muteRecordingSignal(mute)`；见 `room_microphone_toggle.md` |
 | 扬声器静音 | `muteSpeaker(mute)` | `engine.muteAllRemoteAudioStreams(mute)` |
 | 音乐混流 | `startPlayMusic(filePath)` | `engine.startAudioMixing(filePath, loopback:false, cycle:-1)` |
 

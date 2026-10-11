@@ -254,13 +254,28 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
   }
 
   Future<void> toggleLocalMicrophone() async {
-    if (!mounted || !state.isReady || _leaving) return;
+    if (!mounted ||
+        !state.isReady ||
+        !state.isOnMic ||
+        _leaving ||
+        state.togglingMicrophone) {
+      return;
+    }
+    final roomId = state.currentRoomId;
+    state = state.copyWith(togglingMicrophone: true, errorMessage: null);
     try {
       await _repository.muteLocalMicrophone(!state.agoraState.mutedMicrophone);
       _syncFromManager();
     } catch (error) {
-      if (!mounted) return;
+      if (!mounted ||
+          _leaving ||
+          !state.isReady ||
+          state.currentRoomId != roomId) {
+        return;
+      }
       state = state.copyWith(errorMessage: error.toString());
+    } finally {
+      if (mounted) state = state.copyWith(togglingMicrophone: false);
     }
   }
 

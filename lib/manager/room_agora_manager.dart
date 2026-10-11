@@ -98,6 +98,8 @@ class RoomAgoraManager extends ChangeNotifier {
   String? _appId;
   RoomAgoraState _state = const RoomAgoraState();
   String? _expectedRoomId;
+  Completer<bool>? _joinCompletion;
+  int _generation = 0;
 
   RoomAgoraState get state => _state;
 
@@ -106,7 +108,7 @@ class RoomAgoraManager extends ChangeNotifier {
       _setState(_state.copyWith(errorMessage: 'Missing Agora app id'));
       return;
     }
-    if (_engine != null && _appId == appId) return;
+    if (_engine != null && _state.initialized && _appId == appId) return;
 
     await release();
     _appId = appId;
@@ -155,7 +157,10 @@ class RoomAgoraManager extends ChangeNotifier {
     await init(appId: appId);
     final engine = _engine;
     if (engine == null || !_state.initialized) return;
+    _cancelPendingJoin();
+    final generation = ++_generation;
     _expectedRoomId = roomId;
+    _joinCompletion = Completer<bool>();
 
     _setState(
       _state.copyWith(
@@ -182,7 +187,8 @@ class RoomAgoraManager extends ChangeNotifier {
         ),
       );
     } catch (error) {
-      if (_expectedRoomId != roomId || !identical(_engine, engine)) return;
+      if (!_isCurrentChannel(engine, roomId, generation)) return;
+      _cancelPendingJoin();
       _setState(
         _state.copyWith(
           joining: false,
@@ -194,8 +200,11 @@ class RoomAgoraManager extends ChangeNotifier {
   }
 
   Future<void> leaveRoom() async {
+    _generation++;
+    _cancelPendingJoin();
     _expectedRoomId = null;
     final engine = _engine;
+    final initialized = _state.initialized;
     if (engine == null) {
       _setState(const RoomAgoraState());
       return;
@@ -213,6 +222,10 @@ class RoomAgoraManager extends ChangeNotifier {
         () => engine.muteLocalAudioStream(false),
       );
       await _cleanup(
+        'reset recording signal',
+        () => engine.muteRecordingSignal(false),
+      );
+      await _cleanup(
         'reset speaker',
         () => engine.muteAllRemoteAudioStreams(false),
       );
@@ -220,15 +233,30 @@ class RoomAgoraManager extends ChangeNotifier {
       debugPrint('Agora leave room failed: $error');
       await release();
     }
-    _setState(RoomAgoraState(initialized: _engine != null));
+    _setState(RoomAgoraState(initialized: initialized && _engine != null));
   }
 
   Future<void> publish({int? position}) async {
+    final engine = _requireEngine();
     final roomId = _expectedRoomId;
     if (roomId == null) return;
+    final generation = _generation;
     try {
-      await _engine?.setClientRole(role: ClientRoleType.clientRoleBroadcaster);
-      if (_expectedRoomId != roomId) return;
+      if (!await _waitForJoin(engine, roomId, generation)) return;
+      // Keep the user's mute preference when returning to a microphone seat.
+      await engine.muteRecordingSignal(_state.mutedMicrophone);
+      if (!_isCurrentChannel(engine, roomId, generation)) return;
+      await engine.setClientRole(role: ClientRoleType.clientRoleBroadcaster);
+      if (!_isCurrentChannel(engine, roomId, generation)) return;
+      await engine.updateChannelMediaOptions(
+        const ChannelMediaOptions(
+          clientRoleType: ClientRoleType.clientRoleBroadcaster,
+          publishMicrophoneTrack: true,
+        ),
+      );
+      if (!_isCurrentChannel(engine, roomId, generation)) return;
+      await engine.muteLocalAudioStream(false);
+      if (!_isCurrentChannel(engine, roomId, generation)) return;
       _setState(
         _state.copyWith(
           clientRole: ClientRoleType.clientRoleBroadcaster,
@@ -237,18 +265,31 @@ class RoomAgoraManager extends ChangeNotifier {
         ),
       );
     } catch (error) {
-      if (_expectedRoomId != roomId) return;
-      _setState(_state.copyWith(errorMessage: error.toString()));
+      if (!_isCurrentChannel(engine, roomId, generation)) return;
+      _setState(
+        _state.copyWith(publishing: false, errorMessage: error.toString()),
+      );
+      debugPrint('[RoomAgora] publish failed roomId=$roomId: $error');
       rethrow;
     }
   }
 
   Future<void> stopPublish({int? position}) async {
+    final engine = _requireEngine();
     final roomId = _expectedRoomId;
     if (roomId == null) return;
+    final generation = _generation;
     try {
-      await _engine?.setClientRole(role: ClientRoleType.clientRoleAudience);
-      if (_expectedRoomId != roomId) return;
+      if (!await _waitForJoin(engine, roomId, generation)) return;
+      await engine.updateChannelMediaOptions(
+        const ChannelMediaOptions(
+          clientRoleType: ClientRoleType.clientRoleAudience,
+          publishMicrophoneTrack: false,
+        ),
+      );
+      if (!_isCurrentChannel(engine, roomId, generation)) return;
+      await engine.setClientRole(role: ClientRoleType.clientRoleAudience);
+      if (!_isCurrentChannel(engine, roomId, generation)) return;
       _setState(
         _state.copyWith(
           clientRole: ClientRoleType.clientRoleAudience,
@@ -257,18 +298,32 @@ class RoomAgoraManager extends ChangeNotifier {
         ),
       );
     } catch (error) {
-      if (_expectedRoomId != roomId) return;
+      if (!_isCurrentChannel(engine, roomId, generation)) return;
       _setState(_state.copyWith(errorMessage: error.toString()));
       rethrow;
     }
   }
 
   Future<void> muteMicrophone(bool mute) async {
+    final engine = _requireEngine();
     final roomId = _expectedRoomId;
-    if (roomId == null) return;
-    await _engine?.muteLocalAudioStream(mute);
-    if (_expectedRoomId != roomId) return;
-    _setState(_state.copyWith(mutedMicrophone: mute));
+    if (roomId == null) throw StateError('Agora has not joined a room');
+    final generation = _generation;
+    try {
+      if (!await _waitForJoin(engine, roomId, generation)) return;
+      // Nady keeps the outgoing stream enabled so muting does not stop music.
+      await engine.muteLocalAudioStream(false);
+      if (!_isCurrentChannel(engine, roomId, generation)) return;
+      await engine.muteRecordingSignal(mute);
+      if (!_isCurrentChannel(engine, roomId, generation)) return;
+      _setState(_state.copyWith(mutedMicrophone: mute, errorMessage: null));
+      debugPrint('[RoomAgora] microphone roomId=$roomId muted=$mute');
+    } catch (error) {
+      if (!_isCurrentChannel(engine, roomId, generation)) return;
+      _setState(_state.copyWith(errorMessage: error.toString()));
+      debugPrint('[RoomAgora] microphone failed roomId=$roomId: $error');
+      rethrow;
+    }
   }
 
   Future<void> muteSpeaker(bool mute) async {
@@ -297,6 +352,8 @@ class RoomAgoraManager extends ChangeNotifier {
   }
 
   Future<void> release() async {
+    _generation++;
+    _cancelPendingJoin();
     _expectedRoomId = null;
     final engine = _engine;
     _engine = null;
@@ -316,6 +373,44 @@ class RoomAgoraManager extends ChangeNotifier {
     }
   }
 
+  RtcEngine _requireEngine() {
+    final engine = _engine;
+    if (engine == null || !_state.initialized) {
+      throw StateError(_state.errorMessage ?? 'Agora is not initialized');
+    }
+    return engine;
+  }
+
+  bool _isCurrentChannel(RtcEngine engine, String roomId, int generation) =>
+      _generation == generation &&
+      _expectedRoomId == roomId &&
+      identical(_engine, engine);
+
+  Future<bool> _waitForJoin(
+    RtcEngine engine,
+    String roomId,
+    int generation,
+  ) async {
+    if (!_isCurrentChannel(engine, roomId, generation)) return false;
+    if (_state.joined) return true;
+    final pending = _joinCompletion;
+    if (_state.joining && pending != null) {
+      final joined = await pending.future.timeout(
+        const Duration(seconds: 15),
+        onTimeout: () => false,
+      );
+      if (!_isCurrentChannel(engine, roomId, generation)) return false;
+      if (joined && _state.joined) return true;
+    }
+    throw StateError(_state.errorMessage ?? 'Agora has not connected yet');
+  }
+
+  void _cancelPendingJoin() {
+    final pending = _joinCompletion;
+    _joinCompletion = null;
+    if (pending != null && !pending.isCompleted) pending.complete(false);
+  }
+
   bool _accepts(RtcConnection connection) =>
       _expectedRoomId != null && connection.channelId == _expectedRoomId;
 
@@ -331,6 +426,8 @@ class RoomAgoraManager extends ChangeNotifier {
             errorMessage: null,
           ),
         );
+        final pending = _joinCompletion;
+        if (pending != null && !pending.isCompleted) pending.complete(true);
       },
       // leaveRoom owns this reset. A late leave callback may refer to a channel
       // that has already been rejoined with the same ID.
@@ -406,6 +503,7 @@ class RoomAgoraManager extends ChangeNotifier {
         if (state == ConnectionStateType.connectionStateFailed ||
             reason ==
                 ConnectionChangedReasonType.connectionChangedBannedByServer) {
+          _cancelPendingJoin();
           _setState(
             _state.copyWith(isTerminal: true, errorMessage: reason.name),
           );

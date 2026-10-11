@@ -145,7 +145,7 @@ class RoomRepository {
   }
 
   Future<void> muteLocalMicrophone(bool mute) {
-    return _agoraManager.muteMicrophone(mute);
+    return _roomManager.muteLocalMicrophone(mute);
   }
 
   Future<void> muteSpeaker(bool mute) {

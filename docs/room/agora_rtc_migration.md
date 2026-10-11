@@ -141,7 +141,7 @@ iSnow 建议：`RoomAgoraManager` 可以 App 启动初始化，也可以首次�
 | `leaveRoom(String roomID)` | `roomID` | `Future<void>` | 切 audience 后 leaveChannel | 退房/切房/dispose 都要调用 |
 | `startPlayingStream(String streamID)` | `streamID` | `Future<void>` | 空实现，只有注释 | 不迁移 |
 | `stopPlayingStream(String streamID)` | `streamID` | `Future<void>` | 空实现，只有注释 | 不迁移 |
-| `muteMicrophone(bool mute)` | `mute` | `Future<void>` | `muteLocalAudioStream`；静音时如果音乐播放中则暂停音乐 | 保留，但音乐暂停建议交给 `RoomMusicManager` 监听 mic 状态 |
+| `muteMicrophone(bool mute)` | `mute` | `Future<void>` | `muteLocalAudioStream(false)` + `muteRecordingSignal(mute)`；只静音采集，保留混流 | 按当前 Nady 实现；状态同步见 `room_microphone_toggle.md` |
 | `muteSpeaker(bool mute)` | `mute` | `Future<void>` | `muteAllRemoteAudioStreams` | 保留 |
 | `setMicVolume(int volume)` | `volume` | `Future<void>` | `adjustRecordingSignalVolume(volume)`，注释范围 `[0,400]` | 保留；nady UI 中麦克风音量 slider 当前注释 |
 | `startPlayMusic({required String filePath})` | `filePath` | `Future<void>` | `startAudioMixing(filePath, loopback:false, cycle:-1)` | 由 `RoomMusicManager` 调用 |
@@ -222,7 +222,7 @@ Agora 状态决定“用户是否已经加入音频频道、当前是否推流�
 | 上麦 | 先 HTTP `/api/room/mic/up` 成功，再 `setClientRole(broadcaster)` |
 | 下麦 | 先 HTTP `/api/room/mic/down` 成功，再 `setClientRole(audience)` |
 | 角色切换失败 | 调 `/api/shenwang/callback` 上报，再调 `/api/room/mic/down` 做服务端麦位补偿 |
-| 麦克风静音 | `muteLocalAudioStream(mute)`；如果静音且音乐播放中，暂停音乐 |
+| 麦克风静音 | `muteLocalAudioStream(false)` + `muteRecordingSignal(mute)`；不因闭麦停止背景音乐 |
 | 扬声器静音 | `muteAllRemoteAudioStreams(mute)` |
 
 ### 3. 音乐播放状态
