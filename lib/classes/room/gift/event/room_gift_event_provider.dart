@@ -23,12 +23,11 @@ final roomGiftEventManagerProvider = StateNotifierProvider.autoDispose
           }
         },
       );
-      final keepAlive = ref.keepAlive();
       final binding = _RoomGiftLifecycle(
         manager,
         repository,
         roomId,
-        keepAlive.close,
+        ref.keepAlive,
         sender,
       );
       Future.microtask(() {
@@ -52,16 +51,15 @@ class _RoomGiftLifecycle with WidgetsBindingObserver {
     this.manager,
     this.repository,
     this.roomId,
-    this.release,
+    this.retain,
     this.sender,
   );
   final RoomGiftEventManager manager;
   final RoomRepository repository;
   final String roomId;
-  final VoidCallback release;
+  final KeepAliveLink Function() retain;
   final RoomGiftSendController sender;
-  bool _hasEntered = false;
-  bool _hasAttempted = false;
+  KeepAliveLink? _keepAlive;
   bool _foreground = true;
   AppSocketStatus? _socketStatus;
 
@@ -78,19 +76,13 @@ class _RoomGiftLifecycle with WidgetsBindingObserver {
     final room = repository.roomState;
     sender.audience = repository.giftAudience(roomId);
     final inRoom = room.currentRoomId == roomId && room.isInRoom;
-    if (room.isInRoom && !inRoom) {
+    if (!inRoom || room.status == RoomStatus.leaving) {
       manager.reset(visible: false, clearHistory: true);
-      release();
+      _keepAlive?.close();
+      _keepAlive = null;
       return;
     }
-    if (room.status == RoomStatus.entering) _hasAttempted = true;
-    if (_hasAttempted && !inRoom && room.status == RoomStatus.error) release();
-    if (inRoom) _hasEntered = true;
-    if (_hasEntered && (!inRoom || room.status == RoomStatus.leaving)) {
-      manager.reset(visible: false, clearHistory: true);
-      release();
-      return;
-    }
+    _keepAlive ??= retain();
     final status = repository.socketState.status;
     if (_socketStatus == AppSocketStatus.ready &&
         status != AppSocketStatus.ready) {
@@ -110,5 +102,6 @@ class _RoomGiftLifecycle with WidgetsBindingObserver {
   void dispose() {
     repository.removeListener(_sync);
     WidgetsBinding.instance.removeObserver(this);
+    _keepAlive?.close();
   }
 }

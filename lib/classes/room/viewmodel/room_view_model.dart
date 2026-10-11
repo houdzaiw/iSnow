@@ -61,6 +61,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
   final String _roomId;
   late final StreamSubscription<RoomSocketMessage> _socketSubscription;
   bool _entering = false;
+  bool _leaving = false;
   Map<String, RoomGiftPublicMessage> _giftMessages = const {};
 
   /// Bind to the server's canonical room ID after entering, not the route alias.
@@ -128,12 +129,20 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
     _syncFromManager();
   }
 
-  Future<void> leaveRoom() async {
+  Future<bool> leaveRoom() async {
+    if (!mounted || _leaving) return false;
+    _leaving = true;
     try {
       await _repository.leaveRoom();
-      _syncFromManager();
+      if (mounted) _syncFromManager();
+      return !_repository.roomState.isInRoom;
     } catch (error) {
-      state = state.copyWith(errorMessage: error.toString());
+      if (mounted) {
+        state = state.copyWith(errorMessage: error.toString());
+      }
+      return false;
+    } finally {
+      _leaving = false;
     }
   }
 

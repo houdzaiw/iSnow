@@ -46,6 +46,8 @@ class RoomPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = roomViewModelProvider(roomId);
     final state = ref.watch(provider);
+    final viewModel = ref.read(provider.notifier);
+    final isExiting = useState(false);
     final giftRoomId = state.currentRoomId.trim().isNotEmpty
         ? state.currentRoomId.trim()
         : roomId;
@@ -60,9 +62,9 @@ class RoomPage extends HookConsumerWidget {
 
     useEffect(() {
       Future.microtask(() {
-        ref
-            .read(provider.notifier)
-            .enterRoom(roomPassword: roomPassword, followUid: followUid);
+        if (viewModel.mounted) {
+          viewModel.enterRoom(roomPassword: roomPassword, followUid: followUid);
+        }
       });
       return null;
     }, [roomId, roomPassword, followUid]);
@@ -81,9 +83,10 @@ class RoomPage extends HookConsumerWidget {
         systemNavigationBarColor: const Color(0xFF555563),
       ),
       child: PopScope<void>(
+        canPop: !isExiting.value,
         onPopInvokedWithResult: (didPop, _) {
-          if (didPop) {
-            ref.read(provider.notifier).minimizeRoom();
+          if (didPop && !isExiting.value && viewModel.mounted) {
+            viewModel.minimizeRoom();
           }
         },
         child: Scaffold(
@@ -113,13 +116,23 @@ class RoomPage extends HookConsumerWidget {
                           _RoomHeader(
                             state: state,
                             onMinimize: () {
-                              ref.read(provider.notifier).minimizeRoom();
+                              if (isExiting.value) return;
+                              viewModel.minimizeRoom();
                               context.pop();
                             },
                             onExit: () async {
-                              await ref.read(provider.notifier).leaveRoom();
-                              if (context.mounted && context.canPop()) {
+                              if (isExiting.value) return;
+                              isExiting.value = true;
+                              final didLeave = await viewModel.leaveRoom();
+                              if (!context.mounted) return;
+                              if (!didLeave) {
+                                isExiting.value = false;
+                                return;
+                              }
+                              if (context.canPop()) {
                                 context.pop();
+                              } else {
+                                context.go('/party');
                               }
                             },
                           ),
