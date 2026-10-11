@@ -411,11 +411,7 @@ Future<void> _showRoomGiftPanel(
   if (!context.mounted || result == null) return;
   if (result == RoomGiftSheetResult.openWallet) {
     context.push('/wallet');
-    return;
   }
-  ScaffoldMessenger.of(context)
-    ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(content: Text(context.l10n.t('room.gift.sent'))));
 }
 
 void _showSeatActions(

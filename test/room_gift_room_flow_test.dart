@@ -148,6 +148,8 @@ void main() {
           await tester.pump(const Duration(milliseconds: 400));
           await tester.pump();
           expect(find.byType(RoomGiftSheet), findsNothing);
+          expect(find.byType(SnackBar), findsNothing);
+          expect(find.text('Gift sent'), findsNothing);
           final combo = find.byKey(const ValueKey('room-gift-confirmed-combo'));
           expect(combo, findsOneWidget);
           expect(find.byType(RoomGiftComboButton), findsOneWidget);
