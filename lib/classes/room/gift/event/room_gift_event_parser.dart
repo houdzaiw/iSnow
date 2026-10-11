@@ -4,7 +4,7 @@ import '../../../../model/room_socket_message.dart';
 import '../models/room_gift_event_models.dart';
 import '../models/room_gift_models.dart';
 
-enum RoomGiftEventKind { gift, finalCombo, stream, banner, lucky }
+enum RoomGiftEventKind { gift, publicScreen, finalCombo, stream, banner, lucky }
 
 class RoomGiftEvent {
   const RoomGiftEvent({
@@ -34,6 +34,7 @@ class RoomGiftEventParser {
   static const events = {
     'roomScreenSendGiftComboEvent',
     'RoomSendGiftPublicScreenEvent',
+    'RoomSendGiftComboPublicScreenEvent',
     'RoomGiftStreamUpdateEvent',
     'RoomGiftSendBannerEvent',
     'RoomLuckGiftSendBannerEvent',
@@ -47,7 +48,12 @@ class RoomGiftEventParser {
   RoomGiftEvent? parse(RoomSocketMessage message, String roomId, DateTime now) {
     if (!events.contains(message.event)) return null;
     final outer = _decodeMap(message.payload);
-    final nested = _decodeMap(outer['msg']);
+    final isPublic =
+        message.event == 'RoomSendGiftPublicScreenEvent' ||
+        message.event == 'RoomSendGiftComboPublicScreenEvent';
+    final nested = isPublic
+        ? _decodeMap(outer['msg'])
+        : const <String, dynamic>{};
     final json = nested.isEmpty ? outer : {...outer, ...nested};
     final payloadRoomId = '${json['roomId'] ?? message.raw['roomId'] ?? ''}';
     if (payloadRoomId.isNotEmpty && payloadRoomId != roomId) {
@@ -58,11 +64,13 @@ class RoomGiftEventParser {
       return null;
     }
     final rawTime = giftInt(message.timestamp ?? json['timestamp']);
-    final createdAt = rawTime <= 0
-        ? now
-        : DateTime.fromMillisecondsSinceEpoch(
-            rawTime < 1000000000000 ? rawTime * 1000 : rawTime,
-          );
+    final createdAt =
+        message.receivedAt ??
+        (rawTime <= 0
+            ? now
+            : DateTime.fromMillisecondsSinceEpoch(
+                rawTime < 1000000000000 ? rawTime * 1000 : rawTime,
+              ));
     final comboId = '${json['comboId'] ?? json['newComboId'] ?? ''}';
     final key = message.msgId?.isNotEmpty == true
         ? message.msgId!
@@ -80,30 +88,47 @@ class RoomGiftEventParser {
         roomWeekVal: giftInt(json['roomWeekVal']),
       );
     }
-    if (event == 'RoomSendGiftPublicScreenEvent') {
+    if (isPublic) {
+      final isEnd = event == 'RoomSendGiftPublicScreenEvent';
       final giftId = giftInt(json['giftId']);
-      if (giftId <= 0 || comboId.isEmpty) {
-        throw const FormatException('Invalid combo end');
+      if (giftId <= 0 || isEnd && comboId.isEmpty) {
+        throw const FormatException('Invalid gift public message');
       }
+      final sendType = giftInt(json['sendType'], 1);
+      final target = RoomGiftUser.fromJson(giftMap(json['targetUser']));
+      final sender = RoomGiftUser.fromJson(
+        giftMap(outer['from'] ?? json['userInfo']),
+      );
+      final targetLabel = switch (sendType) {
+        2 => 'all mic',
+        3 => 'all room',
+        4 => 'room',
+        6 => '${giftInt(json['receivingGiftsPeople'])} people',
+        _ => target.name,
+      };
       return RoomGiftEvent(
-        kind: RoomGiftEventKind.finalCombo,
+        kind: isEnd
+            ? RoomGiftEventKind.finalCombo
+            : RoomGiftEventKind.publicScreen,
         key: key,
         createdAt: createdAt,
         roomId: roomId,
         comboId: comboId,
         publicMessage: RoomGiftPublicMessage(
-          key: comboId,
+          key: comboId.isEmpty ? key : comboId,
           gift: RoomGift(
             id: giftId,
-            name: '${json['giftName'] ?? ''}',
+            name: _giftName(json['giftName']),
             icon: '${json['giftIcon'] ?? ''}',
             price: 0,
             isCombo: giftInt(json['isCombo']),
             tabId: 0,
           ),
           count: giftInt(json['giftNum']),
-          targetLabel: '${giftInt(json['receivingGiftsPeople'])} recipients',
-          sender: RoomGiftUser.fromJson(giftMap(json['userInfo'])),
+          targetLabel: targetLabel,
+          sender: sender,
+          sendType: sendType,
+          multiplier: giftInt(json['multiple']),
           isFinal: true,
           winAmount: giftInt(json['winAmount']),
           createdAt: createdAt,
@@ -195,5 +220,17 @@ class RoomGiftEventParser {
       }
     }
     return giftMap(value);
+  }
+
+  String _giftName(Object? value) {
+    if (value is Map) return '${value['en'] ?? value.values.firstOrNull ?? ''}';
+    final text = '$value';
+    if (value == null) return '';
+    if (!text.trimLeft().startsWith('{')) return text;
+    try {
+      return _giftName(_decodeMap(text));
+    } on FormatException {
+      return text;
+    }
   }
 }

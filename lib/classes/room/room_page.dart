@@ -46,13 +46,16 @@ class RoomPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = roomViewModelProvider(roomId);
     final state = ref.watch(provider);
+    final giftRoomId = state.currentRoomId.trim().isNotEmpty
+        ? state.currentRoomId.trim()
+        : roomId;
     final messageController = useTextEditingController();
-    final giftRootKey = useMemoized(() => GlobalKey(), [roomId]);
+    final giftRootKey = useMemoized(() => GlobalKey(), [giftRoomId]);
     final giftRegistry = useMemoized(() => RoomGiftSeatRegistry(giftRootKey), [
-      roomId,
+      giftRoomId,
     ]);
     final giftSlots = ref.watch(
-      roomGiftEventManagerProvider(roomId).select((value) => value.slots),
+      roomGiftEventManagerProvider(giftRoomId).select((value) => value.slots),
     );
 
     useEffect(() {
@@ -159,7 +162,7 @@ class RoomPage extends HookConsumerWidget {
                                           ),
                                           child: RoomGiftSlotLayer(
                                             slots: giftSlots,
-                                            roomId: roomId,
+                                            roomId: giftRoomId,
                                           ),
                                         ),
                                       ),
@@ -197,7 +200,7 @@ class RoomPage extends HookConsumerWidget {
                       ),
                       Positioned.fill(
                         child: RoomGiftOverlay(
-                          roomId: roomId,
+                          roomId: giftRoomId,
                           registry: giftRegistry,
                         ),
                       ),

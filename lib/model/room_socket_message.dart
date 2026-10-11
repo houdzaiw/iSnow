@@ -9,6 +9,7 @@ class RoomSocketMessage {
     this.ids,
     this.msgId,
     this.from,
+    this.receivedAt,
   });
 
   final String channel;
@@ -19,11 +20,15 @@ class RoomSocketMessage {
   final List<String>? ids;
   final String? msgId;
   final String? from;
+
+  /// Local arrival time, independent of the server's clock.
+  final DateTime? receivedAt;
   final Map<String, dynamic> raw;
 
   factory RoomSocketMessage.fromJson(
     Map<String, dynamic> json, {
     required String channel,
+    DateTime? receivedAt,
   }) {
     return RoomSocketMessage(
       channel: channel,
@@ -34,6 +39,7 @@ class RoomSocketMessage {
       ids: _asStringList(json['ids']),
       msgId: json['msgId']?.toString(),
       from: json['from']?.toString(),
+      receivedAt: receivedAt,
       raw: json,
     );
   }

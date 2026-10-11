@@ -26,6 +26,7 @@ class RoomGiftSendState {
     this.request,
     this.catalog,
     this.issue,
+    this.remainingMilliseconds = 0,
   });
   final bool isSending, awaitingEcho;
   final RoomScreenGiftMsg? message;
@@ -36,8 +37,12 @@ class RoomGiftSendState {
   final SendRoomGiftRequest? request;
   final RoomGiftCatalog? catalog;
   final String? issue;
+  final int remainingMilliseconds;
   bool get canContinue =>
-      !isSending && gift?.isCombo == 1 && comboId.isNotEmpty && request != null;
+      !isSending &&
+      gift?.supportsCombo == true &&
+      comboId.isNotEmpty &&
+      request != null;
 
   bool matches(RoomScreenGiftMsg other) =>
       comboId.isNotEmpty &&
@@ -66,6 +71,7 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
   int? currentUid;
   bool _inFlight = false;
   Timer? _echoTimeout;
+  int _remainingMilliseconds = 0;
 
   Future<RoomGiftCatalog?> send({
     required SendRoomGiftRequest request,
@@ -105,6 +111,7 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
       message: previousMessage,
       gift: gift,
       confirmedComboId: previousComboId,
+      remainingMilliseconds: _remainingMilliseconds,
     );
     try {
       final result = await _repository.sendGift(request);
@@ -130,14 +137,14 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
         gift: gift,
         confirmedComboId: confirmedId,
         awaitingEcho:
-            confirmedId.isEmpty && state.message == null && gift.isCombo == 1,
+            confirmedId.isEmpty && state.message == null && gift.supportsCombo,
       );
       _log(
         'confirmed giftId=${gift.id} comboId=${state.comboId} '
         'comboEnabled=${state.canContinue}',
       );
       _echoTimeout?.cancel();
-      _echoTimeout = Timer(const Duration(seconds: 5), resetCombo);
+      _restartCountdown();
       return updated;
     } catch (error) {
       if (mounted && generation == _generation) {
@@ -148,9 +155,10 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
           gift: gift,
           confirmedComboId: previousComboId,
           issue: error.toString(),
+          remainingMilliseconds: _remainingMilliseconds,
         );
         if (previousComboId.isNotEmpty) {
-          _echoTimeout = Timer(const Duration(seconds: 5), resetCombo);
+          _restartCountdown();
         }
       }
       rethrow;
@@ -195,7 +203,7 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
       confirmedComboId: state.confirmedComboId,
     );
     _echoTimeout?.cancel();
-    _echoTimeout = Timer(const Duration(seconds: 5), resetCombo);
+    _restartCountdown();
   }
 
   Future<bool> continueCombo() async {
@@ -209,10 +217,10 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
         .map((user) => user.uid)
         .toSet();
     if (eligible != null &&
+        previous.sendType == RoomGiftSendType.onMic &&
         previous.targetUids != null &&
         (!eligible.containsAll(previous.targetUids!) ||
-            previous.sendType == RoomGiftSendType.onMic &&
-                eligible.length != previous.targetUids!.length)) {
+            eligible.length != previous.targetUids!.length)) {
       resetCombo();
       return false;
     }
@@ -257,6 +265,7 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
           issue: error is RoomGiftSendException
               ? error.issue.name
               : error.toString(),
+          remainingMilliseconds: _remainingMilliseconds,
         );
       }
       return false;
@@ -268,9 +277,39 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
     _generation++;
     _gift = null;
     _startedAt = null;
+    _remainingMilliseconds = 0;
     if (mounted) {
       state = RoomGiftSendState(catalog: state.catalog, isSending: _inFlight);
     }
+  }
+
+  void _restartCountdown() {
+    _echoTimeout?.cancel();
+    _remainingMilliseconds = 5000;
+    _publishCountdown();
+    _echoTimeout = Timer.periodic(const Duration(milliseconds: 250), (_) {
+      _remainingMilliseconds -= 250;
+      if (_remainingMilliseconds <= 0) {
+        resetCombo();
+      } else {
+        _publishCountdown();
+      }
+    });
+  }
+
+  void _publishCountdown() {
+    if (!mounted) return;
+    state = RoomGiftSendState(
+      isSending: state.isSending,
+      awaitingEcho: state.awaitingEcho,
+      message: state.message,
+      gift: state.gift,
+      confirmedComboId: state.confirmedComboId,
+      request: state.request,
+      catalog: state.catalog,
+      issue: state.issue,
+      remainingMilliseconds: _remainingMilliseconds,
+    );
   }
 
   void _log(String message) {

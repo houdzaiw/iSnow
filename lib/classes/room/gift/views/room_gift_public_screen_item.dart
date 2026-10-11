@@ -39,14 +39,14 @@ class RoomGiftPublicScreenItem extends StatelessWidget {
                       style: AppTextStyles.giftEffectTitle,
                     ),
                     Text(
-                      '${message.gift.name} x${message.count} → ${message.targetLabel}',
+                      message.sentText,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.giftEffectSubtitle,
                     ),
                     if (message.winAmount > 0)
                       Text(
-                        '+${message.winAmount} coins',
+                        '${message.winText}${message.multiplier >= 1 ? ' (${message.multiplier} times)' : ''}',
                         style: AppTextStyles.giftEffectTitle,
                       ),
                   ],

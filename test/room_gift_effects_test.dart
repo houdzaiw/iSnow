@@ -59,7 +59,7 @@ void main() {
   );
 
   test(
-    'trajectory splits only registered targets and uses fresh coordinates',
+    'trajectory starts at center, splits registered targets and refreshes coordinates',
     () {
       final coordinates = <int, RoomGiftSeatCoordinate>{
         10: const RoomGiftSeatCoordinate(
@@ -76,9 +76,11 @@ void main() {
       final tasks = RoomGiftTrajectoryTask.fromEvent(
         sample(),
         (uid) => coordinates[uid],
+        viewport: const Size(375, 812),
       );
       expect(tasks, hasLength(1));
       expect(tasks.single.target.uid, 20);
+      expect(tasks.single.source, const Offset(187.5, 406));
       coordinates[20] = const RoomGiftSeatCoordinate(
         uid: 20,
         position: 2,
@@ -88,19 +90,24 @@ void main() {
         RoomGiftTrajectoryTask.fromEvent(
           sample(),
           (uid) => coordinates[uid],
+          viewport: const Size(375, 812),
         ).single.target.offset,
         const Offset(200, 40),
       );
       coordinates.remove(10);
       expect(
-        RoomGiftTrajectoryTask.fromEvent(sample(), (uid) => coordinates[uid]),
-        isEmpty,
+        RoomGiftTrajectoryTask.fromEvent(
+          sample(),
+          (uid) => coordinates[uid],
+          viewport: const Size(375, 812),
+        ),
+        hasLength(1),
       );
     },
   );
 
   testWidgets(
-    'audience sender flies from the gift-button anchor without a mic seat',
+    'audience sender reveals at screen center then flies to a recipient seat',
     (tester) async {
       final root = GlobalKey();
       final registry = RoomGiftSeatRegistry(root);
@@ -110,16 +117,6 @@ void main() {
           Stack(
             key: root,
             children: [
-              const Positioned(
-                left: 180,
-                top: 650,
-                child: RoomGiftSeatAnchor(
-                  uid: null,
-                  position: -1,
-                  isOrigin: true,
-                  child: SizedBox(width: 40, height: 40),
-                ),
-              ),
               const Positioned(
                 left: 100,
                 top: 80,
@@ -143,9 +140,16 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 200));
       expect(registry.coordinate(10), isNull);
-      expect(registry.sourceCoordinate(10)!.position, -1);
       expect(find.byType(RoomGiftImage), findsOneWidget);
+      final reveal = find.byKey(const ValueKey('gift-reveal-event'));
+      expect(tester.getCenter(reveal), tester.getRect(find.byKey(root)).center);
       expect(consumed, 1);
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(reveal, findsNothing);
+      final flight = find.byKey(const ValueKey('gift-flight-event:20:0'));
+      expect(flight, findsOneWidget);
+      final center = tester.getCenter(flight);
+      expect(center.dy, lessThan(tester.getRect(find.byKey(root)).center.dy));
       await tester.pump(const Duration(seconds: 2));
       await tester.pump();
       expect(find.byType(RoomGiftImage), findsNothing);

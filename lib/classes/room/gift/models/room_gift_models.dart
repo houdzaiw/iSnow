@@ -81,6 +81,7 @@ class RoomGift {
   final int? videoMode;
 
   bool get isBackpack => tabId == RoomGiftTab.backpackId;
+  bool get supportsCombo => isBackpack ? isCombo > 0 : isCombo == 1;
 
   String get selectionKey => '$tabId:$id:${userBackpackId ?? 0}';
 

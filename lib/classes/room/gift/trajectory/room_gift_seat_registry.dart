@@ -15,12 +15,11 @@ class RoomGiftSeatRegistry {
   RoomGiftSeatRegistry(this.rootKey);
   final GlobalKey rootKey;
   final Map<int, ({int position, GlobalKey key})> _anchors = {};
-  GlobalKey? _originKey;
-
-  void registerOrigin(GlobalKey key) => _originKey = key;
-
-  void unregisterOrigin(GlobalKey key) {
-    if (_originKey == key) _originKey = null;
+  Size? get viewport {
+    final root = rootKey.currentContext?.findRenderObject();
+    return root is RenderBox && root.attached && root.hasSize
+        ? root.size
+        : null;
   }
 
   void register(int uid, int position, GlobalKey key) {
@@ -40,15 +39,6 @@ class RoomGiftSeatRegistry {
       position: anchor.position,
       offset: offset,
     );
-  }
-
-  RoomGiftSeatCoordinate? sourceCoordinate(int uid) {
-    final seat = coordinate(uid);
-    if (seat != null) return seat;
-    final offset = _center(_originKey);
-    return offset == null
-        ? null
-        : RoomGiftSeatCoordinate(uid: uid, position: -1, offset: offset);
   }
 
   Offset? _center(GlobalKey? key) {
@@ -85,12 +75,10 @@ class RoomGiftSeatAnchor extends StatefulWidget {
     required this.uid,
     required this.position,
     required this.child,
-    this.isOrigin = false,
   });
   final int? uid;
   final int position;
   final Widget child;
-  final bool isOrigin;
   @override
   State<RoomGiftSeatAnchor> createState() => _RoomGiftSeatAnchorState();
 }
@@ -114,15 +102,12 @@ class _RoomGiftSeatAnchorState extends State<RoomGiftSeatAnchor> {
   }
 
   void _register() {
-    if (widget.isOrigin) {
-      _registry?.registerOrigin(_key);
-    } else if (widget.uid != null) {
+    if (widget.uid != null) {
       _registry?.register(widget.uid!, widget.position, _key);
     }
   }
 
   void _unregister(int? uid) {
-    _registry?.unregisterOrigin(_key);
     if (uid != null) _registry?.unregister(uid, _key);
   }
 

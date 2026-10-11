@@ -116,6 +116,8 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
           _receiveGift(event);
         case RoomGiftEventKind.finalCombo:
           _finishCombo(event);
+        case RoomGiftEventKind.publicScreen:
+          _receivePublic(event.publicMessage!);
         case RoomGiftEventKind.banner:
           _emit(
             banners: _merge(
@@ -179,6 +181,7 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
       count: gift.displayCount,
       targetLabel: gift.targetLabel,
       createdAt: event.createdAt,
+      sendType: gift.sendType,
     );
     final delta = gift.displayCount - (previous?.displayCount ?? 0);
     final coinDelta = gift.totalCoinCount - (previous?.totalCoinCount ?? 0);
@@ -216,19 +219,19 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
     }
     _emit(
       slots: _slotQueue.slots,
-      publicMessages: _merge(
-        state.publicMessages,
-        public,
-        (item) => item.key,
-        80,
-      ),
-      flights: delta > 0 ? [...state.flights, task].takeLast(32) : null,
+      publicMessages:
+          state.publicMessages.any(
+            (item) => item.key == public.key && item.isFinal,
+          )
+          ? null
+          : _merge(state.publicMessages, public, (item) => item.key, 80),
+      flights: delta > 0 || gift.comboCount > (previous?.comboCount ?? 0)
+          ? [...state.flights, task].takeLast(32)
+          : null,
       effects:
           previous == null &&
               !(gift.isLuckyGift && gift.isHideLuckyGift) &&
-              (gift.gift.animationUrl?.isNotEmpty == true ||
-                  gift.sendType == 3 ||
-                  gift.sendType == 4)
+              gift.gift.animationUrl?.isNotEmpty == true
           ? _merge(effects, task, _effectKey, 12)
           : effects,
       lucky: lucky == null
@@ -242,6 +245,46 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
         lucky.sender,
       );
     }
+  }
+
+  void _receivePublic(RoomGiftPublicMessage message) {
+    // Nady's SendGiftMsgModel does not require comboId. Reconcile its public
+    // message with the provisional animation entry rather than showing both.
+    final previous = state.publicMessages
+        .where(
+          (item) =>
+              item.key == message.key ||
+              !item.isFinal &&
+                  message.sender.uid > 0 &&
+                  item.sender.uid == message.sender.uid &&
+                  item.gift.id == message.gift.id &&
+                  item.sendType == message.sendType,
+        )
+        .lastOrNull;
+    final merged = RoomGiftPublicMessage(
+      key: previous?.key ?? message.key,
+      gift: message.gift,
+      count: message.count,
+      targetLabel: message.targetLabel.isEmpty
+          ? previous?.targetLabel ?? ''
+          : message.targetLabel,
+      createdAt: message.createdAt,
+      sender: message.sender.uid > 0
+          ? message.sender
+          : previous?.sender ?? message.sender,
+      sendType: message.sendType,
+      isFinal: true,
+      winAmount: message.winAmount,
+      multiplier: message.multiplier,
+    );
+    _emit(
+      publicMessages: _merge(
+        state.publicMessages,
+        merged,
+        (item) => item.key,
+        80,
+      ),
+    );
   }
 
   void _queueSpecialEffect(
@@ -281,19 +324,22 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
       key: finalMessage.key,
       gift: finalMessage.gift,
       count: finalMessage.count,
-      targetLabel: old?.targetLabel ?? finalMessage.targetLabel,
+      targetLabel: finalMessage.targetLabel.isEmpty
+          ? old?.targetLabel ?? ''
+          : finalMessage.targetLabel,
       createdAt: finalMessage.createdAt,
-      sender: old?.sender ?? finalMessage.sender,
+      sender: finalMessage.sender.uid > 0
+          ? finalMessage.sender
+          : old?.sender ?? finalMessage.sender,
+      sendType: finalMessage.sendType,
       isFinal: true,
       winAmount: finalMessage.winAmount,
+      multiplier: finalMessage.multiplier,
     );
     _emit(
-      publicMessages: _merge(
-        state.publicMessages,
-        merged,
-        (item) => item.key,
-        80,
-      ),
+      publicMessages: old == null
+          ? null
+          : _merge(state.publicMessages, merged, (item) => item.key, 80),
       lucky: state.lucky
           .where(
             (item) =>
@@ -318,12 +364,16 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
     reset(visible: visible);
   }
 
-  void reset({bool? visible, bool clearHistory = false}) {
+  void reset({
+    bool? visible,
+    bool clearHistory = false,
+    bool resetCombo = true,
+  }) {
     _slotQueue.clear();
     // Socket timestamps can be second-resolution; accept fresh same-second events.
     final time = _now().millisecondsSinceEpoch;
     _acceptAfter = DateTime.fromMillisecondsSinceEpoch(time ~/ 1000 * 1000);
-    onComboEnd?.call('');
+    if (resetCombo) onComboEnd?.call('');
     state = RoomGiftEventState(
       isVisible: visible ?? state.isVisible,
       roomWeekVal: clearHistory ? 0 : state.roomWeekVal,

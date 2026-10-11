@@ -158,6 +158,144 @@ void main() {
     expect(manager.state.publicMessages.single.count, 18);
   });
 
+  test(
+    'Nady public-screen contract works without comboId and does not end Combo',
+    () {
+      final ended = <String>[];
+      final runtime = RoomGiftEventManager(
+        roomId: '123',
+        startTimer: false,
+        onComboEnd: ended.add,
+      );
+      addTearDown(runtime.dispose);
+      runtime.receive(socket(payload(), id: 'initial'));
+      final public = jsonEncode({
+        'from': {'uid': 10, 'nick': 'Sender'},
+        'msg': jsonEncode({
+          'giftId': 31,
+          'giftIcon': '',
+          'giftNum': 881,
+          'comboTimes': 1,
+          'sendType': 6,
+          'receivingGiftsPeople': 2,
+          'giftName': jsonEncode({'en': 'Rose', 'ar': 'Rose'}),
+          'isCombo': 1,
+          'isLucky': true,
+          'winAmount': 150,
+          'multiple': 3,
+        }),
+      });
+      runtime.receive(
+        socket(
+          public,
+          event: 'RoomSendGiftComboPublicScreenEvent',
+          id: 'public',
+        ),
+      );
+      expect(runtime.snapshot.publicMessages, hasLength(1));
+      final item = runtime.snapshot.publicMessages.single;
+      expect(item.text, 'sent 2 people Rose x881 win 150 coins');
+      expect(item.sender.name, 'Sender');
+      expect(item.multiplier, 3);
+      expect(ended, isEmpty);
+      expect(runtime.snapshot.flights, hasLength(1));
+      runtime.receive(socket(payload(count: 2), id: 'echo-after-public'));
+      expect(runtime.snapshot.publicMessages.single.winAmount, 150);
+    },
+  );
+
+  test(
+    'live delivery uses arrival time despite server clock skew; delayed delivery is dropped',
+    () {
+      manager.setVisible(false);
+      manager.setVisible(true);
+      manager.receive(
+        RoomSocketMessage(
+          channel: 'room:123',
+          event: 'roomScreenSendGiftComboEvent',
+          raw: const {},
+          payload: payload(),
+          msgId: 'skew',
+          timestamp: start
+              .subtract(const Duration(hours: 12))
+              .millisecondsSinceEpoch,
+          receivedAt: now,
+        ),
+      );
+      expect(manager.snapshot.flights, hasLength(1));
+      manager.receive(
+        RoomSocketMessage(
+          channel: 'room:123',
+          event: 'roomScreenSendGiftComboEvent',
+          raw: const {},
+          payload: payload(combo: 'delayed'),
+          msgId: 'delayed',
+          receivedAt: now.subtract(const Duration(seconds: 30)),
+        ),
+      );
+      expect(manager.snapshot.flights, hasLength(1));
+    },
+  );
+
+  test('ordinary gift payload ignores unrelated plain msg text', () {
+    manager.receive(
+      socket({...payload(), 'msg': 'sent a gift'}, id: 'ordinary'),
+    );
+    expect(manager.snapshot.flights, hasLength(1));
+  });
+
+  test(
+    'a fresh Nady combo increment flies even if per-request quantity stays the same',
+    () {
+      manager.receive(socket(payload(), id: 'one'));
+      manager.completeFlight('one');
+      manager.receive(socket({...payload(), 'comboCount': 2}, id: 'two'));
+      expect(manager.snapshot.flights.single.key, 'two');
+      manager.receive(
+        socket({...payload(), 'comboCount': 2}, id: 'duplicate-version'),
+      );
+      expect(manager.snapshot.flights, hasLength(1));
+    },
+  );
+
+  test(
+    'all-room default scatter does not also enqueue a generic full-screen effect',
+    () {
+      manager.receive(
+        socket({
+          ...payload(),
+          'sendType': 3,
+          'gift': {'id': 31, 'name': 'Rose', 'icon': '', 'isCombo': 1},
+        }, id: 'scatter'),
+      );
+      expect(manager.snapshot.flights, hasLength(1));
+      expect(manager.snapshot.effects, isEmpty);
+    },
+  );
+
+  test(
+    'Nady combo end without an earlier visual does not invent anonymous public text',
+    () {
+      manager.receive(
+        socket(
+          {
+            'msg': jsonEncode({
+              'giftId': 31,
+              'giftName': 'Rose',
+              'giftNum': 8,
+              'comboId': 'combo',
+              'sendType': 2,
+              'winAmount': 150,
+            }),
+          },
+          event: 'RoomSendGiftPublicScreenEvent',
+          id: 'end-only',
+        ),
+      );
+      expect(manager.snapshot.publicMessages, isEmpty);
+    },
+  );
+
   test('lucky results use cumulative deltas and honor hidden effects', () {
     manager.receive(
       socket({

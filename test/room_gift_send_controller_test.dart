@@ -107,6 +107,46 @@ void main() {
   });
 
   test(
+    'off-mic single recipient keeps the confirmed combo like Nady',
+    () async {
+      sender.audience = const RoomGiftAudience(
+        isInRoom: true,
+        onlineCount: 2,
+        recipients: [],
+      );
+      await sender.send(
+        request: request(),
+        gift: gift,
+        targetCount: 1,
+        catalog: catalog,
+      );
+      expect(await sender.continueCombo(), isTrue);
+      expect(repository.requests.last.targetUids, [20]);
+    },
+  );
+
+  test('backpack isCombo > 0 enables the Nady combo button', () async {
+    const backpack = RoomGift(
+      id: 31,
+      name: 'Rose',
+      icon: '',
+      price: 0,
+      isCombo: 2,
+      tabId: RoomGiftTab.backpackId,
+      amount: 10,
+      userBackpackId: 99,
+    );
+    await sender.send(
+      request: request(source: 2, backpack: 99),
+      gift: backpack,
+      targetCount: 1,
+      catalog: catalog,
+    );
+    expect(sender.snapshot.canContinue, isTrue);
+    expect(sender.snapshot.remainingMilliseconds, 5000);
+  });
+
+  test(
     'confirmed combo rejects a different echo and locks repeated taps',
     () async {
       await sender.send(

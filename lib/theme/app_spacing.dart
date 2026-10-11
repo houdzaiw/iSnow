@@ -1,15 +1,20 @@
 class AppSpacing {
-  static const double giftTrajectoryArcHeight = 32;
-  static const double giftTrajectoryIconSize = 40;
+  static const double giftTrajectoryIconSize = 48;
+  static const double giftTrajectoryCenterSize = 90;
+  static const double giftTrajectoryScatterWidthRatio = 0.34;
+  static const double giftTrajectoryScatterHeightRatio = 0.23;
+  static const double giftTrajectoryInitialScale = 0.3;
   static const double giftSlotHeight = 52;
   static const double giftSlotAvatarSize = 34;
   static const double giftSlotIconSize = 42;
   static const double giftSlotComboSize = 46;
   static const double giftComboButtonSize = 100;
+  static const double giftComboLabelTopRatio = 0.22;
+  static const double giftComboCountdownBottomRatio = 0.43;
   static const double giftBannerHeight = 52;
   static const double giftBannerTop = 64;
   static const double giftLuckyBottom = 190;
-  static const double giftOverlayBottom = 82;
+  static const double giftOverlayBottom = 52;
   static const double giftPanelSummaryHeight = 20;
   static const double giftSlotAreaMaxRatio = 0.6;
   const AppSpacing._();
@@ -104,6 +109,11 @@ class AppSpacing {
   static const double roomMicGridVerticalInset = 6;
   static const double roomMicSeatWidth = 68;
   static const double roomMicSeatHeight = 80;
+  static const double roomMicSeatLabelGap = 6;
+  static const double roomMicSeatHeatGap = 3;
+  static const double roomMicSeatLabelFontSize = 12;
+  static const double roomMicSeatHeatFontSize = 10;
+  static const double roomMicSeatHeatIconSize = 12;
   static const double roomMicSeatCircleSize = 46;
   static const double roomMicSeatAvatarSize = 54;
   static const double roomMicSeatStatusIconSize = 16;

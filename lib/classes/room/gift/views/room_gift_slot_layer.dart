@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../theme/app_theme.dart';
 import '../queue/room_gift_slot_queue.dart';
-import '../viewmodel/room_gift_send_controller.dart';
-import 'room_gift_combo_button.dart';
 import 'room_gift_image.dart';
 
-class RoomGiftSlotLayer extends ConsumerWidget {
+class RoomGiftSlotLayer extends StatelessWidget {
   const RoomGiftSlotLayer({
     super.key,
     required this.slots,
@@ -17,8 +14,7 @@ class RoomGiftSlotLayer extends ConsumerWidget {
   final List<RoomGiftSlot?> slots;
   final String roomId;
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final sender = ref.watch(roomGiftSendControllerProvider(roomId));
+  Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -29,14 +25,8 @@ class RoomGiftSlotLayer extends ConsumerWidget {
             child: slot == null
                 ? null
                 : _GiftSlotCard(
-                    key: ValueKey(slot.key),
+                    key: ValueKey('$roomId:${slot.key}'),
                     slot: slot,
-                    comboEnabled:
-                        sender.canContinue && sender.matches(slot.message),
-                    sending: sender.isSending && sender.matches(slot.message),
-                    onCombo: () => ref
-                        .read(roomGiftSendControllerProvider(roomId).notifier)
-                        .continueCombo(),
                   ),
           ),
       ],
@@ -45,16 +35,8 @@ class RoomGiftSlotLayer extends ConsumerWidget {
 }
 
 class _GiftSlotCard extends StatelessWidget {
-  const _GiftSlotCard({
-    super.key,
-    required this.slot,
-    required this.comboEnabled,
-    required this.sending,
-    required this.onCombo,
-  });
+  const _GiftSlotCard({super.key, required this.slot});
   final RoomGiftSlot slot;
-  final bool comboEnabled, sending;
-  final VoidCallback onCombo;
   @override
   Widget build(BuildContext context) {
     final message = slot.message;
@@ -123,18 +105,6 @@ class _GiftSlotCard extends StatelessWidget {
               ),
             ),
           ),
-        ),
-        SizedBox(width: AppSpacing.xs.w),
-        SizedBox(
-          width: AppSpacing.giftSlotComboSize.r,
-          height: AppSpacing.giftSlotComboSize.r,
-          child: comboEnabled || sending
-              ? RoomGiftComboButton(
-                  enabled: comboEnabled,
-                  sending: sending,
-                  onTap: onCombo,
-                )
-              : null,
         ),
       ],
     );

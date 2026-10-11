@@ -3,6 +3,20 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 class AppTextStyles {
+  static const TextStyle giftComboLabel = TextStyle(
+    color: AppColors.textInverse,
+    fontSize: 16,
+    fontWeight: FontWeight.w700,
+    height: 1,
+    letterSpacing: 0,
+  );
+  static const TextStyle giftComboCountdown = TextStyle(
+    color: AppColors.textInverse,
+    fontSize: 16,
+    fontWeight: FontWeight.w800,
+    height: 1,
+    letterSpacing: 0,
+  );
   static const TextStyle giftEffectTitle = TextStyle(
     color: AppColors.roomGiftGold,
     fontSize: 13,

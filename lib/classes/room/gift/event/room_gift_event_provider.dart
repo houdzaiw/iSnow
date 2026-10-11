@@ -78,6 +78,11 @@ class _RoomGiftLifecycle with WidgetsBindingObserver {
     final room = repository.roomState;
     sender.audience = repository.giftAudience(roomId);
     final inRoom = room.currentRoomId == roomId && room.isInRoom;
+    if (room.isInRoom && !inRoom) {
+      manager.reset(visible: false, clearHistory: true);
+      release();
+      return;
+    }
     if (room.status == RoomStatus.entering) _hasAttempted = true;
     if (_hasAttempted && !inRoom && room.status == RoomStatus.error) release();
     if (inRoom) _hasEntered = true;
@@ -89,7 +94,8 @@ class _RoomGiftLifecycle with WidgetsBindingObserver {
     final status = repository.socketState.status;
     if (_socketStatus == AppSocketStatus.ready &&
         status != AppSocketStatus.ready) {
-      manager.reset();
+      // A transient socket reconnect does not undo a paid HTTP confirmation.
+      manager.reset(resetCombo: false);
     }
     _socketStatus = status;
     manager.setVisible(inRoom && !room.isMinimized && _foreground);

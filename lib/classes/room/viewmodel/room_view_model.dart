@@ -12,6 +12,7 @@ import '../room_repository.dart';
 import '../gift/event/room_gift_event_manager.dart';
 import '../gift/event/room_gift_event_parser.dart';
 import '../gift/event/room_gift_event_provider.dart';
+import '../gift/event/room_gift_room_id_provider.dart';
 import '../gift/models/room_gift_event_models.dart';
 import 'room_state.dart';
 
@@ -19,11 +20,21 @@ export '../room_repository.dart' show roomRepositoryProvider;
 
 final roomViewModelProvider = StateNotifierProvider.autoDispose
     .family<RoomViewModel, RoomPageState, String>((ref, roomId) {
-      return RoomViewModel(
+      final model = RoomViewModel(
         repository: ref.read(roomRepositoryProvider),
         roomId: roomId,
-        giftManager: ref.watch(roomGiftEventManagerProvider(roomId).notifier),
       );
+      ProviderSubscription<RoomGiftEventManager>? gifts;
+      ref.listen(roomGiftRoomIdProvider(roomId), (_, id) {
+        gifts?.close();
+        gifts = ref.listen(
+          roomGiftEventManagerProvider(id).notifier,
+          (_, manager) => model.bindGiftManager(manager),
+          fireImmediately: true,
+        );
+      }, fireImmediately: true);
+      ref.onDispose(() => gifts?.close());
+      return model;
     });
 
 class RoomViewModel extends StateNotifier<RoomPageState> {
@@ -45,12 +56,21 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
   }
 
   final RoomRepository _repository;
-  final RoomGiftEventManager? _giftManager;
+  RoomGiftEventManager? _giftManager;
   VoidCallback? _removeGiftListener;
   final String _roomId;
   late final StreamSubscription<RoomSocketMessage> _socketSubscription;
   bool _entering = false;
   Map<String, RoomGiftPublicMessage> _giftMessages = const {};
+
+  /// Bind to the server's canonical room ID after entering, not the route alias.
+  void bindGiftManager(RoomGiftEventManager manager) {
+    if (identical(_giftManager, manager)) return;
+    _removeGiftListener?.call();
+    _giftManager = manager;
+    _giftMessages = const {};
+    _removeGiftListener = manager.addListener(_syncGiftState);
+  }
 
   Future<void> enterRoom({String roomPassword = '', int followUid = 0}) async {
     if (_entering) return;
@@ -71,7 +91,8 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
         followUid: followUid,
       );
       _syncFromManager();
-      if (_giftManager != null) _syncGiftState(_giftManager.snapshot);
+      final gifts = _giftManager;
+      if (gifts != null) _syncGiftState(gifts.snapshot);
     } catch (error) {
       state = state.copyWith(
         status: RoomStatus.error,
@@ -373,7 +394,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
       final entry = RoomChatEntry(
         id: id,
         kind: RoomChatEntryKind.gift,
-        text: '${gift.gift.name} x${gift.count} → ${gift.targetLabel}',
+        text: gift.text,
         createdAt: gift.createdAt,
         senderName: gift.sender.name,
         senderAvatar: gift.sender.avatar,

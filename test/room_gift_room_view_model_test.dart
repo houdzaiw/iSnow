@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -22,6 +23,7 @@ void main() {
   setUp(() async {
     repository = _RoomRepository();
     gifts = RoomGiftEventManager(roomId: '123', startTimer: false);
+    repository.messages.stream.listen(gifts.receive);
     model = RoomViewModel(
       repository: repository,
       roomId: '123',
@@ -69,17 +71,36 @@ void main() {
     );
   });
 
-  test('Nady combo public-screen text is not silently ignored', () {
-    repository.messages.add(
-      socket(
-        '{"from":{"uid":10,"nick":"Sender"},"msg":"Sent Rose x1"}',
-        event: 'RoomSendGiftComboPublicScreenEvent',
-        id: 'combo-text',
-      ),
-    );
-    expect(snapshot.messages.last.text, 'Sent Rose x1');
-    expect(snapshot.messages.last.kind, RoomChatEntryKind.gift);
-  });
+  test(
+    'Nady typed public-screen message includes recipient, gift and winnings',
+    () {
+      repository.messages.add(
+        socket(
+          jsonEncode({
+            'from': {'uid': 10, 'nick': 'Sender'},
+            'msg': jsonEncode({
+              'giftId': 31,
+              'giftName': '88',
+              'giftIcon': '',
+              'giftNum': 1,
+              'comboTimes': 1,
+              'sendType': 2,
+              'isCombo': 1,
+              'isLucky': true,
+              'winAmount': 150,
+            }),
+          }),
+          event: 'RoomSendGiftComboPublicScreenEvent',
+          id: 'combo-text',
+        ),
+      );
+      expect(snapshot.messages.last.text, 'sent all mic 88 x1 win 150 coins');
+      expect(snapshot.messages.last.kind, RoomChatEntryKind.gift);
+      expect(snapshot.messages.last.gift?.winAmount, 150);
+      expect(snapshot.messages.last.senderName, 'Sender');
+      expect(gifts.snapshot.flights, isEmpty);
+    },
+  );
 
   test(
     'combo public-screen updates preserve chat order and restore history',

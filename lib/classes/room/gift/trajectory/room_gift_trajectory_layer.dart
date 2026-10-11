@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -25,8 +23,10 @@ class RoomGiftTrajectoryLayer extends StatefulWidget {
 }
 
 class _RoomGiftTrajectoryLayerState extends State<RoomGiftTrajectoryLayer> {
-  final Map<String, RoomGiftTrajectoryTask> _tasks = {};
+  final Map<String, List<RoomGiftTrajectoryTask>> _bursts = {};
   final Set<String> _seen = {};
+  bool _scheduled = false;
+
   @override
   void initState() {
     super.initState();
@@ -40,18 +40,25 @@ class _RoomGiftTrajectoryLayerState extends State<RoomGiftTrajectoryLayer> {
   }
 
   void _schedule() {
+    if (_scheduled) return;
+    _scheduled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scheduled = false;
       if (!mounted) return;
+      final viewport = widget.registry.viewport;
+      if (viewport == null || viewport.isEmpty) return;
       for (final event in widget.events) {
         if (!_seen.add(event.key)) continue;
         if (_seen.length > 300) _seen.remove(_seen.first);
-        for (final task in RoomGiftTrajectoryTask.fromEvent(
+        final capacity =
+            32 -
+            _bursts.values.fold<int>(0, (count, tasks) => count + tasks.length);
+        final tasks = RoomGiftTrajectoryTask.fromEvent(
           event,
           widget.registry.coordinate,
-          sourceCoordinate: widget.registry.sourceCoordinate,
-        )) {
-          if (_tasks.length < 32) _tasks[task.key] = task;
-        }
+          viewport: viewport,
+        ).take(capacity).toList();
+        if (tasks.isNotEmpty) _bursts[event.key] = tasks;
         widget.onConsumed(event.key);
       }
       setState(() {});
@@ -62,13 +69,13 @@ class _RoomGiftTrajectoryLayerState extends State<RoomGiftTrajectoryLayer> {
   Widget build(BuildContext context) => IgnorePointer(
     child: Stack(
       children: [
-        for (final task in _tasks.values)
-          _FlyingGift(
-            key: ValueKey(task.key),
-            task: task,
+        for (final burst in _bursts.entries)
+          _GiftBurst(
+            key: ValueKey(burst.key),
+            tasks: burst.value,
             registry: widget.registry,
             onEnd: () {
-              if (mounted) setState(() => _tasks.remove(task.key));
+              if (mounted) setState(() => _bursts.remove(burst.key));
             },
           ),
       ],
@@ -76,27 +83,29 @@ class _RoomGiftTrajectoryLayerState extends State<RoomGiftTrajectoryLayer> {
   );
 }
 
-class _FlyingGift extends StatefulWidget {
-  const _FlyingGift({
-    super.key,
-    required this.task,
+class _GiftBurst extends StatefulWidget {
+  const _GiftBurst({
+    required super.key,
+    required this.tasks,
     required this.registry,
     required this.onEnd,
   });
-  final RoomGiftTrajectoryTask task;
+  final List<RoomGiftTrajectoryTask> tasks;
   final RoomGiftSeatRegistry registry;
   final VoidCallback onEnd;
   @override
-  State<_FlyingGift> createState() => _FlyingGiftState();
+  State<_GiftBurst> createState() => _GiftBurstState();
 }
 
-class _FlyingGiftState extends State<_FlyingGift>
+class _GiftBurstState extends State<_GiftBurst>
     with SingleTickerProviderStateMixin {
+  // Match Nady's central elastic reveal and its delayed ~666ms flight.
   late final _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 1100),
+    duration: AppMotion.roomGiftBurst,
   );
   bool _ended = false;
+
   @override
   void initState() {
     super.initState();
@@ -114,45 +123,81 @@ class _FlyingGiftState extends State<_FlyingGift>
     });
   }
 
-  bool _matches(RoomGiftSeatCoordinate original) {
-    final current = original.position == -1
-        ? widget.registry.sourceCoordinate(original.uid)
-        : widget.registry.coordinate(original.uid);
+  bool _matches(RoomGiftTrajectoryTask task) {
+    if (task.isScatter) return true;
+    final current = widget.registry.coordinate(task.target.uid);
     return current != null &&
-        current.position == original.position &&
-        (current.offset - original.offset).distance < AppSpacing.xs;
+        current.position == task.target.position &&
+        (current.offset - task.target.offset).distance < AppSpacing.xs;
   }
 
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
     animation: _controller,
     builder: (context, _) {
-      final task = widget.task;
-      if (!_matches(task.source) || !_matches(task.target)) {
+      final elapsed =
+          _controller.value * AppMotion.roomGiftBurst.inMilliseconds;
+      final first = widget.tasks.first;
+      final active = widget.tasks.where(_matches).toList();
+      if (active.isEmpty) {
         _end();
         return const SizedBox.shrink();
       }
-      final t = Curves.easeInOutCubic.transform(_controller.value);
-      final offset =
-          Offset.lerp(task.source.offset, task.target.offset, t)! -
-          Offset(
-            0,
-            math.sin(t * math.pi) * AppSpacing.giftTrajectoryArcHeight.h,
-          );
+      if (elapsed < AppMotion.roomGiftReveal.inMilliseconds) {
+        final scale =
+            AppSpacing.giftTrajectoryInitialScale +
+            (1 - AppSpacing.giftTrajectoryInitialScale) *
+                AppMotion.roomGiftRevealCurve.transform(
+                  elapsed / AppMotion.roomGiftRevealScale.inMilliseconds,
+                );
+        final size = AppSpacing.giftTrajectoryCenterSize.r;
+        return Stack(
+          children: [
+            Positioned(
+              left: first.source.dx - size / 2,
+              top: first.source.dy - size / 2,
+              child: Transform.scale(
+                scale: scale,
+                child: RoomGiftImage(
+                  key: ValueKey('gift-reveal-${first.event.key}'),
+                  source: first.event.message.gift.icon,
+                  size: size,
+                ),
+              ),
+            ),
+          ],
+        );
+      }
+      final t = AppMotion.roomGiftFlightCurve.transform(
+        ((elapsed - AppMotion.roomGiftReveal.inMilliseconds) /
+                AppMotion.roomGiftFlight.inMilliseconds)
+            .clamp(0.0, 1.0),
+      );
       final size = AppSpacing.giftTrajectoryIconSize.r;
-      return Positioned(
-        left: offset.dx - size / 2,
-        top: offset.dy - size / 2,
-        child: Transform.scale(
-          scale: 0.7 + math.sin(t * math.pi) * 0.3,
-          child: RoomGiftImage(
-            source: task.event.message.gift.icon,
-            size: size,
-          ),
-        ),
+      return Stack(
+        children: [
+          for (final task in active)
+            Positioned(
+              left:
+                  Offset.lerp(task.source, task.target.offset, t)!.dx -
+                  size / 2,
+              top:
+                  Offset.lerp(task.source, task.target.offset, t)!.dy -
+                  size / 2,
+              child: Opacity(
+                opacity: task.isScatter ? 1 - t : 1,
+                child: RoomGiftImage(
+                  key: ValueKey('gift-flight-${task.key}'),
+                  source: task.event.message.gift.icon,
+                  size: size,
+                ),
+              ),
+            ),
+        ],
       );
     },
   );
+
   @override
   void dispose() {
     _controller.dispose();

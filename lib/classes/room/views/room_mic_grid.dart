@@ -102,9 +102,19 @@ class _RoomMicGrid extends StatelessWidget {
     double circleSize = AppSpacing.roomMicSeatCircleSize,
     double avatarSize = AppSpacing.roomMicSeatAvatarSize,
   }) {
+    final heatTextHeight = AppSpacing.roomMicSeatHeatFontSize.sp;
+    final heatIconHeight = AppSpacing.roomMicSeatHeatIconSize.r;
+    final contentHeight =
+        circleSize.r +
+        AppSpacing.roomMicSeatLabelGap.h +
+        AppSpacing.roomMicSeatLabelFontSize.sp +
+        AppSpacing.roomMicSeatHeatGap.h +
+        (heatTextHeight > heatIconHeight ? heatTextHeight : heatIconHeight);
     return SizedBox(
       width: width,
-      height: height.h,
+      height: height.h > contentHeight
+          ? height.h
+          : contentHeight.ceilToDouble(),
       child: _RoomMicSeat(
         seat: seat,
         isMine: seat.uid != null && seat.uid == currentUid,
@@ -182,7 +192,7 @@ class _RoomMicSeat extends StatelessWidget {
               avatarSize: avatarSize,
             ),
           ),
-          SizedBox(height: 6.h),
+          SizedBox(height: AppSpacing.roomMicSeatLabelGap.h),
           Text(
             seat.displayPosition.toString(),
             maxLines: 1,
@@ -190,12 +200,12 @@ class _RoomMicSeat extends StatelessWidget {
               color: isMine
                   ? Colors.white
                   : Colors.white.withValues(alpha: 0.48),
-              fontSize: 12.sp,
+              fontSize: AppSpacing.roomMicSeatLabelFontSize.sp,
               height: 1,
               fontWeight: FontWeight.w300,
             ),
           ),
-          SizedBox(height: 3.h),
+          SizedBox(height: AppSpacing.roomMicSeatHeatGap.h),
           _SeatHeat(value: seat.heat),
         ],
       ),
@@ -309,7 +319,10 @@ class _SeatHeat extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _RoomAssetIcon(asset: AppAssets.lanhuRoomHeat, size: 12.r),
+        _RoomAssetIcon(
+          asset: AppAssets.lanhuRoomHeat,
+          size: AppSpacing.roomMicSeatHeatIconSize.r,
+        ),
         SizedBox(width: 2.w),
         ConstrainedBox(
           constraints: BoxConstraints(maxWidth: 42.w),
@@ -321,7 +334,7 @@ class _SeatHeat extends StatelessWidget {
               maxLines: 1,
               style: TextStyle(
                 color: AppColors.roomHeatText,
-                fontSize: 10.sp,
+                fontSize: AppSpacing.roomMicSeatHeatFontSize.sp,
                 height: 1,
                 fontWeight: FontWeight.w400,
               ),

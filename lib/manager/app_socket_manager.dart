@@ -423,6 +423,7 @@ class AppSocketManager extends ChangeNotifier {
         final message = RoomSocketMessage.fromJson(
           decoded.cast<String, dynamic>(),
           channel: channel,
+          receivedAt: DateTime.now(),
         );
         _log(
           'receive channel=$channel event=${message.event} '

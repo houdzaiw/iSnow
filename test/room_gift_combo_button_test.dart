@@ -67,11 +67,13 @@ void main() {
       final button = find.byKey(const ValueKey('room-gift-confirmed-combo'));
       expect(button, findsOneWidget);
       expect(tester.getRect(button).right, lessThanOrEqualTo(width));
+      expect(tester.getCenter(button).dx, closeTo(width / 2, 0.1));
+      expect(find.text('5.0s'), findsOneWidget);
       expect(manager.snapshot.publicMessages, isEmpty);
       expect(manager.snapshot.effects, isEmpty);
       expect(manager.snapshot.flights, isEmpty);
       repository.pending = Completer();
-      await tester.tap(find.text('Combo'));
+      await tester.tap(button);
       await tester.pump();
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       expect(repository.requests, hasLength(2));
@@ -90,7 +92,7 @@ void main() {
   }
 
   testWidgets(
-    'matching socket slot replaces the standalone combo without duplicates',
+    'socket gift slot never hides or duplicates the independent combo button',
     (tester) async {
       final sender = RoomGiftSendController(_Repository(), '123');
       final manager = RoomGiftEventManager(roomId: '123', startTimer: false);
@@ -112,7 +114,7 @@ void main() {
       await tester.pump();
       expect(
         find.byKey(const ValueKey('room-gift-confirmed-combo')),
-        findsNothing,
+        findsOneWidget,
       );
       expect(find.byType(RoomGiftComboButton), findsOneWidget);
       expect(manager.snapshot.publicMessages, hasLength(1));

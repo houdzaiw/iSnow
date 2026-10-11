@@ -75,23 +75,24 @@ class RoomGiftOverlay extends ConsumerWidget {
               onEnd: () => manager.completeLucky(gifts.lucky.first.key),
             ),
           ),
-        // A confirmed send must not wait for a broadcast slot to expose Combo.
-        if ((sender.canContinue ||
-                sender.isSending && sender.comboId.isNotEmpty) &&
-            !gifts.slots.any(
-              (slot) => slot != null && sender.matches(slot.message),
-            ))
+        if (sender.canContinue || sender.isSending && sender.comboId.isNotEmpty)
           Positioned(
-            bottom: AppSpacing.giftOverlayBottom.h,
-            right: AppSpacing.lg.w,
-            child: RoomGiftComboButton(
-              key: const ValueKey('room-gift-confirmed-combo'),
-              size: AppSpacing.giftComboButtonSize,
-              enabled: sender.canContinue,
-              sending: sender.isSending,
-              onTap: () => ref
-                  .read(roomGiftSendControllerProvider(roomId).notifier)
-                  .continueCombo(),
+            bottom:
+                AppSpacing.giftOverlayBottom.h +
+                MediaQuery.paddingOf(context).bottom,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: RoomGiftComboButton(
+                key: const ValueKey('room-gift-confirmed-combo'),
+                size: AppSpacing.giftComboButtonSize,
+                enabled: sender.canContinue,
+                sending: sender.isSending,
+                remainingMilliseconds: sender.remainingMilliseconds,
+                onTap: () => ref
+                    .read(roomGiftSendControllerProvider(roomId).notifier)
+                    .continueCombo(),
+              ),
             ),
           ),
       ],

@@ -59,9 +59,9 @@ class RoomScreenGiftMsg {
       ? const []
       : [targetUsers!.uid];
   String get targetLabel => switch (sendType) {
-    2 => 'All mic',
-    3 => 'All room',
-    4 => 'Room',
+    2 => 'all mic',
+    3 => 'all room',
+    4 => 'room',
     _ =>
       targetUsers?.name.isNotEmpty == true
           ? targetUsers!.name
@@ -116,15 +116,22 @@ class RoomGiftPublicMessage {
     this.sender = const RoomGiftUser(uid: 0),
     this.isFinal = false,
     this.winAmount = 0,
+    this.sendType = 1,
+    this.multiplier = 0,
   });
 
   final String key;
   final RoomGift gift;
   final RoomGiftUser sender;
   final int count, winAmount;
+  final int sendType, multiplier;
   final String targetLabel;
   final DateTime createdAt;
   final bool isFinal;
+
+  String get sentText => 'sent $targetLabel ${gift.name} x$count'.trim();
+  String get winText => 'win $winAmount coins';
+  String get text => winAmount > 0 ? '$sentText $winText' : sentText;
 }
 
 class RoomGiftBanner {
