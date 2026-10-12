@@ -444,12 +444,24 @@ void main() {
   });
 
   testWidgets(
-    'Keep/Exit dialog and mini-room render the reference image assets',
+    'Keep/Exit dialog and mini-room render their configured image assets',
     (tester) async {
       final repository = _RoomRepository();
       await _openRoom(tester, repository, miniOverlay: true);
       await tester.tap(_exitButton);
       await tester.pumpAndSettle();
+      for (final (action, asset) in [
+        (RoomExitAction.keep, AppAssets.roomExitKeep),
+        (RoomExitAction.exit, AppAssets.roomExitClose),
+      ]) {
+        final image = tester.widget<Image>(
+          find.descendant(
+            of: find.byKey(ValueKey('room-exit-${action.name}')),
+            matching: find.byType(Image),
+          ),
+        );
+        expect((image.image as AssetImage).assetName, asset);
+      }
       await expectLater(
         find.byKey(const ValueKey('room-lifecycle-snapshot')),
         matchesGoldenFile('goldens/room_exit_choices.png'),

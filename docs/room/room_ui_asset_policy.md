@@ -33,9 +33,10 @@
 
 ## Keep/Exit Reference UI
 
-- 用户指定缺少 UI 时对照 Nady 的退出弹窗；本次 Keep/Exit 使用其 `room_exit_minimize.webp`、`room_exit_close.webp`，迷你入口关闭使用 `ic_outline_close.webp` 并沿用白色着色，复制为本地语义化资源并在 manifest 明确标记 Nady 来源，不冒充蓝湖切图。
+- Keep/Exit 按钮使用用户提供的 `/Users/huili/Downloads/exit-dialog/` 图片，分别复制为 `room_exit_keep.png` 和 `room_exit_close.png`，通过 `AppAssets.roomExitKeep` / `roomExitClose` 引用；保留按钮文案、尺寸和点击逻辑，在 manifest 明确记录本地来源，不冒充蓝湖切图。
+- 旧版 Nady Keep/Exit WebP 仅保留为参考资源，不再用于弹窗。迷你入口关闭仍使用其 `ic_outline_close.webp`，沿用白色着色，并在 manifest 标记 Nady 来源。
 - 迷你房间封面来自当前房间接口；无封面时使用红色缺省图。音浪以 Flutter 原生圆形边框动画实现，不引入悬浮窗库或 Flutter 内置图标。
-- 后续提供对应蓝湖设计稿时优先替换这两个参考资源；未明确授权的其他缺失图标仍遵守红色缺省图规则。
+- 后续提供对应蓝湖设计稿或用户指定图片时优先替换相应资源；未明确授权的其他缺失图标仍遵守红色缺省图规则。
 
 ## Gift Panel
 

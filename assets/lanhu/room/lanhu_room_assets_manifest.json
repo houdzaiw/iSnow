@@ -1,4 +1,6 @@
 {
+  "room_exit_keep.png": "user-provided local asset: /Users/huili/Downloads/exit-dialog/缩小直播间@2x.png; active Keep button image",
+  "room_exit_close.png": "user-provided local asset: /Users/huili/Downloads/exit-dialog/退出房间按钮.png; active Exit button image",
   "room_exit_keep.webp": "Nady reference requested for missing UI: assets/images/room_exit_minimize.webp; replace when Lanhu Keep icon is supplied",
   "room_exit_close.webp": "Nady reference requested for missing UI: assets/images/room_exit_close.webp",
   "room_mini_close.webp": "Nady reference requested for missing UI: assets/images/ic_outline_close.webp; white tint as in nady_room_button.dart",
