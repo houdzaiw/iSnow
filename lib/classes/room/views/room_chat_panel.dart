@@ -1,105 +1,5 @@
 part of '../room_page.dart';
 
-class _RoomMusicStrip extends StatelessWidget {
-  const _RoomMusicStrip({required this.state});
-
-  final RoomPageState state;
-
-  @override
-  Widget build(BuildContext context) {
-    final listeners = state.seats.where((seat) => seat.isOccupied).take(5);
-    return SizedBox(
-      height: 48.h,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(28.w, 5.h, 28.w, 6.h),
-        child: Row(
-          children: [
-            Expanded(
-              child: Container(
-                height: 37.h,
-                padding: EdgeInsets.symmetric(horizontal: 14.w),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.56),
-                  borderRadius: BorderRadius.circular(18.r),
-                ),
-                child: Row(
-                  children: [
-                    _RoomAssetIcon(
-                      asset: AppAssets.lanhuRoomMusicIcon,
-                      size: 24.r,
-                    ),
-                    SizedBox(width: 7.w),
-                    Expanded(
-                      child: Text(
-                        state.roomDesc?.isNotEmpty == true
-                            ? state.roomDesc!
-                            : 'A song about music A...',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.66),
-                          fontSize: 15.sp,
-                          height: 1,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(width: 12.w),
-            SizedBox(
-              width: 136.w,
-              height: 38.h,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  for (final entry in listeners.indexed)
-                    Positioned(
-                      left: entry.$1 * 26.w,
-                      child: _RoomAvatarImage(
-                        url: entry.$2.avatar,
-                        size: 38.r,
-                        radius: 19.r,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            Container(
-              height: 34.h,
-              padding: EdgeInsets.symmetric(horizontal: 10.w),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.58),
-                borderRadius: BorderRadius.circular(18.r),
-              ),
-              child: Row(
-                children: [
-                  _RoomAssetIcon(
-                    asset: AppAssets.lanhuRoomOnlineIcon,
-                    size: 17.r,
-                  ),
-                  SizedBox(width: 6.w),
-                  Text(
-                    _formatCompact(state.onlineCount),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 15.sp,
-                      height: 1,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _RoomChatPanel extends HookWidget {
   const _RoomChatPanel({required this.state, required this.onFilterChanged});
 
@@ -306,7 +206,9 @@ class _RoomChatMessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (message.gift != null) return RoomGiftPublicScreenItem(message: message.gift!);
+    if (message.gift != null) {
+      return RoomGiftPublicScreenItem(message: message.gift!);
+    }
     final isSystem = message.kind == RoomChatEntryKind.system;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,

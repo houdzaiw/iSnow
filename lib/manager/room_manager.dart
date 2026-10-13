@@ -7,6 +7,8 @@ import '../configs/app_configs.dart';
 import '../configs/app_device.dart';
 import '../model/room_models.dart';
 import '../model/room_socket_message.dart';
+import '../model/room_user_info.dart';
+import '../model/room_music_state.dart';
 import '../model/server_response.dart';
 import 'app_socket_manager.dart';
 import 'auth_session.dart';
@@ -14,6 +16,8 @@ import 'http_api.dart';
 import 'http_dio_manager.dart';
 import 'room_agora_manager.dart';
 import 'room_background_audio_manager.dart';
+
+part 'room_manager_music.dart';
 
 enum RoomStatus { idle, entering, ready, leaving, error }
 
@@ -28,6 +32,10 @@ class RoomState {
     this.enterResponse,
     this.roomInfo,
     this.micList = const [],
+    this.audience = const [],
+    this.audienceLoaded = false,
+    this.loadingAudience = false,
+    this.audienceError,
     this.errorMessage,
   });
 
@@ -40,7 +48,14 @@ class RoomState {
   final EnterRoomResp? enterResponse;
   final RoomInfo? roomInfo;
   final List<RoomMicModel> micList;
+  final List<RoomUserInfo> audience;
+  final bool audienceLoaded;
+  final bool loadingAudience;
+  final String? audienceError;
   final String? errorMessage;
+
+  int get onlineCount =>
+      audienceLoaded ? audience.length : roomInfo?.audienceCount ?? 0;
 
   bool get isLoading =>
       status == RoomStatus.entering || status == RoomStatus.leaving;
@@ -58,6 +73,10 @@ class RoomState {
     RoomInfo? roomInfo,
     bool? clearRoomInfo,
     List<RoomMicModel>? micList,
+    List<RoomUserInfo>? audience,
+    bool? audienceLoaded,
+    bool? loadingAudience,
+    Object? audienceError = _sentinel,
     Object? errorMessage = _sentinel,
   }) {
     return RoomState(
@@ -74,6 +93,12 @@ class RoomState {
           : enterResponse ?? this.enterResponse,
       roomInfo: clearRoomInfo == true ? null : roomInfo ?? this.roomInfo,
       micList: micList ?? this.micList,
+      audience: audience ?? this.audience,
+      audienceLoaded: audienceLoaded ?? this.audienceLoaded,
+      loadingAudience: loadingAudience ?? this.loadingAudience,
+      audienceError: identical(audienceError, _sentinel)
+          ? this.audienceError
+          : audienceError as String?,
       errorMessage: identical(errorMessage, _sentinel)
           ? this.errorMessage
           : errorMessage as String?,
@@ -131,9 +156,18 @@ class RoomManager extends ChangeNotifier {
   Future<void>? _joinTask;
   Future<void>? _agoraJoinTask;
   Future<void>? _followTask;
+  Future<void>? _audienceTask;
+  bool _audienceRefreshQueued = false;
   String? _requestedRoomId;
   String? _serverRoomId;
   int _generation = 0;
+  Future<void>? _musicQueue;
+  Future<void>? _musicStatusQueue;
+  String? _musicPlayerRoomId;
+  int? _musicUid;
+  int _musicEpoch = 0;
+  bool _musicLeaseRevoked = false;
+  RoomMusicPlayback _lastMusicStatus = RoomMusicPlayback.stopped;
 
   RoomState get state => _state;
   AppSocketState get socketState => _socketManager.state;
@@ -142,6 +176,26 @@ class RoomManager extends ChangeNotifier {
   String get currentRoomId => _state.currentRoomId ?? '';
   bool get isInRoom => _state.isInRoom;
   bool get isMinimized => _state.isMinimized;
+  int get sessionGeneration => _generation;
+
+  Future<void> playMusic({
+    required String roomId,
+    required String path,
+    required String title,
+    bool force = false,
+  }) => _playMusic(roomId: roomId, path: path, title: title, force: force);
+  Future<void> pauseMusic(String roomId) =>
+      _controlMusic(roomId, _agoraManager.pauseMusic);
+  Future<void> resumeMusic(String roomId) =>
+      _controlMusic(roomId, _agoraManager.resumeMusic);
+  Future<void> seekMusic(String roomId, int position) =>
+      _controlMusic(roomId, () => _agoraManager.seekMusic(position));
+  Future<void> setMusicVolume(String roomId, int volume) => _controlMusic(
+    roomId,
+    () => _agoraManager.setMusicVolume(volume),
+    requirePlayer: false,
+  );
+  Future<void> stopMusic() => _queueMusic(() => _closeMusicPlayer());
 
   Future<void> tryEnterRoom({
     required String roomId,
@@ -225,6 +279,10 @@ class RoomManager extends ChangeNotifier {
         clearRoomInfo: true,
         clearEnterResponse: true,
         micList: const [],
+        audience: const [],
+        audienceLoaded: false,
+        loadingAudience: false,
+        audienceError: null,
         errorMessage: null,
       ),
     );
@@ -331,6 +389,11 @@ class RoomManager extends ChangeNotifier {
         final joining = _joinTask;
         if (joining != null) await _cleanupStep('pending joins', () => joining);
         final roomId = _serverRoomId ?? _state.currentRoomId;
+        await _cleanupStep('music player close', stopMusic);
+        await _cleanupStep(
+          'pending music status',
+          () => _musicStatusQueue ?? Future<void>.value(),
+        );
         if (roomId != null && roomId.isNotEmpty) {
           await _cleanupStep('exit API', () => _api.exitRoom(roomId));
         }
@@ -349,6 +412,12 @@ class RoomManager extends ChangeNotifier {
         _joinTask = null;
         _agoraJoinTask = null;
         _followTask = null;
+        _audienceTask = null;
+        _audienceRefreshQueued = false;
+        _musicUid = null;
+        _musicLeaseRevoked = false;
+        _musicEpoch++;
+        _lastMusicStatus = RoomMusicPlayback.stopped;
         _setState(const RoomState());
         _leaveTask = null;
         completion.complete();
@@ -372,6 +441,20 @@ class RoomManager extends ChangeNotifier {
       _state.currentRoomId == roomId;
 
   void _onDependencyChanged() {
+    _notifyMusicStatus();
+    if (_musicPlayerRoomId != null &&
+        _agoraManager.state.music.status == RoomMusicPlayback.failed) {
+      unawaited(
+        _cleanupStep(
+          'failed music player close',
+          () => _queueMusic(() async {
+            if (_agoraManager.state.music.status == RoomMusicPlayback.failed) {
+              await _closeMusicPlayer();
+            }
+          }),
+        ),
+      );
+    }
     if (_state.status == RoomStatus.ready &&
         (_socketManager.state.isTerminal || _agoraManager.state.isTerminal)) {
       unawaited(leaveRoom());
@@ -389,6 +472,7 @@ class RoomManager extends ChangeNotifier {
     await Future.wait<void>([
       refreshRoomInfo(),
       refreshMicList(),
+      refreshAudience(),
     ], eagerError: false);
   }
 
@@ -423,6 +507,51 @@ class RoomManager extends ChangeNotifier {
       if (!_isCurrentSession(roomId, generation)) return;
       _setState(_state.copyWith(errorMessage: error.toString()));
     }
+  }
+
+  Future<void> refreshAudience() {
+    final roomId = _requireCurrentRoomId();
+    final pending = _audienceTask;
+    if (pending != null) return pending;
+    final generation = _generation;
+    final completion = Completer<void>();
+    _audienceTask = completion.future;
+    _setState(_state.copyWith(loadingAudience: true, audienceError: null));
+    unawaited(() async {
+      try {
+        final audience = await _api.getAudience(roomId);
+        if (_isCurrentSession(roomId, generation)) {
+          _setState(
+            _state.copyWith(
+              audience: audience,
+              audienceLoaded: true,
+              loadingAudience: false,
+              audienceError: null,
+            ),
+          );
+        }
+      } catch (error) {
+        if (_isCurrentSession(roomId, generation)) {
+          _setState(
+            _state.copyWith(
+              loadingAudience: false,
+              audienceError: error.toString(),
+            ),
+          );
+        }
+      } finally {
+        if (identical(_audienceTask, completion.future)) {
+          _audienceTask = null;
+          final refreshAgain = _audienceRefreshQueued;
+          _audienceRefreshQueued = false;
+          if (refreshAgain && _isCurrentSession(roomId, generation)) {
+            unawaited(refreshAudience());
+          }
+        }
+        completion.complete();
+      }
+    }());
+    return completion.future;
   }
 
   /// Follow the current canonical room; retain the result through Keep/restore.
@@ -490,6 +619,8 @@ class RoomManager extends ChangeNotifier {
     final response = await _api.downMic(roomId: roomId, position: position);
     if (!_isCurrentSession(roomId, generation)) return response;
     _applyMicOperateResponse(response);
+    await _cleanupStep('music after down mic', stopMusic);
+    if (!_isCurrentSession(roomId, generation)) return response;
     await _agoraManager.stopPublish(position: position);
     if (_isCurrentSession(roomId, generation)) unawaited(refreshMicList());
     return response;
@@ -518,6 +649,7 @@ class RoomManager extends ChangeNotifier {
     _applyMicOperateResponse(response);
     final uid = await _authSession.uid();
     if (uid == targetUid && _isCurrentSession(roomId, generation)) {
+      await _cleanupStep('music after kick down', stopMusic);
       await _agoraManager.stopPublish(position: position);
     }
     if (_isCurrentSession(roomId, generation)) unawaited(refreshMicList());
@@ -599,9 +731,31 @@ class RoomManager extends ChangeNotifier {
     if (roomId == null || roomId.isEmpty || _state.status != RoomStatus.ready) {
       return;
     }
+    if (message.event == 'RoomClosePlayerEvent' &&
+        (message.channel == 'global:$_musicUid' ||
+            message.channel == 'room:$roomId')) {
+      // A forced takeover revoked this lease. Never close the new owner's lock.
+      _musicEpoch++;
+      _musicLeaseRevoked = true;
+      unawaited(
+        _cleanupStep(
+          'revoked music player',
+          () => _queueMusic(() => _closeMusicPlayer(revoked: true)),
+        ),
+      );
+      return;
+    }
     if (message.channel != 'room:$roomId' && message.channel != 'room') return;
 
     switch (message.event) {
+      case 'RoomAudienceUpdateEvent':
+        // This event only contains top users, never the complete audience.
+        if (_audienceTask != null) {
+          _audienceRefreshQueued = true;
+        } else {
+          unawaited(refreshAudience());
+        }
+        break;
       case 'RoomMicUpdateEvent':
         final micList = _parseMicListPayload(message.payload);
         if (micList != null) {
@@ -706,7 +860,14 @@ class RoomManager extends ChangeNotifier {
   }
 
   void _setState(RoomState value) {
+    final micChanged = !identical(_state.micList, value.micList);
     _state = value;
+    if (micChanged &&
+        _musicPlayerRoomId != null &&
+        !_state.micList.any((mic) => mic.uid == _musicUid)) {
+      _musicEpoch++;
+      unawaited(_cleanupStep('music after down mic', stopMusic));
+    }
     notifyListeners();
   }
 
@@ -722,6 +883,37 @@ class RoomManager extends ChangeNotifier {
 class _RoomApiClient {
   _RoomApiClient(this._httpManager);
   final HttpDioManager _httpManager;
+
+  Future<void> openPlayer(String roomId, {required bool force}) async {
+    _throwIfFailed(
+      await _httpManager.post(
+        HttpApi.roomOpenPlayer,
+        data: {'roomId': roomId, 'opType': force ? 2 : 1},
+      ),
+    );
+  }
+
+  Future<void> closePlayer(String roomId) async {
+    _throwIfFailed(
+      await _httpManager.post(
+        HttpApi.roomClosePlayer,
+        data: {'roomId': roomId},
+      ),
+    );
+  }
+
+  Future<void> musicStatus(String roomId, String status) async {
+    _throwIfFailed(
+      await _httpManager.post(
+        HttpApi.roomMsgPush,
+        data: {
+          'event': 'RoomMusicPlaybackStatusEvent',
+          'roomId': roomId,
+          'data': status,
+        },
+      ),
+    );
+  }
 
   Future<EnterRoomResp> enterRoom({
     required String roomId,
@@ -785,6 +977,27 @@ class _RoomApiClient {
           .whereType<Map>()
           .map((item) => RoomMicModel.fromJson(item.cast<String, dynamic>()))
           .toList();
+    });
+  }
+
+  Future<List<RoomUserInfo>> getAudience(String roomId) async {
+    final response = await _httpManager.get(
+      HttpApi.roomAudienceList,
+      queryParameters: {'roomId': roomId},
+    );
+    return _requireData(response, (json) {
+      if (json is! List) {
+        throw const FormatException('Invalid room audience list');
+      }
+      final users = <int, RoomUserInfo>{};
+      for (final item in json) {
+        if (item is! Map) {
+          throw const FormatException('Invalid room audience user');
+        }
+        final user = RoomUserInfo.fromJson(item.cast<String, dynamic>());
+        if (user.uid > 0) users.putIfAbsent(user.uid, () => user);
+      }
+      return List.unmodifiable(users.values);
     });
   }
 

@@ -18,6 +18,9 @@ import 'gift/views/room_gift_public_screen_item.dart';
 import 'gift/event/room_gift_event_provider.dart';
 import 'gift/trajectory/room_gift_seat_registry.dart';
 import 'models/room_more_tools_models.dart';
+import 'music/room_music_sheet.dart';
+import 'online/room_audience_avatar.dart';
+import 'online/room_audience_sheet.dart';
 import 'viewmodel/room_state.dart';
 import 'viewmodel/room_more_tools_view_model.dart';
 import 'viewmodel/room_view_model.dart';
@@ -27,6 +30,7 @@ part 'views/room_bottom_bar.dart';
 part 'views/room_chat_panel.dart';
 part 'views/room_header.dart';
 part 'views/room_mic_grid.dart';
+part 'views/room_music_strip.dart';
 part 'views/room_more_tools_sheet.dart';
 
 const Color _roomGold = Color(0xFFFFD86B);
@@ -236,8 +240,25 @@ class RoomPage extends HookConsumerWidget {
                               seat,
                             ),
                           ),
-                          // _RoomMusicStrip(state: state),
-                          SizedBox(height: 20),
+                          _RoomMusicStrip(
+                            state: state,
+                            onMusicTap: () =>
+                                _openRoomMusic(context, ref.read(provider)),
+                            onAudienceTap: () async {
+                              final roomId = state.currentRoomId;
+                              final uid = await showRoomAudienceSheet(
+                                context,
+                                roomId,
+                              );
+                              if (uid == null || !context.mounted) return;
+                              final current = ref.read(provider);
+                              if (!current.isReady ||
+                                  current.currentRoomId != roomId) {
+                                return;
+                              }
+                              context.push('/profile-homepage/$uid');
+                            },
+                          ),
                           Expanded(
                             child: LayoutBuilder(
                               builder: (context, constraints) => Column(

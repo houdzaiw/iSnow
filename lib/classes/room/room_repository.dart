@@ -39,13 +39,14 @@ class RoomRepository {
   final AuthSession _authSession;
 
   RoomState get roomState => _roomManager.state;
+  int get roomGeneration => _roomManager.sessionGeneration;
   AppSocketState get socketState => _roomManager.socketState;
   RoomAgoraState get agoraState => _roomManager.agoraState;
   Stream<RoomSocketMessage> get socketMessages => _socketManager.messages;
 
   RoomGiftAudience giftAudience(String roomId) => RoomGiftAudience(
     isInRoom: roomState.isInRoom && roomState.currentRoomId == roomId,
-    onlineCount: roomState.roomInfo?.audienceCount ?? 0,
+    onlineCount: roomState.onlineCount,
     recipients: [
       for (final mic in roomState.micList)
         if ((mic.uid ?? 0) > 0)
@@ -119,6 +120,10 @@ class RoomRepository {
     return _roomManager.followRoom();
   }
 
+  Future<void> refreshAudience() {
+    return _roomManager.refreshAudience();
+  }
+
   Future<RoomMicOperateResp> upMic(int position) {
     return _roomManager.upMic(position);
   }
@@ -155,6 +160,25 @@ class RoomRepository {
   Future<void> muteSpeaker(bool mute) {
     return _agoraManager.muteSpeaker(mute);
   }
+
+  Future<void> playMusic({
+    required String roomId,
+    required String path,
+    required String title,
+    bool force = false,
+  }) => _roomManager.playMusic(
+    roomId: roomId,
+    path: path,
+    title: title,
+    force: force,
+  );
+  Future<void> pauseMusic(String roomId) => _roomManager.pauseMusic(roomId);
+  Future<void> resumeMusic(String roomId) => _roomManager.resumeMusic(roomId);
+  Future<void> stopMusic() => _roomManager.stopMusic();
+  Future<void> seekMusic(String roomId, int position) =>
+      _roomManager.seekMusic(roomId, position);
+  Future<void> setMusicVolume(String roomId, int volume) =>
+      _roomManager.setMusicVolume(roomId, volume);
 
   Future<int?> sendTextMessage({required String roomId, required String text}) {
     return sendRoomMessage(

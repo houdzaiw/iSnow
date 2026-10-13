@@ -15,6 +15,8 @@ import 'package:project/classes/room/gift/room_gift_repository.dart';
 import 'package:project/classes/room/gift/viewmodel/room_gift_send_controller.dart';
 import 'package:project/classes/room/room_page.dart';
 import 'package:project/classes/room/room_repository.dart';
+import 'package:project/classes/room/online/room_audience_avatar.dart';
+import 'package:project/classes/room/online/room_audience_sheet.dart';
 import 'package:project/classes/room/viewmodel/room_view_model.dart';
 import 'package:project/classes/room/viewmodel/room_session_view_model.dart';
 import 'package:project/classes/room/views/room_exit_dialog.dart';
@@ -24,9 +26,12 @@ import 'package:project/manager/app_socket_manager.dart';
 import 'package:project/manager/room_agora_manager.dart';
 import 'package:project/manager/room_manager.dart';
 import 'package:project/model/room_models.dart';
+import 'package:project/model/room_user_info.dart';
 import 'package:project/model/room_socket_message.dart';
 import 'package:project/model/user_profile.dart';
 import 'package:project/theme/app_theme.dart';
+
+import 'support/precache_room_assets.dart';
 
 void main() {
   setUpAll(() async {
@@ -38,6 +43,53 @@ void main() {
       );
     await font.load();
   });
+
+  for (final width in [320.0, 375.0]) {
+    testWidgets(
+      'online entry previews real room users and opens a root sheet at $width',
+      (tester) async {
+        final repository = _RoomRepository()
+          ..audience = List.generate(
+            4,
+            (index) => RoomUserInfo.fromJson({
+              'userBase': {
+                'uid': index + 10,
+                'userNo': index + 100,
+                'nick': 'Online user $index',
+              },
+              'roomIdentity': index == 0 ? 'ROOM_OWNER' : 'ROOM_AUDIENCE',
+            }),
+          );
+        await _openRoom(tester, repository, width: width);
+        expect(find.byType(RoomAudienceAvatar), findsNWidgets(3));
+        expect(
+          tester
+              .widget<Text>(find.byKey(const ValueKey('room-online-count')))
+              .data,
+          '4',
+        );
+        final entry = find.byKey(const ValueKey('room-audience-entry'));
+        expect(tester.getRect(entry).right, lessThanOrEqualTo(width));
+        await tester.tap(entry);
+        await tester.pumpAndSettle();
+        expect(find.byType(RoomAudienceSheet), findsOneWidget);
+        expect(find.text('Users (4)'), findsOneWidget);
+        expect(find.text('Online user 3'), findsOneWidget);
+        expect(find.text('Owner'), findsOneWidget);
+        expect(repository.audienceRefreshCalls, 1);
+        final sheet = tester.getRect(
+          find.byKey(const ValueKey('room-audience-sheet')),
+        );
+        expect(sheet.width, width);
+        expect(sheet.bottom, 812);
+        await tester.tapAt(const Offset(8, 100));
+        await tester.pumpAndSettle();
+        expect(find.byType(RoomAudienceSheet), findsNothing);
+        expect(find.byType(RoomPage), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 
   testWidgets('follow owner waits for success, ignores repeat taps and hides', (
     tester,
@@ -757,6 +809,7 @@ Future<({ProviderContainer container, GoRouter router})> _openRoom(
     await tester.tap(find.text('Open room'));
     await tester.pumpAndSettle();
   }
+  await precacheRoomAssets(tester, tester.element(find.byType(RoomPage)));
   final container = ProviderScope.containerOf(
     tester.element(find.byType(RoomPage)),
   );
@@ -772,6 +825,8 @@ class _RoomRepository extends ChangeNotifier implements RoomRepository {
   int enterCalls = 0;
   int restoreCalls = 0;
   int followCalls = 0;
+  int audienceRefreshCalls = 0;
+  List<RoomUserInfo> audience = const [];
   bool initiallyFollowed = false;
   int? ownerUid;
   bool loggedIn = true;
@@ -817,6 +872,13 @@ class _RoomRepository extends ChangeNotifier implements RoomRepository {
   }
 
   @override
+  Future<void> refreshAudience() async {
+    audienceRefreshCalls++;
+    room = room.copyWith(audience: audience, audienceLoaded: true);
+    notifyListeners();
+  }
+
+  @override
   Future<void> followRoom() async {
     followCalls++;
     room = room.copyWith(isFollowingRoom: true, errorMessage: null);
@@ -834,7 +896,7 @@ class _RoomRepository extends ChangeNotifier implements RoomRepository {
   @override
   RoomGiftAudience giftAudience(String roomId) => RoomGiftAudience(
     isInRoom: room.isInRoom && room.currentRoomId == roomId,
-    onlineCount: 1,
+    onlineCount: room.onlineCount,
     recipients: const [],
   );
   @override
@@ -852,6 +914,8 @@ class _RoomRepository extends ChangeNotifier implements RoomRepository {
       currentRoomId: roomId == 'second' ? 'second' : 'canonical',
       isInRoom: true,
       isFollowed: initiallyFollowed,
+      audience: audience,
+      audienceLoaded: true,
       roomInfo: ownerUid == null
           ? null
           : RoomInfo(

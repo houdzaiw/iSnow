@@ -27,7 +27,7 @@ class EnterRoomResp {
   factory EnterRoomResp.fromJson(Map<String, dynamic> json) {
     return EnterRoomResp(
       roomId: json['roomId']?.toString() ?? json['roomID']?.toString() ?? '',
-      identity: _asRoomIdentity(json['identity']),
+      identity: userRoomIdentityFromJson(json['identity']),
       agoraToken: json['agoraToken']?.toString(),
       longLinkToken: json['longLinkToken']?.toString(),
       status: _asInt(json['status']),
@@ -164,7 +164,8 @@ int? _asInt(Object? value) {
   return int.tryParse(value?.toString() ?? '');
 }
 
-UserRoomIdentity? _asRoomIdentity(Object? value) {
+/// Maps Nady's room identity strings and numeric values.
+UserRoomIdentity? userRoomIdentityFromJson(Object? value) {
   if (value is UserRoomIdentity) return value;
   if (value is num) {
     return switch (value.toInt()) {

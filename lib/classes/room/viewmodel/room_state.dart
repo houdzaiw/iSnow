@@ -2,6 +2,7 @@ import '../../../manager/app_socket_manager.dart';
 import '../../../manager/room_agora_manager.dart';
 import '../../../manager/room_manager.dart';
 import '../../../model/room_models.dart';
+import '../../../model/room_user_info.dart';
 import '../gift/models/room_gift_event_models.dart';
 
 enum RoomChatFilter { all, chat, gift }
@@ -127,6 +128,7 @@ class RoomPageState {
     this.roomNo = '',
     this.roomDesc,
     this.onlineCount = 0,
+    this.audience = const [],
     this.roomWeekVal = 0,
     this.roomInfo,
     this.enterResponse,
@@ -158,6 +160,7 @@ class RoomPageState {
   final String roomNo;
   final String? roomDesc;
   final int onlineCount;
+  final List<RoomUserInfo> audience;
   final int roomWeekVal;
   final RoomInfo? roomInfo;
   final EnterRoomResp? enterResponse;
@@ -244,6 +247,7 @@ class RoomPageState {
     String? roomNo,
     Object? roomDesc = _sentinel,
     int? onlineCount,
+    List<RoomUserInfo>? audience,
     int? roomWeekVal,
     RoomInfo? roomInfo,
     Object? enterResponse = _sentinel,
@@ -279,6 +283,7 @@ class RoomPageState {
           ? this.roomDesc
           : roomDesc as String?,
       onlineCount: onlineCount ?? this.onlineCount,
+      audience: audience ?? this.audience,
       roomWeekVal: roomWeekVal ?? this.roomWeekVal,
       roomInfo: roomInfo ?? this.roomInfo,
       enterResponse: identical(enterResponse, _sentinel)

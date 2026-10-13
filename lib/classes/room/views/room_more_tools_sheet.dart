@@ -16,6 +16,11 @@ void _showRoomMoreToolsSheet(
     builder: (sheetContext) {
       return _RoomMoreToolsSheet(
         roomProvider: provider,
+        onOpenMusic: () {
+          final roomState = ref.read(provider);
+          Navigator.of(sheetContext).pop();
+          if (context.mounted) _openRoomMusic(context, roomState);
+        },
         onOpenBanner: (banner) {
           final roomState = ref.read(provider);
           final targetUrl = banner.resolvedRouteUrl(
@@ -50,6 +55,7 @@ void _showRoomMoreToolsSheet(
 
 class _RoomMoreToolsSheet extends ConsumerWidget {
   const _RoomMoreToolsSheet({
+    required this.onOpenMusic,
     required this.roomProvider,
     required this.onOpenBanner,
   });
@@ -57,6 +63,7 @@ class _RoomMoreToolsSheet extends ConsumerWidget {
   final AutoDisposeStateNotifierProvider<RoomViewModel, RoomPageState>
   roomProvider;
   final ValueChanged<RoomToolBanner> onOpenBanner;
+  final VoidCallback onOpenMusic;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -159,10 +166,7 @@ class _RoomMoreToolsSheet extends ConsumerWidget {
           label: context.l10n.t('room.more.music'),
           asset: AppAssets.lanhuRoomMoreMusic,
           assetIncludesTile: true,
-          onTap: () => _showRoomMoreSnack(
-            context,
-            context.l10n.t('room.more.actionPending'),
-          ),
+          onTap: onOpenMusic,
         ),
       if (roomState.isOwnerOrManager)
         _RoomMoreToolItem(

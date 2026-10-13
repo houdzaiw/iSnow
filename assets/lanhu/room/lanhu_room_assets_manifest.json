@@ -1,4 +1,5 @@
 {
+  "music_controls_missing": "roomMusicPlay/Pause/Previous/Next/Stop/Delete/Volume currently alias room_icon_missing.png: no music-player Lanhu design/slices provided; red placeholders awaiting replacement. Existing music entry uses the current Lanhu music asset; no Flutter icons used.",
   "room_exit_keep.png": "user-provided local asset: /Users/huili/Downloads/exit-dialog/缩小直播间@2x.png; active Keep button image",
   "room_exit_close.png": "user-provided local asset: /Users/huili/Downloads/exit-dialog/退出房间按钮.png; active Exit button image",
   "room_exit_keep.webp": "Nady reference requested for missing UI: assets/images/room_exit_minimize.webp; replace when Lanhu Keep icon is supplied",

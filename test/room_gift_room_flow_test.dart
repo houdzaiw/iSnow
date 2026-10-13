@@ -28,6 +28,8 @@ import 'package:project/model/room_socket_message.dart';
 import 'package:project/model/user_profile.dart';
 import 'package:project/theme/app_theme.dart';
 
+import 'support/precache_room_assets.dart';
+
 const _gift = RoomGift(
   id: 31,
   name: '88',
@@ -119,6 +121,10 @@ void main() {
           );
           await tester.pump();
           await tester.pump();
+          await precacheRoomAssets(
+            tester,
+            tester.element(find.byType(RoomPage)),
+          );
           final container = ProviderScope.containerOf(
             tester.element(find.byType(RoomPage)),
           );

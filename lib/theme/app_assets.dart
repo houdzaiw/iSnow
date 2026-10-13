@@ -10,6 +10,14 @@ class AppAssets {
   const AppAssets._();
 
   static const String iconMissing = 'assets/lanhu/common/icon_missing.png';
+  // Waiting for the room music-player Lanhu control slices.
+  static const roomMusicPlay = lanhuRoomIconMissing;
+  static const roomMusicPause = lanhuRoomIconMissing;
+  static const roomMusicPrevious = lanhuRoomIconMissing;
+  static const roomMusicNext = lanhuRoomIconMissing;
+  static const roomMusicStop = lanhuRoomIconMissing;
+  static const roomMusicDelete = lanhuRoomIconMissing;
+  static const roomMusicVolume = lanhuRoomIconMissing;
   static const String roomExitKeep = 'assets/lanhu/room/room_exit_keep.png';
   static const String roomExitClose = 'assets/lanhu/room/room_exit_close.png';
   static const String roomMiniClose = 'assets/lanhu/room/room_mini_close.webp';

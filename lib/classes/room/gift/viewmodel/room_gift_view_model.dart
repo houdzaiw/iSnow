@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../model/server_response.dart';
+import '../../room_repository.dart';
 import '../models/room_gift_models.dart';
 import '../room_gift_repository.dart';
 import 'room_gift_state.dart';
@@ -9,13 +10,31 @@ import 'room_gift_send_controller.dart';
 
 final roomGiftViewModelProvider = StateNotifierProvider.autoDispose
     .family<RoomGiftViewModel, RoomGiftState, String>((ref, roomId) {
-      return RoomGiftViewModel(
+      final model = RoomGiftViewModel(
         repository: ref.watch(roomGiftRepositoryProvider),
         roomId: roomId,
         sendController: ref.watch(
           roomGiftSendControllerProvider(roomId).notifier,
         ),
       );
+      final roomRepository = ref.read(roomRepositoryProvider);
+      var syncedRoom = roomRepository.roomState;
+      void syncAudience() {
+        final audience = roomRepository.giftAudience(roomId);
+        if (model.mounted && model._initialized && audience.isInRoom) {
+          final room = roomRepository.roomState;
+          if (identical(syncedRoom.micList, room.micList) &&
+              syncedRoom.onlineCount == room.onlineCount) {
+            return;
+          }
+          syncedRoom = room;
+          model.updateRecipients(audience.recipients, audience.onlineCount);
+        }
+      }
+
+      roomRepository.addListener(syncAudience);
+      ref.onDispose(() => roomRepository.removeListener(syncAudience));
+      return model;
     });
 
 class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
@@ -41,10 +60,13 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
   }) async {
     if (_initialized) return;
     _initialized = true;
+    final audience = _sender.audience;
     _sourceRecipients = recipients;
     state = state.copyWith(
-      recipients: recipients,
-      onlineCount: onlineCount,
+      recipients: _sourceRecipients,
+      onlineCount: audience?.isInRoom == true
+          ? audience!.onlineCount
+          : onlineCount,
       currentUid: currentUid,
     );
     await load();

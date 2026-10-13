@@ -90,6 +90,22 @@ class AppSocketManager extends ChangeNotifier {
 
   static final AppSocketManager instance = AppSocketManager._();
 
+  /// Only used for the targeted RoomClosePlayerEvent while in a room.
+  Future<void> subscribeRoomMusicControl(int uid) async {
+    final client = _client;
+    if (client == null || !_state.roomChannelSubscribed) {
+      throw const NadyApiException(message: 'Room socket is not connected');
+    }
+    final generation = _roomJoinGeneration;
+    final channel = 'global:$uid';
+    await _subscribeChannel(client, channel);
+    if (generation != _roomJoinGeneration) {
+      await _unsubscribeChannel(channel);
+    } else {
+      _musicControlChannel = channel;
+    }
+  }
+
   final HttpDioManager _httpManager = HttpDioManager();
   final centrifuge.Client Function(String, centrifuge.ClientConfig)
   _clientFactory;
@@ -109,6 +125,7 @@ class AppSocketManager extends ChangeNotifier {
   String? _socketUrl;
   int _roomJoinGeneration = 0;
   String? _joiningRoomId;
+  String? _musicControlChannel;
   bool _intentionalDisconnect = false;
   AppSocketState _state = const AppSocketState();
 
@@ -235,6 +252,14 @@ class AppSocketManager extends ChangeNotifier {
   Future<void> leaveRoom(String roomId) async {
     _roomJoinGeneration += 1;
     _joiningRoomId = null;
+    final musicChannel = _musicControlChannel;
+    _musicControlChannel = null;
+    if (musicChannel != null) {
+      await _cleanup(
+        'music control unsubscribe',
+        () => _unsubscribeChannel(musicChannel),
+      );
+    }
     await _cleanup(
       'room unsubscribe',
       () => _unsubscribeChannel('room:$roomId'),

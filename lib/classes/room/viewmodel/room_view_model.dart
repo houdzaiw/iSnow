@@ -382,7 +382,8 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
       roomAvatar: _roomAvatar(roomInfo, roomData),
       roomNo: _roomNo(roomInfo, enterResponse, effectiveRoomId),
       roomDesc: _stringValue(roomInfo?.roomDesc ?? roomData['roomDesc']),
-      onlineCount: _onlineCount(roomInfo, roomData),
+      onlineCount: roomState.onlineCount,
+      audience: roomState.audience,
       roomInfo: roomInfo,
       enterResponse: enterResponse,
       seats: _buildSeats(roomState.micList, agoraState.volumeLevels),
@@ -678,17 +679,6 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
               enterResponse?.raw['roomId'],
         ) ??
         currentRoomId;
-  }
-
-  int _onlineCount(RoomInfo? info, Map<String, dynamic> roomData) {
-    return info?.audienceCount ??
-        _intValue(
-          roomData['audienceCount'] ??
-              roomData['roomAudience'] ??
-              roomData['onlineNum'] ??
-              roomData['inRoomNum'],
-        ) ??
-        0;
   }
 
   Map<String, dynamic> _roomDataMap(RoomInfo? info) {

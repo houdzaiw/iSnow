@@ -3,6 +3,19 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 class AppTextStyles {
+  static const TextStyle roomMusicTitle = TextStyle(
+    color: AppColors.roomGiftTextMuted,
+    fontSize: 15,
+    height: 1,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0,
+  );
+  static const TextStyle roomAudienceName = TextStyle(
+    color: AppColors.textInverse,
+    fontSize: 14,
+    fontWeight: FontWeight.w500,
+    letterSpacing: 0,
+  );
   static const TextStyle roomExitLabel = TextStyle(
     color: AppColors.textInverse,
     fontSize: 12,

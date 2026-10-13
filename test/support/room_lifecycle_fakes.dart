@@ -10,6 +10,7 @@ import 'package:project/manager/room_agora_manager.dart';
 import 'package:project/manager/room_background_audio_manager.dart';
 import 'package:project/manager/room_manager.dart';
 import 'package:project/model/room_socket_message.dart';
+import 'package:project/model/room_music_state.dart';
 import 'package:project/model/user_profile.dart';
 
 class RoomLifecycleFixture {
@@ -84,6 +85,10 @@ class FakeRoomHttp implements HttpDioManager {
   int infoCalls = 0;
   final followRequests = <Map<String, dynamic>>[];
   Map<String, dynamic> followResponse = const {'code': 200, 'msg': 'success'};
+  Completer<void>? audienceGate;
+  List<Map<String, dynamic>> audience = [];
+  bool failAudience = false;
+  final audienceRequests = <Map<String, dynamic>>[];
   String? canonicalRoomId;
 
   @override
@@ -129,6 +134,14 @@ class FakeRoomHttp implements HttpDioManager {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
+    if (path == HttpApi.roomAudienceList) {
+      audienceRequests.add(Map<String, dynamic>.from(queryParameters!));
+      final users = List<Map<String, dynamic>>.of(audience);
+      final fail = failAudience;
+      await audienceGate?.future;
+      if (fail) return {'code': 1003, 'message': 'Audience unavailable'};
+      return {'code': 200, 'data': users};
+    }
     if (path == HttpApi.roomInfo) {
       infoCalls++;
       final roomInfo = {
@@ -169,6 +182,11 @@ class FakeRoomSocket extends ChangeNotifier implements AppSocketManager {
   AppSocketState get state => value;
   @override
   Stream<RoomSocketMessage> get messages => controller.stream;
+  @override
+  Future<void> subscribeRoomMusicControl(int uid) async {
+    actions.add('music-control:$uid');
+  }
+
   @override
   Future<void> joinRoom(String roomId, {String? url}) async {
     actions.add('socket-join:$roomId');
@@ -213,6 +231,13 @@ class FakeRoomAgora extends ChangeNotifier implements RoomAgoraManager {
   Completer<void>? joinGate;
   @override
   RoomAgoraState get state => value;
+  @override
+  Future<void> stopMusic() async {
+    if (value.music.path == null) return;
+    actions.add('music-stop');
+    setState(value.copyWith(music: const RoomMusicPlaybackState()));
+  }
+
   @override
   Future<void> joinRoom({
     required String roomId,

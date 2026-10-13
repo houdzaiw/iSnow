@@ -4,9 +4,12 @@ import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/foundation.dart';
 
 import '../model/server_response.dart';
+import '../model/room_music_state.dart';
 import 'auth_session.dart';
 import 'http_api.dart';
 import 'http_dio_manager.dart';
+
+part 'room_agora_music.dart';
 
 class RoomAgoraState {
   const RoomAgoraState({
@@ -23,6 +26,7 @@ class RoomAgoraState {
     this.downstreamQuality,
     this.errorMessage,
     this.isTerminal = false,
+    this.music = const RoomMusicPlaybackState(),
   });
 
   final bool initialized;
@@ -38,6 +42,7 @@ class RoomAgoraState {
   final QualityType? downstreamQuality;
   final String? errorMessage;
   final bool isTerminal;
+  final RoomMusicPlaybackState music;
 
   RoomAgoraState copyWith({
     bool? initialized,
@@ -53,6 +58,7 @@ class RoomAgoraState {
     QualityType? upstreamQuality,
     QualityType? downstreamQuality,
     bool? isTerminal,
+    RoomMusicPlaybackState? music,
     Object? errorMessage = _sentinel,
   }) {
     return RoomAgoraState(
@@ -68,6 +74,7 @@ class RoomAgoraState {
       upstreamQuality: upstreamQuality ?? this.upstreamQuality,
       downstreamQuality: downstreamQuality ?? this.downstreamQuality,
       isTerminal: isTerminal ?? this.isTerminal,
+      music: music ?? this.music,
       errorMessage: identical(errorMessage, _sentinel)
           ? this.errorMessage
           : errorMessage as String?,
@@ -100,8 +107,21 @@ class RoomAgoraManager extends ChangeNotifier {
   String? _expectedRoomId;
   Completer<bool>? _joinCompletion;
   int _generation = 0;
+  Future<void>? _musicQueue;
+  Timer? _musicProgressTimer;
+  bool _pollingMusic = false;
+  bool _mixingActive = false;
+  DateTime? _lastMusicStart;
 
   RoomAgoraState get state => _state;
+
+  Future<void> startMusic({required String path, required String title}) =>
+      _startMusic(path: path, title: title);
+  Future<void> pauseMusic() => _pauseMusic();
+  Future<void> resumeMusic() => _resumeMusic();
+  Future<void> stopMusic() => _stopMusic();
+  Future<void> seekMusic(int position) => _seekMusic(position);
+  Future<void> setMusicVolume(int volume) => _setMusicVolume(volume);
 
   Future<void> init({required String appId}) async {
     if (appId.isEmpty) {
@@ -205,6 +225,7 @@ class RoomAgoraManager extends ChangeNotifier {
     _expectedRoomId = null;
     final engine = _engine;
     final initialized = _state.initialized;
+    await stopMusic();
     if (engine == null) {
       _setState(const RoomAgoraState());
       return;
@@ -275,6 +296,7 @@ class RoomAgoraManager extends ChangeNotifier {
   }
 
   Future<void> stopPublish({int? position}) async {
+    await stopMusic();
     final engine = _requireEngine();
     final roomId = _expectedRoomId;
     if (roomId == null) return;
@@ -356,6 +378,7 @@ class RoomAgoraManager extends ChangeNotifier {
     _cancelPendingJoin();
     _expectedRoomId = null;
     final engine = _engine;
+    await stopMusic();
     _engine = null;
     _appId = null;
     if (engine != null) {
@@ -416,6 +439,7 @@ class RoomAgoraManager extends ChangeNotifier {
 
   RtcEngineEventHandler _eventHandler() {
     return RtcEngineEventHandler(
+      onAudioMixingStateChanged: _onMusicStateChanged,
       onJoinChannelSuccess: (connection, elapsed) {
         if (!_accepts(connection)) return;
         _setState(

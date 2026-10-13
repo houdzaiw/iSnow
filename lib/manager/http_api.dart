@@ -1,4 +1,7 @@
 class HttpApi {
+  static const roomOpenPlayer = '/api/room/openPlayer';
+  static const roomClosePlayer = '/api/room/closePlayer';
+
   /// ==================== 国家相关 ====================
   /// 按国家 ISO code 查询拨号码
   static const queryCountryCode = '/api/user/country/query/code';
@@ -64,6 +67,9 @@ class HttpApi {
 
   /// 房间详情
   static const roomInfo = '/api/room/get/info';
+
+  /// 房间完整在线用户列表
+  static const roomAudienceList = '/api/room/list/audience';
 
   /// 麦位列表
   static const roomMicListInfo = '/api/room/mic/list/info';

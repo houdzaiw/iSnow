@@ -1,5 +1,19 @@
 class AppSpacing {
+  static const double musicSheetHeight = 580;
+  static const double musicSheetMaxHeightRatio = 0.85;
+  static const double musicTrackHeight = 56;
+  static const double musicTransportHeight = 48;
   static const double roomExitChoiceSize = 82;
+  static const double roomMusicStripHeight = 48;
+  static const double roomMusicPillHeight = 37;
+  static const double roomAudiencePreviewAvatarSize = 30;
+  static const double roomAudiencePreviewAvatarOffset = 20;
+  static const int roomAudiencePreviewLimit = 3;
+  static const double roomAudienceCountWidth = 64;
+  static const double roomAudienceSheetHeight = 454;
+  static const double roomAudienceSheetMaxHeightRatio = 0.8;
+  static const double roomAudienceHeaderHeight = 44;
+  static const double roomAudienceAvatarSize = 48;
   static const double roomExitChoiceGap = 100;
   static const double roomMiniSize = 84;
   static const double roomMiniAvatarSize = 56;

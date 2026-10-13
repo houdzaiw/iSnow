@@ -29,6 +29,8 @@
 
 ## Replacement Rule
 
+音乐播放器的播放、暂停、上一首、下一首、停止、删除和音量控制暂无对应 Lanhu 切图，必须使用红色缺省图并保留语义/Tooltip，资源清单中记录待补原因；禁止用 Flutter 内置图标代替。已有音乐入口继续复用设计图。
+
 后续补齐图标时，只替换 `assets/lanhu/room/` 下的语义化图片文件或更新 `AppAssets` 常量，不要改动业务逻辑。
 
 ## Keep/Exit Reference UI

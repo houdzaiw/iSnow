@@ -73,6 +73,22 @@ void main() {
     expect(socket.state.status, AppSocketStatus.error);
   });
 
+  test(
+    'music control subscription is scoped to the active room lifecycle',
+    () async {
+      await expectLater(
+        socket.subscribeRoomMusicControl(10),
+        throwsA(isA<Exception>()),
+      );
+      await socket.joinRoom('123');
+      await socket.subscribeRoomMusicControl(10);
+      await socket.subscribeRoomMusicControl(10);
+      expect(client.channels.keys, contains('global:10'));
+      await socket.leaveRoom('123');
+      expect(client.channels, isEmpty);
+    },
+  );
+
   test('leaving during endpoint lookup does not resurrect the room', () async {
     final pending = Completer<dynamic>();
     final delayed = AppSocketManager.forTesting(
