@@ -23,6 +23,8 @@ class RoomState {
     this.currentRoomId,
     this.isInRoom = false,
     this.isMinimized = false,
+    this.isFollowed = false,
+    this.isFollowingRoom = false,
     this.enterResponse,
     this.roomInfo,
     this.micList = const [],
@@ -33,6 +35,8 @@ class RoomState {
   final String? currentRoomId;
   final bool isInRoom;
   final bool isMinimized;
+  final bool isFollowed;
+  final bool isFollowingRoom;
   final EnterRoomResp? enterResponse;
   final RoomInfo? roomInfo;
   final List<RoomMicModel> micList;
@@ -47,6 +51,8 @@ class RoomState {
     bool? clearCurrentRoomId,
     bool? isInRoom,
     bool? isMinimized,
+    bool? isFollowed,
+    bool? isFollowingRoom,
     EnterRoomResp? enterResponse,
     bool? clearEnterResponse,
     RoomInfo? roomInfo,
@@ -61,6 +67,8 @@ class RoomState {
           : currentRoomId ?? this.currentRoomId,
       isInRoom: isInRoom ?? this.isInRoom,
       isMinimized: isMinimized ?? this.isMinimized,
+      isFollowed: isFollowed ?? this.isFollowed,
+      isFollowingRoom: isFollowingRoom ?? this.isFollowingRoom,
       enterResponse: clearEnterResponse == true
           ? null
           : enterResponse ?? this.enterResponse,
@@ -122,6 +130,7 @@ class RoomManager extends ChangeNotifier {
   Future<void>? _leaveTask;
   Future<void>? _joinTask;
   Future<void>? _agoraJoinTask;
+  Future<void>? _followTask;
   String? _requestedRoomId;
   String? _serverRoomId;
   int _generation = 0;
@@ -211,6 +220,8 @@ class RoomManager extends ChangeNotifier {
         currentRoomId: roomId,
         isInRoom: false,
         isMinimized: false,
+        isFollowed: false,
+        isFollowingRoom: false,
         clearRoomInfo: true,
         clearEnterResponse: true,
         micList: const [],
@@ -337,6 +348,7 @@ class RoomManager extends ChangeNotifier {
         _requestedRoomId = null;
         _joinTask = null;
         _agoraJoinTask = null;
+        _followTask = null;
         _setState(const RoomState());
         _leaveTask = null;
         completion.complete();
@@ -386,7 +398,14 @@ class RoomManager extends ChangeNotifier {
     try {
       final roomInfo = await _api.getRoomInfo(roomId);
       if (!_isCurrentSession(roomId, generation)) return;
-      _setState(_state.copyWith(roomInfo: roomInfo, errorMessage: null));
+      _setState(
+        _state.copyWith(
+          roomInfo: roomInfo,
+          // A stale detail response must not undo a successful follow.
+          isFollowed: _state.isFollowed || roomInfo.isFollow == true,
+          errorMessage: null,
+        ),
+      );
     } catch (error) {
       if (!_isCurrentSession(roomId, generation)) return;
       _setState(_state.copyWith(errorMessage: error.toString()));
@@ -404,6 +423,52 @@ class RoomManager extends ChangeNotifier {
       if (!_isCurrentSession(roomId, generation)) return;
       _setState(_state.copyWith(errorMessage: error.toString()));
     }
+  }
+
+  /// Follow the current canonical room; retain the result through Keep/restore.
+  Future<void> followRoom() {
+    final roomId = _requireCurrentRoomId();
+    if (_state.isFollowed || _state.roomInfo?.isFollow == true) {
+      return Future<void>.value();
+    }
+    final pending = _followTask;
+    if (pending != null) return pending;
+
+    final generation = _generation;
+    final completion = Completer<void>();
+    _followTask = completion.future;
+    _setState(_state.copyWith(isFollowingRoom: true, errorMessage: null));
+    unawaited(() async {
+      try {
+        await _api.followRoom(roomId);
+        if (_isCurrentSession(roomId, generation)) {
+          _setState(
+            _state.copyWith(
+              isFollowed: true,
+              isFollowingRoom: false,
+              errorMessage: null,
+            ),
+          );
+          if (_isCurrentSession(roomId, generation)) {
+            unawaited(refreshRoomInfo());
+          }
+        }
+        completion.complete();
+      } catch (error, stack) {
+        if (_isCurrentSession(roomId, generation)) {
+          _setState(
+            _state.copyWith(
+              isFollowingRoom: false,
+              errorMessage: error.toString(),
+            ),
+          );
+        }
+        completion.completeError(error, stack);
+      } finally {
+        if (identical(_followTask, completion.future)) _followTask = null;
+      }
+    }());
+    return completion.future;
   }
 
   Future<RoomMicOperateResp> upMic(int position) async {
@@ -681,6 +746,14 @@ class _RoomApiClient {
   Future<void> exitRoom(String roomId) async {
     final response = await _httpManager.post(
       HttpApi.roomExit,
+      data: {'roomId': roomId},
+    );
+    _throwIfFailed(response);
+  }
+
+  Future<void> followRoom(String roomId) async {
+    final response = await _httpManager.post(
+      HttpApi.roomFollow,
       data: {'roomId': roomId},
     );
     _throwIfFailed(response);

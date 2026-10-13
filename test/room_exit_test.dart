@@ -23,6 +23,7 @@ import 'package:project/localization/app_localizations.dart';
 import 'package:project/manager/app_socket_manager.dart';
 import 'package:project/manager/room_agora_manager.dart';
 import 'package:project/manager/room_manager.dart';
+import 'package:project/model/room_models.dart';
 import 'package:project/model/room_socket_message.dart';
 import 'package:project/model/user_profile.dart';
 import 'package:project/theme/app_theme.dart';
@@ -36,6 +37,100 @@ void main() {
         ).readAsBytes().then(ByteData.sublistView),
       );
     await font.load();
+  });
+
+  testWidgets('follow owner waits for success, ignores repeat taps and hides', (
+    tester,
+  ) async {
+    final repository = _RoomRepository()..followGate = Completer<void>();
+    final harness = await _openRoom(tester, repository, miniOverlay: true);
+    final followButton = find.byKey(const ValueKey('room-follow-owner'));
+    expect(followButton, findsOneWidget);
+    await tester.tap(followButton);
+    await tester.pump();
+    expect(followButton, findsOneWidget);
+    expect(tester.widget<InkWell>(followButton).onTap, isNull);
+    await tester.tap(followButton);
+    expect(repository.followCalls, 1);
+    repository.followGate!.complete();
+    await tester.pumpAndSettle();
+    expect(followButton, findsNothing);
+    expect(
+      harness.container.read(roomViewModelProvider('alias')).isRoomFollowed,
+      isTrue,
+    );
+
+    await tester.tap(_exitButton);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('room-exit-keep')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('room-mini-restore')));
+    await tester.pumpAndSettle();
+    expect(find.byType(RoomPage), findsOneWidget);
+    expect(followButton, findsNothing);
+    expect(repository.followCalls, 1);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('failed follow retains button and permits a retry', (
+    tester,
+  ) async {
+    final repository = _RoomRepository()
+      ..followError = StateError('Follow failed');
+    await _openRoom(tester, repository);
+    final followButton = find.byKey(const ValueKey('room-follow-owner'));
+    await tester.tap(followButton);
+    await tester.pumpAndSettle();
+    expect(followButton, findsOneWidget);
+    expect(find.text('Bad state: Follow failed'), findsOneWidget);
+    expect(tester.widget<InkWell>(followButton).onTap, isNotNull);
+    repository.followError = null;
+    await tester.tap(followButton);
+    await tester.pumpAndSettle();
+    expect(followButton, findsNothing);
+    expect(repository.followCalls, 2);
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final ownRoom in [false, true]) {
+    testWidgets('follow icon is absent for followed/own room: own=$ownRoom', (
+      tester,
+    ) async {
+      final repository = _RoomRepository()
+        ..initiallyFollowed = !ownRoom
+        ..ownerUid = ownRoom ? 10 : 20;
+      await _openRoom(tester, repository);
+      expect(find.byKey(const ValueKey('room-follow-owner')), findsNothing);
+      expect(repository.followCalls, 0);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('long room title does not push follow icon off a narrow screen', (
+    tester,
+  ) async {
+    final repository = _RoomRepository();
+    await _openRoom(tester, repository, width: 320);
+    repository.room = repository.room.copyWith(
+      roomInfo: const RoomInfo(
+        roomId: 'canonical',
+        title: 'A very long room title that should not push follow off screen',
+        raw: {},
+      ),
+    );
+    repository.notifyListeners();
+    await tester.pumpAndSettle();
+    final followButton = find.byKey(const ValueKey('room-follow-owner'));
+    final rect = tester.getRect(followButton);
+    expect(rect.left, greaterThanOrEqualTo(0));
+    expect(rect.right, lessThanOrEqualTo(320));
+    await tester.tap(followButton);
+    await tester.pumpAndSettle();
+    expect(repository.followCalls, 1);
+    expect(followButton, findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   for (final pushed in [false, true]) {
@@ -676,11 +771,16 @@ class _RoomRepository extends ChangeNotifier implements RoomRepository {
   int minimizeCalls = 0;
   int enterCalls = 0;
   int restoreCalls = 0;
+  int followCalls = 0;
+  bool initiallyFollowed = false;
+  int? ownerUid;
   bool loggedIn = true;
   final authListeners = <VoidCallback>[];
   Completer<void>? leaveGate;
   Completer<void>? sendGate;
   Completer<void>? refreshGate;
+  Completer<void>? followGate;
+  Object? followError;
   Object? leaveError;
 
   @override
@@ -717,6 +817,21 @@ class _RoomRepository extends ChangeNotifier implements RoomRepository {
   }
 
   @override
+  Future<void> followRoom() async {
+    followCalls++;
+    room = room.copyWith(isFollowingRoom: true, errorMessage: null);
+    notifyListeners();
+    await followGate?.future;
+    if (followError != null) {
+      room = room.copyWith(isFollowingRoom: false);
+      notifyListeners();
+      throw followError!;
+    }
+    room = room.copyWith(isFollowed: true, isFollowingRoom: false);
+    notifyListeners();
+  }
+
+  @override
   RoomGiftAudience giftAudience(String roomId) => RoomGiftAudience(
     isInRoom: room.isInRoom && room.currentRoomId == roomId,
     onlineCount: 1,
@@ -736,6 +851,15 @@ class _RoomRepository extends ChangeNotifier implements RoomRepository {
       status: RoomStatus.ready,
       currentRoomId: roomId == 'second' ? 'second' : 'canonical',
       isInRoom: true,
+      isFollowed: initiallyFollowed,
+      roomInfo: ownerUid == null
+          ? null
+          : RoomInfo(
+              roomId: roomId,
+              roomOwnerUid: ownerUid,
+              isFollow: initiallyFollowed,
+              raw: const {},
+            ),
     );
     notifyListeners();
   }

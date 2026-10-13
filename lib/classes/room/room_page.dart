@@ -216,6 +216,7 @@ class RoomPage extends HookConsumerWidget {
                         children: [
                           _RoomHeader(
                             state: state,
+                            onFollowRoom: viewModel.followRoom,
                             onMinimize: () {
                               if (isExiting.value) return;
                               if (viewModel.minimizeRoom()) closePage();

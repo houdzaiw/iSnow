@@ -120,6 +120,8 @@ class RoomPageState {
     this.status = RoomStatus.idle,
     this.isInRoom = false,
     this.isMinimized = false,
+    this.isRoomFollowed = false,
+    this.followingRoom = false,
     this.roomTitle = 'Voice Room',
     this.roomAvatar,
     this.roomNo = '',
@@ -149,6 +151,8 @@ class RoomPageState {
   final RoomStatus status;
   final bool isInRoom;
   final bool isMinimized;
+  final bool isRoomFollowed;
+  final bool followingRoom;
   final String roomTitle;
   final String? roomAvatar;
   final String roomNo;
@@ -176,6 +180,19 @@ class RoomPageState {
       status == RoomStatus.entering || status == RoomStatus.leaving;
 
   bool get isReady => status == RoomStatus.ready && isInRoom;
+
+  bool get isRoomOwner {
+    if (enterResponse?.identity == UserRoomIdentity.owner) return true;
+    final uid = currentUid;
+    return uid != null && uid > 0 && roomInfo?.roomOwnerUid == uid;
+  }
+
+  bool get showFollowRoomButton =>
+      isReady &&
+      (currentUid ?? 0) > 0 &&
+      !isRoomOwner &&
+      !isRoomFollowed &&
+      roomInfo?.isFollow != true;
 
   bool get isOnMic {
     final uid = currentUid;
@@ -220,6 +237,8 @@ class RoomPageState {
     RoomStatus? status,
     bool? isInRoom,
     bool? isMinimized,
+    bool? isRoomFollowed,
+    bool? followingRoom,
     String? roomTitle,
     Object? roomAvatar = _sentinel,
     String? roomNo,
@@ -249,6 +268,8 @@ class RoomPageState {
       status: status ?? this.status,
       isInRoom: isInRoom ?? this.isInRoom,
       isMinimized: isMinimized ?? this.isMinimized,
+      isRoomFollowed: isRoomFollowed ?? this.isRoomFollowed,
+      followingRoom: followingRoom ?? this.followingRoom,
       roomTitle: roomTitle ?? this.roomTitle,
       roomAvatar: identical(roomAvatar, _sentinel)
           ? this.roomAvatar

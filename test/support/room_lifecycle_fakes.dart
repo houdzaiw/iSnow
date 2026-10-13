@@ -10,6 +10,7 @@ import 'package:project/manager/room_agora_manager.dart';
 import 'package:project/manager/room_background_audio_manager.dart';
 import 'package:project/manager/room_manager.dart';
 import 'package:project/model/room_socket_message.dart';
+import 'package:project/model/user_profile.dart';
 
 class RoomLifecycleFixture {
   RoomLifecycleFixture({RoomBackgroundAudioManager? backgroundAudio}) {
@@ -53,6 +54,8 @@ class FakeRoomAuth extends ChangeNotifier implements AuthSession {
   @override
   Future<int?> uid() async => loggedIn ? 10 : null;
   @override
+  Future<UserData?> user() async => null;
+  @override
   Future<String?> token() async => loggedIn ? 'test-token' : null;
   @override
   Future<bool> isLoggedIn() async => loggedIn;
@@ -75,6 +78,12 @@ class FakeRoomHttp implements HttpDioManager {
   Completer<void>? enterGate;
   Completer<void>? exitGate;
   Completer<void>? infoGate;
+  Completer<void>? followGate;
+  bool? roomIsFollowed;
+  int? roomOwnerUid;
+  int infoCalls = 0;
+  final followRequests = <Map<String, dynamic>>[];
+  Map<String, dynamic> followResponse = const {'code': 200, 'msg': 'success'};
   String? canonicalRoomId;
 
   @override
@@ -84,6 +93,12 @@ class FakeRoomHttp implements HttpDioManager {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
+    if (path == HttpApi.roomFollow) {
+      followRequests.add(Map<String, dynamic>.from(data as Map));
+      final response = followResponse;
+      await followGate?.future;
+      return response;
+    }
     if (path == HttpApi.roomEnter) {
       actions.add('enter:${data['roomId']}');
       await enterGate?.future;
@@ -115,11 +130,15 @@ class FakeRoomHttp implements HttpDioManager {
     Options? options,
   }) async {
     if (path == HttpApi.roomInfo) {
-      await infoGate?.future;
-      return {
-        'code': 200,
-        'data': {'roomId': queryParameters!['roomId'], 'title': 'Test room'},
+      infoCalls++;
+      final roomInfo = {
+        'roomId': queryParameters!['roomId'],
+        'title': 'Test room',
+        if (roomIsFollowed != null) 'isFollow': roomIsFollowed,
+        if (roomOwnerUid != null) 'roomUid': roomOwnerUid,
       };
+      await infoGate?.future;
+      return {'code': 200, 'data': roomInfo};
     }
     if (path == HttpApi.roomMicListInfo) {
       return {

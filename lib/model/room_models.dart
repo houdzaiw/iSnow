@@ -47,6 +47,7 @@ class RoomInfo {
     this.roomDesc,
     this.roomOwnerUid,
     this.roomLock,
+    this.isFollow,
     this.audienceCount,
   });
 
@@ -57,6 +58,7 @@ class RoomInfo {
   final String? roomDesc;
   final int? roomOwnerUid;
   final bool? roomLock;
+  final bool? isFollow;
   final int? audienceCount;
   final Map<String, dynamic> raw;
 
@@ -72,6 +74,7 @@ class RoomInfo {
         data['roomUid'] ?? data['roomUID'] ?? data['ownerUid'],
       ),
       roomLock: _asBool(data['roomLock']),
+      isFollow: _asBool(data['isFollow'] ?? json['isFollow']),
       audienceCount: _asInt(
         data['audienceCount'] ??
             data['roomAudience'] ??

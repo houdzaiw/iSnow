@@ -59,6 +59,9 @@ class HttpApi {
   /// 退出房间
   static const roomExit = '/api/room/outRoom';
 
+  /// 关注房间
+  static const roomFollow = '/api/follow/room/saveFollow';
+
   /// 房间详情
   static const roomInfo = '/api/room/get/info';
 

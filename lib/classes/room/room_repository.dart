@@ -115,6 +115,10 @@ class RoomRepository {
     return _roomManager.refreshRoomData();
   }
 
+  Future<void> followRoom() {
+    return _roomManager.followRoom();
+  }
+
   Future<RoomMicOperateResp> upMic(int position) {
     return _roomManager.upMic(position);
   }

@@ -127,6 +127,30 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
     }
   }
 
+  Future<void> followRoom() async {
+    if (!mounted ||
+        _leaving ||
+        !state.showFollowRoomButton ||
+        state.followingRoom) {
+      return;
+    }
+    final roomId = state.currentRoomId;
+    final session = state.enterResponse;
+    try {
+      await _repository.followRoom();
+      if (mounted) _syncFromManager();
+    } catch (error) {
+      if (!mounted ||
+          _leaving ||
+          !state.isReady ||
+          state.currentRoomId != roomId ||
+          !identical(state.enterResponse, session)) {
+        return;
+      }
+      state = state.copyWith(errorMessage: error.toString());
+    }
+  }
+
   bool minimizeRoom() {
     if (!mounted || _leaving || !state.isReady) return false;
     _repository.minimizeRoom();
@@ -352,6 +376,8 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
       status: roomState.status,
       isInRoom: roomState.isInRoom,
       isMinimized: roomState.isMinimized,
+      isRoomFollowed: roomState.isFollowed || roomInfo?.isFollow == true,
+      followingRoom: roomState.isFollowingRoom,
       roomTitle: _roomTitle(roomInfo, enterResponse),
       roomAvatar: _roomAvatar(roomInfo, roomData),
       roomNo: _roomNo(roomInfo, enterResponse, effectiveRoomId),

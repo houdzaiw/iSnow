@@ -5,11 +5,13 @@ class _RoomHeader extends StatelessWidget {
     required this.state,
     required this.onMinimize,
     required this.onExit,
+    required this.onFollowRoom,
   });
 
   final RoomPageState state;
   final VoidCallback onMinimize;
   final VoidCallback onExit;
+  final VoidCallback onFollowRoom;
 
   @override
   Widget build(BuildContext context) {
@@ -43,11 +45,23 @@ class _RoomHeader extends StatelessWidget {
                           ),
                         ),
                       ),
-                      SizedBox(width: 6.w),
-                      _RoomAssetIcon(
-                        asset: AppAssets.lanhuRoomAddFriend,
-                        size: 22.r,
-                      ),
+                      if (state.showFollowRoomButton) ...[
+                        SizedBox(width: AppSpacing.inlineActionGap.w),
+                        Semantics(
+                          button: true,
+                          enabled: !state.followingRoom,
+                          label: context.l10n.t('profile.follow'),
+                          child: InkWell(
+                            key: const ValueKey('room-follow-owner'),
+                            onTap: state.followingRoom ? null : onFollowRoom,
+                            customBorder: const CircleBorder(),
+                            child: _RoomAssetIcon(
+                              asset: AppAssets.lanhuRoomAddFriend,
+                              size: AppSpacing.iconSizeCompact.r,
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                   SizedBox(height: 5.h),
