@@ -188,6 +188,15 @@ class RoomRepository {
     );
   }
 
+  Future<void> clearMessages(String roomId) async {
+    final response = await _httpManager.post(
+      HttpApi.roomChatClean,
+      data: {'roomId': roomId},
+    );
+    final server = NadyServerResponse<void>.fromJson(_asMap(response), null);
+    if (!server.isSuccess) throw server.toException();
+  }
+
   Future<int?> sendRoomMessage({
     required String event,
     required String roomId,

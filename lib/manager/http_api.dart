@@ -95,6 +95,9 @@ class HttpApi {
   /// 发送房间公屏消息
   static const roomMsgPush = '/api/room/msg/push';
 
+  /// 房主或管理员清理房间公屏
+  static const roomChatClean = '/api/room/clean';
+
   /// 房间长连接频道 token
   static const roomSocketToken = '/api/room/genGlobalToken';
 

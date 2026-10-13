@@ -63,6 +63,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
   bool _entering = false;
   bool _leaving = false;
   String? _sessionRoomId;
+  int _chatClearRevision = 0;
   Map<String, RoomGiftPublicMessage> _giftMessages = const {};
 
   /// Bind to the server's canonical room ID after entering, not the route alias.
@@ -194,6 +195,52 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
 
   void setChatFilter(RoomChatFilter filter) {
     state = state.copyWith(chatFilter: filter);
+  }
+
+  Future<void> clearMessages() async {
+    if (!mounted ||
+        !state.isReady ||
+        !state.isOwnerOrManager ||
+        _leaving ||
+        state.clearingMessages) {
+      return;
+    }
+    final roomId = _effectiveRoomId;
+    final generation = _repository.roomGeneration;
+    final revision = _chatClearRevision;
+    bool isCurrentSession() =>
+        mounted &&
+        !_leaving &&
+        state.isReady &&
+        state.currentRoomId == roomId &&
+        _repository.roomGeneration == generation;
+
+    state = state.copyWith(clearingMessages: true, errorMessage: null);
+    try {
+      await _repository.clearMessages(roomId);
+      // The broadcast can arrive before HTTP and already start a new chat.
+      if (isCurrentSession() && revision == _chatClearRevision) {
+        _clearChatMessages();
+      }
+    } catch (error) {
+      if (isCurrentSession()) {
+        state = state.copyWith(errorMessage: error.toString());
+      }
+    } finally {
+      if (isCurrentSession()) {
+        state = state.copyWith(clearingMessages: false);
+      }
+    }
+  }
+
+  void _clearChatMessages({bool showNotice = false}) {
+    _chatClearRevision++;
+    _giftManager?.clearPublicMessages();
+    state = state.copyWith(
+      messages: showNotice
+          ? [RoomChatEntry.system('Screen has been cleared.')]
+          : const [],
+    );
   }
 
   Future<void> sendMessage(String text) async {
@@ -452,10 +499,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
     if (RoomGiftEventParser.events.contains(message.event)) return;
 
     if (message.event == 'RoomScreenSystemClear') {
-      _giftManager?.reset(clearHistory: true);
-      state = state.copyWith(
-        messages: [RoomChatEntry.system('Screen has been cleared.')],
-      );
+      _clearChatMessages(showNotice: true);
       return;
     }
 

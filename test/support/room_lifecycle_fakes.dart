@@ -80,6 +80,10 @@ class FakeRoomHttp implements HttpDioManager {
   Completer<void>? exitGate;
   Completer<void>? infoGate;
   Completer<void>? followGate;
+  Completer<void>? clearMessagesGate;
+  final clearMessagesRequests = <Map<String, dynamic>>[];
+  Map<String, dynamic> clearMessagesResponse = const {'code': 200};
+  String? roomIdentity;
   bool? roomIsFollowed;
   int? roomOwnerUid;
   int infoCalls = 0;
@@ -98,6 +102,12 @@ class FakeRoomHttp implements HttpDioManager {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
+    if (path == HttpApi.roomChatClean) {
+      clearMessagesRequests.add(Map<String, dynamic>.from(data as Map));
+      final response = clearMessagesResponse;
+      await clearMessagesGate?.future;
+      return response;
+    }
     if (path == HttpApi.roomFollow) {
       followRequests.add(Map<String, dynamic>.from(data as Map));
       final response = followResponse;
@@ -112,6 +122,7 @@ class FakeRoomHttp implements HttpDioManager {
         'data': {
           'roomId': canonicalRoomId ?? data['roomId'],
           'agoraToken': 'agora-token',
+          if (roomIdentity != null) 'identity': roomIdentity,
         },
       };
     }

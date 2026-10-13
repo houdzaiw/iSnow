@@ -24,6 +24,7 @@ import 'online/room_audience_sheet.dart';
 import 'viewmodel/room_state.dart';
 import 'viewmodel/room_more_tools_view_model.dart';
 import 'viewmodel/room_view_model.dart';
+import 'views/room_chat_clear_dialog.dart';
 import 'views/room_exit_dialog.dart';
 
 part 'views/room_bottom_bar.dart';
@@ -291,6 +292,28 @@ class RoomPage extends HookConsumerWidget {
                                   Expanded(
                                     child: _RoomChatPanel(
                                       state: state,
+                                      onClearMessages: () async {
+                                        final current = ref.read(provider);
+                                        if (!current.isReady ||
+                                            !current.isOwnerOrManager ||
+                                            current.clearingMessages) {
+                                          return;
+                                        }
+                                        final confirmed =
+                                            await showRoomChatClearDialog(
+                                              context,
+                                            );
+                                        if (confirmed != true ||
+                                            !context.mounted ||
+                                            !viewModel.mounted ||
+                                            !identical(
+                                              ref.read(provider).enterResponse,
+                                              current.enterResponse,
+                                            )) {
+                                          return;
+                                        }
+                                        await viewModel.clearMessages();
+                                      },
                                       onFilterChanged: (filter) => ref
                                           .read(provider.notifier)
                                           .setChatFilter(filter),

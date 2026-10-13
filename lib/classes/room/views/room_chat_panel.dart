@@ -1,10 +1,15 @@
 part of '../room_page.dart';
 
 class _RoomChatPanel extends HookWidget {
-  const _RoomChatPanel({required this.state, required this.onFilterChanged});
+  const _RoomChatPanel({
+    required this.state,
+    required this.onFilterChanged,
+    required this.onClearMessages,
+  });
 
   final RoomPageState state;
   final ValueChanged<RoomChatFilter> onFilterChanged;
+  final VoidCallback onClearMessages;
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +54,13 @@ class _RoomChatPanel extends HookWidget {
             selected: state.chatFilter,
             tabController: tabController,
             onSelected: updateFilter,
+            onClearMessages:
+                state.isReady &&
+                    state.isOwnerOrManager &&
+                    !state.clearingMessages
+                ? onClearMessages
+                : null,
+            showClearButton: state.isOwnerOrManager,
           ),
           Expanded(
             child: ExtendedTabBarView(
@@ -74,11 +86,15 @@ class _RoomChatTabs extends StatelessWidget {
     required this.selected,
     required this.tabController,
     required this.onSelected,
+    required this.onClearMessages,
+    required this.showClearButton,
   });
 
   final RoomChatFilter selected;
   final TabController tabController;
   final ValueChanged<RoomChatFilter> onSelected;
+  final VoidCallback? onClearMessages;
+  final bool showClearButton;
 
   @override
   Widget build(BuildContext context) {
@@ -116,15 +132,29 @@ class _RoomChatTabs extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          Padding(
-            padding: EdgeInsets.only(
-              right: AppSpacing.roomChatGiftRightInset.w,
+          if (showClearButton)
+            Padding(
+              padding: EdgeInsets.only(
+                right: AppSpacing.roomChatGiftRightInset.w,
+              ),
+              child: Semantics(
+                button: true,
+                enabled: onClearMessages != null,
+                label: context.l10n.t('room.chat.clear'),
+                child: Tooltip(
+                  message: context.l10n.t('room.chat.clear'),
+                  child: GestureDetector(
+                    key: const ValueKey('room-chat-clear'),
+                    behavior: HitTestBehavior.opaque,
+                    onTap: onClearMessages,
+                    child: _RoomAssetIcon(
+                      asset: AppAssets.lanhuRoomChatPanelGift,
+                      size: AppSpacing.roomChatGiftIconSize.r,
+                    ),
+                  ),
+                ),
+              ),
             ),
-            child: _RoomAssetIcon(
-              asset: AppAssets.lanhuRoomChatPanelGift,
-              size: AppSpacing.roomChatGiftIconSize.r,
-            ),
-          ),
         ],
       ),
     );

@@ -80,11 +80,14 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
   set currentUid(int? uid) => _slotQueue.currentUid = uid;
 
   void receive(RoomSocketMessage message) {
-    if (!mounted ||
-        !_sessionActive ||
-        !RoomGiftEventParser.events.contains(message.event)) {
+    if (!mounted || !_sessionActive) return;
+    if (message.event == 'RoomScreenSystemClear') {
+      if (message.channel == 'room:$roomId' || message.channel == 'room') {
+        clearPublicMessages();
+      }
       return;
     }
+    if (!RoomGiftEventParser.events.contains(message.event)) return;
     try {
       final now = _now();
       final event = _parser.parse(message, roomId, now);
@@ -387,6 +390,12 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
       _emit(banners: state.banners.where((item) => item.key != key).toList());
   void completeLucky(String key) =>
       _emit(lucky: state.lucky.where((item) => item.key != key).toList());
+
+  /// Clear chat history without ending paid combos or stopping their effects.
+  void clearPublicMessages() {
+    if (!mounted || state.publicMessages.isEmpty) return;
+    _emit(publicMessages: const []);
+  }
 
   void setVisible(bool visible) {
     if (visible == state.isVisible) return;
