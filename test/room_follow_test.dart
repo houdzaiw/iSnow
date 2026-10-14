@@ -167,8 +167,7 @@ void main() {
       expect(state.isRoomFollowed, isFalse);
       expect(state.followingRoom, isFalse);
       expect(state.showFollowRoomButton, isTrue);
-      expect(state.errorMessage, contains('Server error'));
-      expect(state.errorMessage, contains('follow-error'));
+      expect(state.errorMessage, 'Server error');
 
       fixture.http.followResponse = const {'code': 200};
       await model.followRoom();

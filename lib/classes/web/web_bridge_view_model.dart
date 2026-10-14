@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../configs/app_device.dart';
+import '../../manager/api_error_message.dart';
 import 'web_bridge_repository.dart';
 
 final webBridgeViewModelProvider = Provider<WebBridgeViewModel>((ref) {
@@ -24,11 +25,14 @@ class WebBridgeViewModel {
       return WebBridgeApiResult.success(response);
     } on DioException catch (error) {
       return WebBridgeApiResult.failure(
-        message: error.message ?? 'Network request failed',
+        message: userFacingErrorMessage(
+          error,
+          fallback: error.message ?? 'Network request failed',
+        ),
         response: error.response?.data,
       );
     } catch (error) {
-      return WebBridgeApiResult.failure(message: error.toString());
+      return WebBridgeApiResult.failure(message: userFacingErrorMessage(error));
     }
   }
 

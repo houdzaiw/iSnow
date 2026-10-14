@@ -39,7 +39,11 @@ class LoginResponse {
   }
 
   factory LoginResponse.failure(String? message) {
-    return LoginResponse(success: false, message: message);
+    final text = message?.trim();
+    return LoginResponse(
+      success: false,
+      message: text?.isNotEmpty == true ? text : null,
+    );
   }
 
   Map<String, dynamic> toJson() {

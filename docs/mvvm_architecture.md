@@ -213,6 +213,15 @@ View 只根据 state 渲染，不直接推导复杂业务状态。
 - ViewModel 负责把异常转换成页面 state。
 - View 负责展示错误，不负责判断错误来源。
 
+### 服务端错误文案
+
+- 网络业务错误的 Toast/SnackBar 优先显示非空 `msg`，其次是非空 `message`；都没有时沿用当前操作的本地兜底文案。
+- Repository 使用 `NadyServerResponse` 解析业务错误，失败响应不反序列化业务 `data`，避免异常响应结构掩盖服务端文案。
+- ViewModel 的字符串错误状态使用 `userFacingErrorMessage`（`lib/manager/api_error_message.dart`），不要直接把异常 `toString()` 塞进 UI。
+- 需要保留本地兜底文案的场景传入 `fallback`；包含文案 key 的状态应另外持有服务端原文，不把服务端原文当作翻译 key。
+- `NadyApiException.code`、`traceId` 和诊断 `toString()` 保留给日志；UI 不展示异常类型、错误码或 traceId。
+- 网络 Manager 不直接弹 Toast，后台预加载/缓存等原有静默失败流程继续保持静默。
+
 ## 新功能开发流程
 
 1. 先确定 feature 属于哪个业务领域。

@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../manager/api_error_message.dart';
 import '../../../manager/room_manager.dart';
 import '../../../manager/room_music_library.dart';
 import '../../../model/room_music_state.dart';
@@ -210,7 +211,7 @@ class RoomMusicRepository extends ChangeNotifier {
       await next(roomId, automatic: true);
     } catch (error) {
       if (_disposed || !isCurrentRoom(roomId)) return;
-      _automaticError = error.toString();
+      _automaticError = userFacingErrorMessage(error);
       notifyListeners();
     }
   }

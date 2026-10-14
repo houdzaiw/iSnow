@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../localization/app_localizations.dart';
+import '../../manager/api_error_message.dart';
 import '../../model/country_info.dart';
 import '../../model/user_profile.dart';
 import '../../theme/app_theme.dart';
@@ -98,9 +99,14 @@ class _RegisterPageState extends State<RegisterPage> {
       setState(() {
         _selectedCountry = _selectedCountry.copyWith(areaCode: dialCode);
       });
-    } catch (_) {
+    } catch (error) {
       if (!mounted || !showError) return;
-      _showMessage(context.l10n.t('auth.countryCodeLoadFailed'));
+      _showMessage(
+        userFacingErrorMessage(
+          error,
+          fallback: context.l10n.t('auth.countryCodeLoadFailed'),
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() => _isQueryingCountryCode = false);
@@ -137,7 +143,7 @@ class _RegisterPageState extends State<RegisterPage> {
       _startCountdown();
     } catch (e) {
       if (!mounted) return;
-      _showMessage(e.toString());
+      _showMessage(userFacingErrorMessage(e));
     } finally {
       if (mounted) {
         setState(() => _isSendingCode = false);
@@ -218,7 +224,7 @@ class _RegisterPageState extends State<RegisterPage> {
       context.go('/party');
     } catch (e) {
       if (!mounted) return;
-      _showMessage(e.toString());
+      _showMessage(userFacingErrorMessage(e));
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);

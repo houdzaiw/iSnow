@@ -5,6 +5,7 @@ import 'package:tencent_cloud_chat_sdk/enum/V2TimConversationListener.dart';
 import 'package:tencent_cloud_chat_sdk/models/v2_tim_conversation.dart';
 
 import '../../manager/auth_session.dart';
+import '../../manager/api_error_message.dart';
 import '../../manager/http_dio_manager.dart';
 import 'im_repository.dart';
 
@@ -69,7 +70,10 @@ class MessageViewModel extends StateNotifier<MessageListState> {
       );
       await _ensureListener();
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: '$e');
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: userFacingErrorMessage(e),
+      );
     }
   }
 
@@ -83,7 +87,7 @@ class MessageViewModel extends StateNotifier<MessageListState> {
         clearError: true,
       );
     } catch (e) {
-      state = state.copyWith(errorMessage: '$e');
+      state = state.copyWith(errorMessage: userFacingErrorMessage(e));
     }
   }
 

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../manager/api_error_message.dart';
 import '../../../model/room_music_state.dart';
 import '../../../model/server_response.dart';
 import 'room_music_repository.dart';
@@ -68,7 +69,7 @@ class RoomMusicViewModel extends StateNotifier<RoomMusicSheetState> {
     try {
       await _repository.load();
     } catch (error) {
-      _error = error.toString();
+      _error = userFacingErrorMessage(error);
     }
     _loading = false;
     _sync();
@@ -89,7 +90,7 @@ class RoomMusicViewModel extends StateNotifier<RoomMusicSheetState> {
       if (error is NadyApiException && error.code == 4062 && !force) {
         _takeoverAction = action;
       }
-      _error = error is NadyApiException ? error.message : error.toString();
+      _error = userFacingErrorMessage(error);
     } finally {
       _busy = false;
       _sync();

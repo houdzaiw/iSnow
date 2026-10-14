@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../localization/app_localizations.dart';
+import '../../manager/api_error_message.dart';
 import '../../model/user_profile.dart';
 import 'create_room_repository.dart';
 import 'create_room_sheet.dart';
@@ -20,9 +21,15 @@ Future<void> enterOwnRoom(BuildContext context, WidgetRef ref) async {
   UserData? latestUser;
   try {
     latestUser = await repository.fetchRemoteCurrentUser();
-  } catch (_) {
+  } catch (error) {
     if (context.mounted) {
-      _showMessage(context, context.l10n.t('createRoom.fetchOwnRoomFailed'));
+      _showMessage(
+        context,
+        userFacingErrorMessage(
+          error,
+          fallback: context.l10n.t('createRoom.fetchOwnRoomFailed'),
+        ),
+      );
     }
     return;
   }
@@ -50,9 +57,15 @@ Future<void> _enterAndOpenRoom(
 ) async {
   try {
     await repository.enterRoom(roomId);
-  } catch (_) {
+  } catch (error) {
     if (context.mounted) {
-      _showMessage(context, context.l10n.t('createRoom.enterFailed'));
+      _showMessage(
+        context,
+        userFacingErrorMessage(
+          error,
+          fallback: context.l10n.t('createRoom.enterFailed'),
+        ),
+      );
     }
     return;
   }

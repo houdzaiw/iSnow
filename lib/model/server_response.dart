@@ -1,3 +1,12 @@
+/// Server text for user-facing notices, with `msg` taking precedence.
+String? nadyResponseMessage(Map<dynamic, dynamic> json) {
+  for (final key in const ['msg', 'message']) {
+    final value = json[key];
+    if (value is String && value.trim().isNotEmpty) return value.trim();
+  }
+  return null;
+}
+
 class NadyServerResponse<T> {
   const NadyServerResponse({
     required this.code,
@@ -21,13 +30,18 @@ class NadyServerResponse<T> {
     Map<String, dynamic> json,
     T Function(Object? json)? fromJsonT,
   ) {
+    final rawCode = json['code'];
+    final code = rawCode is num
+        ? rawCode.toInt()
+        : int.tryParse(rawCode?.toString() ?? '') ?? 0;
+    final data = json['data'];
     return NadyServerResponse<T>(
-      code: (json['code'] as num?)?.toInt() ?? 0,
-      message: json['message']?.toString() ?? '',
+      code: code,
+      message: nadyResponseMessage(json) ?? '',
       timestamp: json['timestamp']?.toString() ?? '',
       traceId: json['traceId']?.toString(),
-      data: json.containsKey('data') && fromJsonT != null
-          ? fromJsonT(json['data'])
+      data: code == successCode && json.containsKey('data') && fromJsonT != null
+          ? fromJsonT(data)
           : null,
     );
   }
@@ -37,16 +51,25 @@ class NadyServerResponse<T> {
       message: message.isEmpty ? 'Request failed' : message,
       code: code,
       traceId: traceId,
+      hasDisplayMessage: message.isNotEmpty,
     );
   }
 }
 
 class NadyApiException implements Exception {
-  const NadyApiException({required this.message, this.code, this.traceId});
+  const NadyApiException({
+    required this.message,
+    this.code,
+    this.traceId,
+    this.hasDisplayMessage = true,
+  });
 
   final String message;
   final int? code;
   final String? traceId;
+
+  /// False when `message` is only the diagnostic default for an empty response.
+  final bool hasDisplayMessage;
 
   @override
   String toString() {

@@ -1,5 +1,6 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../manager/api_error_message.dart';
 import 'create_party_models.dart';
 import 'create_party_repository.dart';
 import 'create_party_state.dart';
@@ -34,7 +35,7 @@ class CreatePartyViewModel extends AutoDisposeNotifier<CreatePartyState> {
     } catch (error) {
       canCreateParty = false;
       loadError = error;
-      state = state.copyWith(message: error.toString());
+      state = state.copyWith(message: userFacingErrorMessage(error));
     }
 
     try {
@@ -180,7 +181,7 @@ class CreatePartyViewModel extends AutoDisposeNotifier<CreatePartyState> {
       state = state.copyWith(
         isSubmitting: false,
         isUploadingCover: false,
-        message: error.toString(),
+        message: userFacingErrorMessage(error),
       );
       return false;
     }

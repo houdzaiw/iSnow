@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 
 import '../model/server_response.dart';
 import '../model/room_music_state.dart';
+import 'api_error_message.dart';
 import 'auth_session.dart';
 import 'http_api.dart';
 import 'http_dio_manager.dart';
@@ -163,7 +164,10 @@ class RoomAgoraManager extends ChangeNotifier {
       );
     } catch (error) {
       _setState(
-        _state.copyWith(initialized: false, errorMessage: error.toString()),
+        _state.copyWith(
+          initialized: false,
+          errorMessage: userFacingErrorMessage(error),
+        ),
       );
     }
   }
@@ -213,7 +217,7 @@ class RoomAgoraManager extends ChangeNotifier {
         _state.copyWith(
           joining: false,
           joined: false,
-          errorMessage: error.toString(),
+          errorMessage: userFacingErrorMessage(error),
         ),
       );
     }
@@ -288,7 +292,10 @@ class RoomAgoraManager extends ChangeNotifier {
     } catch (error) {
       if (!_isCurrentChannel(engine, roomId, generation)) return;
       _setState(
-        _state.copyWith(publishing: false, errorMessage: error.toString()),
+        _state.copyWith(
+          publishing: false,
+          errorMessage: userFacingErrorMessage(error),
+        ),
       );
       debugPrint('[RoomAgora] publish failed roomId=$roomId: $error');
       rethrow;
@@ -321,7 +328,7 @@ class RoomAgoraManager extends ChangeNotifier {
       );
     } catch (error) {
       if (!_isCurrentChannel(engine, roomId, generation)) return;
-      _setState(_state.copyWith(errorMessage: error.toString()));
+      _setState(_state.copyWith(errorMessage: userFacingErrorMessage(error)));
       rethrow;
     }
   }
@@ -342,7 +349,7 @@ class RoomAgoraManager extends ChangeNotifier {
       debugPrint('[RoomAgora] microphone roomId=$roomId muted=$mute');
     } catch (error) {
       if (!_isCurrentChannel(engine, roomId, generation)) return;
-      _setState(_state.copyWith(errorMessage: error.toString()));
+      _setState(_state.copyWith(errorMessage: userFacingErrorMessage(error)));
       debugPrint('[RoomAgora] microphone failed roomId=$roomId: $error');
       rethrow;
     }
@@ -369,7 +376,7 @@ class RoomAgoraManager extends ChangeNotifier {
       _setState(_state.copyWith(errorMessage: null));
     } catch (error) {
       if (_expectedRoomId != roomId || !identical(_engine, engine)) return;
-      _setState(_state.copyWith(errorMessage: error.toString()));
+      _setState(_state.copyWith(errorMessage: userFacingErrorMessage(error)));
     }
   }
 

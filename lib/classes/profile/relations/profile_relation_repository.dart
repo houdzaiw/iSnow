@@ -1,6 +1,7 @@
 import '../../../manager/auth_session.dart';
 import '../../../manager/http_api.dart';
 import '../../../manager/http_dio_manager.dart';
+import '../../../model/server_response.dart';
 import 'profile_relation_models.dart';
 import 'profile_relation_type.dart';
 
@@ -60,7 +61,7 @@ class ProfileRelationRepository {
     final body = _asMap(response);
     final code = _int(body['code']);
     if (code != null && code != 200) {
-      throw Exception(body['message']?.toString() ?? 'Request failed');
+      throw NadyServerResponse<void>.fromJson(body, null).toException();
     }
     return body['data'];
   }

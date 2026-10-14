@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:tencent_cloud_chat_sdk/enum/V2TimAdvancedMsgListener.dart';
 import 'package:tencent_cloud_chat_sdk/models/v2_tim_message.dart';
 
+import '../../manager/api_error_message.dart';
 import 'im_repository.dart';
 import 'message_view_model.dart';
 
@@ -65,7 +66,10 @@ class ChatViewModel extends StateNotifier<ChatState> {
       );
       await _ensureListener();
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: '$e');
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: userFacingErrorMessage(e),
+      );
     }
   }
 
@@ -82,7 +86,10 @@ class ChatViewModel extends StateNotifier<ChatState> {
       _upsertMessage(message);
       state = state.copyWith(isSending: false, clearError: true);
     } catch (e) {
-      state = state.copyWith(isSending: false, errorMessage: '$e');
+      state = state.copyWith(
+        isSending: false,
+        errorMessage: userFacingErrorMessage(e),
+      );
     }
   }
 

@@ -10,6 +10,7 @@ import '../model/room_socket_message.dart';
 import '../model/room_user_info.dart';
 import '../model/room_music_state.dart';
 import '../model/server_response.dart';
+import 'api_error_message.dart';
 import 'app_socket_manager.dart';
 import 'auth_session.dart';
 import 'http_api.dart';
@@ -335,7 +336,7 @@ class RoomManager extends ChangeNotifier {
           status: RoomStatus.error,
           isInRoom: false,
           isMinimized: false,
-          errorMessage: error.toString(),
+          errorMessage: userFacingErrorMessage(error),
         ),
       );
       // Run after the enter task settles; leaveRoom also drains pending joins.
@@ -492,7 +493,7 @@ class RoomManager extends ChangeNotifier {
       );
     } catch (error) {
       if (!_isCurrentSession(roomId, generation)) return;
-      _setState(_state.copyWith(errorMessage: error.toString()));
+      _setState(_state.copyWith(errorMessage: userFacingErrorMessage(error)));
     }
   }
 
@@ -505,7 +506,7 @@ class RoomManager extends ChangeNotifier {
       _setState(_state.copyWith(micList: micList, errorMessage: null));
     } catch (error) {
       if (!_isCurrentSession(roomId, generation)) return;
-      _setState(_state.copyWith(errorMessage: error.toString()));
+      _setState(_state.copyWith(errorMessage: userFacingErrorMessage(error)));
     }
   }
 
@@ -535,7 +536,7 @@ class RoomManager extends ChangeNotifier {
           _setState(
             _state.copyWith(
               loadingAudience: false,
-              audienceError: error.toString(),
+              audienceError: userFacingErrorMessage(error),
             ),
           );
         }
@@ -588,7 +589,7 @@ class RoomManager extends ChangeNotifier {
           _setState(
             _state.copyWith(
               isFollowingRoom: false,
-              errorMessage: error.toString(),
+              errorMessage: userFacingErrorMessage(error),
             ),
           );
         }

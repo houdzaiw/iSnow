@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 
 import '../model/room_socket_message.dart';
 import '../model/server_response.dart';
+import 'api_error_message.dart';
 import 'http_api.dart';
 import 'http_dio_manager.dart';
 
@@ -165,7 +166,7 @@ class AppSocketManager extends ChangeNotifier {
       _setState(
         _state.copyWith(
           status: AppSocketStatus.error,
-          errorMessage: error.toString(),
+          errorMessage: userFacingErrorMessage(error),
         ),
       );
       rethrow;
@@ -193,7 +194,7 @@ class AppSocketManager extends ChangeNotifier {
         _setState(
           _state.copyWith(
             status: AppSocketStatus.error,
-            errorMessage: error.toString(),
+            errorMessage: userFacingErrorMessage(error),
           ),
         );
       }
@@ -225,7 +226,7 @@ class AppSocketManager extends ChangeNotifier {
         _setState(
           _state.copyWith(
             status: AppSocketStatus.error,
-            errorMessage: error.toString(),
+            errorMessage: userFacingErrorMessage(error),
           ),
         );
       }
@@ -371,7 +372,7 @@ class AppSocketManager extends ChangeNotifier {
           _setState(
             _state.copyWith(
               status: AppSocketStatus.error,
-              errorMessage: event.error.toString(),
+              errorMessage: userFacingErrorMessage(event.error),
             ),
           );
         }),

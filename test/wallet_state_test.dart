@@ -48,4 +48,27 @@ void main() {
 
     expect(state.copyWith(selectedProductId: null).selectedProduct, isNull);
   });
+
+  test(
+    'server notices survive unrelated updates but not a new keyed notice',
+    () {
+      const state = WalletState(noticeMessage: 'Server rejected the order');
+      expect(
+        state.copyWith(selectedProductId: 'coins_100').noticeMessage,
+        state.noticeMessage,
+      );
+      expect(
+        state.copyWith(noticeKey: 'wallet.paymentSuccess').noticeMessage,
+        isNull,
+      );
+      expect(state.copyWith(noticeKey: null).noticeMessage, isNull);
+      expect(state.copyWith(noticeMessage: null).noticeMessage, isNull);
+      expect(
+        state
+            .copyWith(noticeKey: null, noticeMessage: 'Try again')
+            .noticeMessage,
+        'Try again',
+      );
+    },
+  );
 }

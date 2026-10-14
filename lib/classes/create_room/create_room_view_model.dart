@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../manager/api_error_message.dart';
 import 'create_room_models.dart';
 import 'create_room_repository.dart';
 import 'create_room_state.dart';
@@ -63,7 +64,7 @@ class CreateRoomViewModel extends AutoDisposeNotifier<CreateRoomState> {
     } catch (error) {
       state = state.copyWith(
         isUploadingAvatar: false,
-        message: error.toString(),
+        message: userFacingErrorMessage(error),
       );
     }
   }
@@ -89,10 +90,11 @@ class CreateRoomViewModel extends AutoDisposeNotifier<CreateRoomState> {
         ),
       );
     } catch (error) {
+      final message = serverErrorMessage(error);
       state = state.copyWith(
         isSubmitting: false,
-        messageKey: 'createRoom.createFailed',
-        message: null,
+        messageKey: message == null ? 'createRoom.createFailed' : null,
+        message: message,
       );
       return null;
     }
@@ -106,10 +108,11 @@ class CreateRoomViewModel extends AutoDisposeNotifier<CreateRoomState> {
     try {
       await _repository.enterRoom(roomId);
     } catch (error) {
+      final message = serverErrorMessage(error);
       state = state.copyWith(
         isSubmitting: false,
-        messageKey: 'createRoom.enterFailed',
-        message: null,
+        messageKey: message == null ? 'createRoom.enterFailed' : null,
+        message: message,
       );
       return null;
     }

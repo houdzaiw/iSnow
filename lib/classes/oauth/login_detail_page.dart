@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../localization/app_localizations.dart';
+import '../../manager/api_error_message.dart';
 import '../../model/country_info.dart';
 import '../../model/user_profile.dart';
 import '../../theme/app_theme.dart';
@@ -40,7 +41,7 @@ class LoginDetailPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final phoneController = useTextEditingController();
     final passwordController = useTextEditingController();
-    final loginProvider = useMemoized(() => LoginProvider());
+    final loginProvider = ref.read(loginRepositoryProvider);
     final isLoading = useState(false);
     final isCheckingUser = useState(false);
     final agreementAccepted = useState(true);
@@ -50,9 +51,12 @@ class LoginDetailPage extends HookConsumerWidget {
     );
     final hasUserResult = useState<HasUserResponse?>(null);
     final phoneStatusText = useState<String?>(null);
+    final userCheckError = useState<String?>(null);
     final debounceRef = useRef<Timer?>(null);
 
-    Future<HasUserResponse?> checkUserStatus() async {
+    Future<HasUserResponse?> checkUserStatus({
+      bool showErrorToast = true,
+    }) async {
       final phone = phoneController.text.trim();
       final checkingText = context.l10n.t('auth.checkingUser');
       final existsText = context.l10n.t('auth.userExists');
@@ -61,25 +65,36 @@ class LoginDetailPage extends HookConsumerWidget {
       if (phone.length < 6) {
         hasUserResult.value = null;
         phoneStatusText.value = null;
+        userCheckError.value = null;
         return null;
       }
 
       isCheckingUser.value = true;
+      userCheckError.value = null;
       phoneStatusText.value = checkingText;
       try {
         final result = await loginProvider.hasUser(
           phone: phone,
           areaCode: selectedCountry.value.areaCode,
         );
+        if (!context.mounted) return null;
         hasUserResult.value = result;
         phoneStatusText.value = result.hasUser ? existsText : notFoundText;
         return result;
       } catch (e) {
+        if (!context.mounted) return null;
+        final message = userFacingErrorMessage(e, fallback: failedText);
         hasUserResult.value = null;
-        phoneStatusText.value = failedText;
+        phoneStatusText.value = message;
+        userCheckError.value = message;
+        if (showErrorToast && serverErrorMessage(e) != null) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(SnackBar(content: Text(message)));
+        }
         return null;
       } finally {
-        isCheckingUser.value = false;
+        if (context.mounted) isCheckingUser.value = false;
       }
     }
 
@@ -149,11 +164,16 @@ class LoginDetailPage extends HookConsumerWidget {
         return;
       }
 
-      final currentHasUser = hasUserResult.value ?? await checkUserStatus();
+      final currentHasUser =
+          hasUserResult.value ?? await checkUserStatus(showErrorToast: false);
       if (currentHasUser == null) {
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.t('auth.userCheckFailed'))),
+          SnackBar(
+            content: Text(
+              userCheckError.value ?? context.l10n.t('auth.userCheckFailed'),
+            ),
+          ),
         );
         return;
       }
@@ -213,7 +233,12 @@ class LoginDetailPage extends HookConsumerWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              context.l10n.t('auth.loginException', {'error': '$e'}),
+              userFacingErrorMessage(
+                e,
+                fallback: context.l10n.t('auth.loginException', {
+                  'error': '$e',
+                }),
+              ),
             ),
           ),
         );

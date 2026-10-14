@@ -112,7 +112,7 @@ void main() {
     await model.clearMessages();
     expect(state.messages, same(messages));
     expect(state.clearingMessages, isFalse);
-    expect(state.errorMessage, contains('clear-error'));
+    expect(state.errorMessage, 'Server error');
     fixture.http.clearMessagesResponse = const {'code': 200, 'data': null};
     await model.clearMessages();
     expect(state.messages, isEmpty);

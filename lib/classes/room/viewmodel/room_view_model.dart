@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../manager/app_socket_manager.dart';
+import '../../../manager/api_error_message.dart';
 import '../../../manager/room_manager.dart';
 import '../../../model/room_models.dart';
 import '../../../model/room_socket_message.dart';
@@ -110,7 +111,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
       state = state.copyWith(
         status: RoomStatus.error,
         isInRoom: false,
-        errorMessage: error.toString(),
+        errorMessage: userFacingErrorMessage(error),
       );
     } finally {
       _entering = false;
@@ -124,7 +125,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
       _syncFromManager();
     } catch (error) {
       if (!mounted || !state.isReady) return;
-      state = state.copyWith(errorMessage: error.toString());
+      state = state.copyWith(errorMessage: userFacingErrorMessage(error));
     }
   }
 
@@ -148,7 +149,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
           !identical(state.enterResponse, session)) {
         return;
       }
-      state = state.copyWith(errorMessage: error.toString());
+      state = state.copyWith(errorMessage: userFacingErrorMessage(error));
     }
   }
 
@@ -185,7 +186,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
         return true;
       }
       if (mounted) {
-        state = state.copyWith(errorMessage: error.toString());
+        state = state.copyWith(errorMessage: userFacingErrorMessage(error));
       }
       return false;
     } finally {
@@ -224,7 +225,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
       }
     } catch (error) {
       if (isCurrentSession()) {
-        state = state.copyWith(errorMessage: error.toString());
+        state = state.copyWith(errorMessage: userFacingErrorMessage(error));
       }
     } finally {
       if (isCurrentSession()) {
@@ -274,7 +275,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
       if (!mounted || !state.isReady) return;
       state = state.copyWith(
         sendingMessage: false,
-        errorMessage: error.toString(),
+        errorMessage: userFacingErrorMessage(error),
       );
     }
   }
@@ -344,7 +345,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
           state.currentRoomId != roomId) {
         return;
       }
-      state = state.copyWith(errorMessage: error.toString());
+      state = state.copyWith(errorMessage: userFacingErrorMessage(error));
     } finally {
       if (mounted) state = state.copyWith(togglingMicrophone: false);
     }
@@ -357,7 +358,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
       _syncFromManager();
     } catch (error) {
       if (!mounted) return;
-      state = state.copyWith(errorMessage: error.toString());
+      state = state.copyWith(errorMessage: userFacingErrorMessage(error));
     }
   }
 
@@ -377,7 +378,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
       _syncFromManager();
     } catch (error) {
       if (!mounted) return;
-      state = state.copyWith(errorMessage: error.toString());
+      state = state.copyWith(errorMessage: userFacingErrorMessage(error));
     } finally {
       if (mounted) {
         state = state.copyWith(pendingSeatPosition: null);

@@ -20,12 +20,17 @@ class WalletPage extends ConsumerWidget {
     final notifier = ref.read(walletViewModelProvider.notifier);
 
     ref.listen<WalletState>(walletViewModelProvider, (previous, next) {
-      if (previous?.noticeKey == next.noticeKey || next.noticeKey == null) {
+      if (previous?.noticeKey == next.noticeKey &&
+          previous?.noticeMessage == next.noticeMessage) {
         return;
       }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(context.l10n.t(next.noticeKey!))));
+      final message =
+          next.noticeMessage ??
+          (next.noticeKey == null ? null : context.l10n.t(next.noticeKey!));
+      if (message == null || message.trim().isEmpty) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(message)));
     });
 
     return AnnotatedRegion<SystemUiOverlayStyle>(

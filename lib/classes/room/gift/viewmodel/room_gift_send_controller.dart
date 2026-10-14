@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../../manager/api_error_message.dart';
 import '../models/room_gift_event_models.dart';
 import '../models/room_gift_models.dart';
 import '../room_gift_repository.dart';
@@ -154,7 +155,7 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
           message: previousMessage,
           gift: gift,
           confirmedComboId: previousComboId,
-          issue: error.toString(),
+          issue: userFacingErrorMessage(error),
           remainingMilliseconds: _remainingMilliseconds,
         );
         if (previousComboId.isNotEmpty) {
@@ -264,7 +265,7 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
           confirmedComboId: state.confirmedComboId,
           issue: error is RoomGiftSendException
               ? error.issue.name
-              : error.toString(),
+              : userFacingErrorMessage(error),
           remainingMilliseconds: _remainingMilliseconds,
         );
       }

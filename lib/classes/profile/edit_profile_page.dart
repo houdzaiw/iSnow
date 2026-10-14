@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../configs/consts.dart';
 import '../../localization/app_localizations.dart';
+import '../../manager/api_error_message.dart';
 import '../../model/user_profile.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/custom_scaffold.dart';
@@ -54,9 +55,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
       if (mounted) {
         _applyUser(remote);
       }
-    } catch (_) {
+    } catch (error) {
       if (mounted) {
-        _showMessage(context.l10n.t('profile.loadFailed'));
+        _showMessage(
+          userFacingErrorMessage(
+            error,
+            fallback: context.l10n.t('profile.loadFailed'),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -101,7 +107,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       context.pop();
     } catch (e) {
       if (!mounted) return;
-      _showMessage(e.toString());
+      _showMessage(userFacingErrorMessage(e));
     } finally {
       if (mounted) {
         setState(() => _isSaving = false);
@@ -344,7 +350,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
       _showMessage(context.l10n.t('profile.avatarUploaded'));
     } catch (e) {
       if (!mounted) return;
-      _showMessage(context.l10n.t('profile.avatarUploadFailed'));
+      _showMessage(
+        userFacingErrorMessage(
+          e,
+          fallback: context.l10n.t('profile.avatarUploadFailed'),
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() => _isSaving = false);

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
+import '../../manager/api_error_message.dart';
 import 'wallet_models.dart';
 import 'wallet_payment_service.dart';
 import 'wallet_repository.dart';
@@ -88,6 +89,7 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
       isLoading: false,
       isRefreshing: false,
       loadError: firstError,
+      noticeMessage: serverErrorMessage(firstError),
     );
   }
 
@@ -124,10 +126,13 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
       );
       if (!started) throw const _WalletPaymentException('failed');
     } catch (error) {
+      final message = serverErrorMessage(error);
       state = state.copyWith(
         purchaseProductId: null,
-        noticeKey:
-            error is _WalletPaymentException && error.reason == 'unavailable'
+        noticeMessage: message,
+        noticeKey: message != null
+            ? null
+            : error is _WalletPaymentException && error.reason == 'unavailable'
             ? 'wallet.paymentUnavailable'
             : 'wallet.paymentFailed',
       );
@@ -264,7 +269,10 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
       );
       state = state.copyWith(
         purchaseProductId: null,
-        noticeKey: 'wallet.paymentFailed',
+        noticeMessage: serverErrorMessage(error),
+        noticeKey: serverErrorMessage(error) == null
+            ? 'wallet.paymentFailed'
+            : null,
       );
     }
   }
@@ -273,7 +281,10 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
     debugPrint('[WalletPayment] purchase stream failed: $error\n$stackTrace');
     state = state.copyWith(
       purchaseProductId: null,
-      noticeKey: 'wallet.paymentFailed',
+      noticeMessage: serverErrorMessage(error),
+      noticeKey: serverErrorMessage(error) == null
+          ? 'wallet.paymentFailed'
+          : null,
     );
   }
 

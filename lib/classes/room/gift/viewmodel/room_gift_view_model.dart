@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../../../model/server_response.dart';
+import '../../../../manager/api_error_message.dart';
 import '../../room_repository.dart';
 import '../models/room_gift_models.dart';
 import '../room_gift_repository.dart';
@@ -349,8 +349,7 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
   }
 
   String _errorMessage(Object error) {
-    if (error is NadyApiException) return error.message;
-    return error.toString();
+    return userFacingErrorMessage(error);
   }
 
   @override

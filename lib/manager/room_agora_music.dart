@@ -70,7 +70,7 @@ extension RoomAgoraMusic on RoomAgoraManager {
         _setMusic(
           _state.music.copyWith(
             status: RoomMusicPlayback.failed,
-            error: error.toString(),
+            error: userFacingErrorMessage(error),
           ),
         );
         rethrow;

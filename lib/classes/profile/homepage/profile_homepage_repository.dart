@@ -1,5 +1,6 @@
 import '../../../manager/http_api.dart';
 import '../../../manager/http_dio_manager.dart';
+import '../../../model/server_response.dart';
 import 'profile_homepage_models.dart';
 
 class ProfileHomepageRepository {
@@ -16,7 +17,7 @@ class ProfileHomepageRepository {
     final body = _map(response);
     final code = _int(body['code']);
     if (code != null && code != 200) {
-      throw Exception(body['message']?.toString() ?? 'Request failed');
+      throw NadyServerResponse<void>.fromJson(body, null).toException();
     }
 
     final data = _map(body['data'] ?? body);
@@ -40,7 +41,7 @@ class ProfileHomepageRepository {
     final body = _map(response);
     final code = _int(body['code']);
     if (code != null && code != 200) {
-      throw Exception(body['message']?.toString() ?? 'Request failed');
+      throw NadyServerResponse<void>.fromJson(body, null).toException();
     }
 
     return ProfileHomepageGiftWall.fromJson(_map(body['data']));
@@ -56,7 +57,7 @@ class ProfileHomepageRepository {
     final body = _map(response);
     final code = _int(body['code']);
     if (code != null && code != 200) {
-      throw Exception(body['message']?.toString() ?? 'Request failed');
+      throw NadyServerResponse<void>.fromJson(body, null).toException();
     }
 
     final data = body['data'];

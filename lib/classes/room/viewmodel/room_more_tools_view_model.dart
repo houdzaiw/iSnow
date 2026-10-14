@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../manager/api_error_message.dart';
 import '../models/room_more_tools_models.dart';
 import '../room_more_tools_repository.dart';
 
@@ -100,7 +101,7 @@ class RoomMoreToolsViewModel extends StateNotifier<RoomMoreToolsState> {
       if (!mounted) return;
       state = state.copyWith(
         loadingBanners: false,
-        errorMessage: error.toString(),
+        errorMessage: userFacingErrorMessage(error),
       );
     }
   }
@@ -131,7 +132,7 @@ class RoomMoreToolsViewModel extends StateNotifier<RoomMoreToolsState> {
       if (!mounted) return false;
       state = state.copyWith(
         togglingLobbyType: null,
-        errorMessage: error.toString(),
+        errorMessage: userFacingErrorMessage(error),
       );
       return false;
     }

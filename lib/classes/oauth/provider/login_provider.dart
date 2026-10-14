@@ -6,8 +6,10 @@ import 'package:crypto/crypto.dart' as crypto;
 import 'package:cryptography/cryptography.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../configs/app_device.dart';
+import '../../../manager/api_error_message.dart';
 import '../../../manager/auth_session.dart';
 import '../../../manager/http_api.dart';
 import '../../../manager/http_dio_manager.dart';
@@ -17,6 +19,10 @@ import '../../../model/login_response.dart';
 import '../../../model/server_response.dart';
 import '../../../model/upload_param.dart';
 import '../../../model/user_profile.dart';
+
+final loginRepositoryProvider = Provider<LoginProvider>(
+  (ref) => LoginProvider(),
+);
 
 class LoginProvider {
   LoginProvider({
@@ -208,14 +214,12 @@ class LoginProvider {
       return loginResponse;
     } on DioException catch (e) {
       debugPrint('Login DioException: ${e.message}');
-      final data = e.response?.data;
-      if (data is Map) {
-        return LoginResponse.failure(data['message']?.toString() ?? e.message);
-      }
-      return LoginResponse.failure(e.message);
+      return LoginResponse.failure(
+        userFacingErrorMessage(e, fallback: e.message),
+      );
     } catch (e) {
       debugPrint('Login exception: $e');
-      return LoginResponse.failure('$e');
+      return LoginResponse.failure(userFacingErrorMessage(e));
     }
   }
 

@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../configs/app_configs.dart';
 import '../../../localization/app_localizations.dart';
+import '../../../manager/api_error_message.dart';
 import 'profile_menu_item.dart';
 import 'profile_state.dart';
 import 'profile_view_model.dart';
@@ -38,7 +39,14 @@ class ProfilePage extends ConsumerWidget {
     final uid = state.profile?.user.uid;
     if (uid == null || uid <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.t('profile.loadFailed'))),
+        SnackBar(
+          content: Text(
+            userFacingErrorMessage(
+              state.loadError,
+              fallback: context.l10n.t('profile.loadFailed'),
+            ),
+          ),
+        ),
       );
       return;
     }
@@ -149,7 +157,14 @@ class ProfilePage extends ConsumerWidget {
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.l10n.t('profile.logoutFailed'))),
+      SnackBar(
+        content: Text(
+          userFacingErrorMessage(
+            ref.read(profileViewModelProvider).actionError,
+            fallback: context.l10n.t('profile.logoutFailed'),
+          ),
+        ),
+      ),
     );
   }
 
@@ -176,7 +191,14 @@ class ProfilePage extends ConsumerWidget {
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.l10n.t('profile.deleteAccountFailed'))),
+      SnackBar(
+        content: Text(
+          userFacingErrorMessage(
+            ref.read(profileViewModelProvider).actionError,
+            fallback: context.l10n.t('profile.deleteAccountFailed'),
+          ),
+        ),
+      ),
     );
   }
 

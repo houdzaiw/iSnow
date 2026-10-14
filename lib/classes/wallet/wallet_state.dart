@@ -12,6 +12,7 @@ class WalletState {
     this.purchaseProductId,
     this.loadError,
     this.noticeKey,
+    this.noticeMessage,
   });
 
   final WalletPurse? purse;
@@ -22,6 +23,7 @@ class WalletState {
   final String? purchaseProductId;
   final Object? loadError;
   final String? noticeKey;
+  final String? noticeMessage;
 
   bool get isPurchasing => purchaseProductId != null;
 
@@ -41,6 +43,7 @@ class WalletState {
     Object? purchaseProductId = _walletStateUnset,
     Object? loadError = _walletStateUnset,
     Object? noticeKey = _walletStateUnset,
+    Object? noticeMessage = _walletStateUnset,
   }) {
     return WalletState(
       purse: purse ?? this.purse,
@@ -59,6 +62,11 @@ class WalletState {
       noticeKey: identical(noticeKey, _walletStateUnset)
           ? this.noticeKey
           : noticeKey as String?,
+      noticeMessage: identical(noticeMessage, _walletStateUnset)
+          ? (identical(noticeKey, _walletStateUnset)
+                ? this.noticeMessage
+                : null)
+          : noticeMessage as String?,
     );
   }
 }
