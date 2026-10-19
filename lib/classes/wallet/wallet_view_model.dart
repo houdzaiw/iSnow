@@ -242,6 +242,7 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
   }
 
   Future<void> _handlePurchased(PurchaseDetails purchase) async {
+    final previousBalance = state.purse?.coin;
     try {
       if (Platform.isIOS) {
         final product = _productForId(purchase.productID);
@@ -262,6 +263,12 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
       state = state.copyWith(
         purchaseProductId: null,
         noticeKey: 'wallet.paymentSuccess',
+        verifiedPaymentRevision:
+            previousBalance != null &&
+                state.loadError == null &&
+                (state.purse?.coin ?? 0) > previousBalance
+            ? state.verifiedPaymentRevision + 1
+            : state.verifiedPaymentRevision,
       );
     } catch (error, stackTrace) {
       debugPrint(

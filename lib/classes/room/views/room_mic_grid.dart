@@ -7,6 +7,10 @@ class _RoomMicGrid extends StatelessWidget {
     required this.pendingSeatPosition,
     required this.onSeatTap,
     required this.onSeatLongPress,
+    required this.charmEnabled,
+    required this.wavesEnabled,
+    required this.currency,
+    required this.onCharmTap,
   });
 
   final List<RoomSeatViewData> seats;
@@ -14,6 +18,10 @@ class _RoomMicGrid extends StatelessWidget {
   final int? pendingSeatPosition;
   final ValueChanged<RoomSeatViewData> onSeatTap;
   final ValueChanged<RoomSeatViewData> onSeatLongPress;
+  final bool charmEnabled;
+  final bool wavesEnabled;
+  final int currency;
+  final ValueChanged<RoomSeatViewData> onCharmTap;
 
   @override
   Widget build(BuildContext context) {
@@ -123,6 +131,10 @@ class _RoomMicGrid extends StatelessWidget {
         avatarSize: avatarSize,
         onTap: () => onSeatTap(seat),
         onLongPress: () => onSeatLongPress(seat),
+        charmEnabled: charmEnabled,
+        wavesEnabled: wavesEnabled,
+        currency: currency,
+        onCharmTap: () => onCharmTap(seat),
       ),
     );
   }
@@ -163,6 +175,10 @@ class _RoomMicSeat extends StatelessWidget {
     required this.avatarSize,
     required this.onTap,
     required this.onLongPress,
+    required this.charmEnabled,
+    required this.wavesEnabled,
+    required this.currency,
+    required this.onCharmTap,
   });
 
   final RoomSeatViewData seat;
@@ -172,6 +188,10 @@ class _RoomMicSeat extends StatelessWidget {
   final double avatarSize;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
+  final bool charmEnabled;
+  final bool wavesEnabled;
+  final int currency;
+  final VoidCallback onCharmTap;
 
   @override
   Widget build(BuildContext context) {
@@ -190,6 +210,7 @@ class _RoomMicSeat extends StatelessWidget {
               isPending: isPending,
               circleSize: circleSize,
               avatarSize: avatarSize,
+              wavesEnabled: wavesEnabled,
             ),
           ),
           SizedBox(height: AppSpacing.roomMicSeatLabelGap.h),
@@ -206,7 +227,16 @@ class _RoomMicSeat extends StatelessWidget {
             ),
           ),
           SizedBox(height: AppSpacing.roomMicSeatHeatGap.h),
-          _SeatHeat(value: seat.heat),
+          Visibility(
+            visible: charmEnabled && seat.isOccupied,
+            maintainSize: true,
+            maintainAnimation: true,
+            maintainState: true,
+            child: GestureDetector(
+              onTap: onCharmTap,
+              child: _SeatHeat(value: seat.heat, currency: currency),
+            ),
+          ),
         ],
       ),
     );
@@ -220,6 +250,7 @@ class _SeatCircle extends StatelessWidget {
     required this.isPending,
     required this.circleSize,
     required this.avatarSize,
+    required this.wavesEnabled,
   });
 
   final RoomSeatViewData seat;
@@ -227,6 +258,7 @@ class _SeatCircle extends StatelessWidget {
   final bool isPending;
   final double circleSize;
   final double avatarSize;
+  final bool wavesEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -235,8 +267,17 @@ class _SeatCircle extends StatelessWidget {
       width: circleSize.r,
       height: circleSize.r,
       child: Stack(
+        clipBehavior: Clip.none,
         alignment: Alignment.center,
         children: [
+          if (wavesEnabled && seat.isSpeaking && seat.isOccupied)
+            Positioned(
+              left: -AppSpacing.sm.r,
+              right: -AppSpacing.sm.r,
+              top: -AppSpacing.sm.r,
+              bottom: -AppSpacing.sm.r,
+              child: const RoomMicWave(),
+            ),
           if (seat.isOccupied)
             _RoomAvatarImage(
               url: seat.avatar,
@@ -310,9 +351,10 @@ class _SeatStatusDot extends StatelessWidget {
 }
 
 class _SeatHeat extends StatelessWidget {
-  const _SeatHeat({required this.value});
+  const _SeatHeat({required this.value, required this.currency});
 
   final int value;
+  final int currency;
 
   @override
   Widget build(BuildContext context) {
@@ -320,7 +362,11 @@ class _SeatHeat extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         _RoomAssetIcon(
-          asset: AppAssets.lanhuRoomHeat,
+          asset: currency == 1
+              ? AppAssets.lanhuRoomGiftCoin
+              : currency == 2
+              ? AppAssets.lanhuRoomHeat
+              : AppAssets.lanhuRoomIconMissing,
           size: AppSpacing.roomMicSeatHeatIconSize.r,
         ),
         SizedBox(width: 2.w),

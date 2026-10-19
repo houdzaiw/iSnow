@@ -91,6 +91,67 @@ class AppSocketManager extends ChangeNotifier {
 
   static final AppSocketManager instance = AppSocketManager._();
 
+  /// Feature channels share the room transport and are released by leaveRoom.
+  Future<void> subscribeRoomTools(int uid) async {
+    final client = _client;
+    if (client == null || !_state.roomChannelSubscribed) return;
+    final generation = _roomJoinGeneration;
+    for (final channel in ['global:$uid', 'global_lobby', 'global']) {
+      if (generation != _roomJoinGeneration) return;
+      try {
+        await _subscribeChannel(client, channel);
+        if (generation != _roomJoinGeneration) {
+          if (identical(client, _client)) await _unsubscribeChannel(channel);
+          return;
+        }
+        _toolChannels.add(channel);
+      } catch (error) {
+        _log('optional tools channel=$channel failed: $error');
+      }
+    }
+  }
+
+  final Set<String> _toolChannels = {};
+  final Map<String, Set<String>> _gameConsumers = {};
+
+  Future<void> acquireRoomGame(String consumer, int uid) async {
+    final client = _client;
+    if (client == null || !_state.roomChannelSubscribed) return;
+    final generation = _roomJoinGeneration;
+    final channels = {'game', 'game:$uid'};
+    _gameConsumers[consumer] = channels;
+    for (final channel in channels) {
+      try {
+        await _subscribeChannel(client, channel);
+      } catch (error) {
+        _log('optional game channel=$channel failed: $error');
+      }
+      if (generation != _roomJoinGeneration ||
+          !_gameConsumers.containsKey(consumer)) {
+        if (!_gameConsumers.values.any(
+          (channels) => channels.contains(channel),
+        )) {
+          await _cleanup(
+            'stale game unsubscribe',
+            () => _unsubscribeChannel(channel),
+          );
+        }
+        return;
+      }
+    }
+  }
+
+  Future<void> releaseRoomGame(String consumer) async {
+    final channels = _gameConsumers.remove(consumer) ?? const <String>{};
+    for (final channel in channels) {
+      if (!_gameConsumers.values.any(
+        (channels) => channels.contains(channel),
+      )) {
+        await _cleanup('game unsubscribe', () => _unsubscribeChannel(channel));
+      }
+    }
+  }
+
   /// Only used for the targeted RoomClosePlayerEvent while in a room.
   Future<void> subscribeRoomMusicControl(int uid) async {
     final client = _client;
@@ -101,7 +162,7 @@ class AppSocketManager extends ChangeNotifier {
     final channel = 'global:$uid';
     await _subscribeChannel(client, channel);
     if (generation != _roomJoinGeneration) {
-      await _unsubscribeChannel(channel);
+      if (identical(client, _client)) await _unsubscribeChannel(channel);
     } else {
       _musicControlChannel = channel;
     }
@@ -253,6 +314,13 @@ class AppSocketManager extends ChangeNotifier {
   Future<void> leaveRoom(String roomId) async {
     _roomJoinGeneration += 1;
     _joiningRoomId = null;
+    for (final consumer in _gameConsumers.keys.toList()) {
+      await releaseRoomGame(consumer);
+    }
+    for (final channel in _toolChannels.toList()) {
+      await _cleanup('tools unsubscribe', () => _unsubscribeChannel(channel));
+    }
+    _toolChannels.clear();
     final musicChannel = _musicControlChannel;
     _musicControlChannel = null;
     if (musicChannel != null) {
@@ -319,6 +387,8 @@ class AppSocketManager extends ChangeNotifier {
   }
 
   Future<void> leaveCurrentRoomSubscriptions() async {
+    _gameConsumers.clear();
+    _toolChannels.clear();
     final channels = _subscriptions.keys.toList(growable: false);
     for (final channel in channels) {
       await _cleanup(
@@ -430,7 +500,9 @@ class AppSocketManager extends ChangeNotifier {
       await subscription.ready().timeout(const Duration(seconds: 12));
       _syncConnectedState();
     } catch (_) {
-      await _unsubscribeChannel(channel);
+      if (identical(_subscriptions[channel], subscription)) {
+        await _unsubscribeChannel(channel);
+      }
       rethrow;
     }
   }

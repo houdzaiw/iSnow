@@ -8,10 +8,12 @@ import 'classes/room/gift/room_gift_repository.dart';
 import 'configs/app_configs.dart';
 import 'configs/app_enum.dart';
 import 'lib_main.dart';
+import 'manager/app_startup_diagnostics.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppConfig.shared.run(AppEnv.dev);
+  unawaited(logStartupDeviceAndNetwork());
   await initializeDateFormatting('zh_CN');
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(

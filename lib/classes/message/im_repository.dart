@@ -152,6 +152,34 @@ class ImRepository {
     return sendResponse.data ?? created.messageInfo!;
   }
 
+  Future<void> sendRoomInvitation({
+    required String targetUID,
+    required Map<String, dynamic> room,
+  }) async {
+    await ensureReady();
+    final manager = TencentImSDKPlugin.v2TIMManager.getMessageManager();
+    final created = await manager.createCustomMessage(
+      data: jsonEncode({
+        'type': 'shareRoom',
+        'payload': jsonEncode({...room, 'roomPasswd': ''}),
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      }),
+      desc: '[Share Room]',
+      extension: '',
+    );
+    _throwIfFailed(created.code, created.desc);
+    final message = created.data?.messageInfo;
+    if (message == null) {
+      throw const NadyApiException(message: 'Failed to create room invitation');
+    }
+    final sent = await manager.sendMessage(
+      message: message,
+      receiver: targetUID,
+      groupID: '',
+    );
+    _throwIfFailed(sent.code, sent.desc);
+  }
+
   Future<V2TimAdvancedMsgListener> addC2CMessageListener({
     required String targetUID,
     required ValueChanged<V2TimMessage> onMessageReceived,

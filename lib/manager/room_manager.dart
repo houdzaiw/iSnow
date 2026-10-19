@@ -749,6 +749,9 @@ class RoomManager extends ChangeNotifier {
     if (message.channel != 'room:$roomId' && message.channel != 'room') return;
 
     switch (message.event) {
+      case 'RoomIdentityUpdateEvent':
+        unawaited(_updateRoomIdentity(message.payload));
+        break;
       case 'RoomAudienceUpdateEvent':
         // This event only contains top users, never the complete audience.
         if (_audienceTask != null) {
@@ -786,6 +789,33 @@ class RoomManager extends ChangeNotifier {
         _isCurrentSession(roomId, generation)) {
       await leaveRoom();
     }
+  }
+
+  Future<void> _updateRoomIdentity(Object? payload) async {
+    final generation = _generation;
+    final roomId = _state.currentRoomId;
+    final data = _decodePayload(payload);
+    if (data is! Map || roomId == null) return;
+    final uid = await _authSession.uid();
+    if (!_isCurrentSession(roomId, generation) || '${data['uid']}' != '$uid') {
+      return;
+    }
+    final previous = _state.enterResponse;
+    if (previous == null) return;
+    final identity = switch (int.tryParse('${data['roomIdentity']}')) {
+      1000 => UserRoomIdentity.manager,
+      2000 => UserRoomIdentity.owner,
+      _ => UserRoomIdentity.audience,
+    };
+    _setState(
+      _state.copyWith(
+        enterResponse: EnterRoomResp.fromJson({
+          ...previous.raw,
+          'roomId': previous.roomId,
+          'identity': identity.name,
+        }),
+      ),
+    );
   }
 
   List<RoomMicModel>? _parseMicListPayload(Object? payload) {

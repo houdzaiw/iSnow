@@ -12,6 +12,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:project/classes/room/gift/models/room_gift_models.dart';
 import 'package:project/classes/room/gift/room_gift_repository.dart';
 import 'package:project/classes/room/room_page.dart';
+import 'package:project/classes/room/more/room_tools_repository.dart';
+import 'support/room_tools_fakes.dart';
 import 'package:project/classes/room/room_repository.dart';
 import 'package:project/classes/room/viewmodel/room_state.dart';
 import 'package:project/classes/room/viewmodel/room_view_model.dart';
@@ -226,6 +228,7 @@ Future<void> _openRoom(WidgetTester tester, _Fixture fixture) async {
       overrides: [
         roomRepositoryProvider.overrideWithValue(fixture.repository),
         roomGiftRepositoryProvider.overrideWithValue(_GiftRepository()),
+        roomToolsRepositoryProvider.overrideWithValue(ToolsApiFake()),
       ],
       child: ScreenUtilInit(
         designSize: const Size(375, 812),

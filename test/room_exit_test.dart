@@ -32,6 +32,8 @@ import 'package:project/model/user_profile.dart';
 import 'package:project/theme/app_theme.dart';
 
 import 'support/precache_room_assets.dart';
+import 'support/room_tools_fakes.dart';
+import 'package:project/classes/room/more/room_tools_repository.dart';
 
 void main() {
   setUpAll(() async {
@@ -423,6 +425,7 @@ void main() {
       overrides: [
         roomRepositoryProvider.overrideWithValue(repository),
         roomGiftRepositoryProvider.overrideWithValue(_GiftRepository()),
+        roomToolsRepositoryProvider.overrideWithValue(ToolsApiFake()),
       ],
     );
     addTearDown(() async {
@@ -817,6 +820,10 @@ Future<({ProviderContainer container, GoRouter router})> _openRoom(
 }
 
 class _RoomRepository extends ChangeNotifier implements RoomRepository {
+  @override
+  int get roomGeneration => enterCalls;
+  @override
+  Future<void> subscribeTools(int uid) async {}
   bool get hasActiveListeners => hasListeners;
   RoomState room = const RoomState();
   final messages = StreamController<RoomSocketMessage>.broadcast(sync: true);

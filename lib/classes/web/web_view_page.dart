@@ -32,12 +32,15 @@ class WebViewPage extends HookConsumerWidget {
     final initialUri = useMemoized(() => Uri.tryParse(uri), [uri]);
     final bridgeViewModel = ref.read(webBridgeViewModelProvider);
     final language = initialUri?.queryParameters['language'];
+    final sourceUri = useRef(initialUri);
+    final webEpoch = useRef(0);
 
     Future<void> callH5Function(
       String type,
       String paramsKey,
       Object? data,
     ) async {
+      if (!context.mounted) return;
       final dataString = data is String ? data : jsonEncode(data);
       final jsCode =
           '''
@@ -49,7 +52,11 @@ class WebViewPage extends HookConsumerWidget {
           );
         }
       ''';
-      await controller.runJavaScript(jsCode);
+      try {
+        await controller.runJavaScript(jsCode);
+      } catch (error) {
+        debugPrint('WebView callback failed: $error');
+      }
     }
 
     Future<void> handleBridgeMessage(JavaScriptMessage message) async {
@@ -65,10 +72,13 @@ class WebViewPage extends HookConsumerWidget {
 
       switch (type) {
         case 'apiCaller':
+          final epoch = webEpoch.value;
           final result = await bridgeViewModel.callApi(
             data,
             language: language,
+            sourceUri: sourceUri.value ?? Uri(),
           );
+          if (!context.mounted || epoch != webEpoch.value) return;
           if (result.isSuccess) {
             await callH5Function('apiCaller', paramsKey, result.data);
           } else {
@@ -124,6 +134,10 @@ class WebViewPage extends HookConsumerWidget {
         ..setBackgroundColor(AppColors.transparent)
         ..setNavigationDelegate(
           NavigationDelegate(
+            onPageStarted: (url) {
+              webEpoch.value++;
+              sourceUri.value = Uri.tryParse(url);
+            },
             onProgress: (value) {
               if (context.mounted) {
                 progress.value = value;
@@ -146,6 +160,7 @@ class WebViewPage extends HookConsumerWidget {
               final nextUri = Uri.tryParse(request.url);
               final scheme = nextUri?.scheme;
               if (scheme == 'http' || scheme == 'https') {
+                if (request.isMainFrame) sourceUri.value = nextUri;
                 return NavigationDecision.navigate;
               }
               if (request.url == 'about:blank') {

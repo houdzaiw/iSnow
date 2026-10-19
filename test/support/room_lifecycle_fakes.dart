@@ -181,6 +181,8 @@ class FakeRoomHttp implements HttpDioManager {
 }
 
 class FakeRoomSocket extends ChangeNotifier implements AppSocketManager {
+  @override
+  Future<void> subscribeRoomTools(int uid) async {}
   FakeRoomSocket(this.actions);
   final List<String> actions;
   final controller = StreamController<RoomSocketMessage>.broadcast(sync: true);

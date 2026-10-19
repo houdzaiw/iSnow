@@ -16,6 +16,7 @@ import '../gift/event/room_gift_event_provider.dart';
 import '../gift/event/room_gift_room_id_provider.dart';
 import '../gift/models/room_gift_event_models.dart';
 import 'room_state.dart';
+import '../more/room_tools_models.dart';
 
 export '../room_repository.dart' show roomRepositoryProvider;
 
@@ -66,6 +67,49 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
   String? _sessionRoomId;
   int _chatClearRevision = 0;
   Map<String, RoomGiftPublicMessage> _giftMessages = const {};
+  VoidCallback? clearToolsPublicMessages;
+  bool _luckyBound = false;
+  Set<String> _luckyIds = {};
+
+  void bindLuckyMessages(List<ToolJson> messages) {
+    _luckyBound = true;
+    if (!mounted || !state.isReady) return;
+    final entries = state.messages
+        .where((entry) => !_luckyIds.contains(entry.id))
+        .toList();
+    _luckyIds = {};
+    for (final payload in messages) {
+      final text = _messageText(payload, '${payload['_event']}');
+      if (text == null || text.isEmpty) continue;
+      final id = '${payload['_key']}';
+      final from = _userMap(payload);
+      entries.add(
+        RoomChatEntry(
+          id: id,
+          kind: RoomChatEntryKind.gift,
+          text: text,
+          createdAt: DateTime.fromMillisecondsSinceEpoch(
+            toolInt(
+              payload['_receivedAt'],
+              DateTime.now().millisecondsSinceEpoch,
+            ),
+          ),
+          senderUid: _intValue(from['uid']),
+          senderName: _stringValue(from['nick']),
+          senderAvatar: _stringValue(from['avatar']),
+        ),
+      );
+      _luckyIds.add(id);
+    }
+    entries.sort(
+      (first, second) => first.createdAt.compareTo(second.createdAt),
+    );
+    state = state.copyWith(
+      messages: entries.length > 80
+          ? entries.sublist(entries.length - 80)
+          : entries,
+    );
+  }
 
   /// Bind to the server's canonical room ID after entering, not the route alias.
   void bindGiftManager(RoomGiftEventManager manager) {
@@ -237,6 +281,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
   void _clearChatMessages({bool showNotice = false}) {
     _chatClearRevision++;
     _giftManager?.clearPublicMessages();
+    clearToolsPublicMessages?.call();
     state = state.copyWith(
       messages: showNotice
           ? [RoomChatEntry.system('Screen has been cleared.')]
@@ -498,6 +543,13 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
     if (!mounted || !state.isReady) return;
     if (!_isCurrentRoomMessage(message)) return;
     if (RoomGiftEventParser.events.contains(message.event)) return;
+    if (_luckyBound &&
+        const [
+          'RoomScreenLuckyBagSendEvent',
+          'RoomScreenLuckyBagReciveEvent',
+        ].contains(message.event)) {
+      return;
+    }
 
     if (message.event == 'RoomScreenSystemClear') {
       _clearChatMessages(showNotice: true);

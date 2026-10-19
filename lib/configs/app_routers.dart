@@ -137,6 +137,14 @@ final GoRouter goRouter = GoRouter(
       builder: (context, state) => const CreatePartyPage(),
     ),
     GoRoute(
+      path: '/room-tool',
+      builder: (_, state) => state.extra is Widget
+          ? state.extra! as Widget
+          : const Scaffold(
+              body: Center(child: Text('Room session unavailable')),
+            ),
+    ),
+    GoRoute(
       path: '/chat-view',
       name: 'chat-view',
       builder: (context, state) => ChatPage(

@@ -12,7 +12,8 @@ import 'wallet_state.dart';
 import 'wallet_view_model.dart';
 
 class WalletPage extends ConsumerWidget {
-  const WalletPage({super.key});
+  const WalletPage({super.key, this.returnOnPayment = false});
+  final bool returnOnPayment;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -20,6 +21,13 @@ class WalletPage extends ConsumerWidget {
     final notifier = ref.read(walletViewModelProvider.notifier);
 
     ref.listen<WalletState>(walletViewModelProvider, (previous, next) {
+      if (returnOnPayment &&
+          previous != null &&
+          next.verifiedPaymentRevision > previous.verifiedPaymentRevision &&
+          ModalRoute.of(context)?.isCurrent == true) {
+        Navigator.of(context).pop(true);
+        return;
+      }
       if (previous?.noticeKey == next.noticeKey &&
           previous?.noticeMessage == next.noticeMessage) {
         return;

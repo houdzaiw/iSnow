@@ -1,6 +1,7 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../manager/http_dio_manager.dart';
+import '../room/more/room_tools_config.dart';
 
 final webBridgeRepositoryProvider = Provider<WebBridgeRepository>((ref) {
   return WebBridgeRepository(HttpDioManager());
@@ -12,6 +13,14 @@ class WebBridgeRepository {
   final HttpDioManager _http;
 
   Future<dynamic> callApi(WebBridgeApiRequest request) {
+    final target = Uri.parse(request.normalizedUrl);
+    final base = Uri.parse(const RoomToolsConfig().apiBase);
+    if (target.userInfo.isNotEmpty ||
+        target.hasAuthority &&
+            (!target.hasScheme || target.origin != base.origin) ||
+        target.hasScheme && !{'http', 'https'}.contains(target.scheme)) {
+      throw const WebBridgeApiRequestException('Untrusted API origin');
+    }
     final method = request.method.toUpperCase();
     return switch (method) {
       'GET' => _http.get(
@@ -77,6 +86,12 @@ class WebBridgeApiRequest {
     final trimmed = url.trim();
     if (trimmed.isEmpty) {
       throw const WebBridgeApiRequestException('Missing API url');
+    }
+    final uri = Uri.tryParse(trimmed);
+    if (uri == null ||
+        trimmed.contains('\\') ||
+        uri.hasScheme && !{'http', 'https'}.contains(uri.scheme)) {
+      throw const WebBridgeApiRequestException('Invalid API url');
     }
     if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
       return trimmed;

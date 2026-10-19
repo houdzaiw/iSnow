@@ -119,7 +119,7 @@ void main() {
       await fixture.music.toggle('canonical');
       await fixture.music.toggle('canonical');
       await fixture.flush();
-      expect(fixture.http.statuses, ['playing', 'paused', 'playing']);
+      expect(fixture.http.statuses, ['PLAYING', 'PAUSED', 'PLAYING']);
       fixture.socket.controller.add(
         const RoomSocketMessage(
           channel: 'global:10',
@@ -128,7 +128,7 @@ void main() {
         ),
       );
       await fixture.flush();
-      expect(fixture.http.statuses, ['playing', 'paused', 'playing']);
+      expect(fixture.http.statuses, ['PLAYING', 'PAUSED', 'PLAYING']);
       expect(fixture.http.closes, isEmpty);
     },
   );

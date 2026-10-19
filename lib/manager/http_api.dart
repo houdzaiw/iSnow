@@ -1,6 +1,35 @@
 class HttpApi {
+  /// Anonymous public IPv4/IPv6 lookup, outside the Nady API.
+  static const publicIp = 'https://api64.ipify.org';
+
   static const roomOpenPlayer = '/api/room/openPlayer';
   static const roomClosePlayer = '/api/room/closePlayer';
+  static const roomFunctions = '/api/resource/function2';
+  static const roomEntryProps = '/api/room/inRoom/sendPropInfo';
+  static const roomLobbyRecords = '/api/lobby/lists';
+  static const roomTreasureRecords = '/api/lobby/playTo/lists';
+  static const roomCharmEnabled = '/api/room/mic/charm/isEnable';
+  static const roomCharmUpdate = '/api/room/mic/charm/updateStatus';
+  static const roomCharmRank = '/api/room/mic/charm/rank';
+  static const roomCharmSwitch = '/api/room/mic/charm/switch';
+  static const roomPkBegin = '/api/room/pk/begin';
+  static const roomPkOver = '/api/room/pk/over';
+  static const roomPkInfo = '/api/room/pk/info';
+  static const roomLuckyConfig = '/api/redPacket/config';
+  static const roomLuckyPush = '/api/redPacket/push';
+  static const roomLuckyList = '/api/redPacket/list';
+  static const roomLuckyGrab = '/api/redPacket/grab';
+  static const roomLuckyHaveBox = '/api/redPacket/haveBox';
+  static const roomShareMaterials = '/api/invite/materials';
+  static const roomInviteInfo = '/api/invite/info';
+  static const roomShareShortLinks = '/api/share/short-links/batch';
+  static const userFriends = '/api/user/follow/friends';
+  static const userVipSetting = '/api/vip/setting';
+  static const reportUploadParams = '/api/resource/header-upload-param/list';
+  static const reportSubmit = '/api/report';
+  static const gameToken = '/game/token';
+  static const gameBigWinShow = '/gameBigWin/getGameBigWinShow';
+  static const gameBigWinRank = '/gameBigWin/getGameBigWinRank';
 
   /// ==================== 国家相关 ====================
   /// 按国家 ISO code 查询拨号码

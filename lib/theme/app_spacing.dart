@@ -1,4 +1,5 @@
 class AppSpacing {
+  static const double roomToolsStripMaxHeightRatio = 0.2;
   static const double musicSheetHeight = 580;
   static const double musicSheetMaxHeightRatio = 0.85;
   static const double musicTrackHeight = 56;

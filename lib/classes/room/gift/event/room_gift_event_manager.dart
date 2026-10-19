@@ -10,6 +10,7 @@ import '../models/room_gift_models.dart';
 import '../effects/room_gift_asset_resolver.dart';
 import '../queue/room_gift_slot_queue.dart';
 import 'room_gift_event_parser.dart';
+import '../../more/room_tools_models.dart';
 
 class RoomGiftEffectTask {
   const RoomGiftEffectTask({
@@ -76,6 +77,14 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
   Timer? _timer;
   DateTime? _acceptAfter;
   bool _sessionActive = true;
+  RoomEffectPreferences _effects = const RoomEffectPreferences();
+
+  void setEffects(RoomEffectPreferences value) {
+    _effects = value;
+    if (!value.gift) _slotQueue.clear();
+    _emit();
+  }
+
   int? get currentUid => _slotQueue.currentUid;
   set currentUid(int? uid) => _slotQueue.currentUid = uid;
 
@@ -193,7 +202,7 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
       _combos.remove(_combos.keys.first);
     }
     final now = _now();
-    if (render) _slotQueue.add(gift, event.key, now);
+    if (render && _effects.gift) _slotQueue.add(gift, event.key, now);
     if (gift.uid == currentUid) onSelfGift?.call(gift, event.createdAt);
     final public = RoomGiftPublicMessage(
       key: gift.comboId.isEmpty ? key : gift.comboId,
@@ -461,12 +470,12 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
   }) {
     if (!mounted) return;
     state = RoomGiftEventState(
-      slots: slots ?? state.slots,
+      slots: _effects.gift ? slots ?? state.slots : const [null, null],
       publicMessages: publicMessages ?? state.publicMessages,
-      flights: flights ?? state.flights,
-      effects: effects ?? state.effects,
-      banners: banners ?? state.banners,
-      lucky: lucky ?? state.lucky,
+      flights: _effects.gift ? flights ?? state.flights : const [],
+      effects: _effects.bigGift ? effects ?? state.effects : const [],
+      banners: _effects.screen ? banners ?? state.banners : const [],
+      lucky: _effects.gift ? lucky ?? state.lucky : const [],
       roomWeekVal: roomWeekVal ?? state.roomWeekVal,
       isVisible: state.isVisible,
     );

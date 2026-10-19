@@ -24,6 +24,9 @@ Future<RoomGiftSheetResult?> showRoomGiftSheet({
   required int onlineCount,
   required int? currentUid,
   required List<RoomGiftRecipient> recipients,
+  int? targetUid,
+  int? presetGiftId,
+  bool backpack = false,
 }) {
   return showModalBottomSheet<RoomGiftSheetResult>(
     context: context,
@@ -36,6 +39,9 @@ Future<RoomGiftSheetResult?> showRoomGiftSheet({
       onlineCount: onlineCount,
       currentUid: currentUid,
       recipients: recipients,
+      targetUid: targetUid,
+      presetGiftId: presetGiftId,
+      backpack: backpack,
       onOpenCampaign: (gift) {
         final url = gift.resolvedCampaignUrl(
           Localizations.localeOf(context).languageCode,
@@ -66,6 +72,9 @@ class RoomGiftSheet extends HookConsumerWidget {
     required this.currentUid,
     required this.recipients,
     this.onOpenCampaign,
+    this.targetUid,
+    this.presetGiftId,
+    this.backpack = false,
   });
 
   final String roomId;
@@ -73,6 +82,8 @@ class RoomGiftSheet extends HookConsumerWidget {
   final int? currentUid;
   final List<RoomGiftRecipient> recipients;
   final ValueChanged<RoomGift>? onOpenCampaign;
+  final int? targetUid, presetGiftId;
+  final bool backpack;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -81,13 +92,20 @@ class RoomGiftSheet extends HookConsumerWidget {
     final viewModel = ref.read(provider.notifier);
 
     useEffect(() {
-      Future.microtask(
-        () => viewModel.initialize(
+      Future.microtask(() async {
+        await viewModel.initialize(
           recipients: recipients,
           onlineCount: onlineCount,
           currentUid: currentUid,
-        ),
-      );
+        );
+        if (viewModel.mounted) {
+          viewModel.applyPreset(
+            targetUid: targetUid,
+            giftId: presetGiftId,
+            backpack: backpack,
+          );
+        }
+      });
       return null;
     }, [roomId]);
 

@@ -43,6 +43,12 @@ class RoomRepository {
   AppSocketState get socketState => _roomManager.socketState;
   RoomAgoraState get agoraState => _roomManager.agoraState;
   Stream<RoomSocketMessage> get socketMessages => _socketManager.messages;
+  Future<void> acquireGame(String consumer, int uid) =>
+      _socketManager.acquireRoomGame(consumer, uid);
+  Future<void> releaseGame(String consumer) =>
+      _socketManager.releaseRoomGame(consumer);
+  Future<void> subscribeTools(int uid) =>
+      _socketManager.subscribeRoomTools(uid);
 
   RoomGiftAudience giftAudience(String roomId) => RoomGiftAudience(
     isInRoom: roomState.isInRoom && roomState.currentRoomId == roomId,

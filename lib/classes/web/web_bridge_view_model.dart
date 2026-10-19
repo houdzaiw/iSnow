@@ -4,22 +4,38 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../configs/app_device.dart';
 import '../../manager/api_error_message.dart';
 import 'web_bridge_repository.dart';
+import '../room/more/room_tools_config.dart';
 
 final webBridgeViewModelProvider = Provider<WebBridgeViewModel>((ref) {
-  return WebBridgeViewModel(ref.read(webBridgeRepositoryProvider), AppDevice());
+  return WebBridgeViewModel(
+    ref.read(webBridgeRepositoryProvider),
+    AppDevice(),
+    config: ref.read(roomToolsConfigProvider),
+  );
 });
 
 class WebBridgeViewModel {
-  const WebBridgeViewModel(this._repository, this._device);
+  const WebBridgeViewModel(
+    this._repository,
+    this._device, {
+    RoomToolsConfig config = const RoomToolsConfig(),
+  }) : _config = config;
 
   final WebBridgeRepository _repository;
   final AppDevice _device;
+  final RoomToolsConfig _config;
 
   Future<WebBridgeApiResult> callApi(
     Map<String, dynamic> data, {
     String? language,
+    Uri? sourceUri,
   }) async {
     try {
+      if (sourceUri != null && !_config.trustedWebBridge(sourceUri)) {
+        throw const WebBridgeApiRequestException(
+          'This page is not authorized to use the API bridge',
+        );
+      }
       final request = WebBridgeApiRequest.fromJson(data).withLanguage(language);
       final response = await _repository.callApi(request);
       return WebBridgeApiResult.success(response);

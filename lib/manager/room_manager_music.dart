@@ -117,7 +117,7 @@ extension RoomManagerMusic on RoomManager {
       }
       await _cleanupStep(
         'music status push',
-        () => _api.musicStatus(roomId, status.name),
+        () => _api.musicStatus(roomId, status.name.toUpperCase()),
       );
     }
 

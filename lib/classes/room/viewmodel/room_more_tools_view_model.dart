@@ -81,21 +81,31 @@ class RoomMoreToolsViewModel extends StateNotifier<RoomMoreToolsState> {
 
     state = state.copyWith(loadingBanners: true, errorMessage: null);
     try {
+      String? errorMessage;
+      Future<List<RoomToolBanner>?> fetch(
+        RoomMoreBannerPosition position,
+      ) async {
+        try {
+          return await _repository.fetchBanners(
+            position: position,
+            roomId: state.roomId,
+          );
+        } catch (error) {
+          errorMessage ??= userFacingErrorMessage(error);
+          return null;
+        }
+      }
+
       final results = await Future.wait([
-        _repository.fetchBanners(
-          position: RoomMoreBannerPosition.additionalTool,
-          roomId: state.roomId,
-        ),
-        _repository.fetchBanners(
-          position: RoomMoreBannerPosition.game,
-          roomId: state.roomId,
-        ),
+        fetch(RoomMoreBannerPosition.additionalTool),
+        fetch(RoomMoreBannerPosition.game),
       ]);
       if (!mounted) return;
       state = state.copyWith(
         loadingBanners: false,
-        additionalTools: results[0],
-        gameBanners: results[1],
+        additionalTools: results[0] ?? state.additionalTools,
+        gameBanners: results[1] ?? state.gameBanners,
+        errorMessage: errorMessage,
       );
     } catch (error) {
       if (!mounted) return;

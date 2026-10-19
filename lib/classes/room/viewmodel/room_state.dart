@@ -66,9 +66,9 @@ class RoomSeatViewData {
             mic.raw['heat'] ??
                 mic.raw['score'] ??
                 mic.raw['charmValue'] ??
-                userInfo['wealthLevel'],
+                mic.raw['charm'],
           ) ??
-          100,
+          0,
       isLocked: mic.isLocked ?? false,
       isMuted: mic.isMuted ?? false,
       volume: volume,

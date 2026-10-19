@@ -18,6 +18,8 @@ import 'package:project/classes/room/gift/viewmodel/room_gift_state.dart';
 import 'package:project/classes/room/gift/views/room_gift_combo_button.dart';
 import 'package:project/classes/room/gift/views/room_gift_sheet.dart';
 import 'package:project/classes/room/room_page.dart';
+import 'package:project/classes/room/more/room_tools_repository.dart';
+import 'support/room_tools_fakes.dart';
 import 'package:project/classes/room/room_repository.dart';
 import 'package:project/manager/app_socket_manager.dart';
 import 'package:project/manager/room_agora_manager.dart';
@@ -99,6 +101,7 @@ void main() {
             ProviderScope(
               overrides: [
                 roomRepositoryProvider.overrideWithValue(room),
+                roomToolsRepositoryProvider.overrideWithValue(ToolsApiFake()),
                 roomGiftRepositoryProvider.overrideWithValue(gifts),
               ],
               child: ScreenUtilInit(
@@ -310,11 +313,18 @@ class _GiftRepository extends RoomGiftRepository {
 }
 
 class _RoomRepository extends ChangeNotifier implements RoomRepository {
+  @override
+  int get roomGeneration => 1;
+  @override
+  Future<void> subscribeTools(int uid) async {}
+  @override
+  Future<void> refreshRoomData() async {}
   _RoomRepository(int owner, List<int> seats) {
     room = RoomState(
       currentRoomId: 'canonical',
       isInRoom: true,
       status: RoomStatus.ready,
+      enterResponse: const EnterRoomResp(roomId: 'canonical', raw: {'digitalCurrency': 2}),
       roomInfo: RoomInfo(
         roomId: 'canonical',
         raw: const {},

@@ -89,6 +89,27 @@ void main() {
     },
   );
 
+  test(
+    'game consumers share transport and release only their owned channels',
+    () async {
+      await socket.joinRoom('123');
+      await socket.subscribeRoomMusicControl(10);
+      await socket.acquireRoomGame('first', 10);
+      await socket.acquireRoomGame('second', 10);
+      expect(endpoints.length, 1);
+      expect(
+        client.channels.keys,
+        containsAll(['game', 'game:10', 'room:123', 'global:10']),
+      );
+      await socket.releaseRoomGame('first');
+      expect(client.channels.keys, contains('game'));
+      await socket.releaseRoomGame('second');
+      expect(client.channels.keys, isNot(contains('game')));
+      expect(client.channels.keys, containsAll(['room:123', 'global:10']));
+      expect(socket.state.roomChannelSubscribed, isTrue);
+    },
+  );
+
   test('leaving during endpoint lookup does not resurrect the room', () async {
     final pending = Completer<dynamic>();
     final delayed = AppSocketManager.forTesting(

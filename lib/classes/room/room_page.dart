@@ -26,6 +26,18 @@ import 'viewmodel/room_more_tools_view_model.dart';
 import 'viewmodel/room_view_model.dart';
 import 'views/room_chat_clear_dialog.dart';
 import 'views/room_exit_dialog.dart';
+import 'more/room_tools_controller.dart';
+import 'more/room_tools_widgets.dart';
+import 'more/room_tools_strip.dart';
+import 'more/room_settings_page.dart';
+import 'more/room_report_page.dart';
+import 'more/room_share_page.dart';
+import 'more/room_pk_page.dart';
+import 'more/room_lucky_box_page.dart';
+import 'more/room_lobby_page.dart';
+import 'more/room_game_page.dart';
+import 'more/room_mic_wave.dart';
+import 'more/room_vehicle_layer.dart';
 
 part 'views/room_bottom_bar.dart';
 part 'views/room_chat_panel.dart';
@@ -71,6 +83,51 @@ class RoomPage extends HookConsumerWidget {
     final giftSlots = ref.watch(
       roomGiftEventManagerProvider(giftRoomId).select((value) => value.slots),
     );
+    final moreFeatures = ref.watch(roomToolsControllerProvider(giftRoomId));
+    ref.listen(
+      roomToolsControllerProvider(
+        giftRoomId,
+      ).select((value) => value.luckyMessages),
+      (_, messages) {
+        viewModel.bindLuckyMessages(messages);
+      },
+    );
+    ref.listen(
+      roomToolsControllerProvider(giftRoomId).select((value) => value.error),
+      (previous, next) {
+        if (next != null && next != previous && pageRoute?.isCurrent == true) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(next)));
+        }
+      },
+    );
+    ref.listen(
+      roomToolsControllerProvider(giftRoomId).select((value) => value.effects),
+      (_, effects) {
+        ref
+            .read(roomGiftEventManagerProvider(giftRoomId).notifier)
+            .setEffects(effects);
+      },
+    );
+    useEffect(() {
+      Future.microtask(() {
+        if (!context.mounted) return;
+        final manager = ref.read(
+          roomGiftEventManagerProvider(giftRoomId).notifier,
+        );
+        if (manager.isAlive) manager.setEffects(moreFeatures.effects);
+        if (viewModel.mounted) {
+          viewModel.clearToolsPublicMessages = () => ref
+              .read(roomToolsControllerProvider(giftRoomId).notifier)
+              .clearLuckyPublicMessages();
+          viewModel.bindLuckyMessages(
+            ref.read(roomToolsControllerProvider(giftRoomId)).luckyMessages,
+          );
+        }
+      });
+      return null;
+    }, [giftRoomId]);
 
     useEffect(() {
       Future.microtask(() {
@@ -230,6 +287,20 @@ class RoomPage extends HookConsumerWidget {
                           ),
                           _RoomMicGrid(
                             seats: state.seats,
+                            wavesEnabled: moreFeatures.effects.sound,
+                            currency: moreFeatures.currency,
+                            charmEnabled: moreFeatures.charmEnabled,
+                            onCharmTap: (seat) {
+                              if (seat.uid != null && state.isReady) {
+                                pushRoomTool(
+                                  context,
+                                  RoomCharmRankPage(
+                                    roomId: giftRoomId,
+                                    targetUid: seat.uid!,
+                                  ),
+                                );
+                              }
+                            },
                             currentUid: state.currentUid,
                             pendingSeatPosition: state.pendingSeatPosition,
                             onSeatTap: (seat) =>
@@ -260,6 +331,7 @@ class RoomPage extends HookConsumerWidget {
                               context.push('/profile-homepage/$uid');
                             },
                           ),
+                          RoomToolsStrip(roomId: giftRoomId),
                           Expanded(
                             child: LayoutBuilder(
                               builder: (context, constraints) => Column(
@@ -334,8 +406,13 @@ class RoomPage extends HookConsumerWidget {
                             onToggleMic: () => ref
                                 .read(provider.notifier)
                                 .toggleLocalMicrophone(),
-                            onToggleSpeaker: () =>
-                                ref.read(provider.notifier).toggleSpeaker(),
+                            onToggleSpeaker: () => ref
+                                .read(
+                                  roomToolsControllerProvider(
+                                    giftRoomId,
+                                  ).notifier,
+                                )
+                                .toggleVoice(),
                             onGiftTap: () => _showRoomGiftPanel(context, state),
                             onMoreTap: () =>
                                 _showRoomMoreToolsSheet(context, ref, provider),
@@ -347,6 +424,9 @@ class RoomPage extends HookConsumerWidget {
                           roomId: giftRoomId,
                           registry: giftRegistry,
                         ),
+                      ),
+                      Positioned.fill(
+                        child: RoomVehicleLayer(roomId: giftRoomId),
                       ),
                       if (state.isLoading) const _RoomLoadingOverlay(),
                     ],

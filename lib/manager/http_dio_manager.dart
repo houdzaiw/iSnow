@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
@@ -9,9 +10,12 @@ import '../configs/app_device.dart';
 import '../configs/app_enum.dart';
 import 'app_navigation.dart';
 import 'auth_session.dart';
+import 'http_api.dart';
 
 class HttpDioManager {
   static final HttpDioManager _instance = HttpDioManager._internal();
+  static const _anonymousExternalRequest = 'anonymousExternalRequest';
+  static const _externalQueryParameters = 'externalQueryParameters';
 
   late Dio _dio;
   bool _isHandlingUnauthorized = false;
@@ -47,6 +51,25 @@ class HttpDioManager {
         onRequest: (options, handler) async {
           final startedAt = DateTime.now();
           options.extra['requestStartedAt'] = startedAt;
+
+          if (options.extra['signedObjectUpload'] == true) {
+            // OSS STS credentials are supplied for this object only. Do not add
+            // Nady auth, device headers or request signing to the object host.
+            handler.next(options);
+            return;
+          }
+
+          if (options.extra[_anonymousExternalRequest] == true) {
+            // Never forward session headers or device metadata to third parties.
+            options.headers.clear();
+            options.headers['Accept'] = Headers.jsonContentType;
+            options.queryParameters = Map<String, dynamic>.from(
+              options.extra[_externalQueryParameters] as Map,
+            );
+            _logRequest(options);
+            handler.next(options);
+            return;
+          }
 
           final requestParams = _requestParamsForSign(options);
           final timestamp = DateTime.now()
@@ -166,6 +189,59 @@ class HttpDioManager {
     }
   }
 
+  /// Reads external HTTPS JSON without Nady credentials or unauthorized handling.
+  Future<dynamic> getExternalJson(
+    String url, {
+    Map<String, dynamic>? queryParameters,
+    Duration timeout = const Duration(seconds: 5),
+  }) async {
+    final uri = Uri.parse(url);
+    final nadyHosts = [
+      devBaseUrl,
+      qaBaseUrl,
+      prodBaseUrl,
+    ].map((baseUrl) => Uri.parse(baseUrl).host).toSet();
+    if (uri.scheme != 'https' ||
+        uri.host.isEmpty ||
+        uri.userInfo.isNotEmpty ||
+        nadyHosts.contains(uri.host)) {
+      throw ArgumentError.value(url, 'url', 'Expected an external HTTPS URL');
+    }
+    if (timeout <= Duration.zero) {
+      throw ArgumentError.value(timeout, 'timeout', 'Must be positive');
+    }
+
+    final cancellation = CancelToken();
+    try {
+      final response = await _dio
+          .get<dynamic>(
+            url,
+            queryParameters: queryParameters,
+            cancelToken: cancellation,
+            options: Options(
+              responseType: ResponseType.json,
+              receiveTimeout: timeout,
+              sendTimeout: timeout,
+              extra: {
+                _anonymousExternalRequest: true,
+                _externalQueryParameters: {...?queryParameters},
+              },
+            ),
+          )
+          .timeout(
+            timeout,
+            onTimeout: () {
+              cancellation.cancel('External request timed out');
+              throw TimeoutException('External request timed out', timeout);
+            },
+          );
+      return response.data;
+    } on DioException catch (error) {
+      _handleError(error);
+      rethrow;
+    }
+  }
+
   Future<dynamic> post(
     String path, {
     dynamic data,
@@ -184,6 +260,27 @@ class HttpDioManager {
       _handleError(e);
       rethrow;
     }
+  }
+
+  Future<void> putSignedObject(
+    String url,
+    List<int> bytes,
+    Map<String, dynamic> headers,
+  ) async {
+    final uri = Uri.parse(url);
+    if (uri.scheme != 'https' || uri.host.isEmpty || uri.userInfo.isNotEmpty) {
+      throw ArgumentError('Expected an HTTPS object URL');
+    }
+    await _dio.put(
+      url,
+      data: Stream<List<int>>.value(bytes),
+      options: Options(
+        headers: headers,
+        responseType: ResponseType.plain,
+        followRedirects: false,
+        extra: {'signedObjectUpload': true},
+      ),
+    );
   }
 
   Future<dynamic> put(
@@ -295,14 +392,31 @@ class HttpDioManager {
   }
 
   void _logRequest(RequestOptions options) {
+    final external = options.extra[_anonymousExternalRequest] == true;
+    final prefix = external ? '[ExternalHTTP]' : '[NadyAPI]';
+    final url = external ? options.path : '${options.baseUrl}${options.path}';
     debugPrint(
-      '[NadyAPI] -> ${options.method} ${options.baseUrl}${options.path} '
+      '$prefix -> ${options.method} $url '
       'headers=${_headersSummary(options.headers)} '
       'params=${_paramsSummary(options)}',
     );
   }
 
   void _logResponse(Response<dynamic> response) {
+    if ([
+      HttpApi.reportUploadParams,
+      HttpApi.uploadParam,
+      HttpApi.gameToken,
+    ].contains(response.requestOptions.path)) {
+      debugPrint(
+        '[NadyAPI] <- ${response.requestOptions.path} http=${response.statusCode} credentials redacted',
+      );
+      return;
+    }
+    final prefix =
+        response.requestOptions.extra[_anonymousExternalRequest] == true
+        ? '[ExternalHTTP]'
+        : '[NadyAPI]';
     final startedAt = response.requestOptions.extra['requestStartedAt'];
     final durationMs = startedAt is DateTime
         ? DateTime.now().difference(startedAt).inMilliseconds
@@ -310,7 +424,7 @@ class HttpDioManager {
     final data = response.data;
     if (data is Map) {
       debugPrint(
-        '[NadyAPI] <- ${response.requestOptions.path} '
+        '$prefix <- ${response.requestOptions.path} '
         'http=${response.statusCode} code=${data['code']} '
         'message=${data['message']} traceId=${data['traceId']} '
         'durationMs=$durationMs data=${_formatResponseData(data)}',
@@ -318,7 +432,7 @@ class HttpDioManager {
       return;
     }
     debugPrint(
-      '[NadyAPI] <- ${response.requestOptions.path} '
+      '$prefix <- ${response.requestOptions.path} '
       'http=${response.statusCode} durationMs=$durationMs '
       'data=${_formatResponseData(data)}',
     );
@@ -333,15 +447,20 @@ class HttpDioManager {
   }
 
   void _logError(DioException error) {
+    final prefix = error.requestOptions.extra[_anonymousExternalRequest] == true
+        ? '[ExternalHTTP]'
+        : '[NadyAPI]';
     final response = error.response;
     debugPrint(
-      '[NadyAPI] !! ${error.requestOptions.path} '
+      '$prefix !! ${error.requestOptions.path} '
       'type=${error.type} http=${response?.statusCode} '
       'message=${error.message} response=${response?.data}',
     );
   }
 
   Future<void> _handleUnauthorized(DioException error) async {
+    if (error.requestOptions.extra['signedObjectUpload'] == true) return;
+    if (error.requestOptions.extra[_anonymousExternalRequest] == true) return;
     final statusCode = error.response?.statusCode;
     if (statusCode != 401 || _isHandlingUnauthorized) return;
 

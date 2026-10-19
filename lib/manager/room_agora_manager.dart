@@ -356,10 +356,15 @@ class RoomAgoraManager extends ChangeNotifier {
   }
 
   Future<void> muteSpeaker(bool mute) async {
+    final engine = _requireEngine();
     final roomId = _expectedRoomId;
-    if (roomId == null) return;
-    await _engine?.muteAllRemoteAudioStreams(mute);
-    if (_expectedRoomId != roomId) return;
+    if (roomId == null) {
+      throw const NadyApiException(message: 'Agora has not connected yet');
+    }
+    final generation = _generation;
+    if (!await _waitForJoin(engine, roomId, generation)) return;
+    await engine.muteAllRemoteAudioStreams(mute);
+    if (!_isCurrentChannel(engine, roomId, generation)) return;
     _setState(_state.copyWith(mutedSpeaker: mute));
   }
 
@@ -459,6 +464,14 @@ class RoomAgoraManager extends ChangeNotifier {
         );
         final pending = _joinCompletion;
         if (pending != null && !pending.isCompleted) pending.complete(true);
+      },
+      onRejoinChannelSuccess: (connection, elapsed) {
+        if (!_accepts(connection)) return;
+        unawaited(
+          muteSpeaker(_state.mutedSpeaker).catchError((Object error) {
+            debugPrint('[RoomAgora] Restore speaker failed: $error');
+          }),
+        );
       },
       // leaveRoom owns this reset. A late leave callback may refer to a channel
       // that has already been rejoined with the same ID.

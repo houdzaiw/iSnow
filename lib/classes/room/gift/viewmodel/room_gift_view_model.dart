@@ -52,6 +52,7 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
   final bool _ownsSender;
   bool _initialized = false;
   List<RoomGiftRecipient> _sourceRecipients = const [];
+  RoomGiftRecipient? _presetRecipient;
 
   Future<void> initialize({
     required List<RoomGiftRecipient> recipients,
@@ -109,6 +110,56 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
       issue: null,
       issueMessage: null,
     );
+  }
+
+  void applyPreset({int? targetUid, int? giftId, bool backpack = false}) {
+    if (state.status != RoomGiftLoadStatus.ready) return;
+    final gifts = state.tabs.expand((tab) => tab.gifts);
+    final gift = gifts
+        .where(
+          (gift) =>
+              gift.isBackpack == backpack &&
+              (giftId == null || gift.id == giftId),
+        )
+        .firstOrNull;
+    if (gift != null) {
+      selectGift(gift);
+    } else if (giftId != null || backpack) {
+      final tab = state.tabs
+          .where((tab) => tab.id == RoomGiftTab.backpackId)
+          .firstOrNull;
+      if (backpack && tab != null) selectTab(tab.id);
+      state = state.copyWith(
+        selectedGiftKey: null,
+        issue: RoomGiftIssue.chooseGift,
+      );
+    }
+    if (targetUid != null && targetUid > 0) {
+      if (!state.canSendSelf && targetUid == state.currentUid) {
+        state = state.copyWith(
+          targetMode: RoomGiftTargetMode.selected,
+          selectedRecipientUids: {},
+          issue: RoomGiftIssue.noRecipient,
+        );
+        return;
+      }
+      final recipients = [...state.recipients];
+      _presetRecipient =
+          recipients.where((user) => user.uid == targetUid).firstOrNull ??
+          RoomGiftRecipient(
+            uid: targetUid,
+            nickname: '$targetUid',
+            seatPosition: -1,
+          );
+      if (!recipients.any((user) => user.uid == targetUid)) {
+        recipients.add(_presetRecipient!);
+      }
+      state = state.copyWith(
+        recipients: recipients,
+        targetMode: RoomGiftTargetMode.selected,
+        selectedRecipientUids: {targetUid},
+      );
+    }
   }
 
   void selectGift(RoomGift gift) {
@@ -280,6 +331,12 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
               (state.canSendSelf || user.uid != state.currentUid),
         )
         .toList();
+    final preset = _presetRecipient;
+    if (preset != null &&
+        !available.any((user) => user.uid == preset.uid) &&
+        (state.canSendSelf || preset.uid != state.currentUid)) {
+      available.add(preset);
+    }
     final uids = available.map((user) => user.uid).toSet();
     state = state.copyWith(
       recipients: available,

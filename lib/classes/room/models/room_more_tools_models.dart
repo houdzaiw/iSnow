@@ -60,7 +60,10 @@ class RoomToolBanner {
     final rawUrl = routeUrl?.trim();
     if (rawUrl == null || rawUrl.isEmpty) return '';
 
-    final uri = Uri.tryParse(rawUrl);
+    final resolved = rawUrl
+        .replaceAll(r'${roomId}', Uri.encodeComponent(roomId))
+        .replaceAll(r'${language}', Uri.encodeComponent(languageCode));
+    final uri = Uri.tryParse(resolved);
     if (uri == null || uri.scheme.isEmpty) return rawUrl;
 
     final queryParameters = Map<String, String>.from(uri.queryParameters);

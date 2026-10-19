@@ -9,6 +9,8 @@ import '../../theme/app_theme.dart';
 import '../../widgets/custom_scaffold.dart';
 import 'chat_view_model.dart';
 import 'im_message_formatter.dart';
+import '../room/more/room_entry_flow.dart';
+import '../room/more/room_invitation_card.dart';
 
 class ChatPage extends HookConsumerWidget {
   const ChatPage({super.key, required this.targetUID, this.title});
@@ -138,14 +140,18 @@ class _MessageBubble extends StatelessWidget {
               ? CrossAxisAlignment.end
               : CrossAxisAlignment.start,
           children: [
-            Text(
-              content.isEmpty
-                  ? context.l10n.t('message.emptyPreview')
-                  : content,
-              style: AppTextStyles.body.copyWith(
-                color: isSelf ? AppColors.textInverse : AppColors.textBody,
+            if (decodeRoomInvitation(message.customElem?.data)
+                case final invitation?)
+              RoomInvitationCard(room: invitation)
+            else
+              Text(
+                content.isEmpty
+                    ? context.l10n.t('message.emptyPreview')
+                    : content,
+                style: AppTextStyles.body.copyWith(
+                  color: isSelf ? AppColors.textInverse : AppColors.textBody,
+                ),
               ),
-            ),
             const SizedBox(height: 4),
             Text(
               _formatTime(context, imMessageTime(message)),

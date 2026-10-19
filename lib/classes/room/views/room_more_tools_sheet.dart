@@ -16,34 +16,72 @@ void _showRoomMoreToolsSheet(
     builder: (sheetContext) {
       return _RoomMoreToolsSheet(
         roomProvider: provider,
+        onOpenTool: (action) {
+          final roomId = _roomMoreRoomId(ref.read(provider));
+          final page = switch (action) {
+            'share' => RoomSharePage(roomId: roomId),
+            'report' => RoomReportPage(roomId: roomId),
+            'effects' => RoomSettingsPage(
+              roomId: roomId,
+              section: RoomSettingSection.effects,
+            ),
+            'counter' => RoomSettingsPage(
+              roomId: roomId,
+              section: RoomSettingSection.charmCounter,
+            ),
+            'currency' => RoomSettingsPage(
+              roomId: roomId,
+              section: RoomSettingSection.charmCurrency,
+            ),
+            'pk' => RoomPkPage(roomId: roomId),
+            'lucky' => RoomLuckyBoxPage(roomId: roomId),
+            _ => RoomLobbyPage(roomId: roomId),
+          };
+          Navigator.of(sheetContext).pop();
+          if (context.mounted) pushRoomTool(context, page);
+        },
         onOpenMusic: () {
           final roomState = ref.read(provider);
           Navigator.of(sheetContext).pop();
           if (context.mounted) _openRoomMusic(context, roomState);
         },
-        onOpenBanner: (banner) {
+        onOpenBanner: (banner, game) {
           final roomState = ref.read(provider);
           final targetUrl = banner.resolvedRouteUrl(
             roomId: _roomMoreRoomId(roomState),
             languageCode: Localizations.localeOf(context).languageCode,
           );
-          if (targetUrl.isEmpty) {
+          final target = Uri.tryParse(targetUrl);
+          if (target == null ||
+              !{'http', 'https'}.contains(target.scheme) ||
+              target.host.isEmpty ||
+              target.userInfo.isNotEmpty) {
             _showRoomMoreSnack(
               sheetContext,
-              context.l10n.t('room.more.actionPending'),
+              toolText(context, 'This tool is unavailable', '此功能当前不可用'),
             );
             return;
           }
 
           Navigator.of(sheetContext).pop();
           if (!context.mounted) return;
+          if (game) {
+            openRoomGame(
+              context,
+              ref,
+              _roomMoreRoomId(roomState),
+              targetUrl,
+              banner.displayName,
+            );
+            return;
+          }
           context.push(
             Uri(
               path: '/web-view',
               queryParameters: {
                 'title': banner.displayName,
                 'uri': targetUrl,
-                'hiddenAppBar': 'true',
+                'hiddenAppBar': 'false',
               },
             ).toString(),
           );
@@ -58,12 +96,14 @@ class _RoomMoreToolsSheet extends ConsumerWidget {
     required this.onOpenMusic,
     required this.roomProvider,
     required this.onOpenBanner,
+    required this.onOpenTool,
   });
 
   final AutoDisposeStateNotifierProvider<RoomViewModel, RoomPageState>
   roomProvider;
-  final ValueChanged<RoomToolBanner> onOpenBanner;
+  final void Function(RoomToolBanner, bool) onOpenBanner;
   final VoidCallback onOpenMusic;
+  final ValueChanged<String> onOpenTool;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -72,6 +112,8 @@ class _RoomMoreToolsSheet extends ConsumerWidget {
     final toolsProvider = roomMoreToolsViewModelProvider(roomId);
     final toolsState = ref.watch(toolsProvider);
     final toolsNotifier = ref.read(toolsProvider.notifier);
+    final featureState = ref.watch(roomToolsControllerProvider(roomId));
+    final features = ref.read(roomToolsControllerProvider(roomId).notifier);
 
     final sections = <Widget>[
       _RoomMoreSection(
@@ -81,19 +123,57 @@ class _RoomMoreToolsSheet extends ConsumerWidget {
       if (roomState.isOwnerOrManager)
         _RoomMoreSection(
           title: context.l10n.t('room.more.roomMode'),
-          items: _roomModeTools(context, toolsState, roomState, toolsNotifier),
+          items: [
+            for (final type in featureState.config.moreModes)
+              _RoomMoreToolItem(
+                label: type == 0
+                    ? toolText(context, 'Chat', '聊天')
+                    : type == 1
+                    ? 'Win'
+                    : toolText(context, 'Treasure', '宝藏大厅'),
+                asset: type == 0
+                    ? AppAssets.lanhuRoomMoreModeChat
+                    : type == 1
+                    ? AppAssets.lanhuRoomMoreModeWin
+                    : AppAssets.lanhuRoomMoreModeParty,
+                assetIncludesTile: true,
+                selected: featureState.lobbyType == type,
+                loading: featureState.busy.contains('mode'),
+                onTap: featureState.busy.contains('mode')
+                    ? null
+                    : () async {
+                        final success = await features.selectMode(type);
+                        if (!context.mounted) return;
+                        if (success &&
+                            type != 0 &&
+                            features.snapshot.lobbyType == type) {
+                          onOpenTool('lobby');
+                        } else if (!success) {
+                          _showRoomMoreSnack(
+                            context,
+                            features.snapshot.error ??
+                                context.l10n.t('room.more.lobbyFailed'),
+                          );
+                        }
+                      },
+              ),
+          ],
         ),
-      if (roomState.isOwnerOrManager)
+      if (roomState.isOwnerOrManager || features.canSendLucky)
         _RoomMoreSection(
           title: context.l10n.t('room.more.party'),
-          items: _partyTools(context),
+          items: _partyTools(
+            context,
+            roomState.isOwnerOrManager,
+            features.canSendLucky,
+          ),
         ),
       if (toolsState.loadingBanners && toolsState.gameBanners.isEmpty)
         _RoomMoreLoadingSection(title: context.l10n.t('room.more.game')),
       if (toolsState.gameBanners.isNotEmpty)
         _RoomMoreSection(
           title: context.l10n.t('room.more.game'),
-          items: _bannerTools(toolsState.gameBanners),
+          items: _bannerTools(toolsState.gameBanners, game: true),
         ),
       if (toolsState.errorMessage != null)
         _RoomMoreErrorRow(
@@ -105,6 +185,7 @@ class _RoomMoreToolsSheet extends ConsumerWidget {
     return SafeArea(
       top: false,
       child: Container(
+        key: const ValueKey('room-more-tools-sheet'),
         margin: EdgeInsets.fromLTRB(
           AppSpacing.roomMoreSheetHorizontalMargin.w,
           0,
@@ -147,19 +228,13 @@ class _RoomMoreToolsSheet extends ConsumerWidget {
         label: context.l10n.t('room.more.share'),
         asset: AppAssets.lanhuRoomMoreShare,
         assetIncludesTile: true,
-        onTap: () => _showRoomMoreSnack(
-          context,
-          context.l10n.t('room.more.actionPending'),
-        ),
+        onTap: () => onOpenTool('share'),
       ),
       _RoomMoreToolItem(
         label: context.l10n.t('room.more.report'),
         asset: AppAssets.lanhuRoomMoreReport,
         assetIncludesTile: true,
-        onTap: () => _showRoomMoreSnack(
-          context,
-          context.l10n.t('room.more.actionPending'),
-        ),
+        onTap: () => onOpenTool('report'),
       ),
       if (roomState.isOwnerOrManager)
         _RoomMoreToolItem(
@@ -173,10 +248,7 @@ class _RoomMoreToolsSheet extends ConsumerWidget {
           label: context.l10n.t('room.more.charmCounter'),
           asset: AppAssets.lanhuRoomMoreCharmCounter,
           assetIncludesTile: true,
-          onTap: () => _showRoomMoreSnack(
-            context,
-            context.l10n.t('room.more.actionPending'),
-          ),
+          onTap: () => onOpenTool('counter'),
         ),
       _RoomMoreToolItem(
         label: context.l10n.t('room.more.voice'),
@@ -186,8 +258,26 @@ class _RoomMoreToolsSheet extends ConsumerWidget {
         assetIncludesTile: true,
         selected: !roomState.agoraState.mutedSpeaker,
         onTap: () async {
-          await ref.read(roomProvider.notifier).toggleSpeaker();
+          final success = await ref
+              .read(
+                roomToolsControllerProvider(
+                  _roomMoreRoomId(roomState),
+                ).notifier,
+              )
+              .toggleVoice();
           if (!context.mounted) return;
+          if (!success) {
+            _showRoomMoreSnack(
+              context,
+              ref
+                      .read(
+                        roomToolsControllerProvider(_roomMoreRoomId(roomState)),
+                      )
+                      .error ??
+                  context.l10n.t('room.more.lobbyFailed'),
+            );
+            return;
+          }
           final muted = ref.read(roomProvider).agoraState.mutedSpeaker;
           _showRoomMoreSnack(
             context,
@@ -199,101 +289,52 @@ class _RoomMoreToolsSheet extends ConsumerWidget {
         label: context.l10n.t('room.more.effectSettings'),
         asset: AppAssets.lanhuRoomMoreEffectsSetting,
         assetIncludesTile: true,
-        onTap: () => _showRoomMoreSnack(
-          context,
-          context.l10n.t('room.more.actionPending'),
-        ),
+        onTap: () => onOpenTool('effects'),
       ),
       if (roomState.isOwnerOrManager)
         _RoomMoreToolItem(
           label: context.l10n.t('room.more.charmSet'),
           asset: AppAssets.lanhuRoomMoreCharmSetting,
           assetIncludesTile: true,
-          onTap: () => _showRoomMoreSnack(
-            context,
-            context.l10n.t('room.more.actionPending'),
-          ),
+          onTap: () => onOpenTool('currency'),
         ),
       ..._bannerTools(toolsState.additionalTools),
     ];
   }
 
-  List<_RoomMoreToolItem> _roomModeTools(
+  List<_RoomMoreToolItem> _partyTools(
     BuildContext context,
-    RoomMoreToolsState toolsState,
-    RoomPageState roomState,
-    RoomMoreToolsViewModel toolsNotifier,
+    bool manager,
+    bool lucky,
   ) {
-    final activeLobbyType =
-        toolsState.activeLobbyType ??
-        (roomState.enterResponse?.status == 1
-            ? roomState.enterResponse?.lobbyType
-            : null);
-
-    return RoomLobbyToolType.values.map((type) {
-      final selected = activeLobbyType == type.value;
-      final loading = toolsState.togglingLobbyType == type.value;
-      final asset = _roomModeAsset(type);
-      return _RoomMoreToolItem(
-        label: context.l10n.t(type.labelKey),
-        asset: asset,
-        assetIncludesTile: asset != AppAssets.lanhuRoomIconMissing,
-        selected: selected,
-        loading: loading,
-        onTap: loading
-            ? null
-            : () async {
-                final open = !selected;
-                final success = await toolsNotifier.setLobbyMode(
-                  type,
-                  open: open,
-                );
-                if (!context.mounted) return;
-                _showRoomMoreSnack(
-                  context,
-                  context.l10n.t(
-                    success
-                        ? open
-                              ? 'room.more.lobbyOpenSuccess'
-                              : 'room.more.lobbyCloseSuccess'
-                        : 'room.more.lobbyFailed',
-                  ),
-                );
-              },
-      );
-    }).toList();
-  }
-
-  List<_RoomMoreToolItem> _partyTools(BuildContext context) {
     return [
-      _RoomMoreToolItem(
-        label: context.l10n.t('room.more.pk'),
-        asset: AppAssets.lanhuRoomMorePk,
-        assetIncludesTile: true,
-        onTap: () => _showRoomMoreSnack(
-          context,
-          context.l10n.t('room.more.actionPending'),
+      if (manager)
+        _RoomMoreToolItem(
+          label: context.l10n.t('room.more.pk'),
+          asset: AppAssets.lanhuRoomMorePk,
+          assetIncludesTile: true,
+          onTap: () => onOpenTool('pk'),
         ),
-      ),
-      _RoomMoreToolItem(
-        label: context.l10n.t('room.more.luckyBox'),
-        asset: AppAssets.lanhuRoomMoreLuckyBox,
-        assetIncludesTile: true,
-        onTap: () => _showRoomMoreSnack(
-          context,
-          context.l10n.t('room.more.actionPending'),
+      if (lucky)
+        _RoomMoreToolItem(
+          label: context.l10n.t('room.more.luckyBox'),
+          asset: AppAssets.lanhuRoomMoreLuckyBox,
+          assetIncludesTile: true,
+          onTap: () => onOpenTool('lucky'),
         ),
-      ),
     ];
   }
 
-  List<_RoomMoreToolItem> _bannerTools(List<RoomToolBanner> banners) {
+  List<_RoomMoreToolItem> _bannerTools(
+    List<RoomToolBanner> banners, {
+    bool game = false,
+  }) {
     return banners.map((banner) {
       return _RoomMoreToolItem(
         label: banner.displayName,
         imageUrl: banner.iconUrl,
         tags: banner.tagList,
-        onTap: () => onOpenBanner(banner),
+        onTap: () => onOpenBanner(banner, game),
       );
     }).toList();
   }
@@ -604,25 +645,6 @@ class _RoomMoreToolItem {
   final bool selected;
   final bool loading;
   final VoidCallback? onTap;
-}
-
-String _roomModeAsset(RoomLobbyToolType type) {
-  // The API exposes six mode values while the Lanhu sheet has five visuals;
-  // reuse the closest visual without changing the server-side mode values.
-  switch (type) {
-    case RoomLobbyToolType.gameDefault:
-      return AppAssets.lanhuRoomMoreModeGame;
-    case RoomLobbyToolType.gameMining:
-      return AppAssets.lanhuRoomMoreModeParty;
-    case RoomLobbyToolType.gameSquare:
-      return AppAssets.lanhuRoomMoreModeGame;
-    case RoomLobbyToolType.gameGrandPrize:
-      return AppAssets.lanhuRoomMoreModeWin;
-    case RoomLobbyToolType.gameMenu:
-      return AppAssets.lanhuRoomMoreModeKtv;
-    case RoomLobbyToolType.mapSocial:
-      return AppAssets.lanhuRoomMoreModeChat;
-  }
 }
 
 String _roomMoreRoomId(RoomPageState state) {
