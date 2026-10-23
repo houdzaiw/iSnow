@@ -1,0 +1,16 @@
+name: room_music_scan
+description: Android MediaStore discovery and audio export for room music.
+version: 1.0.0
+publish_to: none
+environment:
+  sdk: '>=3.9.0 <4.0.0'
+  flutter: '>=3.35.0'
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.isnow.room_music_scan
+        pluginClass: RoomMusicScanPlugin

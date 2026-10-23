@@ -66,7 +66,7 @@ class RoomMusicControls extends HookWidget {
                 RoomMusicImageButton(
                   label: context.l10n.t('room.music.previous'),
                   asset: AppAssets.roomMusicPrevious,
-                  onTap: enabled && state.tracks.isNotEmpty
+                  onTap: enabled && state.totalTracks > 0
                       ? () => viewModel.next(previous: true)
                       : null,
                 ),
@@ -82,7 +82,7 @@ class RoomMusicControls extends HookWidget {
                       : AppAssets.roomMusicPlay,
                   onTap:
                       enabled &&
-                          state.tracks.isNotEmpty &&
+                          state.totalTracks > 0 &&
                           music.status != RoomMusicPlayback.preparing
                       ? viewModel.toggle
                       : null,
@@ -90,7 +90,7 @@ class RoomMusicControls extends HookWidget {
                 RoomMusicImageButton(
                   label: context.l10n.t('room.music.next'),
                   asset: AppAssets.roomMusicNext,
-                  onTap: enabled && state.tracks.isNotEmpty
+                  onTap: enabled && state.totalTracks > 0
                       ? viewModel.next
                       : null,
                 ),

@@ -7,6 +7,16 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../classes/room/music/room_music_track.dart';
+import '../classes/room/music/room_local_music_track.dart';
+import 'room_local_music_manager.dart';
+
+class RoomMusicImportBatch {
+  final List<RoomMusicTrack> tracks = [];
+
+  /// Only files created by this batch may be rolled back after cancellation.
+  final List<RoomMusicTrack> created = [];
+  int failedCount = 0;
+}
 
 class RoomMusicLibrary {
   RoomMusicLibrary({
@@ -53,35 +63,101 @@ class RoomMusicLibrary {
   Future<String> path(int uid, RoomMusicTrack track) async =>
       '${(await _folder(uid)).path}/${track.fileName}';
 
-  Future<List<RoomMusicTrack>> importAudio(int uid) async {
+  Future<RoomMusicImportBatch> importAudio(
+    int uid, {
+    bool Function()? isCancelled,
+  }) async {
     final files = await _pickFiles();
-    final tracks = <RoomMusicTrack>[];
+    final batch = RoomMusicImportBatch();
     for (final selected in files) {
-      final source = selected.path;
-      final extension = selected.extension?.toLowerCase();
-      if (source == null || !extensions.contains(extension)) {
-        throw const FormatException('Unsupported audio file');
+      if (isCancelled?.call() == true) break;
+      try {
+        final source = selected.path;
+        if (source == null) throw const FormatException('No audio file');
+        await _importFile(uid, source, selected.name, 0, batch);
+      } catch (_) {
+        batch.failedCount++;
       }
-      final file = File(source);
-      final id = (await sha256.bind(file.openRead()).first).toString();
-      final track = RoomMusicTrack(
-        id: id,
-        name: selected.name,
-        fileName: '$id.$extension',
-      );
-      final target = await path(uid, track);
-      if (!await File(target).exists()) await file.copy(target);
-      tracks.add(track);
     }
-    return tracks;
+    return batch;
+  }
+
+  Future<RoomMusicImportBatch> importLocal(
+    int uid,
+    List<RoomLocalMusicTrack> tracks,
+    RoomLocalMusicManager manager, {
+    bool Function()? isCancelled,
+  }) async {
+    final batch = RoomMusicImportBatch();
+    for (final track in tracks) {
+      if (isCancelled?.call() == true) break;
+      String? temporary;
+      try {
+        temporary = await manager.exportAudio(track);
+        if (isCancelled?.call() == true) break;
+        await _importFile(uid, temporary, track.name, track.duration, batch);
+      } catch (_) {
+        batch.failedCount++;
+      } finally {
+        if (temporary != null) {
+          try {
+            await File(temporary).delete();
+          } on FileSystemException catch (_) {
+            // A cache eviction must not turn a successful import into failure.
+          }
+        }
+      }
+    }
+    return batch;
+  }
+
+  Future<void> _importFile(
+    int uid,
+    String source,
+    String name,
+    int duration,
+    RoomMusicImportBatch batch,
+  ) async {
+    final extension = name.split('.').last.toLowerCase();
+    if (!extensions.contains(extension)) {
+      throw const FormatException('Unsupported audio file');
+    }
+    final file = File(source);
+    if (await file.length() == 0) throw const FormatException('Empty audio');
+    final id = (await sha256.bind(file.openRead()).first).toString();
+    final track = RoomMusicTrack(
+      id: id,
+      name: name,
+      fileName: '$id.$extension',
+      duration: duration,
+    );
+    final target = File(await path(uid, track));
+    if (!await target.exists()) {
+      final staged = File('${target.path}.part');
+      try {
+        await file.copy(staged.path);
+        await staged.rename(target.path);
+        batch.created.add(track);
+      } finally {
+        if (await staged.exists()) await staged.delete();
+      }
+    }
+    batch.tracks.add(track);
+  }
+
+  Future<void> discard(int uid, RoomMusicImportBatch batch) async {
+    for (final track in batch.created) {
+      await remove(uid, track);
+    }
   }
 
   Future<void> save(int uid, List<RoomMusicTrack> tracks) async {
     final preferences = await SharedPreferences.getInstance();
-    await preferences.setStringList(
+    final saved = await preferences.setStringList(
       'room_music_$uid',
       tracks.map((track) => jsonEncode(track.toJson())).toList(),
     );
+    if (!saved) throw const FileSystemException('Unable to save music library');
   }
 
   Future<void> remove(int uid, RoomMusicTrack track) async {

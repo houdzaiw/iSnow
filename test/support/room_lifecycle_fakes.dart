@@ -52,8 +52,9 @@ class RoomLifecycleFixture {
 
 class FakeRoomAuth extends ChangeNotifier implements AuthSession {
   bool loggedIn = true;
+  int currentUid = 10;
   @override
-  Future<int?> uid() async => loggedIn ? 10 : null;
+  Future<int?> uid() async => loggedIn ? currentUid : null;
   @override
   Future<UserData?> user() async => null;
   @override

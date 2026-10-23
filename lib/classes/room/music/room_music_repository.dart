@@ -7,10 +7,14 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../manager/api_error_message.dart';
 import '../../../manager/room_manager.dart';
 import '../../../manager/room_music_library.dart';
+import '../../../manager/room_local_music_manager.dart';
 import '../../../model/room_music_state.dart';
 import '../../../model/server_response.dart';
 import '../room_repository.dart';
 import 'room_music_track.dart';
+import 'room_local_music_track.dart';
+
+part 'room_music_repository_import.dart';
 
 final roomMusicRepositoryProvider = Provider<RoomMusicRepository>(
   (ref) => RoomMusicRepository.instance,
@@ -18,9 +22,13 @@ final roomMusicRepositoryProvider = Provider<RoomMusicRepository>(
 
 /// Application-lifetime music library and playback coordination, independent of sheets.
 class RoomMusicRepository extends ChangeNotifier {
-  RoomMusicRepository({RoomRepository? room, RoomMusicLibrary? library})
-    : _room = room ?? RoomRepository(),
-      _library = library ?? RoomMusicLibrary() {
+  RoomMusicRepository({
+    RoomRepository? room,
+    RoomMusicLibrary? library,
+    RoomLocalMusicManager? localMusic,
+  }) : _room = room ?? RoomRepository(),
+       _library = library ?? RoomMusicLibrary(),
+       _localMusic = localMusic ?? RoomLocalMusicManager() {
     _room.addListener(_sync);
     _room.addAuthListener(_authChanged);
     _completed = playback.completed;
@@ -30,6 +38,10 @@ class RoomMusicRepository extends ChangeNotifier {
   static final instance = RoomMusicRepository();
   final RoomRepository _room;
   final RoomMusicLibrary _library;
+  final RoomLocalMusicManager _localMusic;
+  Future<void> _editQueue = Future<void>.value();
+  Future<RoomMusicImportResult>? _importTask;
+  int _authEpoch = 0;
   List<RoomMusicTrack> _tracks = const [];
   int? _uid;
   Future<void>? _loadTask;
@@ -43,6 +55,13 @@ class RoomMusicRepository extends ChangeNotifier {
   RoomMusicPlaybackState get playback => _room.agoraState.music;
   RoomMusicMode get mode => _mode;
   String? get automaticError => _automaticError;
+  bool get supportsLocalScan => _localMusic.supported;
+  int get sessionGeneration => _room.roomGeneration;
+  void _setTracks(List<RoomMusicTrack> tracks) {
+    _tracks = tracks;
+    notifyListeners();
+  }
+
   RoomMusicTrack? get selected {
     for (final track in _tracks) {
       if (playback.path?.endsWith('/${track.fileName}') == true) return track;
@@ -80,40 +99,56 @@ class RoomMusicRepository extends ChangeNotifier {
   }
 
   Future<void> _load(int uid) async {
+    final epoch = _authEpoch;
     final tracks = await _library.load(uid);
-    if (_disposed || uid != await _room.currentUid()) return;
+    if (_disposed || epoch != _authEpoch || uid != await _room.currentUid()) {
+      return;
+    }
     _uid = uid;
     _tracks = List.unmodifiable(tracks);
     notifyListeners();
   }
 
-  Future<void> addAudio() async {
-    await load();
-    final uid = _uid;
-    if (uid == null) throw const NadyApiException(message: 'Not logged in');
-    final imported = await _library.importAudio(uid);
-    if (_disposed || uid != await _room.currentUid()) return;
-    final tracks = {for (final track in _tracks) track.id: track};
-    for (final track in imported) {
-      tracks.putIfAbsent(track.id, () => track);
-    }
-    final next = List<RoomMusicTrack>.unmodifiable(tracks.values);
-    await _library.save(uid, next);
-    _tracks = next;
-    notifyListeners();
-  }
+  /// Discovers Android audio without importing files or acquiring the player.
+  Future<RoomLocalMusicScanResult> scanLocalTracks({
+    bool requestPermission = false,
+  }) => _localMusic.scan(requestPermission: requestPermission);
 
-  Future<void> remove(RoomMusicTrack track) async {
-    final uid = _uid;
-    if (uid == null) return;
-    if (selected?.id == track.id) await _room.stopMusic();
-    final next = _tracks.where((item) => item.id != track.id).toList();
-    await _library.save(uid, next);
-    await _library.remove(uid, track);
-    if (!_disposed && uid == _uid) {
-      _tracks = List.unmodifiable(next);
-      notifyListeners();
-    }
+  Future<void> openMusicSettings() => _localMusic.openSettings();
+
+  Future<RoomMusicImportResult> addAudio({bool Function()? isCancelled}) =>
+      _importMusic(
+        (uid, cancelled) => _library.importAudio(uid, isCancelled: cancelled),
+        isCancelled: isCancelled,
+      );
+
+  /// Copies selected audio into the current account's library without autoplay.
+  Future<RoomMusicImportResult> addLocalTracks(
+    List<RoomLocalMusicTrack> tracks, {
+    bool Function()? isCancelled,
+  }) => _importMusic(
+    (uid, cancelled) =>
+        _library.importLocal(uid, tracks, _localMusic, isCancelled: cancelled),
+    isCancelled: isCancelled,
+  );
+
+  Future<void> remove(RoomMusicTrack track) {
+    final epoch = _authEpoch;
+    return _edit(() async {
+      if (_disposed || epoch != _authEpoch) return;
+      final uid = _uid;
+      if (uid == null) return;
+      final previous = _tracks;
+      if (selected?.id == track.id) await _room.stopMusic();
+      if (_disposed || epoch != _authEpoch || uid != _uid) return;
+      final next = previous.where((item) => item.id != track.id).toList();
+      await _library.save(uid, next);
+      await _library.remove(uid, track);
+      if (!_disposed && epoch == _authEpoch && uid == _uid) {
+        _tracks = List.unmodifiable(next);
+        notifyListeners();
+      }
+    });
   }
 
   Future<void> play(
@@ -217,6 +252,10 @@ class RoomMusicRepository extends ChangeNotifier {
   }
 
   void _authChanged() {
+    _authEpoch++;
+    _uid = null;
+    _tracks = const [];
+    notifyListeners();
     unawaited(_reloadForAuth());
   }
 

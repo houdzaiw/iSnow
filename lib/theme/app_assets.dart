@@ -18,6 +18,7 @@ class AppAssets {
   static const roomMusicStop = lanhuRoomIconMissing;
   static const roomMusicDelete = lanhuRoomIconMissing;
   static const roomMusicVolume = lanhuRoomIconMissing;
+  static const roomMusicSearch = lanhuRoomIconMissing;
   static const String roomExitKeep = 'assets/lanhu/room/room_exit_keep.png';
   static const String roomExitClose = 'assets/lanhu/room/room_exit_close.png';
   static const String roomMiniClose = 'assets/lanhu/room/room_mini_close.webp';

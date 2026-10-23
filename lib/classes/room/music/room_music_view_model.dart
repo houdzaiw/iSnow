@@ -17,6 +17,9 @@ class RoomMusicSheetState {
     this.busy = false,
     this.error,
     this.takeover = false,
+    this.query = '',
+    this.noticeKey,
+    this.totalTracks = 0,
   });
   final List<RoomMusicTrack> tracks;
   final RoomMusicPlaybackState playback;
@@ -25,6 +28,9 @@ class RoomMusicSheetState {
   final bool busy;
   final String? error;
   final bool takeover;
+  final String query;
+  final String? noticeKey;
+  final int totalTracks;
 }
 
 final roomMusicViewModelProvider = StateNotifierProvider.autoDispose
@@ -51,17 +57,28 @@ class RoomMusicViewModel extends StateNotifier<RoomMusicSheetState> {
   bool _loading = true;
   bool _busy = false;
   String? _error;
+  String _query = '';
+  String? _noticeKey;
+  bool get supportsLocalScan => _repository.supportsLocalScan;
 
   void _sync() {
     if (!mounted) return;
     state = RoomMusicSheetState(
-      tracks: _repository.tracks,
+      tracks: _repository.tracks
+          .where(
+            (track) =>
+                track.name.toLowerCase().contains(_query.trim().toLowerCase()),
+          )
+          .toList(),
       playback: _repository.playback,
       mode: _repository.mode,
       loading: _loading,
       busy: _busy,
       error: _error ?? _repository.automaticError ?? _repository.playback.error,
       takeover: _takeoverAction != null,
+      query: _query,
+      noticeKey: _noticeKey,
+      totalTracks: _repository.tracks.length,
     );
   }
 
@@ -82,6 +99,7 @@ class RoomMusicViewModel extends StateNotifier<RoomMusicSheetState> {
     if (!mounted || _busy || !_repository.isCurrentRoom(_roomId)) return;
     _busy = true;
     _error = null;
+    _noticeKey = null;
     _takeoverAction = null;
     _sync();
     try {
@@ -97,7 +115,19 @@ class RoomMusicViewModel extends StateNotifier<RoomMusicSheetState> {
     }
   }
 
-  Future<void> add() => _run((_) => _repository.addAudio());
+  void search(String query) {
+    _query = query;
+    _sync();
+  }
+
+  Future<void> add() => _run((_) async {
+    final generation = _repository.sessionGeneration;
+    final result = await _repository.addAudio(
+      isCancelled: () =>
+          !mounted || generation != _repository.sessionGeneration,
+    );
+    if (result.failedCount > 0) _noticeKey = 'room.music.importFailed';
+  });
   Future<void> remove(RoomMusicTrack track) =>
       _run((_) => _repository.remove(track));
   Future<void> play(RoomMusicTrack track) =>

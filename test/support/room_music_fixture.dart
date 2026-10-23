@@ -10,12 +10,15 @@ import 'package:project/manager/room_agora_manager.dart';
 import 'package:project/manager/room_background_audio_manager.dart';
 import 'package:project/manager/room_manager.dart';
 import 'package:project/manager/room_music_library.dart';
+import 'package:project/manager/room_local_music_manager.dart';
 import 'package:project/model/room_socket_message.dart';
 
 import 'room_lifecycle_fakes.dart';
 import 'room_music_engine.dart';
 
 class RoomMusicFixture {
+  RoomMusicFixture({this.localMusic});
+  final RoomLocalMusicManager? localMusic;
   final actions = <String>[];
   final auth = FakeRoomAuth();
   final socket = FakeRoomSocket([]);
@@ -62,7 +65,11 @@ class RoomMusicFixture {
         return pickedFiles;
       },
     );
-    music = RoomMusicRepository(room: room, library: library);
+    music = RoomMusicRepository(
+      room: room,
+      library: library,
+      localMusic: localMusic,
+    );
     await manager.enterRoom(roomId: 'visible', agoraAppId: 'test-app');
     await flush();
     await music.load();
