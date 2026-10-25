@@ -42,6 +42,7 @@ class RoomMusicRepository extends ChangeNotifier {
   Future<void> _editQueue = Future<void>.value();
   Future<RoomMusicImportResult>? _importTask;
   int _authEpoch = 0;
+  int _playEpoch = 0;
   List<RoomMusicTrack> _tracks = const [];
   int? _uid;
   Future<void>? _loadTask;
@@ -73,6 +74,9 @@ class RoomMusicRepository extends ChangeNotifier {
       _room.roomState.currentRoomId == roomId &&
       _room.roomState.isInRoom &&
       _room.roomState.status == RoomStatus.ready;
+
+  bool canPresent(String roomId) =>
+      isCurrentRoom(roomId) && !_room.roomState.isMinimized;
 
   Future<void> load() async {
     final uid = await _room.currentUid();
@@ -158,12 +162,15 @@ class RoomMusicRepository extends ChangeNotifier {
   }) async {
     final uid = _uid;
     final generation = _room.roomGeneration;
+    final epoch = _playEpoch;
     if (uid == null || !isCurrentRoom(roomId)) {
       throw const NadyApiException(message: 'Room session ended');
     }
     _automaticError = null;
     final path = await _library.path(uid, track);
-    if (!isCurrentRoom(roomId) || generation != _room.roomGeneration) {
+    if (epoch != _playEpoch ||
+        !isCurrentRoom(roomId) ||
+        generation != _room.roomGeneration) {
       throw const NadyApiException(message: 'Room session ended');
     }
     await _room.playMusic(
@@ -214,7 +221,11 @@ class RoomMusicRepository extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> stop() => _room.stopMusic();
+  Future<void> stop() {
+    _playEpoch++;
+    return _room.stopMusic();
+  }
+
   Future<void> seek(String roomId, int position) =>
       _room.seekMusic(roomId, position);
   Future<void> volume(String roomId, int volume) =>
@@ -253,6 +264,7 @@ class RoomMusicRepository extends ChangeNotifier {
 
   void _authChanged() {
     _authEpoch++;
+    _playEpoch++;
     _uid = null;
     _tracks = const [];
     notifyListeners();
@@ -270,6 +282,7 @@ class RoomMusicRepository extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    _playEpoch++;
     _room.removeListener(_sync);
     _room.removeAuthListener(_authChanged);
     super.dispose();

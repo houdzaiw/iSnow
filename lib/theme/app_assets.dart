@@ -10,14 +10,22 @@ class AppAssets {
   const AppAssets._();
 
   static const String iconMissing = 'assets/lanhu/common/icon_missing.png';
-  // Waiting for the room music-player Lanhu control slices.
-  static const roomMusicPlay = lanhuRoomIconMissing;
-  static const roomMusicPause = lanhuRoomIconMissing;
-  static const roomMusicPrevious = lanhuRoomIconMissing;
-  static const roomMusicNext = lanhuRoomIconMissing;
+  static const roomMusicPlay = 'assets/lanhu/room/room_music_play.png';
+  static const roomMusicPause = 'assets/lanhu/room/room_music_pause.png';
+  static const roomMusicPrevious = 'assets/lanhu/room/room_music_previous.png';
+  static const roomMusicNext = 'assets/lanhu/room/room_music_next.png';
+  static const roomMusicClose = 'assets/lanhu/room/room_music_close.png';
+  static const roomMusicCollapse = 'assets/lanhu/room/room_music_collapse.png';
+  static const roomMusicLoop = 'assets/lanhu/room/room_music_loop.png';
+  static const roomMusicPlaylist = 'assets/lanhu/room/room_music_playlist.png';
+  static const roomMusicSystemVolume =
+      'assets/lanhu/room/room_music_system_volume.png';
+  // No alternate single/shuffle exports in the supplied design.
+  static const roomMusicSingle = lanhuRoomIconMissing;
+  static const roomMusicShuffle = lanhuRoomIconMissing;
   static const roomMusicStop = lanhuRoomIconMissing;
   static const roomMusicDelete = lanhuRoomIconMissing;
-  static const roomMusicVolume = lanhuRoomIconMissing;
+  static const roomMusicVolume = 'assets/lanhu/room/room_music_volume.png';
   static const roomMusicSearch = lanhuRoomIconMissing;
   static const String roomExitKeep = 'assets/lanhu/room/room_exit_keep.png';
   static const String roomExitClose = 'assets/lanhu/room/room_exit_close.png';

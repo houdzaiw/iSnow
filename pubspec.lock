@@ -1646,6 +1646,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "15.0.2"
+  volume_controller:
+    dependency: "direct main"
+    description:
+      path: "packages/room_volume_controller"
+      relative: true
+    source: path
+    version: "3.0.0"
   watcher:
     dependency: transitive
     description:

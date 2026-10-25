@@ -8,6 +8,22 @@ from tools import download_lanhu_room_assets as downloader
 
 
 class LanhuRoomAssetsTest(unittest.TestCase):
+    def test_music_uses_exact_layer_ids_not_generated_css_names(self):
+        layers = [{"name": "section_30", "id": "other", "image": {
+            "imageUrl": "wrong.png"}}]
+        expected = []
+        for index, (layer_id, filename) in enumerate(downloader.ROOM_MUSIC_EXPORTS.items()):
+            url = f"https://example.com/{filename}"
+            layers.append({"id": layer_id, "name": "Frame",
+                           "ddsImage" if index == 0 else "image": {"imageUrl": url}})
+            expected.append((filename, url))
+        self.assertEqual(downloader._room_music_assets({"artboard": {"layers": layers}}), expected)
+        self.assertFalse(any("slider" in name for name, _ in expected))
+
+    def test_music_fails_when_real_export_is_missing(self):
+        with self.assertRaisesRegex(RuntimeError, "exports missing"):
+            downloader._room_music_assets({})
+
     def test_gift_exports_are_scoped_to_their_design_section(self):
         sections = []
         expected = []

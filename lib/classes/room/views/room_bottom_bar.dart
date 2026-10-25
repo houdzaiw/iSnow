@@ -2,6 +2,7 @@ part of '../room_page.dart';
 
 class _RoomBottomBar extends StatelessWidget {
   const _RoomBottomBar({
+    super.key,
     required this.state,
     required this.onChatTap,
     required this.onToggleMic,
@@ -20,7 +21,9 @@ class _RoomBottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 54.h + MediaQuery.paddingOf(context).bottom,
+      height:
+          AppSpacing.roomBottomBarHeight.h +
+          MediaQuery.paddingOf(context).bottom,
       padding: EdgeInsets.fromLTRB(
         28.w,
         8.h,

@@ -1,27 +1,33 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../localization/app_localizations.dart';
 import '../../../theme/app_theme.dart';
 import 'room_music_controls.dart';
+import 'room_music_playlist_footer.dart';
+import 'room_music_takeover_listener.dart';
 import 'room_music_view_model.dart';
 import 'room_local_music_sheet.dart';
 import 'room_music_widgets.dart';
 
-Future<void> showRoomMusicSheet(BuildContext context, String roomId) =>
-    showModalBottomSheet<void>(
-      context: context,
-      useRootNavigator: true,
-      isScrollControlled: true,
-      constraints: const BoxConstraints(maxWidth: double.infinity),
-      backgroundColor: AppColors.roomMoreSheet,
-      barrierColor: AppColors.modalScrimStrong,
-      shape: const RoundedRectangleBorder(borderRadius: AppRadius.sheetBorder),
-      builder: (_) => RoomMusicSheet(roomId: roomId),
-    );
+Future<void> showRoomMusicSheet(BuildContext context, String roomId) {
+  return showModalBottomSheet<void>(
+    context: context,
+    useRootNavigator: true,
+    isScrollControlled: true,
+    constraints: const BoxConstraints(maxWidth: double.infinity),
+    backgroundColor: AppColors.roomMoreSheet,
+    barrierColor: AppColors.modalScrimStrong,
+    shape: const RoundedRectangleBorder(borderRadius: AppRadius.sheetBorder),
+    builder: (_) => RoomMusicSheet(roomId: roomId),
+  );
+}
 
-class RoomMusicSheet extends ConsumerWidget {
+class RoomMusicSheet extends HookConsumerWidget {
   const RoomMusicSheet({super.key, required this.roomId});
   final String roomId;
 
@@ -30,36 +36,11 @@ class RoomMusicSheet extends ConsumerWidget {
     final provider = roomMusicViewModelProvider(roomId);
     final state = ref.watch(provider);
     final viewModel = ref.read(provider.notifier);
-    ref.listen(provider, (previous, next) async {
-      if (!next.takeover || previous?.takeover == true) return;
-      final confirm = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          backgroundColor: AppColors.roomMoreSheet,
-          title: Text(
-            context.l10n.t('room.music.takeover'),
-            style: AppTextStyles.roomMoreSectionTitle,
-          ),
-          content: Text(
-            next.error ?? '',
-            style: AppTextStyles.roomAudienceName,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: Text(context.l10n.t('app.cancel')),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: Text(context.l10n.t('room.music.takeover')),
-            ),
-          ],
-        ),
-      );
-      if (context.mounted && viewModel.mounted) {
-        await viewModel.confirmTakeover(confirm == true);
-      }
-    });
+    useEffect(() {
+      unawaited(Future<void>.microtask(viewModel.initialize));
+      return null;
+    }, [viewModel]);
+    listenRoomMusicTakeover(context, ref, roomId);
     return RoomMusicPanel(
       key: const ValueKey('room-music-sheet'),
       child: Column(
@@ -76,7 +57,7 @@ class RoomMusicSheet extends ConsumerWidget {
                 ),
                 TextButton(
                   key: const ValueKey('room-music-add'),
-                  onPressed: state.busy || state.loading
+                  onPressed: state.busy || state.loading || state.closing
                       ? null
                       : () {
                           FocusScope.of(context).unfocus();
@@ -135,7 +116,9 @@ class RoomMusicSheet extends ConsumerWidget {
                           true;
                       return InkWell(
                         key: ValueKey('room-music-track-${track.id}'),
-                        onTap: state.busy ? null : () => viewModel.play(track),
+                        onTap: state.busy || state.closing
+                            ? null
+                            : () => viewModel.play(track),
                         child: Container(
                           height: AppSpacing.musicTrackHeight.h,
                           color: selected
@@ -185,7 +168,7 @@ class RoomMusicSheet extends ConsumerWidget {
                   ),
           ),
           if (MediaQuery.viewInsetsOf(context).bottom == 0)
-            RoomMusicControls(state: state, viewModel: viewModel),
+            RoomMusicPlaylistFooter(state: state, viewModel: viewModel),
         ],
       ),
     );

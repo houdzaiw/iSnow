@@ -5,11 +5,13 @@ class _RoomMusicStrip extends StatelessWidget {
     required this.state,
     required this.onAudienceTap,
     required this.onMusicTap,
+    required this.musicAnchorKey,
   });
 
   final RoomPageState state;
   final VoidCallback onAudienceTap;
   final VoidCallback onMusicTap;
+  final GlobalKey musicAnchorKey;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +32,7 @@ class _RoomMusicStrip extends StatelessWidget {
                 onTap: state.isReady ? onMusicTap : null,
                 borderRadius: AppRadius.pillBorder,
                 child: Container(
+                  key: musicAnchorKey,
                   height: AppSpacing.roomMusicPillHeight.h,
                   padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm.w),
                   decoration: const BoxDecoration(
@@ -136,11 +139,11 @@ class _RoomMusicStrip extends StatelessWidget {
   }
 }
 
-void _openRoomMusic(BuildContext context, RoomPageState state) {
+void _openRoomMusic(BuildContext context, WidgetRef ref, RoomPageState state) {
   if (!state.isReady) return;
   if (!state.isOnMic) {
     _showRoomMoreSnack(context, context.l10n.t('room.music.takeMic'));
     return;
   }
-  showRoomMusicSheet(context, state.currentRoomId);
+  ref.read(roomMusicViewModelProvider(state.currentRoomId).notifier).expand();
 }

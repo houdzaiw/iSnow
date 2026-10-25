@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
+  static const Color musicBoxSurface = Color(0xE6050505);
+  static const Color musicSliderInactive = Color(0x33FFFFFF);
   static const Color roomExitScrim = Color(0xB3000000);
   static const Color roomMiniSurface = Color(0xFF25232B);
   static const Color roomMusicStripSurface = Color(0x90000000);

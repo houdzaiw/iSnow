@@ -43,7 +43,7 @@ void _showRoomMoreToolsSheet(
         onOpenMusic: () {
           final roomState = ref.read(provider);
           Navigator.of(sheetContext).pop();
-          if (context.mounted) _openRoomMusic(context, roomState);
+          if (context.mounted) _openRoomMusic(context, ref, roomState);
         },
         onOpenBanner: (banner, game) {
           final roomState = ref.read(provider);

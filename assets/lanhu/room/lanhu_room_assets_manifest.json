@@ -1,5 +1,6 @@
 {
-  "music_controls_missing": "roomMusicPlay/Pause/Previous/Next/Stop/Delete/Volume/Search currently alias room_icon_missing.png: no music-player Lanhu design/slices provided; red placeholders awaiting replacement. Existing music entry uses the current Lanhu music asset; selection uses a standard Checkbox form control; no Flutter Icon/Icons used.",
+  "music_controls_missing": "Single/shuffle alternate states, stop, delete and search have no real exports in music design f2616a5f-f98e-4a45-a1d2-05537e65aa76 section_30; keep red missing placeholder pending replacement. No Flutter Icon/Icons.",
+  "music_design_context": "image_id=f2616a5f-f98e-4a45-a1d2-05537e65aa76; section_30 / original layer 15375:181696. Exact layer-ID exports include alternate playback state. Play/pause mapping verified by inspecting PNG contents (source names are reversed). Native interactive sliders replace static slider images.",
   "room_exit_keep.png": "user-provided local asset: /Users/huili/Downloads/exit-dialog/缩小直播间@2x.png; active Keep button image",
   "room_exit_close.png": "user-provided local asset: /Users/huili/Downloads/exit-dialog/退出房间按钮.png; active Exit button image",
   "room_exit_keep.webp": "Nady reference requested for missing UI: assets/images/room_exit_minimize.webp; replace when Lanhu Keep icon is supplied",
@@ -60,5 +61,15 @@
   "room_gift_backpack.png": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNGd98e19341868d75f29203cb77049adcf.png",
   "room_gift_target_arrow.png": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNG6ee414ba63349c9efff8148f3234e7b0.png",
   "room_gift_recipient.png": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNG00c12bfdc2718a904be854fdab15b9f9.png",
-  "room_gift_new_badge.png": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNG1dece31a7fcb33e85e18be47d1317e8f.png"
+  "room_gift_new_badge.png": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNG1dece31a7fcb33e85e18be47d1317e8f.png",
+  "room_music_close.png": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNG8f1c1944e90295834730061b657d974c.png",
+  "room_music_collapse.png": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNG79924414452fac852c44235efa36d331.png",
+  "room_music_loop.png": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNG2dd0bc26e57cbd882a69f75a87f7ed07.png",
+  "room_music_previous.png": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNGd285bf4cf70a4af488d991b89af25f7c.png",
+  "room_music_play.png": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNGd5d861f83d14267f5cdb33a3befd3203.png",
+  "room_music_pause.png": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNG243fb3b52388fba44d90b37d55b004bd.png",
+  "room_music_next.png": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNG23fa9724458ff1336cb7b3b310804308.png",
+  "room_music_playlist.png": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNGdc4dd92b330b2ff9ad628d5ca1a946fb.png",
+  "room_music_volume.png": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNG4815972950b798c21c78ed943ab29cc5.png",
+  "room_music_system_volume.png": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNG1c7022af00bb2dfabab89b93dd4a1d85.png"
 }

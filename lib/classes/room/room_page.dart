@@ -18,7 +18,9 @@ import 'gift/views/room_gift_public_screen_item.dart';
 import 'gift/event/room_gift_event_provider.dart';
 import 'gift/trajectory/room_gift_seat_registry.dart';
 import 'models/room_more_tools_models.dart';
-import 'music/room_music_sheet.dart';
+import 'music/room_music_overlay.dart';
+import 'music/room_music_view_model.dart';
+import 'music/room_music_takeover_listener.dart';
 import 'online/room_audience_avatar.dart';
 import 'online/room_audience_sheet.dart';
 import 'viewmodel/room_state.dart';
@@ -77,6 +79,19 @@ class RoomPage extends HookConsumerWidget {
         : roomId;
     final messageController = useTextEditingController();
     final giftRootKey = useMemoized(() => GlobalKey(), [giftRoomId]);
+    final musicAnchorKey = useMemoized(() => GlobalKey(), [giftRoomId]);
+    final bottomBarKey = useMemoized(() => GlobalKey(), [giftRoomId]);
+    listenRoomMusicTakeover(context, ref, giftRoomId);
+    ref.listen(roomMusicViewModelProvider(giftRoomId), (previous, next) {
+      if (next.error != null &&
+          next.error != previous?.error &&
+          !next.takeover &&
+          pageRoute?.isCurrent == true) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(next.error!)));
+      }
+    });
     final giftRegistry = useMemoized(() => RoomGiftSeatRegistry(giftRootKey), [
       giftRoomId,
     ]);
@@ -225,6 +240,9 @@ class RoomPage extends HookConsumerWidget {
     }
 
     ref.listen<RoomPageState>(provider, (previous, next) {
+      if (!next.isOnMic || next.isMinimized) {
+        ref.read(roomMusicViewModelProvider(giftRoomId).notifier).collapse();
+      }
       if (next.isInRoom) hadRoom.value = true;
       if (hadRoom.value &&
           (next.status == RoomStatus.leaving || !next.isInRoom)) {
@@ -253,7 +271,9 @@ class RoomPage extends HookConsumerWidget {
           if (!didPop) showExitChoices();
         },
         child: Scaffold(
-          resizeToAvoidBottomInset: true,
+          // The composer/list routes handle their own keyboard insets. Keep the
+          // fixed mic grid from overflowing behind those routes.
+          resizeToAvoidBottomInset: false,
           backgroundColor: const Color(0xFF1D0B34),
           body: DecoratedBox(
             decoration: const BoxDecoration(
@@ -313,9 +333,13 @@ class RoomPage extends HookConsumerWidget {
                             ),
                           ),
                           _RoomMusicStrip(
+                            musicAnchorKey: musicAnchorKey,
                             state: state,
-                            onMusicTap: () =>
-                                _openRoomMusic(context, ref.read(provider)),
+                            onMusicTap: () => _openRoomMusic(
+                              context,
+                              ref,
+                              ref.read(provider),
+                            ),
                             onAudienceTap: () async {
                               final roomId = state.currentRoomId;
                               final uid = await showRoomAudienceSheet(
@@ -396,6 +420,7 @@ class RoomPage extends HookConsumerWidget {
                             ),
                           ),
                           _RoomBottomBar(
+                            key: bottomBarKey,
                             state: state,
                             onChatTap: () => _showRoomComposer(
                               context,
@@ -418,6 +443,12 @@ class RoomPage extends HookConsumerWidget {
                                 _showRoomMoreToolsSheet(context, ref, provider),
                           ),
                         ],
+                      ),
+                      RoomMusicOverlay(
+                        roomId: giftRoomId,
+                        rootKey: giftRootKey,
+                        anchorKey: musicAnchorKey,
+                        bottomBarKey: bottomBarKey,
                       ),
                       Positioned.fill(
                         child: RoomGiftOverlay(

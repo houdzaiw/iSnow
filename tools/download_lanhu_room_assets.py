@@ -75,6 +75,20 @@ ROOM_MORE_SEMANTIC_FILES = {
 }
 
 ROOM_GIFT_DESIGN_ID = "dd85e4a7-00f5-41c9-a75b-b28a25da69ad"
+ROOM_MUSIC_DESIGN_ID = "f2616a5f-f98e-4a45-a1d2-05537e65aa76"
+# Exact original layer IDs for section_30, including the alternative pause state.
+ROOM_MUSIC_EXPORTS = {
+    "15375:183487": "room_music_close.png",
+    "15375:183486": "room_music_collapse.png",
+    "15375:183488": "room_music_loop.png",
+    "15375:183489": "room_music_previous.png",
+    "15375:183490": "room_music_pause.png",
+    "15377:183520": "room_music_play.png",
+    "15375:183491": "room_music_next.png",
+    "15375:183492": "room_music_playlist.png",
+    "15375:181675": "room_music_volume.png",
+    "15375:181695": "room_music_system_volume.png",
+}
 ROOM_GIFT_SEMANTIC_FILES = {
     "bg": {
         "Frame_1312319043": "room_gift_first_recharge.png",
@@ -262,6 +276,8 @@ def _fetch_design_assets(design_url: str) -> list[tuple[str, str]]:
 
     if image_id == ROOM_GIFT_DESIGN_ID:
         return _room_gift_assets(sketch)
+    if image_id == ROOM_MUSIC_DESIGN_ID:
+        return _room_music_assets(sketch)
 
     assets: list[tuple[str, str]] = []
     for section_name, filenames in ROOM_MORE_SEMANTIC_FILES.items():
@@ -278,6 +294,29 @@ def _fetch_design_assets(design_url: str) -> list[tuple[str, str]]:
                 # by the actual icon. The final export is the foreground icon.
                 assets.append((filename, urls[-1]))
     return assets
+
+
+def _room_music_assets(sketch: dict) -> list[tuple[str, str]]:
+    exports: dict[str, str] = {}
+
+    def visit(layer: dict) -> None:
+        layer_id = layer.get("id") or layer.get("objectID")
+        if layer_id in ROOM_MUSIC_EXPORTS:
+            for key in ("image", "ddsImage"):
+                url = (layer.get(key) or {}).get("imageUrl")
+                if url:
+                    exports[layer_id] = url
+                    break
+        for child in layer.get("layers") or []:
+            if isinstance(child, dict):
+                visit(child)
+
+    visit(sketch.get("artboard") or {})
+    missing = ROOM_MUSIC_EXPORTS.keys() - exports.keys()
+    if missing:
+        raise RuntimeError(f"Music design exports missing: {sorted(missing)}")
+    return [(filename, exports[layer_id])
+            for layer_id, filename in ROOM_MUSIC_EXPORTS.items()]
 
 
 def _room_gift_assets(sketch: dict) -> list[tuple[str, str]]:

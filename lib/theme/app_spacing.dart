@@ -1,4 +1,23 @@
 class AppSpacing {
+  static const double musicBoxWidth = 260;
+  static const double musicBoxHeight = 211;
+  static const double musicBoxEdge = 14;
+  static const double musicBoxTitleLeft = 50;
+  static const double musicBoxTitleTop = 36;
+  static const double musicBoxTitleRight = 19;
+  static const double musicBoxCollapseTop = 16;
+  static const double musicBoxControlsTop = 60;
+  static const double musicBoxControlsHeight = 50;
+  static const double musicBoxPlaySize = 31;
+  static const double musicBoxIconSize = 20;
+  static const double musicBoxVolumeIconSize = 18;
+  static const double musicBoxVolumeLeft = 21;
+  static const double musicBoxMusicVolumeTop = 118;
+  static const double musicBoxSystemVolumeTop = 162;
+  static const double musicSliderTrackHeight = 4;
+  static const double musicSliderThumbRadius = 4;
+  static const double disabledControlOpacity = 0.35;
+  static const double roomBottomBarHeight = 54;
   static const double roomToolsStripMaxHeightRatio = 0.2;
   static const double musicSheetHeight = 580;
   static const double musicSheetMaxHeightRatio = 0.85;

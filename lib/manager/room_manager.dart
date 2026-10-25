@@ -196,7 +196,12 @@ class RoomManager extends ChangeNotifier {
     () => _agoraManager.setMusicVolume(volume),
     requirePlayer: false,
   );
-  Future<void> stopMusic() => _queueMusic(() => _closeMusicPlayer());
+  Future<void> stopMusic() {
+    _musicEpoch++;
+    // Silence locally even if a pending server lease request has not returned.
+    final stopping = _agoraManager.stopMusic();
+    return _queueMusic(() => _closeMusicPlayer(stopping: stopping));
+  }
 
   Future<void> tryEnterRoom({
     required String roomId,

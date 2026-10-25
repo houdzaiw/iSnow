@@ -19,6 +19,7 @@ class RoomMusicEngine extends RoomMicrophoneEngine {
   bool failStart = false;
   bool acknowledgeStart = true;
   Completer<void>? startGate;
+  Completer<void>? volumeGate;
 
   @override
   Future<void> startAudioMixing({
@@ -59,6 +60,7 @@ class RoomMusicEngine extends RoomMicrophoneEngine {
   @override
   Future<void> adjustAudioMixingVolume(int volume) async {
     volumes.add(volume);
+    await volumeGate?.future;
   }
 
   @override

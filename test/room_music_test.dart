@@ -110,6 +110,33 @@ void main() {
   });
 
   test(
+    'old takeover confirmation cannot act in a reentered same-ID session',
+    () async {
+      await fixture.import();
+      fixture.http.openCode = 4062;
+      final model = RoomMusicViewModel(
+        repository: fixture.music,
+        roomId: 'canonical',
+      );
+      addTearDown(model.dispose);
+      await model.play(fixture.music.tracks.first);
+      expect(model.state.takeover, isTrue);
+      final revision = model.takeoverRevision;
+      await fixture.manager.leaveRoom();
+      await fixture.manager.enterRoom(
+        roomId: 'visible',
+        agoraAppId: 'test-app',
+      );
+      await fixture.flush();
+      fixture.http.openCode = 200;
+      await model.confirmTakeover(true, revision: revision);
+      expect(model.state.takeover, isFalse);
+      expect(fixture.http.opens.length, 1);
+      expect(fixture.engine.starts, isEmpty);
+    },
+  );
+
+  test(
     'owner pushes Nady playback statuses; takeover never announces stopped for the new owner',
     () async {
       fixture.http.roomOwnerUid = 10;
@@ -326,6 +353,36 @@ void main() {
     expect(fixture.agora.state.music.title, 'music-1.mp3');
   });
 
+  test(
+    'close cancels a pending sandbox lookup without leaving the room',
+    () async {
+      await fixture.import();
+      final library = _DelayedLibrary(fixture.directory);
+      final repository = RoomMusicRepository(
+        room: fixture.room,
+        library: library,
+      );
+      addTearDown(repository.dispose);
+      await repository.load();
+      final gate = Completer<void>();
+      library.gate = gate;
+      final model = RoomMusicViewModel(
+        repository: repository,
+        roomId: 'canonical',
+      );
+      addTearDown(model.dispose);
+      final playing = model.toggle();
+      await fixture.flush();
+      expect(model.state.busy, isTrue);
+      await model.close();
+      gate.complete();
+      await playing;
+      expect(fixture.manager.state.isInRoom, isTrue);
+      expect(fixture.engine.starts, isEmpty);
+      expect(fixture.http.opens, isEmpty);
+    },
+  );
+
   test('completion advances playlist even when sheet is absent', () async {
     await fixture.import(2);
     await fixture.music.play('canonical', fixture.music.tracks.first);
@@ -385,9 +442,10 @@ void main() {
         width,
       );
       expect(find.text('music-0.mp3'), findsOneWidget);
-      await tester.tap(find.text('Single'));
-      await tester.pumpAndSettle();
-      expect(fixture.music.mode, RoomMusicMode.single);
+      // Transport modes now live exclusively in the in-room compact box.
+      expect(find.byKey(const ValueKey('room-music-mode')), findsNothing);
+      expect(find.byKey(const ValueKey('room-music-progress')), findsOneWidget);
+      expect(find.byKey(const ValueKey('room-music-stop')), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
     });

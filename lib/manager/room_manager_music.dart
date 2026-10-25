@@ -58,7 +58,12 @@ extension RoomManagerMusic on RoomManager {
         if (!_isCurrentSession(roomId, generation) || epoch != _musicEpoch) {
           return;
         }
-        await _agoraManager.startMusic(path: path, title: title);
+        await _agoraManager.startMusic(
+          path: path,
+          title: title,
+          isCancelled: () =>
+              epoch != _musicEpoch || !_isCurrentSession(roomId, generation),
+        );
       } catch (_) {
         await _closeMusicPlayer();
         rethrow;
@@ -83,10 +88,13 @@ extension RoomManagerMusic on RoomManager {
     });
   }
 
-  Future<void> _closeMusicPlayer({bool revoked = false}) async {
+  Future<void> _closeMusicPlayer({
+    bool revoked = false,
+    Future<void>? stopping,
+  }) async {
     final roomId = _musicPlayerRoomId;
     _musicPlayerRoomId = null;
-    await _agoraManager.stopMusic();
+    await (stopping ?? _agoraManager.stopMusic());
     if (roomId != null && !revoked) {
       await _api.closePlayer(roomId);
     }

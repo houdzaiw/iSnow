@@ -15,12 +15,18 @@ extension RoomAgoraMusic on RoomAgoraManager {
   }
 
   /// Publish mixing to the room while leaving the recording mute unchanged.
-  Future<void> _startMusic({required String path, required String title}) {
+  Future<void> _startMusic({
+    required String path,
+    required String title,
+    bool Function()? isCancelled,
+  }) {
     final generation = _generation;
     final roomId = _expectedRoomId;
     return _queueMusic(() async {
       final engine = _requireEngine();
-      if (roomId == null || !_isCurrentChannel(engine, roomId, generation)) {
+      if (roomId == null ||
+          !_isCurrentChannel(engine, roomId, generation) ||
+          isCancelled?.call() == true) {
         return;
       }
       await publish();
@@ -38,7 +44,10 @@ extension RoomAgoraMusic on RoomAgoraManager {
           await Future<void>.delayed(Duration(milliseconds: remaining));
         }
       }
-      if (!_isCurrentChannel(engine, roomId, generation)) return;
+      if (!_isCurrentChannel(engine, roomId, generation) ||
+          isCancelled?.call() == true) {
+        return;
+      }
       _mixingActive = true;
       _setMusic(
         RoomMusicPlaybackState(
@@ -56,6 +65,10 @@ extension RoomAgoraMusic on RoomAgoraManager {
           loopback: false,
           cycle: 1,
         );
+        if (isCancelled?.call() == true) {
+          await _stopMixing(engine);
+          return;
+        }
         if (!_isCurrentChannel(engine, roomId, generation)) return;
         await engine.adjustAudioMixingVolume(_state.music.volume);
         await engine.adjustAudioMixingPublishVolume(_state.music.volume);

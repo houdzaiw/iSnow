@@ -1,0 +1,56 @@
+package com.kurenai7968.volume_controller
+
+import android.content.Context
+import android.media.AudioManager
+import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.plugin.common.EventChannel
+import io.flutter.plugin.common.MethodCall
+import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.common.MethodChannel.MethodCallHandler
+import io.flutter.plugin.common.MethodChannel.Result
+
+class VolumeControllerPlugin : FlutterPlugin, MethodCallHandler {
+  private lateinit var volumeController: VolumeController
+  private lateinit var methodChannel: MethodChannel
+  private lateinit var eventChannel: EventChannel
+  private var volumeListener: VolumeListener? = null
+
+  override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+    val context = flutterPluginBinding.applicationContext
+    val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    volumeListener = VolumeListener(context, audioManager)
+    volumeController = VolumeController(audioManager)
+
+    // Register EventChannel
+    eventChannel = EventChannel(flutterPluginBinding.binaryMessenger, ChannelName.EVENT_CHANNEL)
+    eventChannel.setStreamHandler(volumeListener)
+
+    // Register MethodChannel
+    methodChannel = MethodChannel(flutterPluginBinding.binaryMessenger, ChannelName.METHOD_CHANNEL)
+    methodChannel.setMethodCallHandler(this)
+  }
+
+  override fun onMethodCall(call: MethodCall, result: Result) {
+    when (call.method) {
+      MethodName.SET_VOLUME -> {
+        val volume: Double = call.argument(MethodArgument.VOLUME)!!
+        val showSystemUI: Boolean = call.argument(MethodArgument.SHOW_SYSTEM_UI)!!
+        try {
+          volumeController.setVolumeByPercentage(volume, showSystemUI)
+          result.success(null)
+        } catch (error: Exception) {
+          result.error("volume_unavailable", error.message, null)
+        }
+      }
+      MethodName.GET_VOLUME -> result.success(volumeController.getVolume())
+      else -> result.notImplemented()
+    }
+  }
+
+  override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+    methodChannel.setMethodCallHandler(null)
+    eventChannel.setStreamHandler(null)
+    volumeListener?.onCancel(null)
+    volumeListener = null
+  }
+}

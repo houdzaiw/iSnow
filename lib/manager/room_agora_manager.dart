@@ -116,8 +116,11 @@ class RoomAgoraManager extends ChangeNotifier {
 
   RoomAgoraState get state => _state;
 
-  Future<void> startMusic({required String path, required String title}) =>
-      _startMusic(path: path, title: title);
+  Future<void> startMusic({
+    required String path,
+    required String title,
+    bool Function()? isCancelled,
+  }) => _startMusic(path: path, title: title, isCancelled: isCancelled);
   Future<void> pauseMusic() => _pauseMusic();
   Future<void> resumeMusic() => _resumeMusic();
   Future<void> stopMusic() => _stopMusic();

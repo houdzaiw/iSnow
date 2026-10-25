@@ -49,6 +49,8 @@ dependencies:
   file_picker: 8.3.7
   room_music_scan:
     path: packages/room_music_scan
+  volume_controller:
+    path: packages/room_volume_controller
   intl: ^0.20.2
   flutter_hooks: ^0.21.3+1
   record: ^6.1.2
