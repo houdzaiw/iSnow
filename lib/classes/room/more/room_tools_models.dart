@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:intl/intl.dart';
+
 typedef ToolJson = Map<String, dynamic>;
 
 Object? toolDecode(Object? value) {
@@ -43,6 +45,31 @@ class RoomFunctionConfig {
         ).any((entry) => toolInt(entry['position']) == position),
   );
   List<int> get moreModes => [0, if (enabled(1, 7)) 1, if (enabled(2, 7)) 2];
+}
+
+class RoomBigWinSnapshot {
+  const RoomBigWinSnapshot(this.raw);
+  final ToolJson raw;
+  ToolJson get info => toolMap(raw['gameBigWinInfoVO']);
+  String get id => '${info['gameBigWinId'] ?? ''}'.trim();
+  int get status => toolInt(raw['status'], -1);
+
+  // Nady's room pendant includes an identified status-0 activity, unlike its game tip.
+  bool get hasPendant => id.isNotEmpty && status >= 0 && status < 4;
+  String get poolLabel {
+    final value = info['bigWinTotalCoins'];
+    final amount = value is num ? value : num.tryParse('$value');
+    if (amount == null || !amount.isFinite) return '';
+    return NumberFormat.compact(locale: 'en').format(amount);
+  }
+
+  RoomBigWinSnapshot applyStatus(ToolJson event) => RoomBigWinSnapshot({
+    'status': event['status'],
+    'gameBigWinInfoVO': {
+      if ('${event['gameBigWinId'] ?? ''}' == id) ...info,
+      ...event,
+    },
+  });
 }
 
 class RoomEffectPreferences {
@@ -156,6 +183,9 @@ class RoomToolsState {
   final List<RoomLuckyBag> bags;
   final RoomPkSnapshot pk;
   final ToolJson luckyConfig, bigWin, prize;
+  RoomBigWinSnapshot get bigWinSnapshot => RoomBigWinSnapshot(bigWin);
+  bool get showBigWinPendant =>
+      sessionActive && config.enabled(8, 17) && bigWinSnapshot.hasPendant;
 
   RoomToolsState copy({
     bool? loading,

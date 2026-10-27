@@ -159,6 +159,9 @@ extension RoomToolsEvents on RoomToolsController {
           _prizeDelay?.cancel();
           void apply() {
             if (!active) return;
+            _value = _value.copy(
+              bigWin: _value.bigWinSnapshot.applyStatus(map).raw,
+            );
             if (visible &&
                 _value.effects.screen &&
                 toolBool(map['showScreen'])) {

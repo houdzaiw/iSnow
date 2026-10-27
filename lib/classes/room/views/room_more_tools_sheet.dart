@@ -521,9 +521,9 @@ class _RoomMoreIconFrame extends StatelessWidget {
                   ? AppColors.roomMoreTileActive
                   : AppColors.roomMoreTile,
               borderRadius: BorderRadius.circular(AppRadius.roomMoreToolTile.r),
-              border: item.selected
-                  ? Border.all(color: _roomPink.withValues(alpha: 0.65))
-                  : null,
+              // border: item.selected
+              //     ? Border.all(color: _roomPink.withValues(alpha: 0.65))
+              //     : null,
             ),
             child: Center(child: _RoomMoreIcon(item: item)),
           ),

@@ -31,6 +31,7 @@ import 'views/room_exit_dialog.dart';
 import 'more/room_tools_controller.dart';
 import 'more/room_tools_widgets.dart';
 import 'more/room_tools_strip.dart';
+import 'more/room_big_win_pendant.dart';
 import 'more/room_settings_page.dart';
 import 'more/room_report_page.dart';
 import 'more/room_share_page.dart';
@@ -440,6 +441,17 @@ class RoomPage extends HookConsumerWidget {
                           ),
                         ],
                       ),
+                      if (state.isReady &&
+                          !state.isMinimized &&
+                          MediaQuery.viewInsetsOf(context).bottom == 0)
+                        PositionedDirectional(
+                          end: AppSpacing.lg.w,
+                          bottom:
+                              AppSpacing.roomBottomBarHeight.h +
+                              MediaQuery.paddingOf(context).bottom +
+                              AppSpacing.sm.h,
+                          child: RoomBigWinPendant(roomId: giftRoomId),
+                        ),
                       RoomMusicOverlay(
                         roomId: giftRoomId,
                         rootKey: giftRootKey,

@@ -167,15 +167,6 @@ class RoomToolsStrip extends HookConsumerWidget {
                         style: AppTextStyles.roomGiftStatus,
                       ),
                     ),
-                  if (state.config.enabled(8, 17))
-                    TextButton(
-                      onPressed: () =>
-                          pushRoomTool(context, RoomBigWinPage(roomId: roomId)),
-                      child: Text(
-                        toolText(context, 'Big Win', '游戏大奖'),
-                        style: AppTextStyles.roomGiftStatus,
-                      ),
-                    ),
                 ],
               ),
             ),

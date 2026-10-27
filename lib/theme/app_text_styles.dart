@@ -3,6 +3,13 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 class AppTextStyles {
+  static const TextStyle roomPendantAmount = TextStyle(
+    color: AppColors.textInverse,
+    fontSize: 10,
+    height: 1,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0,
+  );
   static const TextStyle musicBoxTitle = TextStyle(
     color: AppColors.textInverse,
     fontSize: 16,
