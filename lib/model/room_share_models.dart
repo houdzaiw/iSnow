@@ -20,9 +20,14 @@ class RoomShareMaterial {
   final int id, sortNo;
   final String imageUrl, copyText, jumpLink;
 
-  bool get needsInviteCode =>
-      '$copyText $jumpLink'.contains(r'${inviteCode}') ||
-      Uri.decodeFull(jumpLink).contains(r'${inviteCode}');
+  bool get needsInviteCode {
+    if ('$copyText $jumpLink'.contains(r'${inviteCode}')) return true;
+    try {
+      return Uri.decodeFull(jumpLink).contains(r'${inviteCode}');
+    } on FormatException {
+      return false;
+    }
+  }
 }
 
 class RoomShareContent {
@@ -48,9 +53,40 @@ class RoomShareContact {
   final String nickname, avatar;
 }
 
+class RoomShareContactsPage {
+  const RoomShareContactsPage({required this.users, required this.hasMore});
+  final List<RoomShareContact> users;
+  final bool hasMore;
+}
+
 enum RoomShareTab { share, recent, friends }
 
-enum RoomShareAction { copy, system }
+enum RoomShareAction {
+  copy('Copy'),
+  whatsapp('WhatsApp'),
+  facebook('Facebook'),
+  snapchat('Snapchat'),
+  telegram('Telegram'),
+  messenger('Messenger'),
+  x('X'),
+  instagram('Instagram'),
+  contacts('Contacts'),
+  system('Others');
+
+  const RoomShareAction(this.channelName);
+  final String channelName;
+
+  bool get linkOnlyClipboard =>
+      this == RoomShareAction.facebook || this == RoomShareAction.messenger;
+}
 
 /// Platform completion is not proof that the recipient received an invitation.
-enum RoomShareOutcome { copied, shared, cancelled, unavailable, failed, stale }
+enum RoomShareOutcome {
+  copied,
+  opened,
+  shared,
+  cancelled,
+  unavailable,
+  failed,
+  stale,
+}

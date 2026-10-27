@@ -5,6 +5,7 @@ void _showRoomMoreToolsSheet(
   WidgetRef ref,
   AutoDisposeStateNotifierProvider<RoomViewModel, RoomPageState> provider,
 ) {
+  var openingShare = false;
   showModalBottomSheet<void>(
     context: context,
     useRootNavigator: true,
@@ -19,6 +20,11 @@ void _showRoomMoreToolsSheet(
         onOpenTool: (action) async {
           final roomId = _roomMoreRoomId(ref.read(provider));
           if (action == 'share') {
+            if (openingShare ||
+                !(ModalRoute.of(sheetContext)?.isCurrent ?? false)) {
+              return;
+            }
+            openingShare = true;
             final repository = ref.read(roomRepositoryProvider);
             final generation = repository.roomGeneration;
             final route = ModalRoute.of(sheetContext);
@@ -535,9 +541,9 @@ class _RoomMoreIconFrame extends StatelessWidget {
                   ? AppColors.roomMoreTileActive
                   : AppColors.roomMoreTile,
               borderRadius: BorderRadius.circular(AppRadius.roomMoreToolTile.r),
-              // border: item.selected
-              //     ? Border.all(color: _roomPink.withValues(alpha: 0.65))
-              //     : null,
+              border: item.selected
+                  ? Border.all(color: AppColors.roomMoreSelectedBorder)
+                  : null,
             ),
             child: Center(child: _RoomMoreIcon(item: item)),
           ),

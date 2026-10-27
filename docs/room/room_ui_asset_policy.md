@@ -44,6 +44,13 @@
 - 迷你房间封面来自当前房间接口；无封面时使用红色缺省图。音浪以 Flutter 原生圆形边框动画实现，不引入悬浮窗库或 Flutter 内置图标。
 - 后续提供对应蓝湖设计稿或用户指定图片时优先替换相应资源；未明确授权的其他缺失图标仍遵守红色缺省图规则。
 
+## Share Panel
+
+- More 的 Share 使用 Nady 风格根导航底部面板。海报来自素材接口，完整等比预览；加载失败或图片缺失使用房间红色缺省图，不把示例海报当作业务素材。
+- 本轮用户明确确认以桌面 `Screenshot_2026-10-27-17-12-45-30_f451bd7b6af29514306158c2ac13b20b.jpg` 还原九渠道UI，并授权复用 Nady 的九个渠道图标及复制、链接、收起图片。资源按 `room_share_*` 语义命名放入房间目录，通过 `AppAssets` 使用；manifest 标注 Nady 原路径，不能冒充蓝湖切图。该授权不扩大到其他无关图标。
+- 海报支持左右滑动及首尾循环的圆形箭头，单张隐藏箭头；箭头复用 `lanhuCreatePartyChevronRight`，旋转及图片着色，不新增 Flutter `Icon/Icons.*`，不从整张截图裁出图标。渠道按五列两行展示，Others 使用现有系统分享；其余仅尝试 Nady 的外部Scheme/网页，不承诺第三方接收或送达。
+- 白色底部面板、间距、尺寸、圆角和文字继续引用 `lib/theme/`。分享提示必须位于弹层之上；键盘弹出时联系人区域缩小并可滚动。
+
 ## Gift Panel
 
 - 礼物面板以 `image_id=dd85e4a7-00f5-41c9-a75b-b28a25da69ad` 为资源上下文；下载脚本按该稿的区块和图层名称提取切图，不能使用其他页面的同名图层。
@@ -55,5 +62,6 @@
 
 - 送礼动效允许复用 PRD 指定的 Nady SVGA/PAG/VAP 资源，放入 `assets/room_gift/`，在该目录 manifest 记录来源，并通过 `AppAssets` 声明；不能把动效资源当作蓝湖图标替代品。
 - 礼物图标优先使用本地 `AppAssets.roomGiftLocalImages` 映射，其次使用服务端图标及图片缓存；无法加载时继续显示红色缺省图。
+- 网格、轨迹和公屏复用 `RoomGiftImage` 分流图片：`assets/...` 必须使用资产解码，不能交给 `CachedNetworkImage` 或启动目录缓存；仅有效HTTP(S)地址走网络缓存，网格可提供自己的loading组件。
 - 动画资源类型、缓存、本地映射与降级统一由 `RoomGiftAssetResolver` 处理，不得在多个 UI 层分别猜测格式。
 - 麦位轨迹只使用 Flutter 原生动画；礼物面板、公屏、卡槽、横幅和动效层仍禁止使用 Flutter `Icon`/`Icons.*`。

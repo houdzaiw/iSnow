@@ -51,29 +51,26 @@ class RoomSharePage extends HookConsumerWidget {
     final provider = roomShareViewModelProvider(key);
     final state = ref.watch(provider);
     final vm = ref.read(provider.notifier);
+    final messenger = useMemoized(GlobalKey<ScaffoldMessengerState>.new);
     ref.listen(provider.select((state) => state.error), (_, error) {
       if (error != null && context.mounted) {
-        ScaffoldMessenger.maybeOf(
-          context,
-        )?.showSnackBar(SnackBar(content: Text(error)));
+        messenger.currentState?.showSnackBar(SnackBar(content: Text(error)));
       }
     });
     useEffect(() => vm.close, [vm]);
-    final tabs = [
-      if (!state.materialsLoaded || state.materials.isNotEmpty)
-        RoomShareTab.share,
+    const tabs = [
+      RoomShareTab.share,
       RoomShareTab.recent,
       RoomShareTab.friends,
     ];
     final controller = useTabController(
       initialLength: tabs.length,
       initialIndex: tabs.indexOf(state.tab).clamp(0, tabs.length - 1),
-      keys: [tabs.length],
     );
     useEffect(() {
       void changed() {
         final tab = tabs[controller.index];
-        if (tab != vm.state.tab) vm.selectTab(tab);
+        vm.selectTab(tab);
       }
 
       controller.addListener(changed);
@@ -129,95 +126,144 @@ class RoomSharePage extends HookConsumerWidget {
                     flex: showPoster ? 0 : 1,
                     child: Material(
                       color: AppColors.cardBackground,
-                      borderRadius: AppRadius.sheetBorder,
+                      borderRadius: AppRadius.roomShareSheetBorder,
                       clipBehavior: Clip.antiAlias,
-                      child: SafeArea(
-                        top: false,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SizedBox(
-                              height: AppSpacing.roomShareHeaderHeight,
-                              child: Row(
+                      child: SizedBox(
+                        height:
+                            panelHeight +
+                            AppSpacing.roomShareHeaderHeight +
+                            media.padding.bottom,
+                        child: ScaffoldMessenger(
+                          key: messenger,
+                          child: Scaffold(
+                            backgroundColor: AppColors.cardBackground,
+                            resizeToAvoidBottomInset: false,
+                            body: SafeArea(
+                              top: false,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Expanded(
-                                    child: TabBar(
-                                      controller: controller,
-                                      isScrollable: true,
-                                      tabAlignment: TabAlignment.start,
-                                      dividerColor: AppColors.transparent,
-                                      labelStyle: AppTextStyles.bodyStrongSmall,
-                                      unselectedLabelStyle:
-                                          AppTextStyles.caption,
-                                      labelColor: AppColors.textPrimary,
-                                      unselectedLabelColor:
-                                          AppColors.textSecondary,
-                                      tabs: tabs
-                                          .map(
-                                            (tab) => Tab(
-                                              text: switch (tab) {
-                                                RoomShareTab.share => toolText(
-                                                  context,
-                                                  'Share',
-                                                  '分享',
+                                  SizedBox(
+                                    height: AppSpacing.roomShareHeaderHeight,
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: TabBar(
+                                            controller: controller,
+                                            tabAlignment: TabAlignment.fill,
+                                            labelPadding:
+                                                const EdgeInsets.symmetric(
+                                                  horizontal: AppSpacing.xs,
                                                 ),
-                                                RoomShareTab.recent => toolText(
-                                                  context,
-                                                  'Recent chats',
-                                                  '最近会话',
+                                            dividerColor: AppColors.transparent,
+                                            indicator: const BoxDecoration(),
+                                            labelStyle: Theme.of(context)
+                                                .textTheme
+                                                .labelLarge
+                                                ?.merge(
+                                                  AppTextStyles.bodyStrongSmall,
                                                 ),
-                                                RoomShareTab.friends =>
-                                                  toolText(
-                                                    context,
-                                                    'Friends',
-                                                    '好友',
+                                            unselectedLabelStyle:
+                                                Theme.of(
+                                                  context,
+                                                ).textTheme.labelMedium?.merge(
+                                                  AppTextStyles.caption,
+                                                ),
+                                            labelColor: AppColors.textPrimary,
+                                            unselectedLabelColor:
+                                                AppColors.textSecondary,
+                                            tabs: tabs
+                                                .map(
+                                                  (tab) => Tab(
+                                                    child: Text(
+                                                      switch (tab) {
+                                                        RoomShareTab.share =>
+                                                          toolText(
+                                                            context,
+                                                            'Share',
+                                                            '分享',
+                                                          ),
+                                                        RoomShareTab.recent =>
+                                                          toolText(
+                                                            context,
+                                                            'Recent Chats',
+                                                            '最近会话',
+                                                          ),
+                                                        RoomShareTab.friends =>
+                                                          toolText(
+                                                            context,
+                                                            'Friends',
+                                                            '好友',
+                                                          ),
+                                                      },
+                                                      maxLines: 2,
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
                                                   ),
-                                              },
+                                                )
+                                                .toList(),
+                                          ),
+                                        ),
+                                        Tooltip(
+                                          message: toolText(
+                                            context,
+                                            'Close',
+                                            '关闭',
+                                          ),
+                                          child: SizedBox.square(
+                                            dimension:
+                                                AppSpacing.controlHeightMd,
+                                            child: TextButton(
+                                              key: const ValueKey(
+                                                'room-share-close',
+                                              ),
+                                              onPressed: () =>
+                                                  Navigator.of(context).pop(),
+                                              child: Image.asset(
+                                                AppAssets.roomShareCollapse,
+                                                width: AppSpacing.iconSizeSm,
+                                                height: AppSpacing.iconSizeSm,
+                                              ),
                                             ),
-                                          )
-                                          .toList(),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  Tooltip(
-                                    message: toolText(context, 'Close', '关闭'),
-                                    child: TextButton(
-                                      key: const ValueKey('room-share-close'),
-                                      onPressed: () =>
-                                          Navigator.of(context).pop(),
-                                      child: Image.asset(
-                                        AppAssets.lanhuCloseCircle,
-                                        width: AppSpacing.iconSizeMd,
-                                        height: AppSpacing.iconSizeMd,
-                                      ),
-                                    ),
+                                  SizedBox(
+                                    height: panelHeight,
+                                    child: state.isActive
+                                        ? TabBarView(
+                                            controller: controller,
+                                            children: tabs
+                                                .map(
+                                                  (tab) => _tab(
+                                                    context,
+                                                    vm,
+                                                    state,
+                                                    tab,
+                                                  ),
+                                                )
+                                                .toList(),
+                                          )
+                                        : Center(
+                                            child: Text(
+                                              toolText(
+                                                context,
+                                                'This room is no longer available',
+                                                '当前房间已失效',
+                                              ),
+                                              style: AppTextStyles.bodySmall,
+                                            ),
+                                          ),
                                   ),
                                 ],
                               ),
                             ),
-                            SizedBox(
-                              height: panelHeight,
-                              child: state.isActive
-                                  ? TabBarView(
-                                      controller: controller,
-                                      children: tabs
-                                          .map(
-                                            (tab) =>
-                                                _tab(context, vm, state, tab),
-                                          )
-                                          .toList(),
-                                    )
-                                  : Center(
-                                      child: Text(
-                                        toolText(
-                                          context,
-                                          'This room is no longer available',
-                                          '当前房间已失效',
-                                        ),
-                                        style: AppTextStyles.bodySmall,
-                                      ),
-                                    ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
@@ -241,16 +287,15 @@ class RoomSharePage extends HookConsumerWidget {
       return Column(
         children: [
           if (state.materialsLoading) const LinearProgressIndicator(),
-          if (state.materialsError != null)
+          if (state.materialsError != null ||
+              !state.materialsLoading && state.materials.isEmpty)
             Flexible(
-              child: SingleChildScrollView(
-                child: TextButton(
-                  onPressed: state.materialsLoading ? null : vm.loadMaterials,
-                  child: Text(
-                    state.materialsError!,
-                    style: AppTextStyles.bodySmall,
-                  ),
-                ),
+              fit: FlexFit.tight,
+              child: _materialsStatus(
+                context,
+                state.materialsError ??
+                    toolText(context, 'No share materials available', '暂无分享素材'),
+                state.materialsLoading ? null : vm.loadMaterials,
               ),
             ),
           if (state.materials.isNotEmpty)
@@ -272,35 +317,48 @@ class RoomSharePage extends HookConsumerWidget {
       );
     }
     final recent = tab == RoomShareTab.recent;
-    return Column(
-      children: [
-        if (state.materialsLoaded && state.materials.isEmpty)
-          TextButton(
-            onPressed: state.materialsLoading ? null : vm.loadMaterials,
-            child: Text(
-              state.materialsError ??
-                  toolText(context, 'Retry share materials', '重新获取分享素材'),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.caption,
-            ),
-          ),
-        Expanded(
-          child: RoomShareContacts(
-            contacts: recent ? state.recent : state.friends,
-            query: state.query,
-            onSearch: vm.search,
-            enabled: state.isActive && !state.busy,
-            loading: recent ? state.recentLoading : state.friendsLoading,
-            error: recent ? state.recentError : state.friendsError,
-            onRetry: recent ? vm.loadRecent : () => vm.loadFriends(reset: true),
-            onLoadMore: !recent && state.hasMore ? vm.loadFriends : null,
-            onInvite: (user) => _invite(context, vm, user),
-          ),
-        ),
-      ],
+    return RoomShareContacts(
+      contacts: recent ? state.recent : state.friends,
+      query: state.query,
+      onSearch: vm.search,
+      enabled: state.isActive && !state.busy,
+      loading: recent ? state.recentLoading : state.friendsLoading,
+      error: recent ? state.recentError : state.friendsError,
+      onRetry: recent ? vm.loadRecent : () => vm.loadFriends(reset: true),
+      onLoadMore: !recent && state.hasMore ? vm.loadFriends : null,
+      onInvite: (user) => _invite(context, vm, user),
     );
   }
+
+  Widget _materialsStatus(
+    BuildContext context,
+    String message,
+    VoidCallback? onRetry,
+  ) => Center(
+    child: SingleChildScrollView(
+      padding: const EdgeInsets.all(AppSpacing.xl),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            message,
+            key: const ValueKey('room-share-materials-message'),
+            textAlign: TextAlign.center,
+            style: AppTextStyles.bodySmall,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          TextButton(
+            key: const ValueKey('room-share-materials-retry'),
+            onPressed: onRetry,
+            child: Text(
+              toolText(context, 'Retry', '重试'),
+              style: AppTextStyles.bodyStrongSmall,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 
   Future<void> _share(
     BuildContext context,

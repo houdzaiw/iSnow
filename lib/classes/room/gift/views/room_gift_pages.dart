@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../localization/app_localizations.dart';
 import '../../../../theme/app_theme.dart';
 import '../models/room_gift_models.dart';
+import 'room_gift_image.dart';
 
 class RoomGiftPages extends HookWidget {
   const RoomGiftPages({
@@ -276,13 +277,10 @@ class _GiftImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (url.isEmpty) return _fallback();
-    return CachedNetworkImage(
-      imageUrl: url,
-      width: AppSpacing.roomGiftImageSize.r,
-      height: AppSpacing.roomGiftImageSize.r,
-      fit: BoxFit.contain,
-      placeholder: (_, __) => SizedBox(
+    return RoomGiftImage(
+      source: url,
+      size: AppSpacing.roomGiftImageSize.r,
+      placeholderBuilder: (_) => SizedBox(
         width: AppSpacing.roomGiftImageSize.r,
         height: AppSpacing.roomGiftImageSize.r,
         child: Center(
@@ -296,14 +294,6 @@ class _GiftImage extends StatelessWidget {
           ),
         ),
       ),
-      errorWidget: (_, __, ___) => _fallback(),
     );
   }
-
-  Widget _fallback() => Image.asset(
-    AppAssets.lanhuRoomIconMissing,
-    width: AppSpacing.roomGiftImageSize.r,
-    height: AppSpacing.roomGiftImageSize.r,
-    fit: BoxFit.contain,
-  );
 }

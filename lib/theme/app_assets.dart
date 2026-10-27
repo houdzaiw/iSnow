@@ -10,6 +10,21 @@ class AppAssets {
   const AppAssets._();
 
   static const String iconMissing = 'assets/lanhu/common/icon_missing.png';
+  // User-approved Nady assets matching the room Share reference screenshot.
+  static const roomShareWhatsapp = 'assets/lanhu/room/room_share_whatsapp.png';
+  static const roomShareFacebook = 'assets/lanhu/room/room_share_facebook.png';
+  static const roomShareSnapchat = 'assets/lanhu/room/room_share_snapchat.png';
+  static const roomShareTelegram = 'assets/lanhu/room/room_share_telegram.png';
+  static const roomShareMessenger =
+      'assets/lanhu/room/room_share_messenger.png';
+  static const roomShareX = 'assets/lanhu/room/room_share_x.png';
+  static const roomShareInstagram =
+      'assets/lanhu/room/room_share_instagram.png';
+  static const roomShareContacts = 'assets/lanhu/room/room_share_contacts.png';
+  static const roomShareOthers = 'assets/lanhu/room/room_share_others.png';
+  static const roomShareCopy = 'assets/lanhu/room/room_share_copy.webp';
+  static const roomShareLink = 'assets/lanhu/room/room_share_link.png';
+  static const roomShareCollapse = 'assets/lanhu/room/room_share_collapse.webp';
   static const roomMusicPlay = 'assets/lanhu/room/room_music_play.png';
   static const roomMusicPause = 'assets/lanhu/room/room_music_pause.png';
   static const roomMusicPrevious = 'assets/lanhu/room/room_music_previous.png';

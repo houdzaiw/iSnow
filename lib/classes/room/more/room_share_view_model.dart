@@ -4,7 +4,6 @@ import 'dart:ui';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../manager/api_error_message.dart';
-import '../../../manager/http_api.dart';
 import '../../../manager/room_share_manager.dart';
 import '../../../model/room_share_models.dart';
 import '../../message/im_repository.dart';
@@ -35,7 +34,7 @@ final roomShareViewModelProvider = StateNotifierProvider.autoDispose
 class RoomShareViewModel extends StateNotifier<RoomShareState> {
   RoomShareViewModel(
     this.key,
-    this.repository,
+    RoomToolsRepository repository,
     this.room,
     this.im, {
     RoomShareRepository? sharing,
@@ -49,7 +48,6 @@ class RoomShareViewModel extends StateNotifier<RoomShareState> {
   }
 
   final RoomShareKey key;
-  final RoomToolsRepository repository;
   final RoomShareRepository sharing;
   final RoomShareManager platform;
   final RoomRepository room;
@@ -99,7 +97,7 @@ class RoomShareViewModel extends StateNotifier<RoomShareState> {
       if (!_valid) return false;
       final user = await room.currentUser();
       if (!_valid) return false;
-      if (uid == null || uid <= 0 || user?.uid != uid) {
+      if (uid == null || uid <= 0 || user?.uid != null && user!.uid != uid) {
         throw StateError('Please log in again to share this room');
       }
       _uid = uid;
@@ -112,6 +110,7 @@ class RoomShareViewModel extends StateNotifier<RoomShareState> {
   }
 
   Future<bool> _sameAccount() async {
+    if (!_valid) return false;
     final uid = await room.currentUid();
     if (!_valid) return false;
     if (uid != _uid) {
@@ -137,7 +136,7 @@ class RoomShareViewModel extends StateNotifier<RoomShareState> {
     try {
       if (!await _ensureIdentity() || !_valid) return;
       final materials = await sharing.materials(key.language);
-      if (!_valid) return;
+      if (!await _sameAccount()) return;
       final index = state.materialIndex.clamp(
         0,
         materials.isEmpty ? 0 : materials.length - 1,
@@ -145,34 +144,32 @@ class RoomShareViewModel extends StateNotifier<RoomShareState> {
       state = state.copyWith(materials: materials, materialIndex: index);
       if (materials.any((material) => material.needsInviteCode)) {
         final code = await sharing.inviteCode();
-        if (!_valid) return;
+        if (!await _sameAccount()) return;
         _inviteCode = code;
       }
       if (materials.isNotEmpty) selectMaterial(index);
     } catch (error) {
-      if (_valid)
+      if (_valid) {
         state = state.copyWith(materialsError: userFacingErrorMessage(error));
+      }
     } finally {
       _materialsLoading = false;
       if (_valid) {
-        state = state.copyWith(
-          materialsLoading: false,
-          materialsLoaded: true,
-          tab: state.materials.isEmpty && state.tab == RoomShareTab.share
-              ? RoomShareTab.recent
-              : state.tab,
-        );
+        state = state.copyWith(materialsLoading: false, materialsLoaded: true);
       }
     }
   }
 
   void selectTab(RoomShareTab tab) {
-    if (_valid) state = state.copyWith(tab: tab, clearError: true);
+    if (_valid && tab != state.tab) {
+      state = state.copyWith(tab: tab, clearError: true);
+    }
   }
 
   void selectMaterial(int index) {
-    if (!_valid || state.busy || index < 0 || index >= state.materials.length)
+    if (!_valid || state.busy || index < 0 || index >= state.materials.length) {
       return;
+    }
     try {
       final preview = _content(state.materials[index]);
       state = state.copyWith(
@@ -208,7 +205,7 @@ class RoomShareViewModel extends StateNotifier<RoomShareState> {
     try {
       if (!await _ensureIdentity() || !_valid) return;
       final conversations = await im.fetchConversations();
-      if (!_valid) return;
+      if (!await _sameAccount()) return;
       _allRecent.clear();
       final users = <int>{};
       for (final conversation in conversations) {
@@ -218,8 +215,9 @@ class RoomShareViewModel extends StateNotifier<RoomShareState> {
             id <= 0 ||
             id == _uid ||
             const [10000, 10001, 10002, 10003].contains(id) ||
-            !users.add(id))
+            !users.add(id)) {
           continue;
+        }
         _allRecent.add(
           RoomShareContact(
             uid: id,
@@ -230,8 +228,9 @@ class RoomShareViewModel extends StateNotifier<RoomShareState> {
       }
       state = state.copyWith(recent: _filterRecent(state.query));
     } catch (error) {
-      if (_valid)
+      if (_valid) {
         state = state.copyWith(recentError: userFacingErrorMessage(error));
+      }
     } finally {
       _recentLoading = false;
       if (_valid) state = state.copyWith(recentLoading: false);
@@ -270,93 +269,54 @@ class RoomShareViewModel extends StateNotifier<RoomShareState> {
     state = state.copyWith(friendsLoading: true, clearFriendsError: true);
     try {
       if (!await _ensureIdentity() || !_valid) return;
-      final result = toolList(
-        await repository.post(HttpApi.userFriends, {
-          'pageNum': page,
-          'pageSize': 20,
-          'targetUid': 0,
-          'searchKey': state.query,
-        }),
+      final result = await sharing.friends(
+        page: page,
+        query: state.query,
+        selfUid: _uid!,
       );
-      if (!_valid || version != _searchVersion || request != _friendsRequest)
+      if (!_valid || version != _searchVersion || request != _friendsRequest) {
         return;
+      }
+      if (!await _sameAccount()) return;
+      if (version != _searchVersion || request != _friendsRequest) return;
       _page = page;
       final users = <int, RoomShareContact>{
         if (!reset)
           for (final user in state.friends) user.uid: user,
       };
-      for (final entry in result) {
-        final nested = toolMap(entry['userBaseInfo']);
-        final user = nested.isEmpty ? entry : nested;
-        final uid = toolInt(user['uid']);
-        if (uid > 0 && uid != _uid)
-          users[uid] = RoomShareContact(
-            uid: uid,
-            nickname: '${user['nick'] ?? uid}',
-            avatar: '${user['avatar'] ?? ''}',
-          );
+      for (final user in result.users) {
+        users[user.uid] = user;
       }
       state = state.copyWith(
         friends: users.values.toList(),
-        hasMore: result.length == 20,
+        hasMore: result.hasMore,
       );
     } catch (error) {
       if (_valid && request == _friendsRequest && version == _searchVersion) {
         state = state.copyWith(friendsError: userFacingErrorMessage(error));
       }
     } finally {
-      if (_valid && request == _friendsRequest)
+      if (_valid && request == _friendsRequest) {
         state = state.copyWith(friendsLoading: false);
+      }
     }
   }
 
-  ToolJson roomCard() {
-    final raw = room.roomState.roomInfo?.raw ?? {};
-    final nested = toolMap(raw['roomInfoDTO'] ?? raw['roomInfo']);
-    final source = nested.isEmpty ? raw : nested;
-    const allowed = [
-      'roomUid',
-      'roomNo',
-      'avatar',
-      'title',
-      'roomTypeValue',
-      'roomDesc',
-      'roomLock',
-      'quickWelcomeStr',
-      'isFollow',
-      'country',
-      'roomGiftWeekVal',
-    ];
-    return {
-      'roomId': int.tryParse(key.roomId) ?? key.roomId,
-      for (final name in allowed)
-        if (source.containsKey(name)) name: source[name],
-      'roomPasswd': '',
-    };
-  }
+  ToolJson roomCard() => sharing.roomCard(room.roomState.roomInfo, key.roomId);
 
   Future<bool> invite(int targetUid) async {
     if (!_valid || state.busy || targetUid <= 0) return false;
     state = state.copyWith(busy: true, clearError: true);
     try {
-      if (!await _ensureIdentity() || !_valid || targetUid == _uid)
+      if (!await _ensureIdentity() || !_valid || targetUid == _uid) {
         return false;
-      final profile = toolMap(
-        await repository.get(HttpApi.userHomepage, {'targetUid': targetUid}),
-      );
-      if (!_valid) return false;
-      final user = toolMap(toolMap(profile['info'])['userBaseInfo']);
-      if (user.isEmpty)
-        throw StateError('Unable to verify invitation permission');
-      if (toolInt(toolMap(user['userLevel'])['vipLevel']) >= 5) {
-        final settings = toolMap(
-          await repository.get(HttpApi.userVipSetting, {'uid': targetUid}),
-        );
-        if (!_valid) return false;
-        if (!toolMap(settings['noDisturb']).containsKey('open')) {
-          throw StateError('Unable to verify invitation permission');
-        }
-        if (toolBool(toolMap(settings['noDisturb'])['open'])) {
+      }
+      final vipLevel = await sharing.recipientVipLevel(targetUid);
+      if (!await _sameAccount()) return false;
+      if (vipLevel >= 5) {
+        final accepts = await sharing.acceptsVipInvitations(targetUid);
+        if (!await _sameAccount()) return false;
+        if (!accepts) {
           throw StateError('This user does not accept invitations');
         }
       }
@@ -378,21 +338,36 @@ class RoomShareViewModel extends StateNotifier<RoomShareState> {
     if (!_valid || state.busy) return RoomShareOutcome.stale;
     state = state.copyWith(busy: true, clearError: true);
     try {
-      if (!await _ensureIdentity() || !_valid || state.materials.isEmpty)
+      if (!await _ensureIdentity() || !_valid || state.materials.isEmpty) {
         return RoomShareOutcome.stale;
+      }
+      if (!await _sameAccount()) return RoomShareOutcome.stale;
       final content = _content(state.materials[state.materialIndex], action);
       final shortened = await sharing.shorten(content);
       if (!await _sameAccount()) return RoomShareOutcome.stale;
-      if (action == RoomShareAction.copy) {
-        await platform.copyText(shortened.text);
-        return _valid ? RoomShareOutcome.copied : RoomShareOutcome.stale;
-      }
-      unawaited(sharing.reportShareAttempt());
-      final result = await platform.shareText(
-        text: shortened.text,
-        origin: origin,
+      await platform.copyText(
+        action.linkOnlyClipboard ? shortened.link.toString() : shortened.text,
       );
-      return _valid ? result : RoomShareOutcome.stale;
+      if (!await _sameAccount()) return RoomShareOutcome.stale;
+      if (action == RoomShareAction.copy) return RoomShareOutcome.copied;
+      unawaited(sharing.reportShareAttempt());
+      final RoomShareOutcome result;
+      if (action == RoomShareAction.system) {
+        result = await platform.shareText(text: shortened.text, origin: origin);
+      } else {
+        final opened = await platform.openChannel(action, shortened);
+        if (!await _sameAccount()) return RoomShareOutcome.stale;
+        if (!opened) {
+          state = state.copyWith(
+            error: key.language == 'zh'
+                ? '无法打开该应用'
+                : 'Unable to open ${action.channelName}',
+          );
+          return RoomShareOutcome.failed;
+        }
+        result = RoomShareOutcome.opened;
+      }
+      return _valid && await _sameAccount() ? result : RoomShareOutcome.stale;
     } catch (error) {
       if (_valid) state = state.copyWith(error: userFacingErrorMessage(error));
       return RoomShareOutcome.failed;

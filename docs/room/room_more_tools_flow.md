@@ -176,7 +176,11 @@ flowchart TD
 
 目标包含分享海报区域、Share/Recent Chats/Friends 三个 Tab、搜索、用户项、发送确认弹窗和私聊房间卡片。保留 iSnow 主题；素材内容来自接口。
 
-打开更多的 Share：关闭更多 → 按当前语言取素材缓存；缺少时请求 → 打开分享 Sheet。缓存按语言隔离并合并同语言并发请求。素材为空或失败时仍可打开最近聊天和好友邀请；不展示空海报 Tab，可提供素材重试。
+打开更多的 Share：等待更多关闭动画完成 → 校验房间代次仍有效 → 在根导航打开分享 Sheet，不跳转 `/room-tool`，不退出房间。固定保留 Share、Recent Chats、Friends 三个分类，首次打开默认 Share。素材、最近聊天和好友独立加载；加载、空结果、失败和重试完成均不改变当前分类，用户主动切换的 Tab 不被迟到请求覆盖。
+
+公开素材缓存按 API 环境和语言隔离，并合并相同 key 的并发请求；空结果和失败不永久缓存。邀请码、解析后的个人文案与链接仅保存在本次分享会话，不跨账号复用。Share 内独立展示加载、暂无分享素材或服务端错误（优先 msg）及重试；无素材时不显示海报、复制或系统分享操作，不伪造内容。最近聊天和好友不展示重复的素材重试入口；素材重试不重新加载联系人，也不自动切回 Share。
+
+当前版本以用户提供的 `Screenshot_2026-10-27-17-12-45-30_f451bd7b6af29514306158c2ac13b20b.jpg` 为分享UI参考，取代此前仅「复制/系统分享」的布局。海报完整等比显示，左右圆形箭头循环切换，与滑动共享索引；单张不显示箭头。底部白色24px顶圆角面板使用42px缩略图、单行省略文案与链接、60×32px图片复制按钮和固定五列两行渠道网格；第二行靠左。海报只作素材预览，实际外发为文案和链接，不生成或下载海报附件，也不硬编码截图海报或背景。
 
 `GET /api/invite/materials` 查询：`appScene=ROOM_SHARE`、`sub-scene=ROOM_SHARE`、`language=<当前语言>`。注意 `sub-scene` 包含连字符。
 
@@ -194,12 +198,13 @@ flowchart TD
     E --> G{渠道}
     F --> G
     G -->|复制| H[写入剪贴板并反馈]
-    G -->|已安装外部应用| I[打开对应渠道]
-    G -->|系统分享| J[打开系统分享面板]
-    G -->|渠道不可用| K[提示或提供系统分享]
+    G -->|系统分享| J[非阻塞上报分享触发并打开系统分享面板]
+    G -->|指定渠道| K[写入对应剪贴板内容并非阻塞上报]
+    K --> L[尝试外部应用或网页]
+    L -->|失败| M[提示无法打开并保留面板]
 ```
 
-Nady 的长链为当前 API `Uri.origin` 下的 `/h5/invite`，参数为 `og_title`、`og_description`、`og_image`、`og_url`。`og_url` 装载解析后的目标链接；每个参数正确编码，不使用字符串拼接处理已有 query/fragment。
+经本次明确确认，默认沿用 Nady 当前 API `Uri.origin` 下的 `/h5/invite`，参数为 `og_title`（当前 iSnow）、`og_description`、`og_image`、`og_url`。保留素材里的 Nady 目标协议，不要求必须配置一个尚未接入的 iSnow 协议。文案按占位符解析，目标链接按各 URI component 分别替换和编码，保留原有 query/fragment，昵称里的 `&`、`#` 等不能注入查询参数。
 
 仅在用户复制或执行外部分享时调用 `POST /api/share/short-links/batch`：
 
@@ -212,9 +217,17 @@ Nady 的长链为当前 API `Uri.origin` 下的 `/h5/invite`，参数为 `og_tit
 
 返回列表元素为 `{shortUrl, expireAt}`。`shortBaseUrl` 使用配置的协议和域名部分，不携带 API 路径；短链失败回退长链，不使 IM 邀请失效。
 
-Nady 渠道包括 WhatsApp、Facebook、Snapchat、Telegram、Messenger、X、Instagram、Contacts、Other；沿用其渠道归因 `shareChannel`。Facebook/Messenger 剪贴板仅放链接，其他渠道使用非空文案和链接组合；具体外部应用唤起能力走平台 Service。系统分享取消不得显示“已成功发送”，外部应用被打开也不能当成接收方已收到。
+经本轮用户再次确认，按截图顺序恢复 WhatsApp、Facebook、Snapchat、Telegram、Messenger、X、Instagram、Contacts、Others 九个入口，覆盖此前统一系统分享的约定。`RoomShareAction` 保留 copy/system（system 对应 Others），并增加八个指定渠道。归因值为渠道准确名称，复制为 `Copy`；`shareChannel` 加到目标链接内，再由 `og_url` 装载，不放在 H5 包装层。Facebook、Messenger 只向剪贴板写链接，其余动作写文案和链接组合。
 
-iSnow 的品牌名、邀请落地域名、Deep Link 和第三方平台配置目前未提供，统一列在第 18 节。不得直接把 Nady 的品牌和生产域名当作 iSnow 已配置完成。
+平台能力复用已有 `url_launcher` 和 `share_plus`，由 `RoomShareManager` 封装剪贴板、可注入的外部启动器及系统分享，不新增库、社交 SDK 或原生桥接。WhatsApp/Snapchat/Telegram/Messenger/X/Instagram 沿用 Nady 的 Scheme，Facebook 使用外部 `facebook.com/sharer/sharer.php`，Contacts 使用 `sms:?body=...`，不是读取手机通讯录，无需联系人权限。Others 打开系统分享；必须传有效、位于可见窗口内的 `sharePositionOrigin`，兼容 iPad。Scheme 固定由本地枚举选择，参数逐项编码，直接启动并处理返回false或插件异常，不用 `canLaunchUrl` 作为前置阻断，不新增查询白名单或全应用可见性权限。无法打开只提示并保留面板，不自动转系统分享。
+
+核对当前 Nady 源码后确认：外部分享主链路实际调用 `POST /api/activity/component/share-report`，body `{}`。当前版本在准备完链接、写入剪贴板并重新校验会话后，调用指定渠道或系统分享前非阻塞上报一次；失败仅记录简短日志，不阻塞分享。这是分享触发归因，不是接收方已收到的凭证；复制不触发此上报。
+
+返回状态区分 copied/opened/shared/cancelled/unavailable/failed/stale。opened 只表示外部启动器接受请求；部分第三方版本可能不接收文案，不能根据启动成功断言内容已发送。只有复制完成显示「链接已复制」；系统取消或结果不可用不显示「已发送成功」，平台返回 success 同样不代表实际送达。错误优先显示服务端 `msg`；反馈显示在分享 Sheet 自己的 ScaffoldMessenger 上，不能被根弹窗遮住。
+
+分享期间加提交锁。关闭 Sheet（包括关闭动画开始）、退房、同房重进、切房、切账号或销毁 ViewModel 会使旧任务失效；等待短链返回后必须重新校验房间代次和 UID，不能再复制或突然唤起系统分享。关闭分享不停止音乐、Agora 或 Socket。
+
+本次只完成发起分享和已有站内邀请，不接入 H5 落地页开发、原生 Deep Link、关联域名和外部链接回房。沿用 Nady 环境不等于外部链接已能唤起当前安装的 iSnow。
 
 ### 5.3 最近聊天、好友和确认发送
 
@@ -856,6 +869,7 @@ Nady 在游戏打开、旧状态为开奖且已有用户中奖金额的特定情
 | GET | `/api/invite/materials` | query appScene,sub-scene,language | 素材列表 |
 | GET | `/api/invite/info` | 无本业务额外字段 | 邀请码等现有邀请资料 |
 | POST | `/api/share/short-links/batch` | shortBaseUrl,originalShareUrls | `{shortUrl,expireAt}[]` |
+| POST | `/api/activity/component/share-report` | `{}`，外部分享触发时非阻塞上报 | bool；不是实际送达凭证 |
 | POST | `/api/user/follow/friends` | pageNum,pageSize,targetUid,searchKey | 好友分页结果 |
 | GET | `/api/user/homepage/get` | query targetUid | 接收人主页资料/VIP 等 |
 | GET | `/api/vip/setting` | query uid | 含 noDisturb.open 的设置 |
@@ -880,7 +894,7 @@ Nady 在游戏打开、旧状态为开奖且已有用户中奖金额的特定情
 | GET | `/gameBigWin/getGameBigWinShow` | 无本业务额外字段 | 当前大奖状态及 gameBigWinInfoVO |
 | POST | `/gameBigWin/getGameBigWinRank` | gameBigWinId,round | `{winUserList,bigWinUserVO}` |
 
-`/api/activity/component/share-report` 在 Nady 有定义，但当前更多分享主链路未见直接调用；不因为名称相近就添加为“分享成功”的必需交易接口。腾讯 IM 自定义消息和 OSS 文件上传分别遵守各自 SDK/存储协议，不是上述 HTTP envelope。
+`/api/activity/component/share-report` 经当前 Nady 分享 View 核验，在用户触发外部分享时调用；按第5.2节作为非阻塞触发上报，不能当作“实际送达”的必需交易接口。腾讯 IM 自定义消息和 OSS 文件上传分别遵守各自 SDK/存储协议，不是上述 HTTP envelope。
 
 ## 16. Socket、IM 与关键数据结构
 
@@ -1029,8 +1043,8 @@ HTTP 在提交完成后更新确认结果，Socket 表示共享事实；两者�
 
 | 配置/缺口 | 当前情况 | 落地要求 |
 | --- | --- | --- |
-| 邀请品牌、落地域名、Deep Link/Universal Link | 用户尚未提供 iSnow 专属值 | 通过环境配置注入；无可用链接时外部分享不可伪造成功，IM 邀请仍可独立接入 |
-| 外部分享渠道 | Nady 有多渠道实现 | 配置平台 Scheme/域名/可查询能力；未安装、取消和系统分享回流都可验收 |
+| 邀请品牌、落地域名、Deep Link/Universal Link | 已明确允许沿用 Nady 当前环境，专属回房未接入 | 默认当前API域名 `/h5/invite` 并保留素材协议；可配置覆盖，外部点击回房仍为独立接入项 |
+| 外部分享渠道 | 本轮按参考截图恢复九渠道 | 复用 url_launcher 启动 Nady Scheme/网页，Others 走 share_plus；失败仅提示，不自动降级，不报送达成功 |
 | 第三方游戏域名/渠道参数 | Nady 有 thirdGameList/channelParamConfigs；iSnow 未提供专属值 | 按环境配置，保留默认及 Yomi 参数适配，真实渠道需联调 |
 | 游戏 Token/用户映射 | 已确认 Nady接口与userNo用法 | 验证 iSnow 账号在同后端/渠道中是否有映射；缺失显示不可用并记录 |
 | H5 页面和内部业务 | 非 Flutter 源码的一部分 | 文档定义容器与桥接；不在 Flutter 模拟 H5 投注/结算 |
@@ -1240,7 +1254,7 @@ Golden 用于设置、PK布局、宝箱结果等稳定状态，资源动画/平�
 | --- | --- |
 | 会话级状态、权限、并发、Socket 与 Keep/Exit 边界 | `room_tools_controller.dart`、`room_tools_operations.dart`、`room_tools_events.dart` |
 | HTTP、账号隔离偏好与协议数据 | `room_tools_repository.dart`、`room_tools_models.dart` |
-| 邀请素材、短链、最近会话/好友、VIP限制、IM发送 | `room_share_view_model.dart`、`room_share_page.dart` |
+| 邀请素材缓存、短链、系统分享、最近会话/好友、VIP限制、IM发送 | `room_share_repository.dart`、`room_share_view_model.dart`、`room_share_page.dart`；平台能力 `RoomShareManager` |
 | 收到邀请的房间卡片、锁房校验、恢复/切房 | `room_invitation_card.dart`、`room_entry_flow.dart`，复用既有 RoomManager |
 | 举报表单、截图、STS上传及失败重试 | `room_report_view_model.dart`、`room_report_page.dart` |
 | 特效、魅力开关/币种、贡献榜 | `room_settings_page.dart`，复用礼物运行时和房间状态 |
@@ -1266,19 +1280,19 @@ Golden 用于设置、PK布局、宝箱结果等稳定状态，资源动画/平�
 
 ### 23.3 必填接入配置
 
-配置定义在 [room_tools_config.dart](/Users/huili/project/iSnow/lib/classes/room/more/room_tools_config.dart)，通过 Flutter `--dart-define` 注入，未提供时不会借用Nady品牌值或假装分享/游戏成功。
+配置定义在 [room_tools_config.dart](/Users/huili/project/iSnow/lib/classes/room/more/room_tools_config.dart)，通过 Flutter `--dart-define` 覆盖。分享已明确允许沿用当前 Nady API 环境；游戏相关白名单仍必须独立配置，不借用未授权的第三方集成。
 
 | 配置 | 用途 |
 | --- | --- |
-| `ISNOW_INVITE_BASE_URL` | iSnow 的完整HTTPS邀请落地页地址，包含实际路径 |
-| `ISNOW_SHARE_SCHEME` | 服务端素材仍返回 `nady:` 链接时替换成iSnow协议；发布前同步完成Android/iOS的原生URL Scheme/关联域名配置 |
+| `ISNOW_INVITE_BASE_URL` | 可选的完整邀请落地页地址；默认当前API域名 `/h5/invite`。开发环境兼容HTTP，QA/正式环境必须HTTPS |
+| `ISNOW_SHARE_SCHEME` | 可选；仅明确配置时将素材 `nady:` 替换为指定协议，未配置保留原值。配置此值本身不完成原生回房接入 |
 | `ISNOW_GAME_HOSTS` | 允许获取游戏令牌的第三方HTTPS域名，逗号分隔，精确域名匹配；不填写任意通配符 |
 | `ISNOW_YOMI_HOSTS` | 在上述白名单内采用Yomi参数契约的域名，逗号分隔 |
 | `ISNOW_WEB_BRIDGE_HOSTS` | 除API同源以外，允许普通业务H5调用鉴权API桥接的HTTPS域名；仅授权可控的业务页面 |
 
 同API来源的既有活动页面继续可用；其他游戏域名未授权时明确提示不可用。JS apiCaller只允许当前API来源或相对API路径，不向第三方转发Nady鉴权。STS与游戏令牌不输出到请求响应日志。
 
-外部分享优先调用已安装的WhatsApp/Telegram/X能力；Facebook/Messenger按Nady规则复制链接；Snapchat/Instagram/Contacts/Other及未安装的渠道走系统分享面板，不宣称已发送到指定应用。专有渠道SDK、应用ID、品牌落地页、原生深链注册及审核/账号名单策略仍是发布前接入项，不能用未提供的配置替代真实后台校验。
+外部分享按第5节最新确认的截图恢复九渠道，指定应用通过已有 `url_launcher` 尝试外部启动，Others 通过 `share_plus` 调用系统面板。不保证某个社交应用一定接收文案、预览或实际发送。品牌落地页、原生深链注册及外部点击回房仍需单独接入；本次不需要专有渠道 SDK 或应用 ID。
 
 ### 23.4 验证与联调边界
 
@@ -1289,3 +1303,43 @@ Golden 用于设置、PK布局、宝箱结果等稳定状态，资源动画/平�
 游戏充值复用原有钱包。只有商店购买回调后服务器余额实际增加才返回已到账结果，普通返回或取消不通知游戏充值成功；Android余额异步未到账时不伪造成功，沿用原有支付服务的后端核验链路。
 
 自动化测试使用Fake接口和SDK，不进行真实扣币、发送IM邀请或购买。发布前仍需用iSnow正式配置完成双设备语音、真实Socket事件、OSS截图上传、第三方游戏桥接、商店支付到账、App后台与原生分享的设备验收。服务端没有返回的模式、奖励和结算协议仍不得自行补造。
+
+### 23.5 房间分享补齐验证（2026-10-27）
+
+本节保留分享补齐时的验证记录；当时发现的4项失败已在下一节23.6中定位并修复。
+
+- 分层：`RoomSharePage` 和独立海报/联系人 View → `RoomShareViewModel` → `RoomShareRepository`；剪贴板和原生面板由可注入的 `RoomShareManager` 执行，素材、联系人、分页与平台结果使用明确类型。
+- 新增分享测试49项，覆盖素材排序/缓存/并发/重试、特殊字符和已编码占位符、渠道位置、短链降级、非阻塞上报、系统取消/异常、iPad锚点、重复点击、账号切换、关闭时的迟到请求及站内邀请。320/375/430截图已生成并人工查看；无真实素材的fixture按资源规范展示红色缺省图，不冒充线上海报。
+- 分享、工作流、工具控制器、音乐、Keep/Exit、Big Win及礼物公屏ViewModel共183项相关测试通过；`flutter analyze --no-pub` 无问题，`git diff --check HEAD` 通过。实际 More → 根分享弹层 → 关闭的独立用例验证页面路由不替换、`isInRoom` 保持、没有 leave 调用。
+- 扩展截图回归另发现4项未通过，保持原断言和期望图不变：`room_tools_widget_test.dart` 的320/430 More基线分别有288/299像素边缘差异；`room_gift_room_flow_test.dart` 的375宽 other-empty/other-occupied reveal/flight基线分别存在10022像素差异，并有测试环境未提供 `path_provider`/PAG 原生实现的问题。以上已单独重跑复现，不将其计入本次183项通过结果，也不通过更新无关基线掩盖问题。
+- 真机未验收：Android/iOS/iPad系统分享弹层、各应用接收/送达、真实后端短链与落地页效果，以及双机语音/音乐在原生分享期间的表现。自动化原生渠道测试使用 mock，不替代这些设备验收。本次不增加原生协议或外部链接回房能力。
+- 本轮失败对比图保留在 `/tmp/isnow-share-regression.1leGd8/failures/`，未将其作为项目资源或覆盖现有golden；临时目录清理后可用上述对应测试重新生成。
+
+### 23.6 截图与原生插件测试修复（2026-10-27）
+
+先复现4项失败并分析差异区域，再修复代码和测试前置条件；本次没有执行 `--update-goldens`，没有提高像素容差、裁掉差异区域或过滤 Flutter 异常。
+
+| 问题 | 确认的原因 | 修复 |
+| --- | --- | --- |
+| More 320/430截图差288/299像素 | `c76571e` 把选中描边注释掉，差异覆盖 Voice 和当前房间模式的边缘，不是浮点渲染噪声 | 恢复有意义的选中描边，颜色集中到 `AppColors.roomMoreSelectedBorder`；补充选中态结构断言 |
+| other-empty/other-occupied 的375截图差10022像素 | 旧图描述音乐入口已开启，而测试一直依赖“进房默认显示”的过期前置条件；差异全部在音乐条，不在礼物轨迹 | 用独立的真实 `RoomMusicRepository` 准备已开启、已收起的本机房间会话。其他房主场景明确先以管理员开启，再恢复普通观众身份，验证同一会话仍保留入口；不带入清屏等管理按钮。另增加12组默认隐藏场景，生产默认隐藏规则保持不变 |
+| 偶发 `path_provider` 目录插件异常及测试结束后的异步错误 | `_GiftImage` 把fixture的 `assets/...` 当作URL传给 `CachedNetworkImage`，错误启动磁盘缓存 | 网格复用 `RoomGiftImage`，本地资产直接解码；HTTP(S)仍走既有缓存并保留loading。测试对真实目录访问设失败断言，不用假目录绕过错误；清理迁入 `addTearDown`，断言失败时也释放房间、订阅和平台mock |
+| PAG初始化/销毁异常或回退按钮空白 | 本地PAG包装层把null/无效纹理响应也当初始化成功，并在没有纹理时调用release | 无效textureId保留Flutter回退UI、不调用onInit、不释放伪纹理；有效纹理正常显示和释放，异步初始化在销毁后完成也释放其真实纹理 |
+
+验证：
+
+- 原失败所在的两个测试文件及新增图片/PAG测试共37项通过，包含24组送礼流程（3种屏宽 × 4种收礼场景 × 2种音乐入口状态）。HTTP确认、连击、轨迹、公屏文案和金币奖励断言均保留。
+- 上述37项使用 `--concurrency=1` 串行复跑同样全部通过；`flutter analyze --no-pub` 和 `git diff --check HEAD` 通过。
+- `flutter test --no-pub test/room*_test.dart`：完整房间模块407项通过，覆盖分享、音乐、礼物、More、Keep/Exit和生命周期。
+- 六张受影响的基线（More两张、礼物reveal/flight四张）修复前后SHA-256完全一致；仓库已有golden文件无修改。
+- 宿主Widget测试对PAG明确模拟“原生无可用纹理”，同时断言连击回退仍可点击；独立测试另覆盖有效纹理和迟到释放。不将这些mock当作真机PAG渲染或原生分享的验收。
+- 本轮复现生成的失败对比图归档在 `/tmp/isnow-room-regression.xQipyh/failures/`，不进入项目资源或替换基线；临时目录清理后可重新运行对应测试生成。
+
+### 23.7 Share参考截图与九渠道调整（2026-10-27）
+
+- 固定三个分类及 Share 默认选中，移除空素材自动切最近聊天；空素材、接口错误和重试集中在 Share，不影响联系人。异常测试使用不同的 `msg` / `message` 验证服务端文案优先级。
+- 按用户截图还原海报圆形切换按钮、摘要右侧图片复制按钮、五列两行九渠道和向下关闭图片。12个 Nady 原图逐一复制到房间目录，AppAssets和manifest记录语义与来源；无Flutter Icon，无新增依赖、通讯录权限或社交SDK。
+- 分享相关84项测试通过，包含八个指定渠道的准确路由和参数编码、逐渠道归因和剪贴板差异、短链失败降级、单次上报、重复点击、启动失败不转系统、关闭或切账号后的迟到请求，以及原有联系人邀请和系统取消/iPad锚点。
+- `flutter test --no-pub test/room*_test.dart` 完整房间模块442项通过，More/礼物原基线及音乐、Keep/Exit继续回归；`flutter analyze --no-pub` 无问题，`git diff --check HEAD` 通过。12个图片文件与manifest所记录的Nady源文件逐字节一致，现有pubspec已覆盖房间资源目录，无需修改依赖或资产声明。
+- 320/375/430候选截图经人工对照后保存为独立 `room_share_channels_v2_*.png`，再以普通比较模式重跑通过。fixture没有海报素材时保留红色占位图，不用截图海报冒充接口数据。27张既有基线（含旧Share、More与礼物）SHA-256均不变，旧Share图片保留作历史参考，新UI测试只比较新版文件。
+- Android/iOS的第三方应用实际接收、安装/未安装及短信编辑器/系统分享弹层未做真机验收；所有原生单元测试使用可注入启动器或渠道mock，不将opened/shared当作送达确认。Snapchat/Instagram等沿用Nady的尽力启动策略，不代表所有应用版本都支持这些Scheme。

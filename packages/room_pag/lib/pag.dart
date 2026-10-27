@@ -242,11 +242,14 @@ class PAGViewState extends State<PAGView> {
         _argumentReuseKey: widget.reuseKey,
         _argumentViewId: instanceId,
       });
-      if (result is Map) {
-        _textureId = result[_argumentTextureId];
-        rawWidth = result[_argumentWidth] ?? 0;
-        rawHeight = result[_argumentHeight] ?? 0;
+      final textureId = result is Map ? result[_argumentTextureId] : null;
+      if (textureId is! int || textureId < 0) {
+        // No native texture was created. Keep the supplied Flutter fallback.
+        return;
       }
+      _textureId = textureId;
+      rawWidth = (result[_argumentWidth] as num?)?.toDouble() ?? 0;
+      rawHeight = (result[_argumentHeight] as num?)?.toDouble() ?? 0;
       if (mounted) {
         setState(() {
           _hasLoadTexture = true;
@@ -315,6 +318,7 @@ class PAGViewState extends State<PAGView> {
   }
 
   void notifyRelease() {
+    if (_textureId < 0) return;
     _channel.invokeMethod(_nativeRelease, {
       _argumentTextureId: _textureId,
       _argumentReuse: widget.reuse,

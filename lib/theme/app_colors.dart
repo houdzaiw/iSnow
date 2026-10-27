@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
+  static const Color roomSharePosterControl = Color(0x66999999);
   static const Color musicBoxSurface = Color(0xE6050505);
   static const Color musicSliderInactive = Color(0x33FFFFFF);
   static const Color roomExitScrim = Color(0xB3000000);
@@ -56,6 +57,9 @@ class AppColors {
   static const Color roomMoreSheet = Color(0xFF1C1B29);
   static const Color roomMoreTile = Color(0x14FFFFFF);
   static const Color roomMoreTileActive = Color(0x33FF5390);
+  static final Color roomMoreSelectedBorder = const Color(
+    0xFFFF4FA0,
+  ).withValues(alpha: 0.65);
   static const Color roomMoreSectionTitle = Color(0xE6FFFFFF);
   static const Color roomMoreToolText = Color(0xCCFFFFFF);
   static const Color roomMoreToolSubtle = Color(0x80FFFFFF);

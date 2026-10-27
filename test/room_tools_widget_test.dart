@@ -214,6 +214,22 @@ void main() {
             find.image(const AssetImage(AppAssets.lanhuRoomMoreMusic)),
             findsOneWidget,
           );
+          final voiceFrames = tester.widgetList<DecoratedBox>(
+            find.ancestor(
+              of: find.image(const AssetImage(AppAssets.lanhuRoomMoreVoice)),
+              matching: find.byType(DecoratedBox),
+            ),
+          );
+          expect(
+            voiceFrames.any(
+              (frame) =>
+                  frame.decoration is BoxDecoration &&
+                  (frame.decoration as BoxDecoration).border ==
+                      Border.all(color: AppColors.roomMoreSelectedBorder),
+            ),
+            isTrue,
+            reason: 'An enabled Voice control must retain its selected outline',
+          );
         }
 
         for (final (label, type) in <(String, Type)>[

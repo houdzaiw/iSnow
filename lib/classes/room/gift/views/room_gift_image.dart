@@ -4,9 +4,15 @@ import 'package:flutter/widgets.dart';
 import '../../../../theme/app_theme.dart';
 
 class RoomGiftImage extends StatelessWidget {
-  const RoomGiftImage({super.key, required this.source, required this.size});
+  const RoomGiftImage({
+    super.key,
+    required this.source,
+    required this.size,
+    this.placeholderBuilder,
+  });
   final String source;
   final double size;
+  final WidgetBuilder? placeholderBuilder;
   @override
   Widget build(BuildContext context) {
     final asset = AppAssets.roomGiftLocalImages[source] ?? source;
@@ -36,7 +42,9 @@ class RoomGiftImage extends StatelessWidget {
       width: size,
       height: size,
       fit: BoxFit.contain,
-      placeholder: (_, __) => SizedBox(width: size, height: size),
+      placeholder: (context, _) =>
+          placeholderBuilder?.call(context) ??
+          SizedBox(width: size, height: size),
       errorWidget: (_, __, ___) => missing(),
     );
   }

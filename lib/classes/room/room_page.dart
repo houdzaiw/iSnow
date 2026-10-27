@@ -35,7 +35,6 @@ import 'more/room_big_win_pendant.dart';
 import 'more/room_settings_page.dart';
 import 'more/room_report_page.dart';
 import 'more/room_share_page.dart';
-import 'room_repository.dart';
 import 'more/room_pk_page.dart';
 import 'more/room_lucky_box_page.dart';
 import 'more/room_lobby_page.dart';

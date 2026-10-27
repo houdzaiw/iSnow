@@ -33,6 +33,9 @@ class AppRadius {
   static const BorderRadius sheetBorder = BorderRadius.vertical(
     top: Radius.circular(calendar),
   );
+  static const BorderRadius roomShareSheetBorder = BorderRadius.vertical(
+    top: Radius.circular(roomActionSheet),
+  );
   static const BorderRadius pillBorder = BorderRadius.all(
     Radius.circular(pill),
   );

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../manager/http_api.dart';
+import '../../../model/room_models.dart';
 import '../../../model/room_share_models.dart';
 import 'room_tools_config.dart';
 import 'room_tools_models.dart';
@@ -50,6 +51,84 @@ class RoomShareRepository {
   Future<String> inviteCode() async =>
       '${toolMap(await api.get(HttpApi.roomInviteInfo))['inviteCode'] ?? ''}';
 
+  Future<RoomShareContactsPage> friends({
+    required int page,
+    required String query,
+    required int selfUid,
+  }) async {
+    final data = toolList(
+      await api.post(HttpApi.userFriends, {
+        'pageNum': page,
+        'pageSize': 20,
+        'targetUid': 0,
+        'searchKey': query,
+      }),
+    );
+    final users = <RoomShareContact>[];
+    for (final entry in data) {
+      final nested = toolMap(entry['userBaseInfo']);
+      final user = nested.isEmpty ? entry : nested;
+      final uid = toolInt(user['uid']);
+      if (uid > 0 && uid != selfUid) {
+        users.add(
+          RoomShareContact(
+            uid: uid,
+            nickname: '${user['nick'] ?? uid}',
+            avatar: '${user['avatar'] ?? ''}',
+          ),
+        );
+      }
+    }
+    return RoomShareContactsPage(users: users, hasMore: data.length == 20);
+  }
+
+  Future<int> recipientVipLevel(int uid) async {
+    final profile = toolMap(
+      await api.get(HttpApi.userHomepage, {'targetUid': uid}),
+    );
+    final user = toolMap(toolMap(profile['info'])['userBaseInfo']);
+    if (user.isEmpty) {
+      throw StateError('Unable to verify invitation permission');
+    }
+    return toolInt(toolMap(user['userLevel'])['vipLevel']);
+  }
+
+  Future<bool> acceptsVipInvitations(int uid) async {
+    final settings = toolMap(
+      await api.get(HttpApi.userVipSetting, {'uid': uid}),
+    );
+    final noDisturb = toolMap(settings['noDisturb']);
+    if (!noDisturb.containsKey('open')) {
+      throw StateError('Unable to verify invitation permission');
+    }
+    return !toolBool(noDisturb['open']);
+  }
+
+  ToolJson roomCard(RoomInfo? info, String roomId) {
+    final raw = info?.raw ?? {};
+    final nested = toolMap(raw['roomInfoDTO'] ?? raw['roomInfo']);
+    final source = nested.isEmpty ? raw : nested;
+    const allowed = [
+      'roomUid',
+      'roomNo',
+      'avatar',
+      'title',
+      'roomTypeValue',
+      'roomDesc',
+      'roomLock',
+      'quickWelcomeStr',
+      'isFollow',
+      'country',
+      'roomGiftWeekVal',
+    ];
+    return {
+      'roomId': int.tryParse(roomId) ?? roomId,
+      for (final name in allowed)
+        if (source.containsKey(name)) name: source[name],
+      'roomPasswd': '',
+    };
+  }
+
   /// Resolve individual URI components so nicknames cannot inject parameters.
   RoomShareContent content(
     RoomShareMaterial material, {
@@ -66,22 +145,19 @@ class RoomShareRepository {
       'inviteCode': inviteCode,
     };
     String resolve(String source) {
-      var value = source;
-      for (final entry in values.entries) {
-        final placeholder = '\${${entry.key}}';
-        if (value.contains(placeholder) &&
-            entry.key != 'nickname' &&
-            entry.value.isEmpty) {
+      return source.replaceAllMapped(RegExp(r'\$\{([^}]+)\}'), (match) {
+        final key = match.group(1)!;
+        final value = values[key];
+        if (value == null) {
+          throw StateError('This invitation template is unavailable');
+        }
+        if (key != 'nickname' && value.isEmpty) {
           throw StateError(
             'Invitation information is unavailable. Please retry.',
           );
         }
-        value = value.replaceAll(placeholder, entry.value);
-      }
-      if (value.contains(r'${')) {
-        throw StateError('This invitation template is unavailable');
-      }
-      return value;
+        return value;
+      });
     }
 
     final base = Uri.tryParse(config.inviteBase);
@@ -106,10 +182,9 @@ class RoomShareRepository {
       queryParameters: {
         for (final entry in target.queryParametersAll.entries)
           resolve(entry.key): entry.value.map(resolve).toList(),
-        if (action != null)
-          'shareChannel': action == RoomShareAction.system ? 'Others' : 'Copy',
+        if (action != null) 'shareChannel': action.channelName,
       },
-      fragment: resolve(target.fragment),
+      fragment: resolve(Uri.decodeComponent(target.fragment)),
     );
     if (target.scheme == 'nady' && scheme.isNotEmpty) {
       jump = jump.replace(scheme: scheme);
