@@ -23,6 +23,8 @@ class ToolsRoomFake extends ChangeNotifier implements RoomRepository {
     isInRoom: true,
   );
   int generation = 1;
+  int? uid = 10;
+  final authListeners = <VoidCallback>[];
   bool speaker = false;
   Map<int, int> volumes = {};
   int leaves = 0, subscriptions = 0;
@@ -40,10 +42,23 @@ class ToolsRoomFake extends ChangeNotifier implements RoomRepository {
   @override
   Stream<RoomSocketMessage> get socketMessages => events.stream;
   @override
-  Future<int?> currentUid() async => 10;
+  Future<int?> currentUid() async => uid;
   @override
   Future<UserData?> currentUser() async =>
-      const UserData(uid: 10, userNo: 987, nick: 'Tester');
+      UserData(uid: uid, userNo: 987, nick: 'Tester');
+  @override
+  void addAuthListener(VoidCallback listener) => authListeners.add(listener);
+  @override
+  void removeAuthListener(VoidCallback listener) =>
+      authListeners.remove(listener);
+
+  void changeAccount(int? value) {
+    uid = value;
+    for (final listener in List.of(authListeners)) {
+      listener();
+    }
+  }
+
   @override
   Future<void> subscribeTools(int uid) async {
     subscriptions++;

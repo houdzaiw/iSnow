@@ -23,6 +23,7 @@ class HttpApi {
   static const roomShareMaterials = '/api/invite/materials';
   static const roomInviteInfo = '/api/invite/info';
   static const roomShareShortLinks = '/api/share/short-links/batch';
+  static const roomShareReport = '/api/activity/component/share-report';
   static const userFriends = '/api/user/follow/friends';
   static const userVipSetting = '/api/vip/setting';
   static const reportUploadParams = '/api/resource/header-upload-param/list';

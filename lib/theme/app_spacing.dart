@@ -1,4 +1,10 @@
 class AppSpacing {
+  static const double roomShareMaxHeightRatio = 0.94;
+  static const double roomSharePanelHeight = 260;
+  static const double roomShareContactsHeight = 360;
+  static const double roomShareHeaderHeight = 64;
+  static const double roomSharePanelMaxRatio = 0.65;
+  static const double roomSharePreviewSize = 42;
   static const double musicBoxWidth = 260;
   static const double musicBoxHeight = 211;
   static const double musicBoxEdge = 14;

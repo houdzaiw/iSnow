@@ -16,10 +16,24 @@ void _showRoomMoreToolsSheet(
     builder: (sheetContext) {
       return _RoomMoreToolsSheet(
         roomProvider: provider,
-        onOpenTool: (action) {
+        onOpenTool: (action) async {
           final roomId = _roomMoreRoomId(ref.read(provider));
+          if (action == 'share') {
+            final repository = ref.read(roomRepositoryProvider);
+            final generation = repository.roomGeneration;
+            final route = ModalRoute.of(sheetContext);
+            Navigator.of(sheetContext).pop();
+            await route?.completed;
+            if (context.mounted &&
+                (ModalRoute.of(context)?.isCurrent ?? true) &&
+                repository.roomGeneration == generation &&
+                repository.roomState.isInRoom &&
+                repository.roomState.currentRoomId == roomId) {
+              await showRoomShareSheet(context, roomId);
+            }
+            return;
+          }
           final page = switch (action) {
-            'share' => RoomSharePage(roomId: roomId),
             'report' => RoomReportPage(roomId: roomId),
             'effects' => RoomSettingsPage(
               roomId: roomId,

@@ -7,7 +7,7 @@ final roomToolsConfigProvider = Provider<RoomToolsConfig>(
   (ref) => const RoomToolsConfig(),
 );
 
-/// Supply branded integration values with --dart-define, never Nady defaults.
+/// Override integrations with --dart-define when using a branded deployment.
 class RoomToolsConfig {
   const RoomToolsConfig();
   String get apiBase => switch (AppConfig.shared.appEnv) {
@@ -15,8 +15,14 @@ class RoomToolsConfig {
     AppEnv.qa => HttpDioManager.qaBaseUrl,
     AppEnv.dev => HttpDioManager.devBaseUrl,
   };
-  String get inviteBase =>
-      const String.fromEnvironment('ISNOW_INVITE_BASE_URL');
+  String get inviteBase {
+    const override = String.fromEnvironment('ISNOW_INVITE_BASE_URL');
+    return override.trim().isNotEmpty
+        ? override.trim()
+        : '${Uri.parse(apiBase).origin}/h5/invite';
+  }
+
+  bool get allowHttpShare => AppConfig.shared.appEnv == AppEnv.dev;
   String get shareScheme => const String.fromEnvironment('ISNOW_SHARE_SCHEME');
   Set<String> get webBridgeHosts =>
       const String.fromEnvironment('ISNOW_WEB_BRIDGE_HOSTS')
