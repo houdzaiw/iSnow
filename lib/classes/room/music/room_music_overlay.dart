@@ -15,12 +15,10 @@ class RoomMusicOverlay extends ConsumerWidget {
     super.key,
     required this.roomId,
     required this.rootKey,
-    required this.anchorKey,
     required this.bottomBarKey,
   });
   final String roomId;
   final GlobalKey rootKey;
-  final GlobalKey anchorKey;
   final GlobalKey bottomBarKey;
 
   @override
@@ -31,10 +29,10 @@ class RoomMusicOverlay extends ConsumerWidget {
       child: CustomSingleChildLayout(
         delegate: _MusicBoxLayout(
           rootKey: rootKey,
-          anchorKey: anchorKey,
           bottomBarKey: bottomBarKey,
           width: AppSpacing.musicBoxWidth.w,
           edge: AppSpacing.musicBoxEdge.w,
+          padding: MediaQuery.paddingOf(context),
           keyboardInset: MediaQuery.viewInsetsOf(context).bottom,
         ),
         child: RoomMusicControls(
@@ -50,17 +48,17 @@ class RoomMusicOverlay extends ConsumerWidget {
 class _MusicBoxLayout extends SingleChildLayoutDelegate {
   _MusicBoxLayout({
     required this.rootKey,
-    required this.anchorKey,
     required this.bottomBarKey,
     required this.width,
     required this.edge,
+    required this.padding,
     required this.keyboardInset,
   });
   final GlobalKey rootKey;
-  final GlobalKey anchorKey;
   final GlobalKey bottomBarKey;
   final double width;
   final double edge;
+  final EdgeInsets padding;
   final double keyboardInset;
 
   double? _top(GlobalKey key) {
@@ -72,32 +70,58 @@ class _MusicBoxLayout extends SingleChildLayoutDelegate {
     return target.localToGlobal(Offset.zero, ancestor: root).dy;
   }
 
+  Rect _visibleBounds(Size size) {
+    final left = padding.left.clamp(0.0, size.width);
+    final top = padding.top.clamp(0.0, size.height);
+    return Rect.fromLTRB(
+      left,
+      top,
+      math.max(left, size.width - padding.right),
+      math.max(top, size.height - math.max(padding.bottom, keyboardInset)),
+    );
+  }
+
+  Rect _availableBounds(Size size) {
+    final visible = _visibleBounds(size);
+    final bottom = (_top(bottomBarKey) ?? visible.bottom).clamp(
+      visible.top,
+      visible.bottom,
+    );
+    final horizontalInset = math.min(edge, visible.width / 2);
+    final verticalInset = math.min(edge, (bottom - visible.top) / 2);
+    return Rect.fromLTRB(
+      visible.left + horizontalInset,
+      visible.top + verticalInset,
+      visible.right - horizontalInset,
+      bottom - verticalInset,
+    );
+  }
+
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    final bottom = math.min(
-      _top(bottomBarKey) ?? constraints.maxHeight,
-      constraints.maxHeight - keyboardInset,
-    );
+    final available = _availableBounds(constraints.biggest);
     final ratio = AppSpacing.musicBoxWidth / AppSpacing.musicBoxHeight;
-    final availableHeight = math.max(0.0, bottom - edge);
-    final boxWidth = math.max(
-      0.0,
-      math.min(
-        width,
-        math.min(constraints.maxWidth - edge * 2, availableHeight * ratio),
-      ),
+    final boxWidth = math.min(
+      width,
+      math.min(available.width, available.height * ratio),
     );
     return BoxConstraints.tight(Size(boxWidth, boxWidth / ratio));
   }
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    final bottom = math.min(
-      _top(bottomBarKey) ?? size.height,
-      size.height - keyboardInset,
+    final visible = _visibleBounds(size);
+    final available = _availableBounds(size);
+    return Offset(
+      (visible.center.dx - childSize.width / 2).clamp(
+        available.left,
+        math.max(available.left, available.right - childSize.width),
+      ),
+      (visible.center.dy - childSize.height / 2).clamp(
+        available.top,
+        math.max(available.top, available.bottom - childSize.height),
+      ),
     );
-    final maximum = math.max(0.0, bottom - childSize.height - edge);
-    return Offset(edge, (_top(anchorKey) ?? 0).clamp(0.0, maximum));
   }
 
   @override

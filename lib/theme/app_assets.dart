@@ -20,13 +20,13 @@ class AppAssets {
   static const roomMusicPlaylist = 'assets/lanhu/room/room_music_playlist.png';
   static const roomMusicSystemVolume =
       'assets/lanhu/room/room_music_system_volume.png';
-  // No alternate single/shuffle exports in the supplied design.
-  static const roomMusicSingle = lanhuRoomIconMissing;
-  static const roomMusicShuffle = lanhuRoomIconMissing;
-  static const roomMusicStop = lanhuRoomIconMissing;
-  static const roomMusicDelete = lanhuRoomIconMissing;
+  // User-approved Nady images for controls missing from the Lanhu export.
+  static const roomMusicSingle = 'assets/lanhu/room/room_music_single.webp';
+  static const roomMusicShuffle = 'assets/lanhu/room/room_music_shuffle.webp';
+  static const roomMusicStop = 'assets/lanhu/room/room_music_stop.webp';
+  static const roomMusicDelete = 'assets/lanhu/room/room_music_delete.webp';
   static const roomMusicVolume = 'assets/lanhu/room/room_music_volume.png';
-  static const roomMusicSearch = lanhuRoomIconMissing;
+  static const roomMusicSearch = 'assets/lanhu/room/room_music_search.webp';
   static const String roomExitKeep = 'assets/lanhu/room/room_exit_keep.png';
   static const String roomExitClose = 'assets/lanhu/room/room_exit_close.png';
   static const String roomMiniClose = 'assets/lanhu/room/room_mini_close.webp';

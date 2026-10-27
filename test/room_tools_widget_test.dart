@@ -210,6 +210,10 @@ void main() {
             findsOneWidget,
           );
           expect(find.text('Map Social'), findsNothing);
+          expect(
+            find.image(const AssetImage(AppAssets.lanhuRoomMoreMusic)),
+            findsOneWidget,
+          );
         }
 
         for (final (label, type) in <(String, Type)>[
@@ -230,10 +234,7 @@ void main() {
           await tester.tap(find.text(label));
           await tester.pumpAndSettle();
           expect(find.byType(type), findsOneWidget);
-          await precacheRoomAssets(
-            tester,
-            tester.element(find.byType(type)),
-          );
+          await precacheRoomAssets(tester, tester.element(find.byType(type)));
           if (label == 'Effect Settings') {
             await expectLater(
               find.byKey(const ValueKey('room-more-snapshot')),

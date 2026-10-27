@@ -15,6 +15,7 @@ import 'package:project/classes/room/music/room_music_view_model.dart';
 import 'package:project/localization/app_localizations.dart';
 import 'package:project/manager/room_system_volume_manager.dart';
 import 'package:project/model/room_music_state.dart';
+import 'package:project/theme/app_theme.dart';
 
 import 'support/precache_room_assets.dart';
 import 'support/room_music_fixture.dart';
@@ -74,19 +75,24 @@ void main() {
       await fixture.import();
       final vm = model();
       await fixture.flush();
+      expect(vm.state.isOpened, isFalse);
       vm.expand();
       expect(vm.state.expanded, isTrue);
+      expect(vm.state.isOpened, isTrue);
       expect(fixture.http.opens, isEmpty);
       expect(fixture.engine.starts, isEmpty);
       await vm.toggle();
       vm.collapse();
+      expect(vm.state.isOpened, isTrue);
       expect(fixture.agora.state.music.status, RoomMusicPlayback.playing);
       expect(fixture.engine.stops, 0);
       vm.expand();
       fixture.manager.minimizeRoom();
       expect(vm.state.expanded, isFalse);
+      expect(vm.state.isOpened, isTrue);
       fixture.manager.restoreRoom();
       expect(vm.state.expanded, isFalse);
+      expect(vm.state.isOpened, isTrue);
       expect(fixture.agora.state.music.status, RoomMusicPlayback.playing);
     },
   );
@@ -103,6 +109,7 @@ void main() {
     expect(vm.state.busy, isTrue);
     final closing = vm.close();
     expect(vm.state.expanded, isFalse);
+    expect(vm.state.isOpened, isFalse);
     expect(vm.state.closing, isTrue);
     gate.complete();
     await playing;
@@ -138,6 +145,7 @@ void main() {
     await fixture.import();
     final vm = model();
     await fixture.flush();
+    vm.expand();
     await vm.toggle();
     fixture.http.failClose = true;
     await vm.close();
@@ -145,6 +153,7 @@ void main() {
     expect(fixture.engine.stops, 1);
     expect(vm.state.error, contains('close failed'));
     expect(vm.state.closing, isFalse);
+    expect(vm.state.isOpened, isFalse);
   });
 
   test(
@@ -204,7 +213,7 @@ void main() {
 
   for (final width in [320.0, 375.0, 430.0]) {
     testWidgets(
-      'compact box at $width overlays, fits long names and leaves room interactive',
+      'compact box centers at $width, fits long names and leaves room interactive',
       (tester) async {
         tester.view.physicalSize = Size(width, 700);
         tester.view.devicePixelRatio = 1;
@@ -220,6 +229,12 @@ void main() {
                 'Over_the_Horizon_a_very_long_recording_that_must_ellipsis.m4a',
           ),
         );
+        if (width == 375) {
+          // Stabilize progress before capturing the playlist footer.
+          await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 1100)),
+          );
+        }
         await tester.pumpWidget(
           ProviderScope(
             overrides: [
@@ -248,6 +263,8 @@ void main() {
           anchorBefore,
         );
         final rect = tester.getRect(box);
+        expect(rect.center.dx, closeTo(width / 2, .01));
+        expect(rect.center.dy, closeTo(700 / 2, .01));
         final bottom = tester.getRect(find.byKey(const ValueKey('bottom-bar')));
         expect(rect.bottom, lessThan(bottom.top));
         expect(rect.left, greaterThanOrEqualTo(0));
@@ -263,15 +280,45 @@ void main() {
           find.byKey(const ValueKey('room-box-root')),
           matchesGoldenFile('goldens/room_music_box_${width.toInt()}.png'),
         );
-        await tester.tap(find.byKey(const ValueKey('room-music-mode')));
-        await tester.pumpAndSettle();
-        expect(fixture.music.mode.name, 'single');
+        for (final (mode, asset) in [
+          ('single', AppAssets.roomMusicSingle),
+          ('shuffle', AppAssets.roomMusicShuffle),
+          ('loop', AppAssets.roomMusicLoop),
+        ]) {
+          await tester.tap(find.byKey(const ValueKey('room-music-mode')));
+          await tester.pumpAndSettle();
+          expect(fixture.music.mode.name, mode);
+          expect(
+            find.descendant(
+              of: find.byKey(const ValueKey('room-music-mode')),
+              matching: find.image(AssetImage(asset)),
+            ),
+            findsOneWidget,
+          );
+          if (width == 375 && mode != 'loop') {
+            await precacheRoomAssets(tester, tester.element(box));
+            await expectLater(
+              find.byKey(const ValueKey('room-box-root')),
+              matchesGoldenFile('goldens/room_music_box_${mode}_375.png'),
+            );
+          }
+        }
         await tester.tap(find.byKey(const ValueKey('room-music-playlist')));
         await tester.pumpAndSettle();
         expect(
           find.byKey(const ValueKey('room-music-progress')),
           findsOneWidget,
         );
+        if (width == 375) {
+          await precacheRoomAssets(
+            tester,
+            tester.element(find.byKey(const ValueKey('room-music-sheet'))),
+          );
+          await expectLater(
+            find.byKey(const ValueKey('room-music-sheet')),
+            matchesGoldenFile('goldens/room_music_playlist_375.png'),
+          );
+        }
         // A nested local picker and playlist can be dismissed without stopping.
         Navigator.of(
           tester.element(find.byKey(const ValueKey('room-music-sheet'))),
@@ -279,9 +326,17 @@ void main() {
         await tester.pumpAndSettle();
         expect(fixture.engine.stops, 0);
         for (final rows in [0, 1, 4]) {
-          await tester.tap(find.text('Seats'));
+          tester
+              .state<_RoomHarnessState>(find.byType(_RoomHarness))
+              .setRows(rows);
           tester.view.viewInsets = FakeViewPadding(bottom: rows == 4 ? 250 : 0);
           await tester.pumpAndSettle();
+          final current = tester.getRect(box);
+          expect(current.center.dx, closeTo(width / 2, .01));
+          expect(
+            current.center.dy,
+            closeTo((700 - (rows == 4 ? 250 : 0)) / 2, .01),
+          );
           expect(
             tester.getRect(box).bottom,
             lessThan(
@@ -310,10 +365,10 @@ class _RoomHarness extends ConsumerStatefulWidget {
 
 class _RoomHarnessState extends ConsumerState<_RoomHarness> {
   final root = GlobalKey();
-  final anchor = GlobalKey();
   final bottom = GlobalKey();
   int outside = 0;
   int rows = 1;
+  void setRows(int value) => setState(() => rows = value);
   @override
   Widget build(BuildContext context) => RepaintBoundary(
     key: const ValueKey('room-box-root'),
@@ -327,7 +382,6 @@ class _RoomHarnessState extends ConsumerState<_RoomHarness> {
             children: [
               SizedBox(height: 70.0 + rows * 60),
               SizedBox(
-                key: anchor,
                 height: 48,
                 child: Row(
                   children: [
@@ -368,7 +422,6 @@ class _RoomHarnessState extends ConsumerState<_RoomHarness> {
           RoomMusicOverlay(
             roomId: 'canonical',
             rootKey: root,
-            anchorKey: anchor,
             bottomBarKey: bottom,
           ),
         ],

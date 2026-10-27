@@ -49,6 +49,7 @@ class RoomMusicRepository extends ChangeNotifier {
   RoomMusicMode _mode = RoomMusicMode.loop;
   int _completed = 0;
   int _roomGeneration = 0;
+  bool _isOpened = false;
   bool _disposed = false;
   String? _automaticError;
 
@@ -77,6 +78,22 @@ class RoomMusicRepository extends ChangeNotifier {
 
   bool canPresent(String roomId) =>
       isCurrentRoom(roomId) && !_room.roomState.isMinimized;
+
+  /// Remembers activation in this room session, including while minimized.
+  bool isOpened(String roomId) => _isOpened && isCurrentRoom(roomId);
+
+  /// Ignores activation changes from an expired room session.
+  void setBoxOpened(String roomId, bool opened, {required int generation}) {
+    if (_disposed ||
+        generation != sessionGeneration ||
+        !isCurrentRoom(roomId) ||
+        (opened && !canPresent(roomId)) ||
+        _isOpened == opened) {
+      return;
+    }
+    _isOpened = opened;
+    notifyListeners();
+  }
 
   Future<void> load() async {
     final uid = await _room.currentUid();
@@ -235,6 +252,7 @@ class RoomMusicRepository extends ChangeNotifier {
     if (_disposed) return;
     if (_roomGeneration != _room.roomGeneration) {
       _roomGeneration = _room.roomGeneration;
+      _isOpened = false;
       _automaticError = null;
     }
     if (playback.status == RoomMusicPlayback.failed) {
@@ -265,6 +283,7 @@ class RoomMusicRepository extends ChangeNotifier {
   void _authChanged() {
     _authEpoch++;
     _playEpoch++;
+    _isOpened = false;
     _uid = null;
     _tracks = const [];
     notifyListeners();

@@ -71,6 +71,7 @@ class RoomMusicSearchField extends HookWidget {
               padding: EdgeInsets.all(AppSpacing.lg.r),
               child: Image.asset(
                 AppAssets.roomMusicSearch,
+                color: AppColors.textInverse,
                 width: AppSpacing.iconSizeSm.r,
                 height: AppSpacing.iconSizeSm.r,
               ),

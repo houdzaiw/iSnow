@@ -156,6 +156,7 @@ class RoomMusicSheet extends HookConsumerWidget {
                               RoomMusicImageButton(
                                 label: context.l10n.t('room.music.delete'),
                                 asset: AppAssets.roomMusicDelete,
+                                color: AppColors.textInverse,
                                 onTap: state.busy
                                     ? null
                                     : () => viewModel.remove(track),

@@ -21,6 +21,7 @@ class RoomMusicSheetState {
     this.query = '',
     this.noticeKey,
     this.totalTracks = 0,
+    this.isOpened = false,
     this.expanded = false,
     this.closing = false,
     this.systemVolume,
@@ -36,6 +37,7 @@ class RoomMusicSheetState {
   final String query;
   final String? noticeKey;
   final int totalTracks;
+  final bool isOpened;
   final bool expanded;
   final bool closing;
   final double? systemVolume;
@@ -123,6 +125,7 @@ class RoomMusicViewModel extends StateNotifier<RoomMusicSheetState> {
       query: _query,
       noticeKey: _noticeKey,
       totalTracks: _repository.tracks.length,
+      isOpened: _repository.isOpened(_roomId),
       expanded: _expanded,
       closing: _closing,
       systemVolume: _systemValue,
@@ -271,9 +274,11 @@ class RoomMusicViewModel extends StateNotifier<RoomMusicSheetState> {
 
   void expand() {
     if (!mounted || _closing || !_repository.canPresent(_roomId)) return;
+    final generation = _repository.sessionGeneration;
     _expanded = true;
+    _expandedGeneration = generation;
+    _repository.setBoxOpened(_roomId, true, generation: generation);
     unawaited(initialize());
-    _expandedGeneration = _repository.sessionGeneration;
     _systemError = false;
     _volumeSubscription ??= _systemVolume.changes.listen(
       (value) {
@@ -305,7 +310,14 @@ class RoomMusicViewModel extends StateNotifier<RoomMusicSheetState> {
   }
 
   Future<void> close() {
+    final generation = _expandedGeneration ?? _sessionGeneration;
+    if (!mounted ||
+        generation != _repository.sessionGeneration ||
+        !_repository.isCurrentRoom(_roomId)) {
+      return Future<void>.value();
+    }
     collapse();
+    _repository.setBoxOpened(_roomId, false, generation: generation);
     return stop();
   }
 

@@ -1,5 +1,10 @@
 {
-  "music_controls_missing": "Single/shuffle alternate states, stop, delete and search have no real exports in music design f2616a5f-f98e-4a45-a1d2-05537e65aa76 section_30; keep red missing placeholder pending replacement. No Flutter Icon/Icons.",
+  "music_controls_fallback": "Single/shuffle, stop, delete and search were absent from Lanhu design f2616a5f-f98e-4a45-a1d2-05537e65aa76 section_30. The user explicitly approved Nady image reuse; the five WebP files below are Nady assets, not Lanhu exports. No Flutter Icon/Icons.",
+  "room_music_single.webp": "Nady user-approved source: /Users/huili/nady/assets/images/room_music_single.webp; NadyRoomPlayMode.getPlayModeImage single state; copied unchanged",
+  "room_music_shuffle.webp": "Nady user-approved source: /Users/huili/nady/assets/images/room_music_random.webp; NadyRoomPlayMode.getPlayModeImage random state mapped to iSnow shuffle; copied unchanged",
+  "room_music_stop.webp": "Nady user-approved source: /Users/huili/nady/assets/images/room_music_close.webp; NadyRoomMusicPlayerWidget stopPlayMusic + closePlayerAction power glyph; copied unchanged; existing stop-and-release action retained. Do not use legacy ic_room_music_close.webp (a delete cross when Flutter decodes its alpha).",
+  "room_music_delete.webp": "Nady user-approved source: /Users/huili/nady/assets/images/room_music_player_delete.webp; NadyRoomMusicMyPlayerPage trash image; copied unchanged and tinted textInverse (white) as in Nady",
+  "room_music_search.webp": "Nady user-approved source: /Users/huili/nady/assets/images/invite_details_search.webp; SearchIcon used by NadyMyMusicWidget; copied unchanged and tinted textInverse (white) as in Nady",
   "music_design_context": "image_id=f2616a5f-f98e-4a45-a1d2-05537e65aa76; section_30 / original layer 15375:181696. Exact layer-ID exports include alternate playback state. Play/pause mapping verified by inspecting PNG contents (source names are reversed). Native interactive sliders replace static slider images.",
   "room_exit_keep.png": "user-provided local asset: /Users/huili/Downloads/exit-dialog/缩小直播间@2x.png; active Keep button image",
   "room_exit_close.png": "user-provided local asset: /Users/huili/Downloads/exit-dialog/退出房间按钮.png; active Exit button image",

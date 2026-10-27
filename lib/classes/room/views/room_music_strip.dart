@@ -1,20 +1,23 @@
 part of '../room_page.dart';
 
-class _RoomMusicStrip extends StatelessWidget {
+class _RoomMusicStrip extends ConsumerWidget {
   const _RoomMusicStrip({
     required this.state,
     required this.onAudienceTap,
     required this.onMusicTap,
-    required this.musicAnchorKey,
   });
 
   final RoomPageState state;
   final VoidCallback onAudienceTap;
   final VoidCallback onMusicTap;
-  final GlobalKey musicAnchorKey;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final musicOpened = ref.watch(
+      roomMusicViewModelProvider(
+        state.currentRoomId,
+      ).select((value) => value.isOpened),
+    );
     final users = state.audience
         .take(AppSpacing.roomAudiencePreviewLimit)
         .toList();
@@ -26,43 +29,45 @@ class _RoomMusicStrip extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: AppSpacing.xl.w),
         child: Row(
           children: [
-            Expanded(
-              child: InkWell(
-                key: const ValueKey('room-music-entry'),
-                onTap: state.isReady ? onMusicTap : null,
-                borderRadius: AppRadius.pillBorder,
-                child: Container(
-                  key: musicAnchorKey,
-                  height: AppSpacing.roomMusicPillHeight.h,
-                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm.w),
-                  decoration: const BoxDecoration(
-                    color: AppColors.roomMusicStripSurface,
-                    borderRadius: AppRadius.pillBorder,
-                  ),
-                  child: Row(
-                    children: [
-                      _RoomAssetIcon(
-                        asset: AppAssets.lanhuRoomMusicIcon,
-                        size: AppSpacing.iconSizeMd.r,
-                      ),
-                      SizedBox(width: AppSpacing.inlineActionGap.w),
-                      Expanded(
-                        child: Text(
-                          state.agoraState.music.isActive &&
-                                  state.agoraState.music.title.isNotEmpty
-                              ? state.agoraState.music.title
-                              : context.l10n.t('room.more.music'),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.roomMusicTitle,
+            if (musicOpened)
+              Expanded(
+                child: InkWell(
+                  key: const ValueKey('room-music-entry'),
+                  onTap: state.isReady ? onMusicTap : null,
+                  borderRadius: AppRadius.pillBorder,
+                  child: Container(
+                    height: AppSpacing.roomMusicPillHeight.h,
+                    padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm.w),
+                    decoration: const BoxDecoration(
+                      color: AppColors.roomMusicStripSurface,
+                      borderRadius: AppRadius.pillBorder,
+                    ),
+                    child: Row(
+                      children: [
+                        _RoomAssetIcon(
+                          asset: AppAssets.lanhuRoomMusicIcon,
+                          size: AppSpacing.iconSizeMd.r,
                         ),
-                      ),
-                    ],
+                        SizedBox(width: AppSpacing.inlineActionGap.w),
+                        Expanded(
+                          child: Text(
+                            state.agoraState.music.isActive &&
+                                    state.agoraState.music.title.isNotEmpty
+                                ? state.agoraState.music.title
+                                : context.l10n.t('room.more.music'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.roomMusicTitle,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ),
-            SizedBox(width: AppSpacing.sm.w),
+              )
+            else
+              const Spacer(),
+            if (musicOpened) SizedBox(width: AppSpacing.sm.w),
             Semantics(
               button: true,
               label:
@@ -139,11 +144,7 @@ class _RoomMusicStrip extends StatelessWidget {
   }
 }
 
-void _openRoomMusic(BuildContext context, WidgetRef ref, RoomPageState state) {
+void _openRoomMusic(WidgetRef ref, RoomPageState state) {
   if (!state.isReady) return;
-  if (!state.isOnMic) {
-    _showRoomMoreSnack(context, context.l10n.t('room.music.takeMic'));
-    return;
-  }
   ref.read(roomMusicViewModelProvider(state.currentRoomId).notifier).expand();
 }

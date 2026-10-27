@@ -17,6 +17,7 @@ import 'package:project/manager/room_music_library.dart';
 import 'package:project/model/room_music_state.dart';
 import 'package:project/model/room_socket_message.dart';
 import 'package:project/model/server_response.dart';
+import 'package:project/theme/app_theme.dart';
 
 import 'support/room_music_fixture.dart';
 
@@ -446,6 +447,22 @@ void main() {
       expect(find.byKey(const ValueKey('room-music-mode')), findsNothing);
       expect(find.byKey(const ValueKey('room-music-progress')), findsOneWidget);
       expect(find.byKey(const ValueKey('room-music-stop')), findsOneWidget);
+      expect(
+        find.image(const AssetImage(AppAssets.roomMusicStop)),
+        findsOneWidget,
+      );
+      final search = tester.widget<Image>(
+        find.image(const AssetImage(AppAssets.roomMusicSearch)),
+      );
+      expect(search.color, AppColors.textInverse);
+      final deleteImages = tester.widgetList<Image>(
+        find.image(const AssetImage(AppAssets.roomMusicDelete)),
+      );
+      expect(deleteImages, hasLength(2));
+      expect(
+        deleteImages.map((image) => image.color),
+        everyElement(AppColors.textInverse),
+      );
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
     });

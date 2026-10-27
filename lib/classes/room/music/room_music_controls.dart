@@ -272,12 +272,14 @@ class RoomMusicImageButton extends StatelessWidget {
     this.onTap,
     this.hitSize,
     this.iconSize,
+    this.color,
   });
   final String label;
   final String asset;
   final VoidCallback? onTap;
   final double? hitSize;
   final double? iconSize;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) => Tooltip(
@@ -295,6 +297,7 @@ class RoomMusicImageButton extends StatelessWidget {
               opacity: onTap == null ? AppSpacing.disabledControlOpacity : 1,
               child: Image.asset(
                 asset,
+                color: color,
                 width: iconSize ?? AppSpacing.iconSizeMd.r,
                 height: iconSize ?? AppSpacing.iconSizeMd.r,
               ),

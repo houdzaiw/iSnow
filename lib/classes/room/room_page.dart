@@ -79,7 +79,6 @@ class RoomPage extends HookConsumerWidget {
         : roomId;
     final messageController = useTextEditingController();
     final giftRootKey = useMemoized(() => GlobalKey(), [giftRoomId]);
-    final musicAnchorKey = useMemoized(() => GlobalKey(), [giftRoomId]);
     final bottomBarKey = useMemoized(() => GlobalKey(), [giftRoomId]);
     listenRoomMusicTakeover(context, ref, giftRoomId);
     ref.listen(roomMusicViewModelProvider(giftRoomId), (previous, next) {
@@ -240,7 +239,8 @@ class RoomPage extends HookConsumerWidget {
     }
 
     ref.listen<RoomPageState>(provider, (previous, next) {
-      if (!next.isOnMic || next.isMinimized) {
+      final leftMic = previous?.isOnMic == true && !next.isOnMic;
+      if (leftMic || next.isMinimized) {
         ref.read(roomMusicViewModelProvider(giftRoomId).notifier).collapse();
       }
       if (next.isInRoom) hadRoom.value = true;
@@ -333,13 +333,9 @@ class RoomPage extends HookConsumerWidget {
                             ),
                           ),
                           _RoomMusicStrip(
-                            musicAnchorKey: musicAnchorKey,
                             state: state,
-                            onMusicTap: () => _openRoomMusic(
-                              context,
-                              ref,
-                              ref.read(provider),
-                            ),
+                            onMusicTap: () =>
+                                _openRoomMusic(ref, ref.read(provider)),
                             onAudienceTap: () async {
                               final roomId = state.currentRoomId;
                               final uid = await showRoomAudienceSheet(
@@ -447,7 +443,6 @@ class RoomPage extends HookConsumerWidget {
                       RoomMusicOverlay(
                         roomId: giftRoomId,
                         rootKey: giftRootKey,
-                        anchorKey: musicAnchorKey,
                         bottomBarKey: bottomBarKey,
                       ),
                       Positioned.fill(
