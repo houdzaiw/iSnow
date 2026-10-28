@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -28,6 +29,7 @@ import 'package:project/theme/app_theme.dart';
 
 import 'support/precache_room_assets.dart';
 import 'support/room_share_fakes.dart';
+import 'support/room_share_image_client.dart';
 import 'support/room_tools_fakes.dart';
 
 void main() {
@@ -279,6 +281,83 @@ void main() {
     expect(find.byType(SnackBar), findsNothing);
     expect(find.byType(RoomSharePage), findsOneWidget);
   });
+
+  testWidgets(
+    'captured null-target material displays a decoded poster, text and H5 link',
+    (tester) async {
+      final fixture =
+          jsonDecode(
+                File(
+                  'test/fixtures/room_share_materials_null_target.json',
+                ).readAsStringSync(),
+              )
+              as Map<String, dynamic>;
+      final entry = (fixture['data'] as List).single as Map<String, dynamic>;
+      final url = entry['imageUrl'] as String;
+      final client = RoomShareImageClient(
+        File(AppAssets.roomShareFacebook).readAsBytesSync(),
+      );
+      final previous = debugNetworkImageHttpClientProvider;
+      debugNetworkImageHttpClientProvider = () => client;
+      PaintingBinding.instance.imageCache.clear();
+      addTearDown(() {
+        debugNetworkImageHttpClientProvider = previous;
+        PaintingBinding.instance.imageCache.clear();
+        PaintingBinding.instance.imageCache.clearLiveImages();
+      });
+      try {
+        final api = shareApiFake()
+          ..responses[HttpApi.roomShareMaterials] = fixture['data'];
+        final setup = await open(tester, api: api);
+        await tester.runAsync(
+          () => precacheImage(
+            NetworkImage(url),
+            tester.element(find.byType(RoomSharePage)),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('No share materials available'), findsNothing);
+        expect(find.text(entry['copyText'] as String), findsOneWidget);
+        expect(find.image(NetworkImage(url)), findsNWidgets(2));
+        final poster = find.byKey(const ValueKey('room-share-posters'));
+        final image = tester.widget<RawImage>(
+          find.descendant(of: poster, matching: find.byType(RawImage)),
+        );
+        expect(image.image?.width, greaterThan(0));
+        expect(
+          find.descendant(
+            of: poster,
+            matching: find.image(
+              const AssetImage(AppAssets.lanhuRoomIconMissing),
+            ),
+          ),
+          findsNothing,
+        );
+        expect(client.urls, contains(Uri.parse(url)));
+        final linkText = tester
+            .widgetList<Text>(find.byType(Text))
+            .map((text) => text.data)
+            .whereType<String>()
+            .singleWhere(
+              (text) => text.startsWith('https://share.example/h5/invite?'),
+            );
+        final link = Uri.parse(linkText);
+        expect(link.queryParameters['og_url'], '');
+        expect(link.queryParameters['og_image'], url);
+        expect(api.count(HttpApi.roomInviteInfo), 0);
+        expect(api.count(HttpApi.roomShareShortLinks), 0);
+        await tester.tap(find.byKey(const ValueKey('room-share-copy')));
+        await tester.pumpAndSettle();
+        expect(
+          setup.platform.copied.single,
+          startsWith('${entry['copyText']}\nhttps://share.example/s/abc'),
+        );
+        expect(tester.takeException(), isNull);
+      } finally {
+        debugNetworkImageHttpClientProvider = previous;
+      }
+    },
+  );
 
   testWidgets(
     'actual More entry opens a root share sheet without replacing or exiting the room',

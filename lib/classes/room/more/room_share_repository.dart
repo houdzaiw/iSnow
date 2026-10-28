@@ -33,13 +33,22 @@ class RoomShareRepository {
           'sub-scene': 'ROOM_SHARE',
           'language': language,
         });
+        final entries = toolList(data);
         final list =
-            toolList(data)
+            entries
                 .map(RoomShareMaterial.fromJson)
-                .where((material) => material.jumpLink.isNotEmpty)
+                .where((material) => material.hasContent)
                 .toList()
               ..sort((a, b) => a.sortNo.compareTo(b.sortNo));
         final result = List<RoomShareMaterial>.unmodifiable(list);
+        if (kDebugMode) {
+          debugPrint(
+            '[RoomShare] materials language=$language '
+            'received=${entries.length} usable=${result.length} '
+            'posters=${result.where((item) => item.imageUrl.isNotEmpty).length} '
+            'withoutTarget=${result.where((item) => item.jumpLink.isEmpty).length}',
+          );
+        }
         if (result.isNotEmpty) _cache[key] = result;
         return result;
       } finally {
@@ -164,43 +173,58 @@ class RoomShareRepository {
     if (base == null || !_webUri(base)) {
       throw StateError('The share page address is not configured correctly');
     }
-    final target = Uri.tryParse(material.jumpLink);
-    final scheme = config.shareScheme.trim();
-    if (target == null ||
-        target.userInfo.isNotEmpty ||
-        target.host.isEmpty ||
-        !{
-          'http',
-          'https',
-          'nady',
-          if (scheme.isNotEmpty) scheme,
-        }.contains(target.scheme)) {
-      throw StateError('This invitation link is unavailable');
-    }
-    var jump = target.replace(
-      pathSegments: target.pathSegments.map(resolve),
-      queryParameters: {
-        for (final entry in target.queryParametersAll.entries)
-          resolve(entry.key): entry.value.map(resolve).toList(),
-        if (action != null) 'shareChannel': action.channelName,
-      },
-      fragment: resolve(Uri.decodeComponent(target.fragment)),
-    );
-    if (target.scheme == 'nady' && scheme.isNotEmpty) {
-      jump = jump.replace(scheme: scheme);
+    // Nady keeps poster-only materials and wraps an empty target in the H5 URL.
+    // Never invent a deep link when the server has not configured one.
+    var targetLink = '';
+    if (material.jumpLink.isNotEmpty) {
+      final target = Uri.tryParse(material.jumpLink);
+      final scheme = config.shareScheme.trim();
+      if (target == null ||
+          target.userInfo.isNotEmpty ||
+          target.host.isEmpty ||
+          !{
+            'http',
+            'https',
+            'nady',
+            if (scheme.isNotEmpty) scheme,
+          }.contains(target.scheme)) {
+        throw StateError('This invitation link is unavailable');
+      }
+      var jump = target.replace(
+        pathSegments: target.pathSegments.map(resolve),
+        queryParameters: {
+          for (final entry in target.queryParametersAll.entries)
+            resolve(entry.key): entry.value.map(resolve).toList(),
+          if (action != null) 'shareChannel': action.channelName,
+        },
+        fragment: resolve(Uri.decodeComponent(target.fragment)),
+      );
+      if (target.scheme == 'nady' && scheme.isNotEmpty) {
+        jump = jump.replace(scheme: scheme);
+      }
+      targetLink = jump.toString();
     }
     final description = resolve(material.copyText);
+    final parameters = {
+      ...base.queryParametersAll,
+      'og_title': ['iSnow'],
+      'og_description': [description],
+      'og_image': [material.imageUrl],
+      'og_url': [targetLink],
+    };
+    // Match Nady's explicit key=value encoding. The short-link backend rejects
+    // bare empty keys (og_url), which Uri's queryParameters serializer emits.
+    final query = parameters.entries
+        .expand(
+          (entry) => entry.value.map(
+            (value) =>
+                '${Uri.encodeComponent(entry.key)}=${Uri.encodeComponent(value)}',
+          ),
+        )
+        .join('&');
     return RoomShareContent(
       description: description,
-      link: base.replace(
-        queryParameters: {
-          ...base.queryParametersAll,
-          'og_title': 'iSnow',
-          'og_description': description,
-          'og_image': material.imageUrl,
-          'og_url': jump.toString(),
-        },
-      ),
+      link: base.replace(query: query),
     );
   }
 
@@ -214,7 +238,7 @@ class RoomShareRepository {
     try {
       final links = toolList(
         await api.post(HttpApi.roomShareShortLinks, {
-          'shortBaseUrl': content.link.origin,
+          'shortBaseUrl': Uri.parse(config.apiBase).origin,
           'originalShareUrls': [content.link.toString()],
         }),
       );

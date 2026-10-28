@@ -186,6 +186,8 @@ flowchart TD
 
 素材字段：`id`、`imageUrl`、`copyText`、`jumpLink`、`sortNo`、`subScene`、`resolvedLanguage`。文案替换 `${nickname}`；链接替换 `${nickname}`、`${shareUid}`、`${shareRoomId}`、`${inviteCode}`。`shareUid` 为账号 UID，`shareRoomId` 为真实房间 ID，均不能用展示编号代替。邀请码沿用 `GET /api/invite/info` 返回值。
 
+`jumpLink` 按 Nady 模型允许为空。素材只要有海报、非空白文案或目标链接之一就保留，仅剔除完全空记录；不能把“没有目标链接”当成“没有海报素材”。`subScene`、`resolvedLanguage` 保留在类型化模型中。无目标时仍展示接口海报、文案和 H5 外层链接，`og_url` 保持空值；不编造房间协议、不填入其他素材目标，也不将渠道参数放到H5包装层。有目标时继续执行既有协议安全校验、占位符替换和渠道归因。
+
 ### 5.2 外部分享和短链
 
 ```mermaid
@@ -204,7 +206,7 @@ flowchart TD
     L -->|失败| M[提示无法打开并保留面板]
 ```
 
-经本次明确确认，默认沿用 Nady 当前 API `Uri.origin` 下的 `/h5/invite`，参数为 `og_title`（当前 iSnow）、`og_description`、`og_image`、`og_url`。保留素材里的 Nady 目标协议，不要求必须配置一个尚未接入的 iSnow 协议。文案按占位符解析，目标链接按各 URI component 分别替换和编码，保留原有 query/fragment，昵称里的 `&`、`#` 等不能注入查询参数。
+经本次明确确认，默认沿用 Nady 当前 API `Uri.origin` 下的 `/h5/invite`，参数为 `og_title`（当前 iSnow）、`og_description`、`og_image`、`og_url`。保留素材里的 Nady 目标协议，不要求必须配置一个尚未接入的 iSnow 协议。文案按占位符解析，目标链接按各 URI component 分别替换和编码，保留原有 query/fragment，昵称里的 `&`、`#` 等不能注入查询参数。H5外层查询参数按Nady逐项使用 `Uri.encodeComponent` 编码，并显式保留 `key=value`：无目标时必须为 `og_url=`，不能让 `Uri(queryParameters: ...)` 将其序列化成裸 `og_url`；后者会触发当前短链服务的1003错误。自定义页面的重复参数、空值和fragment均保留。
 
 仅在用户复制或执行外部分享时调用 `POST /api/share/short-links/batch`：
 
@@ -215,7 +217,7 @@ flowchart TD
 }
 ```
 
-返回列表元素为 `{shortUrl, expireAt}`。`shortBaseUrl` 使用配置的协议和域名部分，不携带 API 路径；短链失败回退长链，不使 IM 邀请失效。
+返回列表元素为 `{shortUrl, expireAt}`。`shortBaseUrl` 使用当前API环境地址的 `Uri.origin`（保留非默认端口、不携带 `/simi` 等路径）；即使自定义 `ISNOW_INVITE_BASE_URL` 使用其他落地页域名，也不改变短链服务域名。短链失败、空结果或不安全的短链继续回退长链，不使 IM 邀请失效。
 
 经本轮用户再次确认，按截图顺序恢复 WhatsApp、Facebook、Snapchat、Telegram、Messenger、X、Instagram、Contacts、Others 九个入口，覆盖此前统一系统分享的约定。`RoomShareAction` 保留 copy/system（system 对应 Others），并增加八个指定渠道。归因值为渠道准确名称，复制为 `Copy`；`shareChannel` 加到目标链接内，再由 `og_url` 装载，不放在 H5 包装层。Facebook、Messenger 只向剪贴板写链接，其余动作写文案和链接组合。
 
@@ -1343,3 +1345,40 @@ Golden 用于设置、PK布局、宝箱结果等稳定状态，资源动画/平�
 - `flutter test --no-pub test/room*_test.dart` 完整房间模块442项通过，More/礼物原基线及音乐、Keep/Exit继续回归；`flutter analyze --no-pub` 无问题，`git diff --check HEAD` 通过。12个图片文件与manifest所记录的Nady源文件逐字节一致，现有pubspec已覆盖房间资源目录，无需修改依赖或资产声明。
 - 320/375/430候选截图经人工对照后保存为独立 `room_share_channels_v2_*.png`，再以普通比较模式重跑通过。fixture没有海报素材时保留红色占位图，不用截图海报冒充接口数据。27张既有基线（含旧Share、More与礼物）SHA-256均不变，旧Share图片保留作历史参考，新UI测试只比较新版文件。
 - Android/iOS的第三方应用实际接收、安装/未安装及短信编辑器/系统分享弹层未做真机验收；所有原生单元测试使用可注入启动器或渠道mock，不将opened/shared当作送达确认。Snapchat/Instagram等沿用Nady的尽力启动策略，不代表所有应用版本都支持这些Scheme。
+
+### 23.8 素材空列表定位与修复（2026-10-28）
+
+- 连接设备的实际日志中，`GET /api/invite/materials` 为HTTP 200/code 200，参数为 `appScene=ROOM_SHARE&sub-scene=ROOM_SHARE&language=en`，与Nady的provider和Retrofit生成代码一致。返回一条id=1素材，包含有效PNG地址和 `come on！ play game！！` 文案，但 `jumpLink=null`。旧Repository用 `jumpLink.isNotEmpty` 过滤，导致一条素材变成空列表；不是接口空数据、参数错误或分类UI问题。
+- Nady的 `InviteMaterialsModel.jumpLink` 为可空字段；分享视图以 `model.jumpLink ?? ''` 构建 `/h5/invite` 外层地址。当前实现按同样契约保留图片/文案，缺少目标时以空 `og_url` 构建H5链接。空目标不承诺点击回到房间，真实跳房目标仍需服务端配置；有目标时的安全校验保持原样。
+- 设备日志中的海报地址经独立HEAD检查返回HTTP 200、`Content-Type: image/png`，长度194689字节。测试fixture只保存此次公开素材响应，不保存账号、token、签名或设备凭据；HTTP边界测试仍调用实际 `HttpDioManager → RoomToolsRepository → RoomShareRepository`，只替换传输adapter，不访问线上接口。
+- 新增素材数量诊断日志，仅debug输出语言、收到/可用/含海报/缺目标的数量，不额外输出链接、个人邀请信息或鉴权数据。真正空结果/失败继续可重试，成功缓存仍按环境和语言隔离。
+- 新增图片解码Widget用例：重放此次接口字段，网络图片使用受控PNG字节测试真实解码，断言海报、缩略图、原文案、H5链接及复制功能；这些测试不冒充新版App在真机上的完整UI验收。截图基线不更新。
+- 本节修复时验证：完整房间模块449项测试通过（含91项分享相关测试）；`flutter analyze --no-pub` 无问题，`git diff --check HEAD` 通过，30张既有golden的SHA-256全部不变。当时尚未重新安装或热重载连接设备上的App，修复后UI由离线HTTP重放及Widget解码验证；随后完成的真机热重载验收见23.9。
+
+### 23.9 Share真机热重载验收（2026-10-28）
+
+- 设备：当前USB连接的Android PLL110，验收应用为当前项目实际安装的 `com.nady.dev1`，不是同机另一个 `com.nady.dev`。仅热重载2个修复库，没有重新安装、热重启、退出登录或重新进房；前后进程PID均为24039，保留原房间 `hei` / 展示ID30317291。完成后已断开本次临时Flutter attach并清理自建端口转发，保留原IDE调试连接和Share面板。
+- 素材：在原空状态点击重试，真实接口以 `appScene=ROOM_SHARE&sub-scene=ROOM_SHARE&language=en` 返回HTTP 200/code 200；debug计数为 `received=1 usable=1 posters=1 withoutTarget=1`。海报及摘要缩略图正常显示，文案为 `come on！ play game！！`，地址为当前环境的 `/h5/invite` 链接，长地址单行省略，九个渠道图片和按钮均可见。
+- 复制：点击摘要复制图片后显示 `Link copied`。通过前台应用的Flutter Clipboard读取并核对241字符的实际剪贴板文本：文案后接换行和完整H5地址，`og_description` 解码后与文案一致，`og_image` 指向当前海报，`og_url` 为空，与本次服务端 `jumpLink=null` 一致。
+- 系统分享：点击Others成功打开Android原生“分享文本”面板，预览包含相同文案和完整H5地址；没有选择任何应用或联系人，直接返回取消。取消后回到原Share面板，分类仍选中Share，复制和九渠道控件恢复可用，未出现发送成功提示，房间保持原样。本次未验证各指定第三方应用的Scheme接收或任何消息送达，也未做双设备音频验收。
+- 后端待处理：复制与Others触发的 `/api/share/short-links/batch` 均为HTTP 200/code 1003 `Server error`，客户端正确回退到有效长链接，没有阻止复制或系统面板。复制失败短链请求的traceId为 `22bac3bb-8cf8-4951-bb39-1e3d1ed0dd13`；分享触发上报返回code 200/data true，只表示触发记录，不代表实际发送。服务端仍未配置 `jumpLink`，本次不声称H5可以唤起App或回到房间。
+- 真机截图位于 `/tmp/isnow-share-device-20261028.mgthnO/`：`05-share-loaded.png` 为素材成功展示，`06-copy-feedback.png` 为复制反馈，`07-system-share-open.png` 为系统分享预览，`08-share-cancelled.png` 为取消返回。临时目录可能被系统清理；这些截图不是golden基线，本次没有修改任何截图期望图或生产代码内容。
+
+### 23.10 短链1003定位与修复（2026-10-28）
+
+23.9记录的1003已通过同鉴权、同接口的单变量请求定位，不再归为未确认的后端问题。对照Nady的 `CommonApi.getShareShortLinks`、Retrofit生成代码和 `_buildRoomShareLink`，POST方法、路径及JSON结构一致，差异在原始链接字符串的空参数表示。Nady明确拼接 `&og_url=`，旧iSnow的 `Uri.replace(queryParameters: ...)` 输出 `&og_url`。修复前的失败不是响应列表解析或 `og_title=iSnow` 所致。
+
+受控诊断使用现有 `HttpDioManager`，复用连接设备当前会话和设备header于进程内存，不保存或输出鉴权凭据。只调用短链接口，没有打开第三方应用、调用分享上报或发送消息：
+
+| 对照输入 | 结果 | traceId |
+| --- | --- | --- |
+| 原iSnow链接，末尾裸 `&og_url` | HTTP 200/code 1003 | `37995fbf-0ec4-4bd5-89b8-a13adce99b89` |
+| 仅在上述字符串末尾补 `=`，其他字段及编码不变 | HTTP 200/code 200，返回shortUrl/expireAt | `05308413-0731-44e7-a86f-80dba69f17ca` |
+| Nady逐项编码、保留iSnow标题、空目标 `og_url=` | HTTP 200/code 200，返回shortUrl/expireAt | `b3482990-c716-4c53-a491-b5c6e20709d9` |
+| Nady原样编码及Nady标题、空目标 `og_url=` | HTTP 200/code 200，返回shortUrl/expireAt | `336be697-54f5-40de-9966-452b82941036` |
+| 将目标随意改成同源 `/h5/invite` | HTTP 200/code 1002 | `be1f2c77-083d-4d35-a20b-a84df233c894` |
+
+- 修复仅作用于分享Repository：以结构化查询参数为输入，逐项编码为显式 `key=value`，不硬拼未编码的昵称或目标。保留iSnow标题、素材原值、目标安全校验和渠道归因；不以伪造非空目标规避服务端校验。同时让 `shortBaseUrl` 始终取API环境来源，与Nady契约一致，避免自定义落地页域名污染短链服务地址。网络层、接口路径及响应字段不变。
+- 失败回退保持：请求异常、code 1003、空列表及不安全shortUrl均返回原始长链接。新增真实JSON传输边界测试，验证POST、签名、无query body、原始链接末尾等号及200解析；1003重放仍断言原长链对象返回。另覆盖特殊字符编码、自定义页面重复/空查询及fragment、API非默认端口和独立落地页来源。自动化测试的网络adapter为mock，不作为线上成功证据。
+- 真机验收：对当前 `com.nady.dev1` 热重载1个库后，从More进入Share，只点击复制。剪贴板实际为 `come on！ play game！！` 加换行及当前API来源的 `/s/D6JRaMQtHDUO` 短链，共64字符，确认成功结果不是长链回退。原房间、账号及PID24039保留，没有点击任何分享渠道或实际发送；截图为 `/tmp/isnow_share_shortlink_fixed.png`，临时目录清理后可能失效。服务端 `jumpLink` 仍为空，短链成功不意味着已实现外部回房。
+- 验证：新增4项测试；目标Repository/HTTP边界23项通过，完整房间模块453项通过；`flutter analyze --no-pub` 无问题，`git diff --check HEAD` 通过。没有修改golden文件、降低截图容差或加入新的网络栈/插件。临时诊断脚本不纳入生产代码或自动化测试套件。

@@ -161,6 +161,37 @@ void main() {
     expect(Uri.parse(result.link.queryParameters['og_url']!).scheme, 'isnow');
   });
 
+  test('H5 query matches Nady encoding and keeps explicit empty values', () {
+    const material = RoomShareMaterial(
+      imageUrl: 'https://poster.example/a.png?size=42&label=A+B',
+      copyText: 'A & B/# + 中文',
+      jumpLink: '',
+    );
+    final result = content(material);
+    expect(
+      result.link.toString(),
+      'https://share.example/h5/invite?og_title=iSnow'
+      '&og_description=${Uri.encodeComponent(material.copyText)}'
+      '&og_image=${Uri.encodeComponent(material.imageUrl)}'
+      '&og_url=',
+    );
+    expect(result.link.queryParameters['og_description'], material.copyText);
+    expect(result.link.queryParameters['og_image'], material.imageUrl);
+    expect(result.link.queryParameters['og_url'], '');
+    expect(api.calls, isEmpty);
+  });
+
+  test('custom H5 queries keep duplicate and empty values with a fragment', () {
+    config.invite =
+        'https://invite.example/welcome?campaign=&tag=a%2Bb&tag=c%20d#preview';
+    final result = content(const RoomShareMaterial(jumpLink: ''));
+    expect(result.link.queryParameters['campaign'], '');
+    expect(result.link.queryParametersAll['tag'], ['a+b', 'c d']);
+    expect(result.link.fragment, 'preview');
+    expect(result.link.query, startsWith('campaign=&tag=a%2Bb&tag=c%20d&'));
+    expect(result.link.query, endsWith('&og_description=&og_image=&og_url='));
+  });
+
   test('development can use HTTP while release share pages require HTTPS', () {
     config.invite = 'http://dev.example/h5/invite';
     final material = RoomShareMaterial.fromJson(shareMaterialJson(1));
@@ -204,6 +235,20 @@ void main() {
       expect(result.description, original.description);
       expect(api.calls.single.body, {
         'shortBaseUrl': 'https://share.example',
+        'originalShareUrls': [original.link.toString()],
+      });
+    },
+  );
+
+  test(
+    'custom invitation origin does not change the API short-link origin',
+    () async {
+      config.base = 'https://api.example:8443/simi';
+      config.invite = 'https://invite.example/welcome';
+      final original = content(const RoomShareMaterial(jumpLink: ''));
+      await repository.shorten(original);
+      expect(api.calls.single.body, {
+        'shortBaseUrl': 'https://api.example:8443',
         'originalShareUrls': [original.link.toString()],
       });
     },

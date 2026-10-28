@@ -6,6 +6,8 @@ class RoomShareMaterial {
     this.copyText = '',
     required this.jumpLink,
     this.sortNo = 0,
+    this.subScene = '',
+    this.resolvedLanguage = '',
   });
 
   factory RoomShareMaterial.fromJson(Map<String, dynamic> json) =>
@@ -15,10 +17,16 @@ class RoomShareMaterial {
         copyText: '${json['copyText'] ?? ''}',
         jumpLink: '${json['jumpLink'] ?? ''}'.trim(),
         sortNo: int.tryParse('${json['sortNo']}') ?? 0,
+        subScene: '${json['subScene'] ?? ''}'.trim(),
+        resolvedLanguage: '${json['resolvedLanguage'] ?? ''}'.trim(),
       );
 
   final int id, sortNo;
   final String imageUrl, copyText, jumpLink;
+  final String subScene, resolvedLanguage;
+
+  bool get hasContent =>
+      imageUrl.isNotEmpty || copyText.trim().isNotEmpty || jumpLink.isNotEmpty;
 
   bool get needsInviteCode {
     if ('$copyText $jumpLink'.contains(r'${inviteCode}')) return true;

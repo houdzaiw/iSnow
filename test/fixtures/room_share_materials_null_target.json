@@ -1,0 +1,16 @@
+{
+  "code": 200,
+  "data": [
+    {
+      "id": 1,
+      "imageUrl": "https://simisoul.xyz/admin/emoji_pack/db2837d7-2bff-4a2d-821e-9ed68ccd3336.png",
+      "copyText": "come on！ play game！！",
+      "jumpLink": null,
+      "sortNo": 1,
+      "subScene": "ROOM_SHARE",
+      "resolvedLanguage": "en"
+    }
+  ],
+  "message": "success",
+  "msg": "success"
+}
