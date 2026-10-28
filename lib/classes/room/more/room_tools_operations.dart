@@ -32,6 +32,19 @@ extension RoomToolsOperations on RoomToolsController {
     }
   });
 
+  /// Retry local preferences without resetting the active room session.
+  Future<bool> reloadEffectPreferences() => perform('effects', (current) async {
+    final userId = await room.currentUid();
+    if (!current()) return;
+    if (userId == null) {
+      throw const NadyApiException(message: 'Please log in first');
+    }
+    final prefs = await repository.effects(userId);
+    if (!current()) return;
+    uid = userId;
+    _value = _value.copy(effects: prefs, preferencesReady: true);
+  });
+
   Future<bool> setEffect(String key, bool value) =>
       perform('effects', (current) async {
         if (!_value.preferencesReady || uid == null) {

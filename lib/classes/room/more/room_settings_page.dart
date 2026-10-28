@@ -8,6 +8,7 @@ import 'room_tools_controller.dart';
 import 'room_tools_models.dart';
 import 'room_tools_widgets.dart';
 import 'room_tool_navigation.dart';
+import 'room_settings_content.dart';
 
 enum RoomSettingSection { effects, charmCounter, charmCurrency }
 
@@ -23,18 +24,6 @@ class RoomSettingsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(roomToolsControllerProvider(roomId));
     final vm = ref.read(roomToolsControllerProvider(roomId).notifier);
-    final effects = {
-      'all_effect': state.effects.all,
-      ...state.effects.toJson(),
-    };
-    final labels = {
-      'all_effect': toolText(context, 'All effects', '全部特效'),
-      'car_effect': toolText(context, 'Entry effects', '进场特效'),
-      'gift_effect': toolText(context, 'Gift effects', '礼物特效'),
-      'gift_big_effect': toolText(context, 'Full-screen gifts', '全屏礼物动画'),
-      'sound_effect': toolText(context, 'Mic sound waves', '麦位声波纹'),
-      'screen_top_effect': toolText(context, 'Room banners', '房间横幅'),
-    };
     final title = switch (section) {
       RoomSettingSection.effects => toolText(
         context,
@@ -58,15 +47,7 @@ class RoomSettingsPage extends ConsumerWidget {
       child: Column(
         children: [
           if (section == RoomSettingSection.effects)
-            for (final entry in effects.entries)
-              SwitchListTile(
-                title: Text(labels[entry.key]!),
-                value: entry.value == true,
-                onChanged:
-                    !state.preferencesReady || state.busy.contains('effects')
-                    ? null
-                    : (value) => vm.setEffect(entry.key, value),
-              ),
+            RoomEffectSettingsContent(roomId: roomId),
           if (section == RoomSettingSection.charmCounter) ...[
             SwitchListTile(
               title: Text(title),
@@ -88,33 +69,7 @@ class RoomSettingsPage extends ConsumerWidget {
                 ),
           ],
           if (section == RoomSettingSection.charmCurrency)
-            if (![1, 2].contains(state.currency))
-              Text(toolText(context, 'Currency not available yet', '统计币种暂未同步')),
-          if (section == RoomSettingSection.charmCurrency)
-            RadioGroup<int>(
-              groupValue: state.currency,
-              onChanged: (value) {
-                if (value != null &&
-                    vm.canManage &&
-                    !state.busy.contains('currency')) {
-                  vm.setCurrency(value);
-                }
-              },
-              child: Column(
-                children: [
-                  for (final value in [1, 2])
-                    RadioListTile<int>(
-                      title: Text(
-                        value == 1
-                            ? toolText(context, 'Coins', '金币')
-                            : toolText(context, 'Diamonds', '钻石'),
-                      ),
-                      value: value,
-                      enabled: vm.canManage && !state.busy.contains('currency'),
-                    ),
-                ],
-              ),
-            ),
+            RoomCharmCurrencyContent(roomId: roomId),
         ],
       ),
     );

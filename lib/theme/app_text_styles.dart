@@ -368,6 +368,46 @@ class AppTextStyles {
     fontWeight: FontWeight.w700,
   );
 
+  static const TextStyle roomToolsTab = TextStyle(
+    fontFamily: 'Roboto',
+    letterSpacing: 0,
+    color: AppColors.roomToolsTextInactive,
+    fontSize: 16,
+    height: 1.5,
+    fontWeight: FontWeight.w700,
+  );
+  static const TextStyle roomToolsTabSelected = TextStyle(
+    fontFamily: 'Roboto',
+    letterSpacing: 0,
+    color: AppColors.roomToolsText,
+    fontSize: 16,
+    height: 1.5,
+    fontWeight: FontWeight.w700,
+  );
+  static const TextStyle roomToolsHeading = TextStyle(
+    color: AppColors.roomToolsText,
+    fontSize: 16,
+    height: 1.2,
+    fontWeight: FontWeight.w700,
+  );
+  static const TextStyle roomSettingsTitle = TextStyle(
+    color: AppColors.roomToolsText,
+    fontSize: 16,
+    height: 1.2,
+    fontWeight: FontWeight.w400,
+  );
+  static const TextStyle roomSettingsDescription = TextStyle(
+    color: AppColors.roomToolsTextSecondary,
+    fontSize: 12,
+    height: 1.2,
+    fontWeight: FontWeight.w400,
+  );
+  static const TextStyle roomToolsRetry = TextStyle(
+    color: AppColors.primaryPink,
+    fontSize: 12,
+    fontWeight: FontWeight.w700,
+  );
+
   static const TextStyle roomMoreTool = TextStyle(
     color: AppColors.roomMoreToolText,
     fontSize: 11,

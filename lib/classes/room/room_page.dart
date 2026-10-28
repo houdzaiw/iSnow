@@ -33,6 +33,7 @@ import 'more/room_tools_widgets.dart';
 import 'more/room_tools_strip.dart';
 import 'more/room_big_win_pendant.dart';
 import 'more/room_settings_page.dart';
+import 'more/room_settings_content.dart';
 import 'more/room_report_page.dart';
 import 'more/room_share_page.dart';
 import 'more/room_pk_page.dart';
@@ -48,6 +49,8 @@ part 'views/room_header.dart';
 part 'views/room_mic_grid.dart';
 part 'views/room_music_strip.dart';
 part 'views/room_more_tools_sheet.dart';
+part 'views/room_more_tools_navigation.dart';
+part 'views/room_more_tools_items.dart';
 
 const Color _roomGold = Color(0xFFFFD86B);
 const Color _roomPink = Color(0xFFFF4FA0);

@@ -125,7 +125,7 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
-  for (final width in [320.0, 430.0]) {
+  for (final width in [320.0, 375.0, 430.0]) {
     testWidgets(
       'More preserves its grid and opens complete secondary pages at $width',
       (tester) async {
@@ -234,7 +234,6 @@ void main() {
 
         for (final (label, type) in <(String, Type)>[
           ('Report', RoomReportPage),
-          ('Effect Settings', RoomSettingsPage),
           ('Charm Counter', RoomSettingsPage),
           ('PK', RoomPkPage),
           ('Lucky Box', RoomLuckyBoxPage),
@@ -243,7 +242,9 @@ void main() {
           if (label == 'Report') {
             await expectLater(
               find.byKey(const ValueKey('room-more-snapshot')),
-              matchesGoldenFile('goldens/room_more_tools_${width.toInt()}.png'),
+              matchesGoldenFile(
+                'goldens/room_more_basic_v2_${width.toInt()}.png',
+              ),
             );
           }
           await tester.ensureVisible(find.text(label));
@@ -251,14 +252,6 @@ void main() {
           await tester.pumpAndSettle();
           expect(find.byType(type), findsOneWidget);
           await precacheRoomAssets(tester, tester.element(find.byType(type)));
-          if (label == 'Effect Settings') {
-            await expectLater(
-              find.byKey(const ValueKey('room-more-snapshot')),
-              matchesGoldenFile(
-                'goldens/room_effect_settings_${width.toInt()}.png',
-              ),
-            );
-          }
           expect(room.leaves, 0);
           expect(router.state.uri.path, '/room-tool');
           router.pop();
@@ -266,6 +259,27 @@ void main() {
           expect(find.byType(RoomPage), findsOneWidget);
           expect(tester.takeException(), isNull);
         }
+        await openMore();
+        await tester.ensureVisible(find.text('Effect Settings'));
+        await tester.tap(find.text('Effect Settings'));
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const ValueKey('room-more-tools-sheet')),
+          findsOneWidget,
+        );
+        expect(find.byType(RoomSettingsPage), findsNothing);
+        expect(router.state.uri.path, '/room/123');
+        expect(find.byType(Switch), findsNWidgets(6));
+        await expectLater(
+          find.byKey(const ValueKey('room-more-snapshot')),
+          matchesGoldenFile(
+            'goldens/room_more_setting_v2_${width.toInt()}.png',
+          ),
+        );
+        Navigator.of(
+          tester.element(find.byKey(const ValueKey('room-more-tools-sheet'))),
+        ).pop();
+        await tester.pumpAndSettle();
         room.current = room.current.copyWith(
           micList: const [RoomMicModel(position: 0, uid: 10, raw: {})],
         );

@@ -17,6 +17,12 @@ export 'app_text_styles.dart';
 class AppTheme {
   const AppTheme._();
 
+  static ThemeData roomSettingsSwitch(ThemeData base) => ThemeData.from(
+    colorScheme: base.colorScheme,
+    textTheme: base.textTheme,
+    useMaterial3: true,
+  );
+
   static ThemeData get light {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.primaryPink,

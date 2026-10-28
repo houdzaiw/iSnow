@@ -119,13 +119,7 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
       _reloadKeys.clear();
       state = RoomToolsState(
         sessionActive: true,
-        currency:
-            [
-              1,
-              2,
-            ].contains(toolInt(current.enterResponse?.raw['digitalCurrency']))
-            ? toolInt(current.enterResponse?.raw['digitalCurrency'])
-            : 0,
+        currency: current.enterResponse?.initialCharmCurrency ?? 0,
         lobbyType: current.enterResponse?.status == 1
             ? current.enterResponse?.lobbyType ?? 0
             : 0,
@@ -185,24 +179,6 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
   Future<void> refresh() async {
     if (!active) return;
     await Future.wait([
-      if (state.currency == 0)
-        _load(
-          'currencySnapshot',
-          () async {
-            await room.refreshRoomData();
-            final raw = room.roomState.roomInfo?.raw ?? {};
-            return toolInt(
-              toolMap(
-                raw['roomInfoDTO'] ?? raw['roomInfo'] ?? raw,
-              )['digitalCurrency'],
-            );
-          },
-          (data) {
-            if (state.currency == 0 && [1, 2].contains(data)) {
-              state = state.copy(currency: toolInt(data));
-            }
-          },
-        ),
       _load(
         'functions',
         () => repository.functions(roomId),

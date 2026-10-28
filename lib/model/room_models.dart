@@ -24,6 +24,15 @@ class EnterRoomResp {
   final int? lobbyType;
   final Map<String, dynamic> raw;
 
+  int? get digitalCurrency => _asInt(raw['digitalCurrency']);
+
+  /// Nady defaults only a missing/null currency to Coins; 0 stays unselected.
+  int get initialCharmCurrency {
+    if (raw['digitalCurrency'] == null) return 1;
+    final value = digitalCurrency;
+    return value == 1 || value == 2 ? value! : 0;
+  }
+
   factory EnterRoomResp.fromJson(Map<String, dynamic> json) {
     return EnterRoomResp(
       roomId: json['roomId']?.toString() ?? json['roomID']?.toString() ?? '',

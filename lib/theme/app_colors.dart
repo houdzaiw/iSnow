@@ -65,6 +65,13 @@ class AppColors {
   static const Color roomMoreToolSubtle = Color(0x80FFFFFF);
   static const Color roomMoreTagHot = Color(0xFFFF3D54);
   static const Color roomMoreTagNew = Color(0xFF3DDCFF);
+  static const Color roomToolsSheet = Color(0xFFFFFFFF);
+  static const Color roomToolsText = Color(0xFF212121);
+  static const Color roomToolsTextInactive = Color(0x73212121);
+  static const Color roomToolsTextSecondary = Color(0xCC212121);
+  static const Color roomToolsTile = Color(0xFFF5F5F7);
+  static const Color roomToolsSwitchInactive = Color(0xFFE0E0E0);
+  static const Color roomToolsLoadingScrim = Color(0x47000000);
   static const Color roomGiftSheet = Color(0xF20F0F0F);
   static const Color roomGiftTargetSurface = Color(0xCC000000);
   static const Color roomGiftQuantitySurface = Color(0x1AFFFFFF);

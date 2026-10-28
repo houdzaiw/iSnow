@@ -16,6 +16,8 @@
 
 本文依据客户端源码提取，不代表已使用真实后端、第三方游戏或支付环境联调。文中的 JSON 示例是字段说明，不是真实用户数据、生产配置或请求抓包。
 
+第1至2节保留初始迁移时的范围和差异记录；后续实现与验收见第23节。2026-10-28的More白底双分类规则以第3.6节和第23.11节为准，替代原来动效/魅力设置从More跳二级页的入口规则。
+
 约定三种描述：**现有实现**表示已在工作区定位；**迁移要求**表示 iSnow 后续开发必须完成；**待配置/待核验**表示当前缺少外部配置或调用证据，不允许以假接口、假奖励或空白目标页冒充完成。
 
 ### 1.1 背景、目标与边界
@@ -121,7 +123,7 @@ flowchart TD
 | 举报 | 完整举报页 | 是 | 成功 Pop；取消返回；失败留页重试 |
 | 音乐 | 现有音乐 Sheet | 是 | 只关闭播放器面板，保持播放 |
 | 魅力计数/声音 | 原面板开关 | 否 | 请求/SDK 成功更新图标；失败保留原值 |
-| 动效设置/魅力设置 | 设置 Sheet | 是 | 返回只关闭设置，不退房 |
+| 动效设置/魅力设置 | More内Setting分类，定位对应区域 | 否 | 切换分类或关闭More不退房；原二级设置页保留兼容 |
 | Chat/Win/Treasure | 房间内游戏区域和折叠入口 | 成功后是 | 模式关闭或折叠按第 12 节处理 |
 | PK | PK 设置 Sheet → 房间 PK 层 → 结果 | 是 | 设置取消不启动；关闭结果不退房 |
 | 幸运宝箱 | 编辑、规则、列表、开箱和结果 Sheet/弹层 | 是 | 单独关闭当前层，不关闭整个房间 |
@@ -152,6 +154,16 @@ flowchart TD
 4. 发宝箱、举报、发邀请、PK 开始/结束、模式切换使用各自提交锁。不要自动重试非幂等交易。
 5. 页面关闭取消页面级计时器/监听；房间级监听由会话所有者释放。关闭游戏只退订该游戏消费者，不断开其他模块仍使用的频道。
 6. 权限和配置既控制入口可见性，也在提交前二次核对。界面灰掉不等于服务端授权。
+
+### 3.6 More双分类与设置内容（2026-10-28）
+
+- 分类位于More弹框，不是 `room_chat_panel.dart` 公屏；All/Chat/Gift保持原样。使用同一个TabController驱动 `ExtendedTabBar` / `ExtendedTabBarView`，支持点击和左右滑动。每次打开默认Basic Tools；两个页面分别滚动，切换保留各自位置，不重新请求Banner、偏好或房间数据。
+- More采用蓝湖白底、深色文字、粉色选中指示条、全屏宽度及顶部圆角。参考375×812画板的639高度，同时受可用高度和键盘约束；分类栏固定，底部安全区留在白色面板内。Basic Tools只去掉与分类栏重复的标题，现有工具顺序、权限、图片、50×50图标和Room Mode/Party/Game分组保留。较短屏幕的格子高度同时满足图标与两行文字的最小需求，不挤压图标或隐藏溢出异常。
+- 原Effect Settings、Charm Set快捷入口保留，点击在原弹框切换至Setting并滚动到Effects Setting或Charm Setting，不执行pop/push。Setting中的Charm Setting只对房主/管理员显示，Coins=1、Diamonds=2，继续调用 `POST /api/room/mic/charm/switch`，参数为 `{roomId, digitalCurrency}`。不再复制设计中两条相同的占位说明，按实际币种显示对应文字。
+- Effects Setting保留全部动画、进场动画、礼物动画、全屏礼物动画、麦位声波、房间横幅六项。总开关由五个子项推导，点击总开关设置全部子项；只关闭部分子项时，总开关为关闭且副文案为“部分开启”，全部关闭才显示“已关闭”。全屏礼物仍可独立设置，不与普通礼物合并。仅影响操作者本机的既有视觉通道，不改变麦克风或收听状态。
+- 设置继续由 `RoomToolsController` 和 `RoomToolsRepository` 负责，不引入第二份设置状态。偏好沿用按UID保存的 `room_effects_<uid>` 及原五个JSON字段；加载/保存期间禁用对应操作，失败保留原值并展示错误，服务端优先msg。加载失败可通过 `reloadEffectPreferences()` 只重试本地偏好，不重建房间或重新请求工具。关闭后的View回调先检查mounted，失效房间/代次的旧结果由控制器丢弃。
+- `RoomEffectSettingsContent` / `RoomCharmCurrencyContent` 为独立复用View，原 `RoomSettingsPage` 的effects/charmCurrency分区也使用它们；公开路由与分区参数保持兼容。Tab和滚动控制器是弹框内的临时UI状态，关闭即释放。
+- 白色More使用独立theme token，旧音乐、在线列表、礼物等复用的深色roomMore token不变。图标继续复用房间AppAssets；单选和开关为真正的交互控件，不以设计静态切图代替，不新增Flutter Icon/Icons.*、插件或网络接口。
 
 ## 4. 权限与配置矩阵
 
@@ -455,7 +467,7 @@ flowchart TD
 
 该设置控制**房间魅力统计展示使用金币还是钻石**，不是兑换或支付设置。房主/管理员可进入；普通用户接收变化并更新房间 UI。
 
-更多点击 Charm set → 关闭更多 → 读取当前房间 `digitalCurrency` → 打开二选一 Sheet：`1=金币`、`2=钻石`。
+More → Setting中的Charm Setting（Charm Set快捷入口定位至同一区域），读取当前房间 `digitalCurrency`，展示二选一：`1=金币`、`2=钻石`。旧二级设置页复用相同内容与状态。
 
 ```mermaid
 flowchart TD
@@ -470,7 +482,7 @@ flowchart TD
 
 `POST /api/room/mic/charm/switch`：`{roomId, digitalCurrency:1|2}`，业务 code=200 才成功。`RoomMicCharmUpdate` payload 为整数币种，不是魅力数值或 `{digitalCurrency:...}` 对象。
 
-Nady 初值来自进房响应的 `digitalCurrency`；iSnow 当前 `EnterRoomResp` 没有类型化暴露该字段，需要从真实进房 raw 解析并提升到房间状态。协议缺失/未知值显示未知并刷新，不能把枚举未知当成已保存的金币设置。
+初值来自进房响应，通过 `EnterRoomResp.digitalCurrency` 类型化读取，`initialCharmCurrency` 统一处理初始化规则。沿用Nady：字段缺失或null时默认金币1；明确返回0或非空不支持的值时保持未选择，不擅自标成金币。未选择时提示选择统计币种，房主/管理员仍可选择1或2；只有提交期间禁用选项，code=200才更新选中值，失败保留原状态并优先展示msg。房间详情不保证包含该字段，不再通过 `room/get/info` 等待币种同步；后续状态由成功提交或 `RoomMicCharmUpdate` 更新，较新的Socket事件不能被迟到HTTP覆盖。
 
 同步后重新显示/拉取对应币种的魅力数据。开关关闭和币种切换是独立状态；切换不自动开启魅力计数。退出清除房间共享币种，Keep 保留。
 
@@ -1382,3 +1394,28 @@ Golden 用于设置、PK布局、宝箱结果等稳定状态，资源动画/平�
 - 失败回退保持：请求异常、code 1003、空列表及不安全shortUrl均返回原始长链接。新增真实JSON传输边界测试，验证POST、签名、无query body、原始链接末尾等号及200解析；1003重放仍断言原长链对象返回。另覆盖特殊字符编码、自定义页面重复/空查询及fragment、API非默认端口和独立落地页来源。自动化测试的网络adapter为mock，不作为线上成功证据。
 - 真机验收：对当前 `com.nady.dev1` 热重载1个库后，从More进入Share，只点击复制。剪贴板实际为 `come on！ play game！！` 加换行及当前API来源的 `/s/D6JRaMQtHDUO` 短链，共64字符，确认成功结果不是长链回退。原房间、账号及PID24039保留，没有点击任何分享渠道或实际发送；截图为 `/tmp/isnow_share_shortlink_fixed.png`，临时目录清理后可能失效。服务端 `jumpLink` 仍为空，短链成功不意味着已实现外部回房。
 - 验证：新增4项测试；目标Repository/HTTP边界23项通过，完整房间模块453项通过；`flutter analyze --no-pub` 无问题，`git diff --check HEAD` 通过。没有修改golden文件、降低截图容差或加入新的网络栈/插件。临时诊断脚本不纳入生产代码或自动化测试套件。
+
+### 23.11 More双分类实现与验证（2026-10-28）
+
+- 设计来源：Basic Tools为蓝湖 `image_id=94371a89-331f-4dbf-a524-4f323fcdc130`，Setting为 `image_id=3f0a6f30-45fb-4d90-b50e-63b71ce7cf14`，项目均为 `9ab318f9-4876-4218-a940-73d4c98780c2`。读取原始Schema并下载原稿预览对照；按确认保留六项特效和现有工具，不增加原稿中尚未启用的静态工具。没有新增图标，因此AppAssets、资源manifest和pubspec无需变更。
+- 新增13项设置测试，覆盖默认分类、点击/滑动、独立滚动、快捷定位、重开默认Basic、切分类不重复请求、六项联动、全屏礼物独立开关、共享二级页、加载禁用与重试、保存失败优先msg、重复提交、币种接口/失败保留、权限撤销、关闭时迟到回调、切账号/新代次/退房旧结果隔离。UID持久化用例调用真实Repository及JSON读写代码，SharedPreferences平台存储使用测试mock，不冒充设备磁盘验收。
+- 320/375/430宽度下，分别建立 `room_more_basic_v2_<width>.png` 和 `room_more_setting_v2_<width>.png`，共6张独立新基线。候选图经人工对照后以普通比较模式复跑；原More/旧特效页、Share、音乐和礼物等30张既有golden的SHA-256全部不变，没有覆盖旧图或放宽像素容差。新增375宽度的More导航回归，原举报、魅力计数、PK、宝箱和声音选中态断言继续保留。
+- 验证小屏320×568、长币种说明、键盘200及底部安全区24；独立设置View另验证1.5倍文字缩放。测试中发现短屏工具格子按高度缩放后会挤压标签，已修正最小高度。整页RoomPage额外施加1.3倍字体时还会触发原有 `_RoomMicSeat` 高度溢出，该麦位布局不在本次改动范围，未过滤异常或宣称已通过整房间大字号验收。
+- `flutter test --no-pub test/room*_test.dart` 共467项通过；`flutter analyze --no-pub` 无问题；`git diff --check HEAD` 通过。模拟测试使用fake接口和SDK，不发送分享、礼物或真实币种变更；本次未进行新More的真机热重载或双设备音频验收，不将Widget截图当作真机结果。
+
+### 23.12 More真机热重载验收（2026-10-28）
+
+- 设备：重新连接的Android PLL110，使用无线ADB接回原 `com.nady.dev1` 调试进程。热重载10个库，没有重新安装、热重启、退出登录或重新进房；前后PID均为24039，保留房间 `hei` / 展示ID30317291。完成后仅detach本次Flutter attach并移除两条自建端口转发，App继续运行，停留在Setting供人工检查。
+- 分类与布局：真机1080×2362截图确认白底全宽、顶部圆角和底部安全区；Basic Tools / Setting点击及双向横滑同步，标题固定，内容纵向滚动。Basic Tools滚动后切到Setting再返回，Room Mode / Game的屏幕位置保持一致；关闭重开默认Basic Tools。Effect Settings和Charm Set均在原弹框切至Setting，对应区域可见，没有打开二级页面。
+- 特效交互：初始六个开关均开启。关闭Full-screen gifts后，All animations同步关闭并显示 `Partially enabled`，Gift animation及其他三项仍开启；关闭重开弹框后该状态保留。恢复全屏礼物后再测试总开关关闭/开启，五个子项同步变化。验收结束时六个开关全部恢复开启，并读取Android SharedPreferences中仅该功能的五个布尔字段，确认恢复值已实际写入本地存储；未读取或记录鉴权凭据。
+- 币种边界：当前会话显示 `Currency not available yet`，Coins / Diamonds两个选项禁用。只确认未就绪时不可误操作，没有点击币种选项、伪造默认币种或将真实币种切换列为通过；尚未定位当前会话币种未就绪的数据原因。
+- 安全边界：未点击分享渠道、发送礼物、切换房间模式、操作PK/宝箱或修改音频开关。本次未做普通用户/管理员切号、失败接口注入、双设备收听或各屏宽真机验收，这些与上一节自动化测试结果分开记录。本轮未修改业务代码或任何golden基线。
+- 证据：`/tmp/isnow-more-device-20261028.6hCNtA/` 保存Basic Tools、Setting、部分开启、两个快捷入口和最终恢复截图，以及分类/开关状态的UI XML；其中 `06-setting-restored.png` 为结束状态。临时目录可能被系统清理，截图不作为golden基线。
+
+### 23.13 币种未同步提示定位与修复（2026-10-28）
+
+- 真机诊断：通过PLL110原调试进程只读核对币种字段，实际进房 `digitalCurrency=0`，不是null；当前详情结构为 `roomInfoDTO / roomMicUpType`，其中没有有效币种字段。没有重新进房、请求币种写接口或输出token等鉴权数据。23.12记录的禁用状态由此完成定位。
+- 对照Nady：`services/room_manager/room_manager.dart` 使用 `enterRoomResp.digitalCurrency ?? 1` 初始化；`widgets/charm_set/nady_charm_set_widget.dart` 在0没有任何选中项时仍允许选择1/2。旧iSnow将0当作等待同步，反复刷新不提供该字段的详情，并用 `[1,2].contains(currency)` 永久禁用两个选项。问题不是切换接口报错，也不是图片或单选控件加载失败。
+- 修复：Model提供类型化币种及Nady初始化规则；Controller移除无效详情快照补齐，保留会话隔离、Socket版本保护和原切换接口。View按权限/提交状态控制可操作性，0及非空未知值保持未选择并显示 `Select a currency to calculate charm.`，不冒充已保存金币。成功提交后仍刷新麦位等房间数据，失败保留原选中值。
+- 自动化：新增13项测试，覆盖缺失/null/0/1/2/字符串/异常值解析与初始化、初始化不写币种或重复刷新详情、首次设置成功/失败/msg/重试/重复点击、Socket优先于迟到HTTP，以及320/375/430宽度的未选择可操作状态。完整房间模块480项通过；`flutter analyze --no-pub` 无问题，`git diff --check HEAD` 通过。没有更新或放宽任何截图基线。
+- 真机复验：热重载后原PID24039及房间保留，Setting显示选择币种提示，两个Radio均为 `checked=false / enabled=true`。只检查显示和可操作状态，没有实际选择币种或发送分享/礼物；真实币种写接口的提交/回执由mock测试覆盖，不能据此宣称真机写入已验收。截图为 `/tmp/isnow_currency_fixed_20261028.png`，临时目录可能被清理。
