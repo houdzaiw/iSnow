@@ -249,6 +249,10 @@ class _RoomMoreToolsSheet extends HookConsumerWidget {
     RoomMoreToolsState toolsState,
     ValueChanged<String> showSetting,
   ) {
+    final features = ref.read(
+      roomToolsControllerProvider(_roomMoreRoomId(roomState)).notifier,
+    );
+    final featureState = features.snapshot;
     return [
       _RoomMoreToolItem(
         label: context.l10n.t('room.more.share'),
@@ -272,9 +276,36 @@ class _RoomMoreToolsSheet extends HookConsumerWidget {
       if (roomState.isOwnerOrManager)
         _RoomMoreToolItem(
           label: context.l10n.t('room.more.charmCounter'),
-          asset: AppAssets.lanhuRoomMoreCharmCounter,
+          asset: featureState.charmEnabled
+              ? AppAssets.lanhuRoomMoreCharmCounter
+              : AppAssets.lanhuRoomMoreCharmCounterMuted,
           assetIncludesTile: true,
-          onTap: () => onOpenTool('counter'),
+          toggled: features.charmStatusReady ? featureState.charmEnabled : null,
+          loading: features.charmStatusBusy,
+          onTap: features.charmStatusBusy
+              ? null
+              : () async {
+                  final route = ModalRoute.of(context);
+                  final generation = features.room.roomGeneration;
+                  final success = await features.toggleCharmCounter();
+                  if (!context.mounted ||
+                      !(route?.isCurrent ?? false) ||
+                      route?.animation?.status == AnimationStatus.reverse ||
+                      !features.canManage ||
+                      features.room.roomGeneration != generation ||
+                      success) {
+                    return;
+                  }
+                  _showRoomMoreSnack(
+                    context,
+                    features.snapshot.error ??
+                        toolText(
+                          context,
+                          'Unable to change charm counter',
+                          '魅力值计数切换失败',
+                        ),
+                  );
+                },
         ),
       _RoomMoreToolItem(
         label: context.l10n.t('room.more.voice'),

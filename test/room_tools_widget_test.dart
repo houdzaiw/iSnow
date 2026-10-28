@@ -234,7 +234,6 @@ void main() {
 
         for (final (label, type) in <(String, Type)>[
           ('Report', RoomReportPage),
-          ('Charm Counter', RoomSettingsPage),
           ('PK', RoomPkPage),
           ('Lucky Box', RoomLuckyBoxPage),
         ]) {

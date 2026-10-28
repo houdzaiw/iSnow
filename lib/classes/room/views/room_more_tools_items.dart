@@ -142,7 +142,7 @@ class _RoomMoreToolTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final enabled = item.onTap != null && !item.loading;
 
-    return Opacity(
+    final tile = Opacity(
       opacity: enabled ? 1 : AppSpacing.roomToolDisabledOpacity,
       child: Material(
         color: AppColors.transparent,
@@ -168,6 +168,9 @@ class _RoomMoreToolTile extends StatelessWidget {
         ),
       ),
     );
+    return item.toggled == null
+        ? tile
+        : Semantics(toggled: item.toggled, child: tile);
   }
 }
 
@@ -305,6 +308,7 @@ class _RoomMoreToolItem {
     this.tags = const [],
     this.selected = false,
     this.loading = false,
+    this.toggled,
     this.onTap,
   });
 
@@ -315,5 +319,6 @@ class _RoomMoreToolItem {
   final List<String> tags;
   final bool selected;
   final bool loading;
+  final bool? toggled;
   final VoidCallback? onTap;
 }

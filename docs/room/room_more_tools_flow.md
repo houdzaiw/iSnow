@@ -377,9 +377,11 @@ flowchart TD
 
 ### 8.1 房间共享开关
 
-房主/管理员看到计数入口；打开更多时查询 `GET /api/room/mic/charm/isEnable?roomId=...`，使用响应 `data` 的布尔值显示图标。
+房主/管理员看到计数入口；进入房间、回前台或Socket重连时查询 `GET /api/room/mic/charm/isEnable?roomId=...`，More复用当前会话状态，不在View的build中重复请求。使用响应 `data` 的布尔值显示现有开启/关闭两张图片；读取或提交中显示loading并禁用重复点击。尚未成功读取时，点击须先读取真实状态，再计算反值，读取失败不得凭默认false提交。
 
 点击执行 `GET /api/room/mic/charm/updateStatus?roomId=...&enable=<目标 bool>`。该接口当前就是 GET，不能因它修改状态而在客户端改成 POST。成功时使用返回布尔 `data` 更新，不把 `false` 误判为请求失败。
+
+点击后保留More弹框，不跳转计数设置二级页。Repository使用明确bool返回；非布尔的异常成功体不能被静默当作关闭。失败保留原图标，优先提示msg；提示由发起操作的界面负责，关闭、退房或切换会话后不再弹出迟到提示。成功写入和Socket事件都会推进快照版本，旧读取或旧写回执不得覆盖较新的状态。原计数二级页面继续保留兼容，并共享同一控制器。
 
 ```mermaid
 flowchart TD
@@ -1419,3 +1421,12 @@ Golden 用于设置、PK布局、宝箱结果等稳定状态，资源动画/平�
 - 修复：Model提供类型化币种及Nady初始化规则；Controller移除无效详情快照补齐，保留会话隔离、Socket版本保护和原切换接口。View按权限/提交状态控制可操作性，0及非空未知值保持未选择并显示 `Select a currency to calculate charm.`，不冒充已保存金币。成功提交后仍刷新麦位等房间数据，失败保留原选中值。
 - 自动化：新增13项测试，覆盖缺失/null/0/1/2/字符串/异常值解析与初始化、初始化不写币种或重复刷新详情、首次设置成功/失败/msg/重试/重复点击、Socket优先于迟到HTTP，以及320/375/430宽度的未选择可操作状态。完整房间模块480项通过；`flutter analyze --no-pub` 无问题，`git diff --check HEAD` 通过。没有更新或放宽任何截图基线。
 - 真机复验：热重载后原PID24039及房间保留，Setting显示选择币种提示，两个Radio均为 `checked=false / enabled=true`。只检查显示和可操作状态，没有实际选择币种或发送分享/礼物；真实币种写接口的提交/回执由mock测试覆盖，不能据此宣称真机写入已验收。截图为 `/tmp/isnow_currency_fixed_20261028.png`，临时目录可能被清理。
+
+### 23.14 Charm Counter修复与热重载验收（2026-10-28）
+
+- 定位：Nady的 `nady_voice_room_basic_tools_dialog.dart` 调用 `CharmStatus.updateStatus()` 原地切换，`charm_controller.dart` 用布尔回执和 `RoomMicCharmIsEnableEvent` 同步全房间显示。iSnow原入口却调用 `onOpenTool('counter')` 跳转二级页面，且始终显示开启图片，没有绑定当前状态；接口路径及GET查询参数本身与Nady一致。
+- 修复：More直接调用现有MVVM控制器的切换流程，绑定开启/关闭图片及辅助功能开关语义，尺寸和布局不变。补齐读取就绪判断、重复点击保护、加载状态、失败msg和迟到回调保护；错误归属保存在控制器，房间全局监听不再重复提示或在More关闭后提示该操作的失败。严格bool解析保留合法false，异常响应不改变原值。写入推进版本，避免先发后到的状态查询撤销已成功切换。
+- 资源：复用 `lanhuRoomMoreCharmCounter` / `lanhuRoomMoreCharmCounterMuted`，两张Lanhu图片及manifest、AppAssets、pubspec均已存在，没有新增图片、插件或Flutter Icon。没有改变公屏、送礼、币种设置及音频操作。
+- 测试：新增20项（13项控制器/Widget、7项真实HTTP封装边界），覆盖GET路径/参数/签名、true/false及异常体、More不跳转、50.r图片、320/375/430有人麦位计数显隐、初始加载/失败重试、提交去重、Socket与旧HTTP竞态、权限、切账号/房间代次、退房及关闭时迟到失败。修正原导航回归中将Charm Counter当作二级页的过期断言。目标42项通过，完整房间500项通过；`flutter analyze --no-pub` 和 `git diff --check HEAD` 通过。More、Share、音乐和礼物截图保持原基线，未运行更新基线命令。
+- 真机：接回PLL110原 `com.nady.dev1` / PID24039，只做热重载，没有重新安装、热重启或重新进房。用现有Repository只读查询确认原开关true，点击More中的Charm Counter后弹框保留、关闭图片显示，再独立查询确认服务端false；再次点击恢复，独立查询确认true。验收没有改变币种、发送礼物/分享或操作语音/音乐。当前房间麦位为空，没有自动上麦，因此真机有人麦位数值和双机Socket同步不列为已验收，显隐与广播由Widget/fake事件测试覆盖。
+- 证据与连接边界：`/tmp/isnow-charm-counter-device-20261028.O3p4Q3/01-original-on.png` 和 `02-counter-off.png` 为开启/关闭态。恢复后的服务端true已读回，随后无线ADB变为offline，未取得最后恢复态截图或重开弹框截图，不将其记为已截图通过；临时目录可能被清理。

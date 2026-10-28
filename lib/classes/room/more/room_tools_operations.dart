@@ -63,15 +63,29 @@ extension RoomToolsOperations on RoomToolsController {
         }
       });
 
+  Future<void> refreshCharmStatus() =>
+      _load('charm', () => repository.charmEnabled(roomId), (data) {
+        _snapshotVersions.putIfAbsent('charm', () => 0);
+        _value = _value.copy(charmEnabled: data as bool);
+      });
+
+  Future<bool> toggleCharmCounter() async {
+    if (!active || !canManage || charmStatusBusy) return false;
+    final generation = _generation;
+    if (!charmStatusReady) await refreshCharmStatus();
+    if (!active || generation != _generation || !charmStatusReady) return false;
+    return setCharmEnabled(!_value.charmEnabled);
+  }
+
   Future<bool> setCharmEnabled(bool enabled) =>
       perform('charm', (current) async {
+        if (charmStatusReady && _value.charmEnabled == enabled) return;
         final version = _snapshotVersions['charm'] ?? 0;
-        final data = await repository.get(HttpApi.roomCharmUpdate, {
-          'roomId': roomId,
-          'enable': enabled,
-        });
+        final data = await repository.updateCharmStatus(roomId, enabled);
         if (current() && version == (_snapshotVersions['charm'] ?? 0)) {
-          _value = _value.copy(charmEnabled: toolBool(data));
+          // A completed write supersedes any older in-flight status read.
+          _snapshotVersions['charm'] = version + 1;
+          _value = _value.copy(charmEnabled: data);
         }
       }, manager: true);
 

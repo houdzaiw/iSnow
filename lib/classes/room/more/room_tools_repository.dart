@@ -31,6 +31,23 @@ class RoomToolsRepository {
       RoomFunctionConfig(
         toolList(await get(HttpApi.roomFunctions, {'roomId': roomId})),
       );
+
+  Future<bool> charmEnabled(String roomId) async =>
+      _charmStatus(await get(HttpApi.roomCharmEnabled, {'roomId': roomId}));
+
+  Future<bool> updateCharmStatus(String roomId, bool enabled) async =>
+      _charmStatus(
+        await get(HttpApi.roomCharmUpdate, {
+          'roomId': roomId,
+          'enable': enabled,
+        }),
+      );
+
+  bool _charmStatus(Object? data) {
+    if (data is bool) return data;
+    throw const NadyApiException(message: 'Invalid charm counter status');
+  }
+
   Future<RoomEffectPreferences> effects(int uid) async {
     final prefs = await SharedPreferences.getInstance();
     return RoomEffectPreferences.fromJson(

@@ -45,6 +45,7 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
   StreamSubscription<RoomSocketMessage>? _messages;
   Timer? _ticker, _prizeDelay, _lobbyInsert, _awardRemoval;
   String? _countryCode, _gameId;
+  String? _errorOperation;
   bool _gameOpened = false;
   int? uid;
   int _generation = -1;
@@ -72,6 +73,10 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
       (room.roomState.enterResponse?.identity?.isOwnerOrManager == true ||
           uid != null && room.roomState.roomInfo?.roomOwnerUid == uid);
   bool get visible => active && !room.roomState.isMinimized && _foreground;
+  String? get errorOperation => _errorOperation;
+  bool get charmStatusReady => _snapshotVersions.containsKey('charm');
+  bool get charmStatusBusy =>
+      state.busy.contains('charm') || state.busy.contains('load:charm');
 
   void start() {
     if (!mounted || _started) return;
@@ -104,6 +109,7 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
         _awardRemoval?.cancel();
         _gameOpened = false;
         _gameId = null;
+        _errorOperation = null;
         state = const RoomToolsState();
         _keepAlive?.close();
         _keepAlive = null;
@@ -117,6 +123,7 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
       _claimedBags.clear();
       _snapshotVersions.clear();
       _reloadKeys.clear();
+      _errorOperation = null;
       state = RoomToolsState(
         sessionActive: true,
         currency: current.enterResponse?.initialCharmCurrency ?? 0,
@@ -172,7 +179,10 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
       unawaited(_subscribeEntryEffects(userId, generation));
       await refresh();
     } catch (error) {
-      if (active) state = state.copy(error: userFacingErrorMessage(error));
+      if (active) {
+        _errorOperation = 'initialize';
+        state = state.copy(error: userFacingErrorMessage(error));
+      }
     }
   }
 
@@ -184,11 +194,7 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
         () => repository.functions(roomId),
         (data) => state = state.copy(config: data as RoomFunctionConfig),
       ),
-      _load(
-        'charm',
-        () => repository.get(HttpApi.roomCharmEnabled, {'roomId': roomId}),
-        (data) => state = state.copy(charmEnabled: toolBool(data)),
-      ),
+      refreshCharmStatus(),
       _load(
         'pk',
         () => repository.get(HttpApi.roomPkInfo, {'roomId': roomId}),
@@ -243,6 +249,7 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
       }
     } catch (error) {
       if (active && generation == _generation) {
+        _errorOperation = 'load:$key';
         state = state.copy(error: userFacingErrorMessage(error));
       }
     } finally {
@@ -263,18 +270,21 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
   }) async {
     if (!active || state.busy.contains(key)) return false;
     if (manager && !canManage) {
+      _errorOperation = key;
       state = state.copy(error: 'Room management permission required');
       return false;
     }
     final generation = _generation;
     bool current() =>
         active && generation == _generation && (!manager || canManage);
+    _errorOperation = null;
     state = state.copy(busy: {...state.busy, key}, clearError: true);
     try {
       await action(current);
       return current();
     } catch (error) {
       if (active && generation == _generation) {
+        _errorOperation = key;
         state = state.copy(error: userFacingErrorMessage(error));
       }
       return false;

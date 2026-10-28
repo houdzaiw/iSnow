@@ -113,6 +113,11 @@ class RoomPage extends HookConsumerWidget {
     ref.listen(
       roomToolsControllerProvider(giftRoomId).select((value) => value.error),
       (previous, next) {
+        final operation = ref
+            .read(roomToolsControllerProvider(giftRoomId).notifier)
+            .errorOperation;
+        // The initiating counter view owns its error feedback, even while closing.
+        if (operation == 'charm' || operation == 'load:charm') return;
         if (next != null && next != previous && pageRoute?.isCurrent == true) {
           ScaffoldMessenger.of(
             context,
