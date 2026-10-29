@@ -133,8 +133,17 @@ class RoomCharmCurrencyContent extends ConsumerWidget {
 
     Future<void> select(int? value) async {
       if (!enabled || value == null) return;
+      final route = ModalRoute.of(context);
+      final generation = vm.room.roomGeneration;
       final success = await vm.setCurrency(value);
-      if (!context.mounted || success) return;
+      if (!context.mounted ||
+          !(route?.isCurrent ?? false) ||
+          route?.animation?.status == AnimationStatus.reverse ||
+          !vm.canManage ||
+          vm.room.roomGeneration != generation ||
+          success) {
+        return;
+      }
       _showSettingsError(context, vm);
     }
 
@@ -144,6 +153,10 @@ class RoomCharmCurrencyContent extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (state.busy.contains('currency'))
+            const LinearProgressIndicator(
+              key: ValueKey('room-currency-saving'),
+            ),
           if (![1, 2].contains(state.currency))
             Text(
               toolText(

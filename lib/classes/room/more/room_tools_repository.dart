@@ -43,6 +43,14 @@ class RoomToolsRepository {
         }),
       );
 
+  /// Nady acknowledges this operation by code, without requiring response data.
+  Future<void> switchCharmCurrency(String roomId, int currency) async {
+    await post(HttpApi.roomCharmSwitch, {
+      'roomId': roomId,
+      'digitalCurrency': currency,
+    });
+  }
+
   bool _charmStatus(Object? data) {
     if (data is bool) return data;
     throw const NadyApiException(message: 'Invalid charm counter status');

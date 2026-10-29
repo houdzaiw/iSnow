@@ -116,8 +116,12 @@ class RoomPage extends HookConsumerWidget {
         final operation = ref
             .read(roomToolsControllerProvider(giftRoomId).notifier)
             .errorOperation;
-        // The initiating counter view owns its error feedback, even while closing.
-        if (operation == 'charm' || operation == 'load:charm') return;
+        // Settings feedback belongs to the initiating view, even while closing.
+        if (operation == 'charm' ||
+            operation == 'load:charm' ||
+            operation == 'currency') {
+          return;
+        }
         if (next != null && next != previous && pageRoute?.isCurrent == true) {
           ScaffoldMessenger.of(
             context,

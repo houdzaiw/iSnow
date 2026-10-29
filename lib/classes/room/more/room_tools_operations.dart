@@ -90,14 +90,14 @@ extension RoomToolsOperations on RoomToolsController {
       }, manager: true);
 
   Future<bool> setCurrency(int value) => perform('currency', (current) async {
+    if (value != 1 && value != 2) {
+      throw const NadyApiException(message: 'Choose Coins or Diamonds');
+    }
     if (_value.currency == value) return;
     final version = _snapshotVersions['currency'] ?? 0;
-    if (value != 1 && value != 2) throw ArgumentError.value(value);
-    await repository.post(HttpApi.roomCharmSwitch, {
-      'roomId': roomId,
-      'digitalCurrency': value,
-    });
+    await repository.switchCharmCurrency(roomId, value);
     if (current() && version == (_snapshotVersions['currency'] ?? 0)) {
+      _snapshotVersions['currency'] = version + 1;
       _value = _value.copy(currency: value);
     }
     if (current()) {

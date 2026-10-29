@@ -484,6 +484,8 @@ flowchart TD
 
 `POST /api/room/mic/charm/switch`：`{roomId, digitalCurrency:1|2}`，业务 code=200 才成功。`RoomMicCharmUpdate` payload 为整数币种，不是魅力数值或 `{digitalCurrency:...}` 对象。
 
+沿用Nady的成功回执契约：切换接口不要求 `data`，不能套用Charm Counter的布尔解析。Repository以 `Future<void>` 封装确认，code=200后更新共享币种并刷新房间数据；提交期间显示进度、禁用两个选项，当前已选币种重复点击不请求。非法值先校验，不把初值0的重复提交当作成功。失败保留原选择，提示归属发起操作的设置视图；关闭弹框、撤销管理权限、退房或进入新会话后，不在房间全局弹出过期错误。
+
 初值来自进房响应，通过 `EnterRoomResp.digitalCurrency` 类型化读取，`initialCharmCurrency` 统一处理初始化规则。沿用Nady：字段缺失或null时默认金币1；明确返回0或非空不支持的值时保持未选择，不擅自标成金币。未选择时提示选择统计币种，房主/管理员仍可选择1或2；只有提交期间禁用选项，code=200才更新选中值，失败保留原状态并优先展示msg。房间详情不保证包含该字段，不再通过 `room/get/info` 等待币种同步；后续状态由成功提交或 `RoomMicCharmUpdate` 更新，较新的Socket事件不能被迟到HTTP覆盖。
 
 同步后重新显示/拉取对应币种的魅力数据。开关关闭和币种切换是独立状态；切换不自动开启魅力计数。退出清除房间共享币种，Keep 保留。
@@ -1430,3 +1432,11 @@ Golden 用于设置、PK布局、宝箱结果等稳定状态，资源动画/平�
 - 测试：新增20项（13项控制器/Widget、7项真实HTTP封装边界），覆盖GET路径/参数/签名、true/false及异常体、More不跳转、50.r图片、320/375/430有人麦位计数显隐、初始加载/失败重试、提交去重、Socket与旧HTTP竞态、权限、切账号/房间代次、退房及关闭时迟到失败。修正原导航回归中将Charm Counter当作二级页的过期断言。目标42项通过，完整房间500项通过；`flutter analyze --no-pub` 和 `git diff --check HEAD` 通过。More、Share、音乐和礼物截图保持原基线，未运行更新基线命令。
 - 真机：接回PLL110原 `com.nady.dev1` / PID24039，只做热重载，没有重新安装、热重启或重新进房。用现有Repository只读查询确认原开关true，点击More中的Charm Counter后弹框保留、关闭图片显示，再独立查询确认服务端false；再次点击恢复，独立查询确认true。验收没有改变币种、发送礼物/分享或操作语音/音乐。当前房间麦位为空，没有自动上麦，因此真机有人麦位数值和双机Socket同步不列为已验收，显隐与广播由Widget/fake事件测试覆盖。
 - 证据与连接边界：`/tmp/isnow-charm-counter-device-20261028.O3p4Q3/01-original-on.png` 和 `02-counter-off.png` 为开启/关闭态。恢复后的服务端true已读回，随后无线ADB变为offline，未取得最后恢复态截图或重开弹框截图，不将其记为已截图通过；临时目录可能被清理。
+
+### 23.15 Charm Setting补齐与热重载验收（2026-10-28）
+
+- 对照Nady的 `RoomApi.charmSwitch`、Retrofit请求、`nady_charm_set_widget.dart` 和共享币种控制器，确认仍为POST JSON `{roomId, digitalCurrency:1|2}`，成功只看业务code，不要求返回data，也不使用Charm Counter的布尔结果。保留已有初始化0为未选择的规则，不伪造默认已保存值。
+- 补齐专用Repository确认方法、提交进度、非法值校验及成功版本推进，保留重复点击保护、Socket新状态优先和房间数据刷新。失败保留原选择并优先msg；币种错误只由发起视图提示，不再由RoomPage全局重复提示，关闭动画中、已销毁、权限撤销或会话代次变化后忽略迟到反馈。没有新增接口、网络栈、插件或Flutter Icon。
+- 新增18项测试，覆盖真实HTTP封装的路径/JSON/签名、data缺失/null/false/对象的成功确认、失败msg优先、320/375/430快捷入口、关闭重开、保存进度/去重/重试、Socket同步、非法币种及关闭/权限/账号/退房隔离。目标44项通过，完整房间模块518项通过；`flutter analyze --no-pub` 无问题，`git diff --check HEAD` 通过，没有修改任何golden基线。
+- 真机：PLL110无线ADB接回原 `com.nady.dev1` / PID24039，热重载29个库，没有重新安装、热重启、退出登录或重新进房。原币种0无法通过接口恢复，已向用户确认最终保留Coins；实际完成0→Diamonds2→Coins1。两次 `/api/room/mic/charm/switch` 均为HTTP 200/code 200且无data字段，traceId分别为 `0685f124-b127-4226-9868-ad9fb65419ed` 和 `294a1709-5f49-4e4e-9267-8861fd1eccf0`。成功后UI和只读运行状态均为1；关闭More后重开默认Basic Tools，经Charm Set回到Setting仍为Coins选中，两个选项恢复可用。
+- 证据：`/tmp/isnow-charm-setting-device-20261028.ZAHu5Y/` 保存 `01-unselected.png`、`02-diamonds-selected.png`、`03-coins-selected.png` 和 `04-coins-reopened.png`，最后一张同时保存UI XML；它们不是golden基线，临时目录可能被清理。接口成功回执与本机会话状态为本次保存证据，没有独立读取服务端币种或重新进房验证持久化。当前房间仍为 `hei` / 展示ID30317291、4个空麦位，未上麦、送礼或发送分享；有人麦位展示、双机Socket同步和声音效果未做本轮真机验收。
