@@ -5,7 +5,7 @@ void _showRoomMoreToolsSheet(
   WidgetRef ref,
   AutoDisposeStateNotifierProvider<RoomViewModel, RoomPageState> provider,
 ) {
-  var openingShare = false;
+  var openingStandaloneSheet = false;
   showModalBottomSheet<void>(
     context: context,
     useRootNavigator: true,
@@ -19,12 +19,12 @@ void _showRoomMoreToolsSheet(
         roomProvider: provider,
         onOpenTool: (action) async {
           final roomId = _roomMoreRoomId(ref.read(provider));
-          if (action == 'share') {
-            if (openingShare ||
+          if (action == 'share' || action == 'currency') {
+            if (openingStandaloneSheet ||
                 !(ModalRoute.of(sheetContext)?.isCurrent ?? false)) {
               return;
             }
-            openingShare = true;
+            openingStandaloneSheet = true;
             final repository = ref.read(roomRepositoryProvider);
             final generation = repository.roomGeneration;
             final route = ModalRoute.of(sheetContext);
@@ -35,7 +35,13 @@ void _showRoomMoreToolsSheet(
                 repository.roomGeneration == generation &&
                 repository.roomState.isInRoom &&
                 repository.roomState.currentRoomId == roomId) {
-              await showRoomShareSheet(context, roomId);
+              if (action == 'share') {
+                await showRoomShareSheet(context, roomId);
+              } else if (ref
+                  .read(roomToolsControllerProvider(roomId).notifier)
+                  .canManage) {
+                await showRoomCharmSettingsSheet(context, roomId);
+              }
             }
             return;
           }
@@ -48,10 +54,6 @@ void _showRoomMoreToolsSheet(
             'counter' => RoomSettingsPage(
               roomId: roomId,
               section: RoomSettingSection.charmCounter,
-            ),
-            'currency' => RoomSettingsPage(
-              roomId: roomId,
-              section: RoomSettingSection.charmCurrency,
             ),
             'pk' => RoomPkPage(roomId: roomId),
             'lucky' => RoomLuckyBoxPage(roomId: roomId),

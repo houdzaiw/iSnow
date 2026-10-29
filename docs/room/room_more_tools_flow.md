@@ -16,7 +16,7 @@
 
 本文依据客户端源码提取，不代表已使用真实后端、第三方游戏或支付环境联调。文中的 JSON 示例是字段说明，不是真实用户数据、生产配置或请求抓包。
 
-第1至2节保留初始迁移时的范围和差异记录；后续实现与验收见第23节。2026-10-28的More白底双分类规则以第3.6节和第23.11节为准，替代原来动效/魅力设置从More跳二级页的入口规则。
+第1至2节保留初始迁移时的范围和差异记录；后续实现与验收见第23节。More白底双分类规则以第3.6节为准；2026-10-28再次确认Charm Set改为Nady式独立底部弹框，替代第23.11至23.15节当时“切换Setting定位币种区域”的入口约定，保存接口和共享状态不变。
 
 约定三种描述：**现有实现**表示已在工作区定位；**迁移要求**表示 iSnow 后续开发必须完成；**待配置/待核验**表示当前缺少外部配置或调用证据，不允许以假接口、假奖励或空白目标页冒充完成。
 
@@ -123,7 +123,8 @@ flowchart TD
 | 举报 | 完整举报页 | 是 | 成功 Pop；取消返回；失败留页重试 |
 | 音乐 | 现有音乐 Sheet | 是 | 只关闭播放器面板，保持播放 |
 | 魅力计数/声音 | 原面板开关 | 否 | 请求/SDK 成功更新图标；失败保留原值 |
-| 动效设置/魅力设置 | More内Setting分类，定位对应区域 | 否 | 切换分类或关闭More不退房；原二级设置页保留兼容 |
+| 动效设置 | More内Setting分类，定位Effects Setting | 否 | 切换分类或关闭More不退房；原二级设置页保留兼容 |
+| 魅力设置 | 根导航独立Charm Setting底部弹框，仅两项统计币种 | 是 | 返回、系统返回或空白区域关闭只关当前弹框，不退房 |
 | Chat/Win/Treasure | 房间内游戏区域和折叠入口 | 成功后是 | 模式关闭或折叠按第 12 节处理 |
 | PK | PK 设置 Sheet → 房间 PK 层 → 结果 | 是 | 设置取消不启动；关闭结果不退房 |
 | 幸运宝箱 | 编辑、规则、列表、开箱和结果 Sheet/弹层 | 是 | 单独关闭当前层，不关闭整个房间 |
@@ -159,7 +160,8 @@ flowchart TD
 
 - 分类位于More弹框，不是 `room_chat_panel.dart` 公屏；All/Chat/Gift保持原样。使用同一个TabController驱动 `ExtendedTabBar` / `ExtendedTabBarView`，支持点击和左右滑动。每次打开默认Basic Tools；两个页面分别滚动，切换保留各自位置，不重新请求Banner、偏好或房间数据。
 - More采用蓝湖白底、深色文字、粉色选中指示条、全屏宽度及顶部圆角。参考375×812画板的639高度，同时受可用高度和键盘约束；分类栏固定，底部安全区留在白色面板内。Basic Tools只去掉与分类栏重复的标题，现有工具顺序、权限、图片、50×50图标和Room Mode/Party/Game分组保留。较短屏幕的格子高度同时满足图标与两行文字的最小需求，不挤压图标或隐藏溢出异常。
-- 原Effect Settings、Charm Set快捷入口保留，点击在原弹框切换至Setting并滚动到Effects Setting或Charm Setting，不执行pop/push。Setting中的Charm Setting只对房主/管理员显示，Coins=1、Diamonds=2，继续调用 `POST /api/room/mic/charm/switch`，参数为 `{roomId, digitalCurrency}`。不再复制设计中两条相同的占位说明，按实际币种显示对应文字。
+- 原Effect Settings入口仍在More内切换至Setting并定位Effects Setting。Charm Set仅房主/管理员可见，关闭More并等待动画完成，重新校验房间代次与权限后，从根导航打开独立 `RoomCharmSettingsSheet`，不跳转 `/room-tool`。Setting不再重复展示币种选项，只保留特效设置。
+- 独立Charm Setting沿用项目白底主题、顶部返回图片、全宽及底部安全区，仅展示Nady的两条完整说明：`Charm value is calculated based on the number of gold coins received as gifts.` 和 `Charm value is calculated based on the number of diamonds received as gifts.`，对应Coins=1、Diamonds=2。两项互斥，点击仍调用 `POST /api/room/mic/charm/switch`，参数为 `{roomId, digitalCurrency}`；不额外添加Coins/Diamonds标题或特效开关。面板受键盘和可用高度约束，长文案换行，内容可滚动。
 - Effects Setting保留全部动画、进场动画、礼物动画、全屏礼物动画、麦位声波、房间横幅六项。总开关由五个子项推导，点击总开关设置全部子项；只关闭部分子项时，总开关为关闭且副文案为“部分开启”，全部关闭才显示“已关闭”。全屏礼物仍可独立设置，不与普通礼物合并。仅影响操作者本机的既有视觉通道，不改变麦克风或收听状态。
 - 设置继续由 `RoomToolsController` 和 `RoomToolsRepository` 负责，不引入第二份设置状态。偏好沿用按UID保存的 `room_effects_<uid>` 及原五个JSON字段；加载/保存期间禁用对应操作，失败保留原值并展示错误，服务端优先msg。加载失败可通过 `reloadEffectPreferences()` 只重试本地偏好，不重建房间或重新请求工具。关闭后的View回调先检查mounted，失效房间/代次的旧结果由控制器丢弃。
 - `RoomEffectSettingsContent` / `RoomCharmCurrencyContent` 为独立复用View，原 `RoomSettingsPage` 的effects/charmCurrency分区也使用它们；公开路由与分区参数保持兼容。Tab和滚动控制器是弹框内的临时UI状态，关闭即释放。
@@ -469,7 +471,7 @@ flowchart TD
 
 该设置控制**房间魅力统计展示使用金币还是钻石**，不是兑换或支付设置。房主/管理员可进入；普通用户接收变化并更新房间 UI。
 
-More → Setting中的Charm Setting（Charm Set快捷入口定位至同一区域），读取当前房间 `digitalCurrency`，展示二选一：`1=金币`、`2=钻石`。旧二级设置页复用相同内容与状态。
+More → Charm Set → 独立Charm Setting底部弹框，读取当前房间 `digitalCurrency`，只展示两条完整统计说明，二选一：`1=金币`、`2=钻石`。Setting分类只保留特效设置；独立弹框和旧二级设置页复用 `RoomCharmCurrencyContent` 与同一个控制器，不产生第二份币种状态。
 
 ```mermaid
 flowchart TD
@@ -1440,3 +1442,12 @@ Golden 用于设置、PK布局、宝箱结果等稳定状态，资源动画/平�
 - 新增18项测试，覆盖真实HTTP封装的路径/JSON/签名、data缺失/null/false/对象的成功确认、失败msg优先、320/375/430快捷入口、关闭重开、保存进度/去重/重试、Socket同步、非法币种及关闭/权限/账号/退房隔离。目标44项通过，完整房间模块518项通过；`flutter analyze --no-pub` 无问题，`git diff --check HEAD` 通过，没有修改任何golden基线。
 - 真机：PLL110无线ADB接回原 `com.nady.dev1` / PID24039，热重载29个库，没有重新安装、热重启、退出登录或重新进房。原币种0无法通过接口恢复，已向用户确认最终保留Coins；实际完成0→Diamonds2→Coins1。两次 `/api/room/mic/charm/switch` 均为HTTP 200/code 200且无data字段，traceId分别为 `0685f124-b127-4226-9868-ad9fb65419ed` 和 `294a1709-5f49-4e4e-9267-8861fd1eccf0`。成功后UI和只读运行状态均为1；关闭More后重开默认Basic Tools，经Charm Set回到Setting仍为Coins选中，两个选项恢复可用。
 - 证据：`/tmp/isnow-charm-setting-device-20261028.ZAHu5Y/` 保存 `01-unselected.png`、`02-diamonds-selected.png`、`03-coins-selected.png` 和 `04-coins-reopened.png`，最后一张同时保存UI XML；它们不是golden基线，临时目录可能被清理。接口成功回执与本机会话状态为本次保存证据，没有独立读取服务端币种或重新进房验证持久化。当前房间仍为 `hei` / 展示ID30317291、4个空麦位，未上麦、送礼或发送分享；有人麦位展示、双机Socket同步和声音效果未做本轮真机验收。
+
+### 23.16 Charm Set独立弹框修正与热重载验收（2026-10-28）
+
+- 用户再次确认以Nady的独立Charm Setting为准。本次修正入口和内容组织：Charm Set关闭More，等待完成后再打开根导航独立底部弹框；不切换Setting，也不push旧 `/room-tool` 页面。Setting只保留Effects Setting六项开关，Effect Settings快捷入口继续原地切换分类。旧Charm Currency二级页保留兼容，使用相同两项内容和控制器。
+- 独立View为 `more/room_charm_settings_sheet.dart`，只保留金币/钻石两条完整统计说明及返回按钮，二选一仍由原MVVM控制器保存。新增高度/文案样式进入theme，返回图片复用现有Lanhu资产，无新插件、图片、接口或Flutter Icon。面板在小屏/键盘/底部安全区约束下可滚动，本地ScaffoldMessenger保证错误提示归属当前弹框。补齐控制器对仅角色变化的状态通知，撤销管理权限立即移除选项；关闭More过渡期间的权限、账号/房间代次及退房检查阻止过期弹框打开。
+- 验证：目标49项、完整房间523项通过，涵盖两项完整文案、独立弹框且无分类/特效控件、现有保存/失败/msg/Socket规则、返回/空白区域关闭、关闭重开、320/375/430宽度、320×568键盘200/安全区24，以及过渡期间失效隔离。`flutter analyze --no-pub`、格式检查与 `git diff --check HEAD` 均通过。
+- 截图：Setting移除币种区是本次明确要求的结构变更，生成候选图人工检查后新增 `room_more_setting_effects_v3_320/375/430.png`，普通比较模式和完整房间回归均通过。没有执行 `--update-goldens`；36张既有golden文件的SHA-256全部保持不变，旧Setting v2作为历史保留，不覆盖Share、音乐、More Basic或礼物基线。临时候选捕获入口已移除。
+- 真机：PLL110原 `com.nady.dev1` / PID24039热重载25个库，无重装、热重启或重新进房。热重载前已经打开的More保留旧导航回调，首次点击仍进入旧二级页；返回原房间并重新打开More后，确认独立白底底部弹框、完整两项、金币选中，未显示Setting分类或特效。返回按钮及外部空白区域均只关闭当前弹框，再次打开仍选中金币；Effect Settings入口仍在More切换Setting，实际显示六项已开启开关且无币种区。本轮不再切换币种、不上麦、不送礼或发送分享，不将上一轮真实保存结果当成本轮重复提交；双机Socket和声音未重新验收。
+- 证据位于 `/tmp/isnow-charm-standalone-device-20261028.K9xbin/`：`02-charm-sheet.png` 为独立弹框，`03-setting-effects-only.png` 为仅特效的Setting，`04-charm-reopened.png` 及同名XML记录最终重新打开的金币选中态；`01-pre-reopen-cached-navigation.png` 仅记录旧More回调，不作为新入口通过证据。临时目录可能被系统清理，均非golden基线。房间 `hei` / 展示ID30317291及音乐盒保留，结束停留独立Charm Setting供人工查看。

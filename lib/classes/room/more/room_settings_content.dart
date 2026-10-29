@@ -190,21 +190,19 @@ class RoomCharmCurrencyContent extends ConsumerWidget {
                       ),
                       SizedBox(width: AppSpacing.xs.w),
                       Expanded(
-                        child: _SettingLabel(
-                          title: value == 1
-                              ? toolText(context, 'Coins', '金币')
-                              : toolText(context, 'Diamonds', '钻石'),
-                          description: value == 1
+                        child: Text(
+                          value == 1
                               ? toolText(
                                   context,
-                                  'Charm is calculated from coins received as gifts.',
+                                  'Charm value is calculated based on the number of gold coins received as gifts.',
                                   '根据收到礼物的金币数量计算魅力值。',
                                 )
                               : toolText(
                                   context,
-                                  'Charm is calculated from diamonds received as gifts.',
+                                  'Charm value is calculated based on the number of diamonds received as gifts.',
                                   '根据收到礼物的钻石数量计算魅力值。',
                                 ),
+                          style: AppTextStyles.roomCharmOption,
                         ),
                       ),
                     ],

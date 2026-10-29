@@ -407,6 +407,8 @@ class HttpDioManager {
       HttpApi.reportUploadParams,
       HttpApi.uploadParam,
       HttpApi.gameToken,
+      HttpApi.timToken,
+      HttpApi.imTextAudit,
     ].contains(response.requestOptions.path)) {
       debugPrint(
         '[NadyAPI] <- ${response.requestOptions.path} http=${response.statusCode} credentials redacted',
@@ -447,6 +449,16 @@ class HttpDioManager {
   }
 
   void _logError(DioException error) {
+    if ([
+      HttpApi.timToken,
+      HttpApi.imTextAudit,
+    ].contains(error.requestOptions.path)) {
+      debugPrint(
+        '[NadyAPI] !! ${error.requestOptions.path} '
+        'type=${error.type} http=${error.response?.statusCode} private data redacted',
+      );
+      return;
+    }
     final prefix = error.requestOptions.extra[_anonymousExternalRequest] == true
         ? '[ExternalHTTP]'
         : '[NadyAPI]';
@@ -490,6 +502,9 @@ class HttpDioManager {
   }
 
   Map<String, dynamic> _paramsSummary(RequestOptions options) {
+    if (options.path == HttpApi.imTextAudit) {
+      return const {'content': '[redacted]', 'receiveUid': '[redacted]'};
+    }
     final params = _requestParamsForSign(options);
     return params.map((key, value) {
       if (key.toLowerCase().contains('passwd') ||

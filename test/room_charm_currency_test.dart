@@ -85,9 +85,7 @@ void main() {
     ) async {
       final room = _CurrencyRoom({'digitalCurrency': 0});
       final f = await mountRoomMoreSettings(tester, room: room, width: width);
-      await f.open(tester);
-      await tester.tap(find.text('Setting'));
-      await tester.pumpAndSettle();
+      await f.openCharm(tester);
       expect(find.text('Currency not available yet'), findsNothing);
       expect(
         find.text('Select a currency to calculate charm.'),
@@ -116,9 +114,7 @@ void main() {
       expect(room.refreshes, 1);
       f.close(tester);
       await tester.pumpAndSettle();
-      await f.open(tester);
-      await tester.tap(find.text('Setting'));
-      await tester.pumpAndSettle();
+      await f.openCharm(tester);
       expect(f.controller.snapshot.currency, 2);
       expect(f.api.count(HttpApi.roomCharmSwitch), 1);
       expect(tester.takeException(), isNull);
@@ -139,9 +135,7 @@ void main() {
       room: _CurrencyRoom({'digitalCurrency': 0}),
       api: api,
     );
-    await f.open(tester);
-    await tester.tap(find.text('Setting'));
-    await tester.pumpAndSettle();
+    await f.openCharm(tester);
     await tester.tap(find.byKey(const ValueKey('room-currency-1')));
     await tester.pumpAndSettle();
     expect(f.controller.snapshot.currency, 0);

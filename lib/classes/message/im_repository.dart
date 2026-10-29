@@ -4,10 +4,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:tencent_cloud_chat_sdk/enum/V2TimAdvancedMsgListener.dart';
 import 'package:tencent_cloud_chat_sdk/enum/V2TimConversationListener.dart';
-import 'package:tencent_cloud_chat_sdk/enum/V2TimSDKListener.dart';
-import 'package:tencent_cloud_chat_sdk/enum/conversation_type.dart';
-import 'package:tencent_cloud_chat_sdk/enum/log_level_enum.dart';
 import 'package:tencent_cloud_chat_sdk/enum/offlinePushInfo.dart';
+import 'package:tencent_cloud_chat_sdk/manager/v2_tim_manager.dart';
 import 'package:tencent_cloud_chat_sdk/models/v2_tim_conversation.dart';
 import 'package:tencent_cloud_chat_sdk/models/v2_tim_message.dart';
 import 'package:tencent_cloud_chat_sdk/tencent_im_sdk_plugin.dart';
@@ -15,65 +13,82 @@ import 'package:tencent_cloud_chat_sdk/tencent_im_sdk_plugin.dart';
 import '../../manager/auth_session.dart';
 import '../../manager/http_api.dart';
 import '../../manager/http_dio_manager.dart';
+import '../../manager/im_session_manager.dart';
+import '../../model/im_models.dart';
 import '../../model/server_response.dart';
 import '../../model/tim_token_data.dart';
 
 class ImRepository {
-  ImRepository(this._httpManager, this._authSession);
-
+  ImRepository(this._httpManager, this._authSession, {V2TIMManager? sdk})
+    : _sdkOverride = sdk;
+  final V2TIMManager? _sdkOverride;
+  ImSessionManager? _session;
+  ImSessionManager get session => _session ??= ImSessionManager(
+    sdk: _sdkOverride ?? TencentImSDKPlugin.v2TIMManager,
+    auth: _authSession,
+    loadToken: _fetchTimToken,
+  );
   final HttpDioManager _httpManager;
   final AuthSession _authSession;
+  final _conversations = <V2TimConversationListener>{};
+  final _messages = <V2TimAdvancedMsgListener>{};
+  bool _disposed = false;
+  V2TIMManager get _sdk => session.sdk;
 
-  bool _loggedIn = false;
-  Future<void>? _loginFuture;
+  Future<void> ensureReady() => session.ensureReady();
 
-  Future<void> ensureReady() async {
-    if (_loggedIn) return;
-    _loginFuture ??= _login();
-    try {
-      await _loginFuture;
-    } finally {
-      _loginFuture = null;
+  void _check(int revision, [bool Function()? current]) {
+    if (_disposed || !session.isCurrent(revision) || current?.call() == false) {
+      throw const NadyApiException(message: 'IM session changed');
     }
   }
 
   Future<List<V2TimConversation>> fetchConversations() async {
     await ensureReady();
-    final manager = TencentImSDKPlugin.v2TIMManager.getConversationManager();
-    final conversations = <V2TimConversation>[];
-    var nextSeq = '0';
-
+    final revision = session.revision;
+    final list = <V2TimConversation>[];
+    final visited = <String>{};
+    var next = '0';
     do {
-      final response = await manager.getConversationList(
-        nextSeq: nextSeq,
+      visited.add(next);
+      final response = await _sdk.getConversationManager().getConversationList(
+        nextSeq: next,
         count: 100,
       );
+      _check(revision);
       _throwIfFailed(response.code, response.desc);
       final result = response.data;
-      conversations.addAll(
-        (result?.conversationList ?? const []).where(_isC2CConversation),
+      list.addAll(
+        (result?.conversationList ?? []).where(
+          (c) => c.type == 1 && c.userID?.isNotEmpty == true,
+        ),
       );
-      nextSeq = result?.nextSeq ?? '0';
+      next = result?.nextSeq ?? '0';
       if (result?.isFinished ?? true) break;
-    } while (nextSeq != '0');
-
-    return _sortConversations(conversations);
+    } while (!visited.contains(next));
+    return sortImConversations(
+      {for (final c in list) c.conversationID: c}.values,
+    );
   }
 
   Future<int> fetchTotalUnreadCount() async {
     await ensureReady();
-    final response = await TencentImSDKPlugin.v2TIMManager
+    final revision = session.revision;
+    final response = await _sdk
         .getConversationManager()
         .getTotalUnreadMessageCount();
+    _check(revision);
     _throwIfFailed(response.code, response.desc);
     return response.data ?? 0;
   }
 
   Future<void> deleteConversation(String conversationID) async {
     await ensureReady();
-    final response = await TencentImSDKPlugin.v2TIMManager
-        .getConversationManager()
-        .deleteConversation(conversationID: conversationID);
+    final revision = session.revision;
+    final response = await _sdk.getConversationManager().deleteConversation(
+      conversationID: conversationID,
+    );
+    _check(revision);
     _throwIfFailed(response.code, response.desc);
   }
 
@@ -83,73 +98,177 @@ class ImRepository {
     required ValueChanged<List<String>> onConversationDeleted,
   }) async {
     await ensureReady();
-    final listener = V2TimConversationListener(
-      onNewConversation: onConversationUpdated,
-      onConversationChanged: onConversationUpdated,
-      onTotalUnreadMessageCountChanged: onUnreadChanged,
-      onConversationDeleted: onConversationDeleted,
+    final revision = session.revision;
+    late V2TimConversationListener listener;
+    bool current() =>
+        !_disposed &&
+        session.isCurrent(revision) &&
+        _conversations.contains(listener);
+    listener = V2TimConversationListener(
+      onNewConversation: (items) {
+        if (current()) onConversationUpdated(items);
+      },
+      onConversationChanged: (items) {
+        if (current()) onConversationUpdated(items);
+      },
+      onTotalUnreadMessageCountChanged: (count) {
+        if (current()) onUnreadChanged(count);
+      },
+      onConversationDeleted: (ids) {
+        if (current()) onConversationDeleted(ids);
+      },
     );
-    await TencentImSDKPlugin.v2TIMManager
-        .getConversationManager()
-        .addConversationListener(listener: listener);
-    return listener;
+    _conversations.add(listener);
+    try {
+      await _sdk.getConversationManager().addConversationListener(
+        listener: listener,
+      );
+      if (!current()) await removeConversationListener(listener);
+      return listener;
+    } catch (_) {
+      _conversations.remove(listener);
+      rethrow;
+    }
   }
 
   Future<void> removeConversationListener(
     V2TimConversationListener listener,
   ) async {
-    await TencentImSDKPlugin.v2TIMManager
-        .getConversationManager()
-        .removeConversationListener(listener: listener);
+    _conversations.remove(listener);
+    await _sdk.getConversationManager().removeConversationListener(
+      listener: listener,
+    );
+  }
+
+  Future<ImHistoryPage> fetchHistoryPage(
+    String targetUID, {
+    String? cursor,
+  }) async {
+    await ensureReady();
+    final revision = session.revision;
+    final response = await _sdk.getMessageManager().getC2CHistoryMessageList(
+      userID: targetUID,
+      count: 20,
+      lastMsgID: cursor,
+    );
+    _check(revision);
+    _throwIfFailed(response.code, response.desc);
+    final list = [...?response.data]
+      ..sort((a, b) => (a.timestamp ?? 0).compareTo(b.timestamp ?? 0));
+    final next = list.firstOrNull?.msgID;
+    return ImHistoryPage(
+      list,
+      cursor: next,
+      hasMore: list.length == 20 && next != null && next != cursor,
+    );
   }
 
   Future<List<V2TimMessage>> fetchC2CHistory(String targetUID) async {
-    await ensureReady();
-    final response = await TencentImSDKPlugin.v2TIMManager
-        .getMessageManager()
-        .getC2CHistoryMessageList(userID: targetUID, count: 20);
-    _throwIfFailed(response.code, response.desc);
+    final page = await fetchHistoryPage(targetUID);
     await markC2CRead(targetUID);
-    return _sortMessages(response.data ?? const []);
+    return page.messages;
+  }
+
+  Future<void> _validateText(
+    String uid,
+    String text,
+    int revision,
+    bool Function()? current,
+  ) async {
+    if (isImSystemUser(uid)) {
+      throw const NadyApiException(message: 'This conversation is read-only');
+    }
+    final profile = _data(
+      await _httpManager.get(
+        HttpApi.userHomepage,
+        queryParameters: {'targetUid': uid},
+      ),
+    );
+    _check(revision, current);
+    final user = _map(_map(_map(profile)['info'])['userBaseInfo']);
+    if (user.isEmpty) {
+      throw const NadyApiException(
+        message: 'Unable to verify message permission',
+      );
+    }
+    final vip = int.tryParse('${_map(user['userLevel'])['vipLevel']}') ?? 0;
+    final relation = '${user['followRelation']}';
+    if (vip >= 5 && relation != 'FOLLOW_MUTUAL' && relation != '3') {
+      final settings = _map(
+        _data(
+          await _httpManager.get(
+            HttpApi.userVipSetting,
+            queryParameters: {'uid': uid},
+          ),
+        ),
+      );
+      _check(revision, current);
+      final open = _map(settings['noDisturb'])['open'];
+      if (open is! bool) {
+        throw const NadyApiException(
+          message: 'Unable to verify message permission',
+        );
+      }
+      if (open) {
+        throw const NadyApiException(
+          message:
+              'Operation failed. The VIP user has enabled the "Do Not Disturb" mode.',
+        );
+      }
+    }
+    final approved = _data(
+      await _httpManager.post(
+        HttpApi.imTextAudit,
+        data: {'receiveUid': uid, 'type': 'text', 'content': text},
+      ),
+    );
+    _check(revision, current);
+    if (approved != true) {
+      throw const NadyApiException(
+        message: 'Message did not pass content review',
+      );
+    }
   }
 
   Future<V2TimMessage> sendTextMessage({
     required String targetUID,
     required String text,
+    bool Function()? isCurrent,
   }) async {
     await ensureReady();
-    final messageManager = TencentImSDKPlugin.v2TIMManager.getMessageManager();
-    final createResponse = await messageManager.createTextMessage(text: text);
-    _throwIfFailed(createResponse.code, createResponse.desc);
-
-    final created = createResponse.data;
-    if (created?.messageInfo == null) {
+    final revision = session.revision;
+    _check(revision, isCurrent);
+    await _validateText(targetUID, text, revision, isCurrent);
+    final manager = _sdk.getMessageManager();
+    final created = await manager.createTextMessage(text: text);
+    _check(revision, isCurrent);
+    _throwIfFailed(created.code, created.desc);
+    final message = created.data?.messageInfo;
+    if (message == null) {
       throw const NadyApiException(message: 'Failed to create IM message');
     }
-
-    final currentUser = await _authSession.user();
-    final pushTitle = currentUser?.nick?.trim().isNotEmpty == true
-        ? currentUser!.nick!
-        : 'Message';
-    final currentUid = await _authSession.uid();
-
-    final sendResponse = await messageManager.sendMessage(
-      message: created!.messageInfo,
+    final user = await _authSession.user();
+    _check(revision, isCurrent);
+    final response = await manager.sendMessage(
+      message: message,
       receiver: targetUID,
       groupID: '',
       offlinePushInfo: OfflinePushInfo(
-        title: pushTitle,
+        title: user?.nick ?? 'Message',
         desc: text,
         ignoreIOSBadge: true,
         ext: jsonEncode({
           'jumpUrl':
-              'nady:///main/p2p-chat?target-u-i-d=$currentUid'
-              '&is-on-room=false',
+              'nady:///main/p2p-chat?target-u-i-d=${session.state.uid}&is-on-room=false',
         }),
       ),
     );
-    _throwIfFailed(sendResponse.code, sendResponse.desc);
-    return sendResponse.data ?? created.messageInfo!;
+    _check(revision, isCurrent);
+    _throwIfFailed(response.code, response.desc);
+    if (response.data == null) {
+      throw const NadyApiException(message: 'Message failed to send');
+    }
+    return response.data!;
   }
 
   Future<void> sendRoomInvitation({
@@ -157,7 +276,8 @@ class ImRepository {
     required Map<String, dynamic> room,
   }) async {
     await ensureReady();
-    final manager = TencentImSDKPlugin.v2TIMManager.getMessageManager();
+    final revision = session.revision;
+    final manager = _sdk.getMessageManager();
     final created = await manager.createCustomMessage(
       data: jsonEncode({
         'type': 'shareRoom',
@@ -167,17 +287,19 @@ class ImRepository {
       desc: '[Share Room]',
       extension: '',
     );
+    _check(revision);
     _throwIfFailed(created.code, created.desc);
     final message = created.data?.messageInfo;
     if (message == null) {
       throw const NadyApiException(message: 'Failed to create room invitation');
     }
-    final sent = await manager.sendMessage(
+    final response = await manager.sendMessage(
       message: message,
       receiver: targetUID,
       groupID: '',
     );
-    _throwIfFailed(sent.code, sent.desc);
+    _check(revision);
+    _throwIfFailed(response.code, response.desc);
   }
 
   Future<V2TimAdvancedMsgListener> addC2CMessageListener({
@@ -185,115 +307,78 @@ class ImRepository {
     required ValueChanged<V2TimMessage> onMessageReceived,
   }) async {
     await ensureReady();
-    final listener = V2TimAdvancedMsgListener(
-      onRecvNewMessage: (message) {
-        if (message.userID == targetUID || message.sender == targetUID) {
-          onMessageReceived(message);
-          unawaited(markC2CRead(targetUID));
-        }
-      },
-      onRecvMessageModified: (message) {
-        if (message.userID == targetUID || message.sender == targetUID) {
-          onMessageReceived(message);
-        }
-      },
+    final revision = session.revision;
+    late V2TimAdvancedMsgListener listener;
+    void receive(V2TimMessage message) {
+      if (!_disposed &&
+          session.isCurrent(revision) &&
+          _messages.contains(listener) &&
+          (message.userID == targetUID || message.sender == targetUID)) {
+        onMessageReceived(message);
+      }
+    }
+
+    listener = V2TimAdvancedMsgListener(
+      onRecvNewMessage: receive,
+      onRecvMessageModified: receive,
     );
-    await TencentImSDKPlugin.v2TIMManager
-        .getMessageManager()
-        .addAdvancedMsgListener(listener: listener);
-    await markC2CRead(targetUID);
-    return listener;
+    _messages.add(listener);
+    try {
+      await _sdk.getMessageManager().addAdvancedMsgListener(listener: listener);
+      if (_disposed || !session.isCurrent(revision)) {
+        await removeC2CMessageListener(listener);
+      }
+      return listener;
+    } catch (_) {
+      _messages.remove(listener);
+      rethrow;
+    }
   }
 
   Future<void> removeC2CMessageListener(
     V2TimAdvancedMsgListener listener,
   ) async {
-    await TencentImSDKPlugin.v2TIMManager
-        .getMessageManager()
-        .removeAdvancedMsgListener(listener: listener);
+    _messages.remove(listener);
+    await _sdk.getMessageManager().removeAdvancedMsgListener(
+      listener: listener,
+    );
   }
 
-  Future<void> markC2CRead(String targetUID) async {
-    final response = await TencentImSDKPlugin.v2TIMManager
+  Future<void> markC2CRead(
+    String targetUID, {
+    bool Function()? isCurrent,
+  }) async {
+    await ensureReady();
+    final revision = session.revision;
+    _check(revision, isCurrent);
+    final response = await _sdk
         .getConversationManager()
         .cleanConversationUnreadMessageCount(
           conversationID: 'c2c_$targetUID',
           cleanTimestamp: 0,
           cleanSequence: 0,
         );
-    if (response.code != 0) {
-      debugPrint('markC2CMessageAsRead failed: ${response.desc}');
-    }
-  }
-
-  Future<void> _login() async {
-    final uid = await _authSession.uid();
-    if (uid == null) {
-      throw const NadyApiException(message: 'Please log in first');
-    }
-
-    final token = await _fetchTimToken();
-    if (token.appId <= 0 || token.token.isEmpty) {
-      throw const NadyApiException(message: 'Invalid IM token');
-    }
-
-    final sdkListener = V2TimSDKListener(
-      onKickedOffline: () {
-        _loggedIn = false;
-        debugPrint('Tencent IM kicked offline');
-      },
-      onUserSigExpired: () {
-        _loggedIn = false;
-        debugPrint('Tencent IM userSig expired');
-      },
-      onConnectFailed: (code, error) {
-        debugPrint('Tencent IM connect failed: $code $error');
-      },
-      onConnecting: () {
-        debugPrint('Tencent IM connecting');
-      },
-      onConnectSuccess: () {
-        debugPrint('Tencent IM connected');
-      },
-    );
-
-    final initResponse = await TencentImSDKPlugin.v2TIMManager.initSDK(
-      sdkAppID: token.appId,
-      loglevel: kReleaseMode
-          ? LogLevelEnum.V2TIM_LOG_WARN
-          : LogLevelEnum.V2TIM_LOG_DEBUG,
-      listener: sdkListener,
-    );
-    _throwIfFailed(initResponse.code, initResponse.desc);
-
-    final loginResponse = await TencentImSDKPlugin.v2TIMManager.login(
-      userID: uid.toString(),
-      userSig: token.token,
-    );
-    _throwIfFailed(loginResponse.code, loginResponse.desc);
-    _loggedIn = true;
+    _check(revision);
+    _throwIfFailed(response.code, response.desc);
   }
 
   Future<TimTokenData> _fetchTimToken() async {
-    final response = await _httpManager.get(HttpApi.timToken);
-    final server = NadyServerResponse<TimTokenData>.fromJson(
-      _asMap(response),
-      (json) => TimTokenData.fromJson((json as Map).cast<String, dynamic>()),
+    final data = _data(await _httpManager.get(HttpApi.timToken));
+    if (data is! Map) throw const NadyApiException(message: 'Empty IM token');
+    return TimTokenData.fromJson(data.cast<String, dynamic>());
+  }
+
+  Object? _data(Object? response) {
+    final server = NadyServerResponse<Object?>.fromJson(
+      _map(response),
+      (v) => v,
     );
     if (!server.isSuccess) throw server.toException();
-    final token = server.data;
-    if (token == null) {
-      throw const NadyApiException(message: 'Empty IM token');
-    }
-    return token;
+    return server.data;
   }
 
-  Map<String, dynamic> _asMap(dynamic response) {
-    if (response is Map<String, dynamic>) return response;
-    if (response is Map) return response.cast<String, dynamic>();
-    throw const NadyApiException(message: 'Invalid server response');
-  }
-
+  Map<String, dynamic> _map(Object? value) =>
+      value is Map ? value.cast<String, dynamic>() : {};
   void _throwIfFailed(int code, String desc) {
     if (code != 0) {
       throw NadyApiException(
@@ -302,30 +387,14 @@ class ImRepository {
     }
   }
 
-  bool _isC2CConversation(V2TimConversation conversation) {
-    return conversation.type == ConversationType.V2TIM_C2C &&
-        conversation.userID != null &&
-        conversation.userID!.isNotEmpty;
-  }
-
-  List<V2TimConversation> _sortConversations(
-    Iterable<V2TimConversation> conversations,
-  ) {
-    final list = conversations.toList();
-    list.sort((a, b) {
-      if ((a.isPinned ?? false) != (b.isPinned ?? false)) {
-        return (b.isPinned ?? false) ? 1 : -1;
-      }
-      final aTime = a.lastMessage?.timestamp ?? a.orderkey ?? 0;
-      final bTime = b.lastMessage?.timestamp ?? b.orderkey ?? 0;
-      return bTime.compareTo(aTime);
-    });
-    return list;
-  }
-
-  List<V2TimMessage> _sortMessages(Iterable<V2TimMessage> messages) {
-    final list = messages.toList();
-    list.sort((a, b) => (a.timestamp ?? 0).compareTo(b.timestamp ?? 0));
-    return list;
+  void dispose() {
+    _disposed = true;
+    for (final listener in [..._conversations]) {
+      unawaited(removeConversationListener(listener).catchError((Object _) {}));
+    }
+    for (final listener in [..._messages]) {
+      unawaited(removeC2CMessageListener(listener).catchError((Object _) {}));
+    }
+    _session?.dispose();
   }
 }

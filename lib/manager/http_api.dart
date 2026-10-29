@@ -217,6 +217,7 @@ class HttpApi {
 
   /// 获取腾讯云 IM 登录 token
   static const timToken = '/token/tim';
+  static const imTextAudit = '/api/shumei/audit';
 
   /// 长连接 connection token
   static const longLinkToken = '/token/long-link';

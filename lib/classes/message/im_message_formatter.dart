@@ -51,7 +51,7 @@ String _customMessagePreview(String? rawData) {
       'transferAccounts' => '[Transfer]',
       'SystemSendGiftStore' => '[Gift]',
       'InvitationIMMsg' => '[Invitation]',
-      _ => json['desc']?.toString() ?? '[Custom message]',
+      _ => '[Custom message]',
     };
   } catch (_) {
     return '[Custom message]';

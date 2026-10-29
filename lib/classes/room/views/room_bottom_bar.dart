@@ -6,7 +6,8 @@ class _RoomBottomBar extends StatelessWidget {
     required this.state,
     required this.onChatTap,
     required this.onToggleMic,
-    required this.onToggleSpeaker,
+    required this.onMessageTap,
+    required this.unreadCount,
     required this.onGiftTap,
     required this.onMoreTap,
   });
@@ -14,7 +15,8 @@ class _RoomBottomBar extends StatelessWidget {
   final RoomPageState state;
   final VoidCallback onChatTap;
   final VoidCallback onToggleMic;
-  final VoidCallback onToggleSpeaker;
+  final VoidCallback onMessageTap;
+  final int unreadCount;
   final VoidCallback onGiftTap;
   final VoidCallback onMoreTap;
 
@@ -54,10 +56,10 @@ class _RoomBottomBar extends StatelessWidget {
           _GiftButton(onTap: onGiftTap),
           const Spacer(),
           _BottomIconButton(
-            asset: state.agoraState.mutedSpeaker
-                ? AppAssets.lanhuRoomIconMissing
-                : AppAssets.lanhuRoomBottomMessage,
-            onTap: onToggleSpeaker,
+            key: const ValueKey('room-message-button'),
+            asset: AppAssets.lanhuRoomBottomMessage,
+            onTap: onMessageTap,
+            unread: unreadCount > 0,
           ),
           SizedBox(width: AppSpacing.toolbarItemSpacing.w),
           _BottomIconButton(
@@ -77,12 +79,14 @@ class _BottomIconButton extends StatelessWidget {
     required this.onTap,
     this.selected = false,
     this.badge,
+    this.unread = false,
   });
 
   final String asset;
   final VoidCallback? onTap;
   final bool selected;
   final String? badge;
+  final bool unread;
 
   @override
   Widget build(BuildContext context) {
@@ -115,6 +119,23 @@ class _BottomIconButton extends StatelessWidget {
                   fontSize: 12.sp,
                   height: 1,
                   fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ),
+        if (unread)
+          PositionedDirectional(
+            top: 0,
+            end: 0,
+            child: Semantics(
+              label: 'Unread messages',
+              child: Container(
+                key: const ValueKey('room-message-unread'),
+                width: AppSpacing.messageUnreadDot.r,
+                height: AppSpacing.messageUnreadDot.r,
+                decoration: const BoxDecoration(
+                  color: AppColors.danger,
+                  shape: BoxShape.circle,
                 ),
               ),
             ),

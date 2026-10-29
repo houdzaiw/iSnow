@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
+  static const Color roomMessagePanel = Color(0xF21A1A1A);
+  static const Color roomMessageSurface = Color(0xFF1A1A1A);
+  static const Color roomMessagePinned = Color(0x1AFFFFFF);
+  static const Color roomMessageBubble = Color(0xFF343434);
+  static const Color roomMessageMuted = Color(0x99FFFFFF);
+  static const Color roomMessageHandle = Color(0x33FFFFFF);
   static const Color roomSharePosterControl = Color(0x66999999);
   static const Color musicBoxSurface = Color(0xE6050505);
   static const Color musicSliderInactive = Color(0x33FFFFFF);

@@ -34,6 +34,7 @@ import 'more/room_tools_strip.dart';
 import 'more/room_big_win_pendant.dart';
 import 'more/room_settings_page.dart';
 import 'more/room_settings_content.dart';
+import 'more/room_charm_settings_sheet.dart';
 import 'more/room_report_page.dart';
 import 'more/room_share_page.dart';
 import 'more/room_pk_page.dart';
@@ -42,6 +43,9 @@ import 'more/room_lobby_page.dart';
 import 'more/room_game_page.dart';
 import 'more/room_mic_wave.dart';
 import 'more/room_vehicle_layer.dart';
+import '../message/message_view_model.dart';
+import 'message/room_message_sheet.dart';
+import 'message/room_message_view_model.dart';
 
 part 'views/room_bottom_bar.dart';
 part 'views/room_chat_panel.dart';
@@ -81,6 +85,13 @@ class RoomPage extends HookConsumerWidget {
     final giftRoomId = state.currentRoomId.trim().isNotEmpty
         ? state.currentRoomId.trim()
         : roomId;
+    // Bind message sheets only after enterRoom has assigned its session generation.
+    if (state.isReady) {
+      ref.watch(roomMessageViewModelProvider(giftRoomId));
+    }
+    final imUnread = ref.watch(
+      messageViewModelProvider.select((s) => s.totalUnreadCount),
+    );
     final messageController = useTextEditingController();
     final giftRootKey = useMemoized(() => GlobalKey(), [giftRoomId]);
     final bottomBarKey = useMemoized(() => GlobalKey(), [giftRoomId]);
@@ -440,13 +451,9 @@ class RoomPage extends HookConsumerWidget {
                             onToggleMic: () => ref
                                 .read(provider.notifier)
                                 .toggleLocalMicrophone(),
-                            onToggleSpeaker: () => ref
-                                .read(
-                                  roomToolsControllerProvider(
-                                    giftRoomId,
-                                  ).notifier,
-                                )
-                                .toggleVoice(),
+                            onMessageTap: () =>
+                                showRoomMessageSheet(context, ref, giftRoomId),
+                            unreadCount: imUnread,
                             onGiftTap: () => _showRoomGiftPanel(context, state),
                             onMoreTap: () =>
                                 _showRoomMoreToolsSheet(context, ref, provider),

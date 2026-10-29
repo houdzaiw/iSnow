@@ -20,6 +20,8 @@ import 'package:project/localization/app_localizations.dart';
 import 'package:project/theme/app_theme.dart';
 
 import 'room_tools_fakes.dart';
+import 'package:project/classes/message/im_repository.dart';
+import 'package:project/classes/message/message_view_model.dart';
 
 class RoomSettingsApiFake extends ToolsApiFake {
   int loads = 0, saves = 0;
@@ -74,9 +76,23 @@ class RoomMoreSettingsFixture {
     }
   }
 
-  void close(WidgetTester tester) => Navigator.of(
-    tester.element(find.byKey(const ValueKey('room-more-tools-sheet'))),
-  ).pop();
+  Future<void> openCharm(WidgetTester tester) async {
+    await open(tester);
+    await tester.ensureVisible(find.text('Charm Set'));
+    await tester.tap(find.text('Charm Set'));
+    await tester.pumpAndSettle();
+  }
+
+  void close(WidgetTester tester) {
+    final charm = find.byKey(const ValueKey('room-charm-settings-sheet'));
+    Navigator.of(
+      tester.element(
+        charm.evaluate().isNotEmpty
+            ? charm
+            : find.byKey(const ValueKey('room-more-tools-sheet')),
+      ),
+    ).pop();
+  }
 }
 
 Future<RoomMoreSettingsFixture> mountRoomMoreSettings(
@@ -90,6 +106,7 @@ Future<RoomMoreSettingsFixture> mountRoomMoreSettings(
   RoomSettingsApiFake? api,
   ToolsRoomFake? room,
   bool settle = true,
+  ImRepository? im,
 }) async {
   final activeRoom = room ?? ToolsRoomFake();
   api ??= RoomSettingsApiFake();
@@ -119,6 +136,7 @@ Future<RoomMoreSettingsFixture> mountRoomMoreSettings(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        if (im != null) imRepositoryProvider.overrideWithValue(im),
         roomRepositoryProvider.overrideWithValue(activeRoom),
         roomToolsRepositoryProvider.overrideWithValue(api),
         roomGiftRepositoryProvider.overrideWithValue(_Gifts()),
@@ -138,7 +156,10 @@ Future<RoomMoreSettingsFixture> mountRoomMoreSettings(
               viewPadding: EdgeInsets.only(bottom: bottom),
               textScaler: TextScaler.linear(textScale),
             ),
-            child: child!,
+            child: RepaintBoundary(
+              key: const ValueKey('room-settings-snapshot'),
+              child: child!,
+            ),
           ),
         ),
       ),

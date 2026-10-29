@@ -45,7 +45,7 @@ void main() {
   testWidgets(
     'tabs swipe, retain independent scroll, and do not reload tools',
     (tester) async {
-      final f = await mountRoomMoreSettings(tester, height: 600, games: 20);
+      final f = await mountRoomMoreSettings(tester, height: 500, games: 20);
       await f.open(tester);
       expect(tester.widget<ExtendedTabBar>(tabs).controller!.index, 0);
       expect(
@@ -92,28 +92,23 @@ void main() {
     },
   );
 
-  testWidgets('both shortcuts stay in the sheet and focus their section', (
+  testWidgets('effect shortcut stays in Setting without charm controls', (
     tester,
   ) async {
     final f = await mountRoomMoreSettings(tester);
-    for (final (shortcut, heading) in [
-      ('Effect Settings', 'Effects Setting'),
-      ('Charm Set', 'Charm Setting'),
-    ]) {
-      await f.open(tester);
-      await tester.ensureVisible(find.text(shortcut));
-      await tester.tap(find.text(shortcut));
-      await tester.pumpAndSettle();
-      expect(sheet, findsOneWidget);
-      expect(tester.widget<ExtendedTabBar>(tabs).controller!.index, 1);
-      expect(find.byType(RoomSettingsPage), findsNothing);
-      expect(f.router.state.uri.path, '/room/123');
-      final headingY = tester.getRect(find.text(heading)).top;
-      expect(headingY, greaterThanOrEqualTo(tester.getRect(tabs).bottom));
-      expect(headingY, lessThan(tester.getRect(sheet).bottom));
-      f.close(tester);
-      await tester.pumpAndSettle();
-    }
+    await f.open(tester);
+    await tester.ensureVisible(find.text('Effect Settings'));
+    await tester.tap(find.text('Effect Settings'));
+    await tester.pumpAndSettle();
+    expect(sheet, findsOneWidget);
+    expect(tester.widget<ExtendedTabBar>(tabs).controller!.index, 1);
+    expect(find.byType(RoomSettingsPage), findsNothing);
+    expect(f.router.state.uri.path, '/room/123');
+    final headingY = tester.getRect(find.text('Effects Setting')).top;
+    expect(headingY, greaterThanOrEqualTo(tester.getRect(tabs).bottom));
+    expect(headingY, lessThan(tester.getRect(sheet).bottom));
+    expect(find.byType(Radio<int>), findsNothing);
+    expect(find.text('Charm Setting'), findsNothing);
     expect(f.room.leaves, 0);
     expect(tester.takeException(), isNull);
   });
@@ -232,8 +227,7 @@ void main() {
     'currency uses existing API and is hidden after losing permission',
     (tester) async {
       final f = await mountRoomMoreSettings(tester);
-      await f.open(tester);
-      await selectSetting(tester);
+      await f.openCharm(tester);
       f.api.failingPath = HttpApi.roomCharmSwitch;
       await tester.tap(find.byKey(const ValueKey('room-currency-2')));
       await tester.pumpAndSettle();
@@ -248,9 +242,8 @@ void main() {
       expect(f.controller.snapshot.currency, 2);
       f.room.setRole(UserRoomIdentity.audience);
       await tester.pumpAndSettle();
-      expect(find.text('Charm Setting'), findsNothing);
       expect(find.byType(Radio<int>), findsNothing);
-      expect(find.byType(Switch), findsNWidgets(6));
+      expect(find.byType(Switch), findsNothing);
       expect(await f.controller.setCurrency(1), isFalse);
       expect(tester.takeException(), isNull);
     },

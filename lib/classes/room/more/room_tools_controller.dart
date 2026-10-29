@@ -52,6 +52,7 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
   int _entryEffectsGeneration = -1;
   bool _started = false, _foreground = true;
   bool _wasVisible = true;
+  bool _wasManager = false;
   DateTime? _visualAfter;
   AppSocketStatus? _socketStatus;
   final _seen = <String>{};
@@ -136,6 +137,11 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
       );
       _keepAlive ??= retain?.call();
       unawaited(_initialize(_generation));
+    }
+    if (_wasManager != canManage) {
+      _wasManager = canManage;
+      // Standalone settings must also rebuild on role-only room changes.
+      state = state.copy();
     }
     final socket = room.socketState.status;
     if (socket == AppSocketStatus.ready &&

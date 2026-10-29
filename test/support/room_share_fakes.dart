@@ -9,6 +9,9 @@ import 'package:project/model/room_share_models.dart';
 import 'package:tencent_cloud_chat_sdk/models/v2_tim_conversation.dart';
 
 import 'room_tools_fakes.dart';
+import 'im_fakes.dart';
+import 'package:project/manager/im_session_manager.dart';
+import 'package:project/model/tim_token_data.dart';
 
 class ShareConfigFake extends RoomToolsConfig {
   String base = 'https://share.example/simi';
@@ -26,6 +29,14 @@ class ShareConfigFake extends RoomToolsConfig {
 }
 
 class ShareImFake implements ImRepository {
+  @override
+  late final session = ImSessionManager(
+    sdk: ImSdkFake(),
+    auth: ImAuthFake(),
+    loadToken: () async => const TimTokenData(appId: 123, token: 'test'),
+  );
+  @override
+  Future<void> ensureReady() async {}
   List<V2TimConversation> conversations = [
     V2TimConversation(
       conversationID: 'c2c_20',

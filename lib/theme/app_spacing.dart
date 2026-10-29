@@ -1,4 +1,15 @@
 class AppSpacing {
+  static const double roomMessageHeightRatio = 0.6;
+  static const double roomMessageHandleWidth = 32;
+  static const double roomMessageHandleHeight = 4;
+  static const double roomMessageHandleArea = 16;
+  static const double roomMessageRowHeight = 80;
+  static const double roomMessageAvatar = 48;
+  static const double messageBubbleMaxRatio = 0.74;
+  static const double messageInputHeight = 44;
+  static const double messageBadgeSize = 18;
+  static const double messageUnreadDot = 8;
+  static const double messageHistoryThreshold = 100;
   static const double roomShareMaxHeightRatio = 0.94;
   static const double roomSharePanelHeight = 260;
   static const double roomShareContactsHeight = 360;
@@ -205,6 +216,7 @@ class AppSpacing {
   static const double roomMoreToolLabelTop = 7;
   static const double roomMoreLoadingHeight = 72;
   static const double roomToolsSheetHeight = 639;
+  static const double roomCharmSheetHeight = 454;
   static const double roomToolsTabHeight = 44;
   static const double roomToolsTabsWidth = 210;
   static const double roomToolsContentInset = 20;

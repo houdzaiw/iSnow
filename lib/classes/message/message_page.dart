@@ -79,9 +79,25 @@ class _MessageBody extends ConsumerWidget {
     return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(AppSpacing.xl),
-      itemCount: state.conversations.length,
+      itemCount:
+          state.conversations.length + (state.errorMessage == null ? 0 : 1),
       itemBuilder: (context, index) {
-        final conversation = state.conversations[index];
+        if (state.errorMessage != null && index == 0) {
+          return Row(
+            children: [
+              Expanded(
+                child: Text(state.errorMessage!, style: AppTextStyles.caption),
+              ),
+              TextButton(
+                onPressed: () =>
+                    ref.read(messageViewModelProvider.notifier).load(),
+                child: Text(context.l10n.t('app.retry')),
+              ),
+            ],
+          );
+        }
+        final conversation =
+            state.conversations[index - (state.errorMessage == null ? 0 : 1)];
         return _ConversationTile(
           conversation: conversation,
           overlayEntry: overlayEntry,

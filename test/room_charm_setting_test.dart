@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:extended_tabs/extended_tabs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:project/classes/room/more/room_settings_page.dart';
+import 'package:project/classes/room/more/room_charm_settings_sheet.dart';
 import 'package:project/classes/room/more/room_tools_controller.dart';
 import 'package:project/classes/room/more/room_tools_models.dart';
 import 'package:project/manager/http_api.dart';
@@ -24,18 +24,24 @@ void main() {
     WidgetTester tester,
     RoomMoreSettingsFixture f,
   ) async {
-    await f.open(tester);
-    await tester.ensureVisible(find.text('Charm Set'));
-    await tester.tap(find.text('Charm Set'));
-    await tester.pumpAndSettle();
+    await f.openCharm(tester);
+    expect(sheet, findsNothing);
+    expect(find.byType(RoomCharmSettingsSheet), findsOneWidget);
+    expect(find.byKey(const ValueKey('room-more-tabs')), findsNothing);
+    expect(find.byType(Radio<int>), findsNWidgets(2));
+    expect(find.byType(Switch), findsNothing);
     expect(
-      tester
-          .widget<ExtendedTabBar>(find.byKey(const ValueKey('room-more-tabs')))
-          .controller!
-          .index,
-      1,
+      find.text(
+        'Charm value is calculated based on the number of gold coins received as gifts.',
+      ),
+      findsOneWidget,
     );
-    expect(sheet, findsOneWidget);
+    expect(
+      find.text(
+        'Charm value is calculated based on the number of diamonds received as gifts.',
+      ),
+      findsOneWidget,
+    );
     expect(find.byType(RoomSettingsPage), findsNothing);
     expect(f.router.state.uri.path, '/room/123');
   }
@@ -47,6 +53,7 @@ void main() {
       final f = await mountRoomMoreSettings(tester, width: width);
       await openSetting(tester, f);
       expect(selected(tester), 1);
+      expect(tester.getSize(find.byType(RoomCharmSettingsSheet)).width, width);
       await tester.tap(choice(1));
       await tester.pumpAndSettle();
       expect(f.api.count(HttpApi.roomCharmSwitch), 0);
@@ -70,6 +77,75 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+
+  testWidgets('back and barrier dismiss only the standalone charm sheet', (
+    tester,
+  ) async {
+    final f = await mountRoomMoreSettings(tester);
+    await openSetting(tester, f);
+    await tester.tap(find.byKey(const ValueKey('room-charm-settings-back')));
+    await tester.pumpAndSettle();
+    expect(find.byType(RoomCharmSettingsSheet), findsNothing);
+    expect(f.router.state.uri.path, '/room/123');
+    await openSetting(tester, f);
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(find.byType(RoomCharmSettingsSheet), findsNothing);
+    expect(f.api.count(HttpApi.roomCharmSwitch), 0);
+    expect(f.room.leaves, 0);
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final boundary in ['permission', 'session', 'exit']) {
+    testWidgets(
+      'More closing transition cannot open stale charm after $boundary',
+      (tester) async {
+        final f = await mountRoomMoreSettings(tester);
+        await f.open(tester);
+        await tester.tap(find.text('Charm Set'));
+        await tester.pump();
+        switch (boundary) {
+          case 'permission':
+            f.room.setRole(UserRoomIdentity.audience);
+          case 'session':
+            f.room.generation++;
+            f.room.changeAccount(30);
+            f.room.emitState();
+          case 'exit':
+            await f.room.leaveRoom();
+        }
+        await tester.pumpAndSettle();
+        expect(find.byType(RoomCharmSettingsSheet), findsNothing);
+        expect(f.api.count(HttpApi.roomCharmSwitch), 0);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  testWidgets('charm options remain readable above keyboard on small screens', (
+    tester,
+  ) async {
+    final f = await mountRoomMoreSettings(
+      tester,
+      width: 320,
+      height: 568,
+      inset: 200,
+      bottom: 24,
+    );
+    await openSetting(tester, f);
+    final bounds = tester.getRect(
+      find.byKey(const ValueKey('room-charm-settings-sheet')),
+    );
+    expect(bounds.width, 320);
+    expect(bounds.bottom, lessThanOrEqualTo(368));
+    await tester.ensureVisible(choice(2));
+    await tester.pumpAndSettle();
+    expect(
+      tester.getRect(choice(2)).bottom,
+      lessThanOrEqualTo(bounds.bottom - 24),
+    );
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('saving shows progress and prevents duplicate submissions', (
     tester,

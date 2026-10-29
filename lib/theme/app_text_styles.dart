@@ -3,6 +3,28 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 class AppTextStyles {
+  static const TextStyle roomMessageTitle = TextStyle(
+    color: AppColors.textInverse,
+    fontSize: 16,
+    height: 1.3,
+    fontWeight: FontWeight.w600,
+  );
+  static const TextStyle roomMessageBody = TextStyle(
+    color: AppColors.textInverse,
+    fontSize: 14,
+    height: 1.4,
+  );
+  static const TextStyle roomMessageHint = TextStyle(
+    color: AppColors.roomMessageMuted,
+    fontSize: 12,
+    height: 1.3,
+  );
+  static const TextStyle messageUnread = TextStyle(
+    color: AppColors.textInverse,
+    fontSize: 10,
+    height: 1,
+    fontWeight: FontWeight.w600,
+  );
   static const TextStyle roomShareChannel = TextStyle(
     color: AppColors.textPrimary,
     fontSize: 12,
@@ -400,6 +422,12 @@ class AppTextStyles {
     color: AppColors.roomToolsTextSecondary,
     fontSize: 12,
     height: 1.2,
+    fontWeight: FontWeight.w400,
+  );
+  static const TextStyle roomCharmOption = TextStyle(
+    color: AppColors.roomToolsText,
+    fontSize: 14,
+    height: 1.4,
     fontWeight: FontWeight.w400,
   );
   static const TextStyle roomToolsRetry = TextStyle(

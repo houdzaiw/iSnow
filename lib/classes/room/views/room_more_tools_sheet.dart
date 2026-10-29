@@ -27,14 +27,12 @@ class _RoomMoreToolsSheet extends HookConsumerWidget {
     final basicScroll = useScrollController();
     final settingsScroll = useScrollController();
     final effectsKey = useMemoized(() => GlobalKey(), [roomId]);
-    final currencyKey = useMemoized(() => GlobalKey(), [roomId]);
 
-    void showSetting(String action) {
+    void showSetting() {
       tabs.animateTo(1);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!context.mounted || tabs.index != 1) return;
-        final target =
-            (action == 'currency' ? currencyKey : effectsKey).currentContext;
+        final target = effectsKey.currentContext;
         final render = target?.findRenderObject();
         if (target == null || render == null) return;
         Scrollable.of(
@@ -207,18 +205,6 @@ class _RoomMoreToolsSheet extends HookConsumerWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                if (roomState.isOwnerOrManager) ...[
-                                  Text(
-                                    key: currencyKey,
-                                    toolText(context, 'Charm Setting', '魅力值设置'),
-                                    style: AppTextStyles.roomToolsHeading,
-                                  ),
-                                  SizedBox(height: AppSpacing.sm.h),
-                                  RoomCharmCurrencyContent(roomId: roomId),
-                                  SizedBox(
-                                    height: AppSpacing.roomSettingsSectionGap.h,
-                                  ),
-                                ],
                                 Text(
                                   key: effectsKey,
                                   toolText(context, 'Effects Setting', '特效设置'),
@@ -247,7 +233,7 @@ class _RoomMoreToolsSheet extends HookConsumerWidget {
     WidgetRef ref,
     RoomPageState roomState,
     RoomMoreToolsState toolsState,
-    ValueChanged<String> showSetting,
+    VoidCallback showSetting,
   ) {
     final features = ref.read(
       roomToolsControllerProvider(_roomMoreRoomId(roomState)).notifier,
@@ -346,14 +332,14 @@ class _RoomMoreToolsSheet extends HookConsumerWidget {
         label: context.l10n.t('room.more.effectSettings'),
         asset: AppAssets.lanhuRoomMoreEffectsSetting,
         assetIncludesTile: true,
-        onTap: () => showSetting('effects'),
+        onTap: showSetting,
       ),
       if (roomState.isOwnerOrManager)
         _RoomMoreToolItem(
           label: context.l10n.t('room.more.charmSet'),
           asset: AppAssets.lanhuRoomMoreCharmSetting,
           assetIncludesTile: true,
-          onTap: () => showSetting('currency'),
+          onTap: () => onOpenTool('currency'),
         ),
       ..._bannerTools(toolsState.additionalTools),
     ];
