@@ -9,11 +9,33 @@ import 'package:project/classes/room/room_page.dart';
 import 'package:project/classes/room/room_repository.dart';
 import 'package:project/localization/app_localizations.dart';
 import 'package:project/model/room_socket_message.dart';
+import 'package:project/theme/app_theme.dart';
 
 import 'support/room_lifecycle_fakes.dart';
 
 void main() {
   for (final width in [320.0, 375.0, 430.0]) {
+    testWidgets('chat input loads the supplied send artwork at $width', (
+      tester,
+    ) async {
+      await _openRoom(tester, width: width);
+      await tester.tap(
+        find.image(const AssetImage(AppAssets.lanhuRoomBottomChat)),
+      );
+      await tester.pumpAndSettle();
+      final send = find.image(const AssetImage(AppAssets.roomChatSend));
+      expect(send, findsOneWidget);
+      expect(find.byType(TextField), findsOneWidget);
+      final input = tester.widget<TextField>(find.byType(TextField));
+      expect(input.decoration!.filled, isTrue);
+      expect(input.decoration!.fillColor, AppColors.roomMessageBubble);
+      expect(input.style!.color, AppColors.textInverse);
+      expect(input.cursorColor, AppColors.textInverse);
+      expect(tester.getSize(send).width, tester.getSize(send).height);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+    });
+
     testWidgets('clear asset confirms, cancels and clears the list at $width', (
       tester,
     ) async {

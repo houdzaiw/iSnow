@@ -163,6 +163,7 @@ class AppAssets {
       'assets/lanhu/room/room_badge_medal.png';
   static const String lanhuRoomBottomChat =
       'assets/lanhu/room/room_bottom_chat.png';
+  static const String roomChatSend = 'assets/lanhu/room/room_chat_send.png';
   static const String lanhuRoomBottomMic =
       'assets/lanhu/room/room_bottom_mic.png';
   static const String lanhuRoomBottomGift =

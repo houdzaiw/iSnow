@@ -57,7 +57,6 @@ part 'views/room_more_tools_navigation.dart';
 part 'views/room_more_tools_items.dart';
 
 const Color _roomGold = Color(0xFFFFD86B);
-const Color _roomPink = Color(0xFFFF4FA0);
 
 class RoomPage extends HookConsumerWidget {
   const RoomPage({
@@ -611,12 +610,18 @@ void _showRoomComposer(
                     minLines: 1,
                     maxLines: 3,
                     maxLength: 120,
-                    style: TextStyle(color: Colors.white, fontSize: 15.sp),
+                    cursorColor: AppColors.textInverse,
+                    style: TextStyle(
+                      color: AppColors.textInverse,
+                      fontSize: 15.sp,
+                    ),
                     decoration: InputDecoration(
+                      filled: true,
+                      fillColor: AppColors.roomMessageBubble,
                       counterText: '',
                       hintText: 'Say something...',
                       hintStyle: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.45),
+                        color: AppColors.roomMessageMuted,
                         fontSize: 15.sp,
                       ),
                       border: InputBorder.none,
@@ -626,7 +631,7 @@ void _showRoomComposer(
                 ),
                 SizedBox(width: 8.w),
                 Material(
-                  color: _roomPink,
+                  color: AppColors.transparent,
                   shape: const CircleBorder(),
                   child: InkWell(
                     customBorder: const CircleBorder(),
@@ -640,12 +645,12 @@ void _showRoomComposer(
                       }
                     },
                     child: SizedBox(
-                      width: 44.r,
-                      height: 44.r,
+                      width: AppSpacing.controlHeightMd.r,
+                      height: AppSpacing.controlHeightMd.r,
                       child: Center(
                         child: _RoomAssetIcon(
-                          asset: AppAssets.lanhuRoomIconMissing,
-                          size: 24.r,
+                          asset: AppAssets.roomChatSend,
+                          size: AppSpacing.controlHeightMd.r,
                         ),
                       ),
                     ),
