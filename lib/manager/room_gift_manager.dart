@@ -1,5 +1,11 @@
 import '../classes/room/gift/models/room_gift_models.dart';
 
+typedef RoomGiftBalanceToken = ({
+  String? cacheKey,
+  int generation,
+  int revision,
+});
+
 /// App-wide in-memory gift catalog cache.
 ///
 /// The cache is scoped to the authenticated user key and also coalesces
@@ -15,9 +21,26 @@ class RoomGiftManager {
   Future<RoomGiftCatalog>? _loading;
   String? _loadingKey;
   int _generation = 0;
+  int _balanceRevision = 0;
 
   RoomGiftCatalog? get catalog => hasCatalog ? _catalog : null;
   bool get hasCatalog => _hasData(_catalog);
+  RoomGiftBalanceToken get balanceToken => (
+    cacheKey: _cacheKey,
+    generation: _generation,
+    revision: _balanceRevision,
+  );
+
+  /// Reject a purse response that predates an account change or a paid gift.
+  bool updateBalance(int balance, {required RoomGiftBalanceToken token}) {
+    if (token != balanceToken) return false;
+    final current = _catalog;
+    if (current != null) {
+      _catalog = current.copyWith(balance: balance);
+      _balanceRevision++;
+    }
+    return true;
+  }
 
   Future<RoomGiftCatalog> getOrLoad({
     required String cacheKey,
@@ -29,6 +52,7 @@ class RoomGiftManager {
     if (_loadingKey == cacheKey && _loading != null) return _loading!;
 
     if (_cacheKey != cacheKey) {
+      _generation++;
       _cacheKey = cacheKey;
       _catalog = null;
     }
@@ -58,6 +82,7 @@ class RoomGiftManager {
     required int totalCount,
     required int balance,
   }) {
+    _balanceRevision++;
     final current = _catalog;
     if (current == null) return;
 

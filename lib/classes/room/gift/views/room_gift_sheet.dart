@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -90,6 +91,11 @@ class RoomGiftSheet extends HookConsumerWidget {
     final provider = roomGiftViewModelProvider(roomId);
     final state = ref.watch(provider);
     final viewModel = ref.read(provider.notifier);
+    useOnAppLifecycleStateChange((previous, next) {
+      if (next == AppLifecycleState.resumed) {
+        unawaited(viewModel.refreshBalance());
+      }
+    });
 
     useEffect(() {
       Future.microtask(() async {

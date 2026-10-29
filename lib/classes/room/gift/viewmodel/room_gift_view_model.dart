@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -45,11 +47,23 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
   }) : _repository = repository,
        _sender = sendController ?? RoomGiftSendController(repository, roomId),
        _ownsSender = sendController == null,
-       super(RoomGiftState(roomId: roomId));
+       super(RoomGiftState(roomId: roomId)) {
+    _removeSenderListener = _sender.addListener((value) {
+      final catalog = value.catalog;
+      if (mounted &&
+          state.status == RoomGiftLoadStatus.ready &&
+          catalog != null &&
+          (state.balance != catalog.balance ||
+              !identical(state.tabs, catalog.tabs))) {
+        state = state.copyWith(balance: catalog.balance, tabs: catalog.tabs);
+      }
+    }, fireImmediately: false);
+  }
 
   final RoomGiftRepository _repository;
   final RoomGiftSendController _sender;
   final bool _ownsSender;
+  VoidCallback? _removeSenderListener;
   bool _initialized = false;
   List<RoomGiftRecipient> _sourceRecipients = const [];
   RoomGiftRecipient? _presetRecipient;
@@ -77,6 +91,7 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
     final cachedCatalog = _repository.cachedCatalog;
     if (cachedCatalog != null) {
       _applyCatalog(cachedCatalog);
+      unawaited(refreshBalance());
       return;
     }
     state = state.copyWith(
@@ -95,6 +110,16 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
         status: RoomGiftLoadStatus.error,
         loadErrorMessage: _errorMessage(error),
       );
+    }
+  }
+
+  Future<void> refreshBalance() async {
+    if (!mounted || state.status != RoomGiftLoadStatus.ready) return;
+    final balance = await _sender.refreshBalance();
+    if (mounted &&
+        state.status == RoomGiftLoadStatus.ready &&
+        balance != null) {
+      state = state.copyWith(balance: balance);
     }
   }
 
@@ -295,8 +320,8 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
       }
       state = state.copyWith(
         isSending: false,
-        balance: updated.balance,
-        tabs: updated.tabs,
+        balance: _sender.snapshot.catalog?.balance ?? updated.balance,
+        tabs: _sender.snapshot.catalog?.tabs ?? updated.tabs,
       );
       _log('success: giftId=${gift.id}');
       return true;
@@ -411,6 +436,7 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
 
   @override
   void dispose() {
+    _removeSenderListener?.call();
     if (_ownsSender) _sender.dispose();
     super.dispose();
   }

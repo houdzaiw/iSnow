@@ -50,6 +50,32 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('footer refreshes cached coins on open, resume and reopen', (
+    tester,
+  ) async {
+    final repository = _SheetGiftRepository()
+      ..useCache = true
+      ..balance = 2500;
+    await _openPanel(tester, repository: repository);
+    expect(find.text('2500'), findsOneWidget);
+    expect(repository.catalogLoads, 0);
+    expect(repository.balanceReads, 1);
+    repository.balance = 3500;
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    expect(find.text('3500'), findsOneWidget);
+    repository.balance = 4500;
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Open gift panel'));
+    await tester.pumpAndSettle();
+    expect(find.text('4500'), findsOneWidget);
+    expect(repository.catalogLoads, 0);
+    expect(repository.balanceReads, 3);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('gift pages link to categories and the fixed backpack', (
     tester,
   ) async {
@@ -434,17 +460,24 @@ class _SheetGiftRepository extends RoomGiftRepository {
   final RoomGiftCatalog catalog;
   final Object? sendError;
   SendRoomGiftRequest? lastRequest;
+  bool useCache = false;
+  int? balance;
+  int balanceReads = 0, catalogLoads = 0;
 
   @override
-  RoomGiftCatalog? get cachedCatalog => null;
+  RoomGiftCatalog? get cachedCatalog => useCache ? catalog : null;
 
   @override
   Future<RoomGiftCatalog> fetchCatalog() async {
+    catalogLoads++;
     return catalog;
   }
 
   @override
-  Future<int> fetchBalance() async => catalog.balance;
+  Future<int> fetchBalance() async {
+    balanceReads++;
+    return balance ?? catalog.balance;
+  }
 
   @override
   Future<RoomGiftSendResult> sendGift(SendRoomGiftRequest request) async {

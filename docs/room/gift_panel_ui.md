@@ -17,7 +17,7 @@
 
 ## Data And Assets
 
-- 不改变 RoomGiftManager 单例缓存、启动预加载、Repository 请求或发送接口。重复打开仍优先使用缓存。
+- 保留 RoomGiftManager 的礼物目录缓存和启动预加载，重复打开不重新请求礼物分类、背包或配置；金币余额单独刷新，不长期使用目录中的余额快照。
 - 所有业务数据保持来自现有 Model；补充 `banner` / `jumpLink` 字段，与 Nady 返回数据兼容。
 - 图片缺失继续使用红色缺省图，不使用 Flutter Icon/Icons。
 - 资源位于 `assets/lanhu/room/room_gift_*.png`，来源记录在同目录 manifest，pubspec 已覆盖该目录。
@@ -31,3 +31,12 @@
 - `test/room_gift_sheet_test.dart`：分类/分页边界、固定背包、数量和接收人发送、充值导航，以及 320/375/430 宽度的长文本、安全区布局。
 - `test/goldens/room_gift_panel_*.png`：离线 UI 快照；模拟礼物无图片，红色图属于预期缺省状态，不代表线上礼物图片加载失败。
 - Model、ViewModel 和 Manager 测试继续验证真实字段映射、送礼规则和缓存复用。
+
+## Balance Refresh
+
+- 2026-10-29：修复 `room_gift_footer.dart` 的余额只显示缓存旧值。参考 Nady 的 `gift_panel_coin_provider.dart`，打开缓存面板时查询现有 `/api/revenue/purse`，使用真实 `coin` 更新 ViewModel 与单例缓存，保持已选礼物、分类和数量不变。
+- 送礼及连击成功后先保留即时本地扣减，再非阻塞查询服务端余额；发送请求失败也重新核对余额，但保留原发送错误。面板监听共享发送控制器的目录变化，因此连击后的余额也能刷新。
+- App 从后台恢复且面板就绪时刷新余额；充值入口关闭面板并进入钱包，返回后重新打开礼物面板即重新核对金币，不清空整个礼物缓存。
+- 同一轮并发刷新合并；新发送会废弃旧余额任务，单例通过账号代次与余额版本阻止迟到响应撤销已确认的扣款。退出登录或切账号后的余额及送礼响应不能继续写入新会话。
+- 刷新失败保留最后已知余额并记录调试日志，不将缺失 `coin` 当作 0，不阻断已有礼物列表或将成功送礼误报为失败。真实返回的 `coin: 0` 仍正常展示。
+- `test/room_gift_balance_test.dart` 覆盖缓存刷新、并发合并、送礼/连击同步、错误、迟到响应、同 UID 重登录与跨账号隔离；`room_gift_sheet_test.dart` 验证 footer 打开、前台恢复及重开后的真实文字更新。测试只使用模拟请求，不进行真实充值或送礼。

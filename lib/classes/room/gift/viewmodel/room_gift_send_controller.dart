@@ -50,6 +50,18 @@ class RoomGiftSendState {
       comboId == other.comboId &&
       gift?.id == other.gift.id &&
       request?.giftSource == other.giftSource;
+
+  RoomGiftSendState withCatalog(RoomGiftCatalog value) => RoomGiftSendState(
+    isSending: isSending,
+    awaitingEcho: awaitingEcho,
+    message: message,
+    gift: gift,
+    confirmedComboId: confirmedComboId,
+    request: request,
+    catalog: value,
+    issue: issue,
+    remainingMilliseconds: remainingMilliseconds,
+  );
 }
 
 class RoomGiftSendException implements Exception {
@@ -73,6 +85,36 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
   bool _inFlight = false;
   Timer? _echoTimeout;
   int _remainingMilliseconds = 0;
+  int _balanceEpoch = 0;
+  Future<int?>? _balanceRefresh;
+  int? _refreshEpoch;
+
+  Future<int?> refreshBalance() {
+    if (!mounted) return Future.value(null);
+    final epoch = _balanceEpoch;
+    if (_refreshEpoch == epoch && _balanceRefresh != null) {
+      return _balanceRefresh!;
+    }
+    _refreshEpoch = epoch;
+    return _balanceRefresh = _readBalance(epoch).whenComplete(() {
+      if (_refreshEpoch == epoch) _balanceRefresh = null;
+    });
+  }
+
+  Future<int?> _readBalance(int epoch) async {
+    try {
+      final balance = await _repository.fetchBalance();
+      if (!mounted || epoch != _balanceEpoch) return null;
+      final catalog = _repository.cachedCatalog ?? state.catalog;
+      if (catalog != null) {
+        state = state.withCatalog(catalog.copyWith(balance: balance));
+      }
+      return balance;
+    } catch (error) {
+      _log('balance refresh failed: ${userFacingErrorMessage(error)}');
+      return null;
+    }
+  }
 
   Future<RoomGiftCatalog?> send({
     required SendRoomGiftRequest request,
@@ -98,6 +140,7 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
       throw const RoomGiftSendException(RoomGiftIssue.notEnoughCoin);
     }
     final generation = _generation;
+    _balanceEpoch++;
     _inFlight = true;
     _gift = gift;
     _targetCount = targetCount;
@@ -146,6 +189,7 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
       );
       _echoTimeout?.cancel();
       _restartCountdown();
+      unawaited(refreshBalance());
       return updated;
     } catch (error) {
       if (mounted && generation == _generation) {
@@ -161,6 +205,7 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
         if (previousComboId.isNotEmpty) {
           _restartCountdown();
         }
+        unawaited(refreshBalance());
       }
       rethrow;
     } finally {

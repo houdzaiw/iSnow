@@ -92,17 +92,33 @@ class NadyRoomGiftRepository implements RoomGiftRepository {
 
   @override
   Future<int> fetchBalance() async {
+    final uid = await _authSession.uid();
+    final token = _giftManager.balanceToken;
     final response = await _httpManager.get(HttpApi.walletPurse);
-    final server = NadyServerResponse<int>.fromJson(
-      _asMap(response),
-      (json) => _intValue(_asMap(json)['coin']),
-    );
+    final server = NadyServerResponse<int>.fromJson(_asMap(response), (json) {
+      final value = _asMap(json)['coin'];
+      final coin = value is num ? value.toInt() : int.tryParse('$value');
+      if (coin == null) {
+        throw const NadyApiException(message: 'Invalid coin balance');
+      }
+      return coin;
+    });
     if (!server.isSuccess || server.data == null) throw server.toException();
-    return server.data!;
+    if (await _authSession.uid() != uid ||
+        _giftManager.balanceToken.generation != token.generation) {
+      throw const NadyApiException(message: 'Gift wallet session changed');
+    }
+    final balance = server.data!;
+    if (!_giftManager.updateBalance(balance, token: token)) {
+      return _giftManager.catalog?.balance ?? balance;
+    }
+    return balance;
   }
 
   @override
   Future<RoomGiftSendResult> sendGift(SendRoomGiftRequest request) async {
+    final uid = await _authSession.uid();
+    final generation = _giftManager.balanceToken.generation;
     final response = await _httpManager.post(
       HttpApi.giftSend,
       data: request.toJson(),
@@ -112,6 +128,10 @@ class NadyRoomGiftRepository implements RoomGiftRepository {
       RoomGiftSendResult.fromJson,
     );
     if (!server.isSuccess) throw server.toException();
+    if (await _authSession.uid() != uid ||
+        _giftManager.balanceToken.generation != generation) {
+      throw const NadyApiException(message: 'Gift wallet session changed');
+    }
     return server.data ?? const RoomGiftSendResult();
   }
 
