@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -38,7 +39,11 @@ void main() {
     });
   });
 
-  Future<GoRouter> mount(WidgetTester tester) async {
+  Future<GoRouter> mount(WidgetTester tester, {double width = 375}) async {
+    tester.view.physicalSize = Size(width, 812);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     final router = GoRouter(
       initialLocation: '/messages',
       routes: [
@@ -62,13 +67,92 @@ void main() {
         child: MaterialApp.router(
           routerConfig: router,
           theme: AppTheme.light,
-          localizationsDelegates: const [AppLocalizations.delegate],
-          supportedLocales: const [Locale('en')],
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('en'), Locale('zh')],
         ),
       ),
     );
     await tester.pumpAndSettle();
     return router;
+  }
+
+  for (final width in [320.0, 375.0, 430.0]) {
+    testWidgets(
+      'inbox summaries update and localize without reading at $width',
+      (tester) async {
+        final title =
+            'System notice ${List.filled(25, 'long title').join(' ')}';
+        sdk.conversations.rows = [
+          imConversation('10000', pinned: true)
+            ..lastMessage = imCustom({
+              'type': 'SystemComplexIMMsg',
+              'payload': {
+                'titleMap': {'en': title, 'zh': '系统通知标题'},
+                'textMap': {'en': 'Do not show body'},
+              },
+            }, uid: '10000'),
+          imConversation('20', unread: 2)
+            ..lastMessage = imCustom({
+              'type': 'TextIMMsg',
+              'payload': {'text': 'Hello\nfriend 👋'},
+            }),
+        ];
+        await mount(tester, width: width);
+        expect(find.text('Hello friend 👋'), findsOneWidget);
+        expect(find.text(title), findsOneWidget);
+        final summary = tester.widget<Text>(find.text(title));
+        expect(summary.maxLines, 1);
+        expect(summary.overflow, TextOverflow.ellipsis);
+        expect(
+          tester.getRect(find.text(title)).right,
+          lessThanOrEqualTo(width),
+        );
+        expect(find.text('2'), findsOneWidget);
+        sdk.conversations.emit([
+          imConversation('20', unread: 2)
+            ..lastMessage = imCustom({
+              'type': 'SystemSendGiftStore',
+              'payload': {'targetUserId': 10},
+            }),
+        ]);
+        await tester.pumpAndSettle();
+        expect(find.text('Sent you'), findsOneWidget);
+        expect(find.text('Hello friend 👋'), findsNothing);
+        tester.platformDispatcher.localesTestValue = const [Locale('zh')];
+        addTearDown(tester.platformDispatcher.clearLocalesTestValue);
+        await tester.pumpAndSettle();
+        expect(find.text('送给你'), findsOneWidget);
+        expect(find.text('系统通知标题'), findsOneWidget);
+        expect(find.text('Sent you'), findsNothing);
+        expect(find.text('2'), findsOneWidget);
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(MessagePage)),
+        );
+        sdk.conversations.rows = [
+          sdk.conversations.rows.firstWhere((c) => c.userID == '10000'),
+          imConversation('20', unread: 2)
+            ..lastMessage = imCustom({
+              'type': 'TextIMMsg',
+              'payload': {'text': 'Refreshed server content'},
+            }),
+        ];
+        await container.read(messageViewModelProvider.notifier).refresh();
+        await tester.pumpAndSettle();
+        expect(find.text('Refreshed server content'), findsOneWidget);
+        expect(find.text('送给你'), findsNothing);
+        expect(sdk.conversations.reads, isEmpty);
+        expect(sdk.conversations.deleted, isEmpty);
+        expect(sdk.messages.sent, isEmpty);
+        expect(sdk.conversations.listeners, hasLength(1));
+        expect(http.requests, hasLength(1));
+        expect(tester.takeException(), isNull);
+      },
+    );
   }
 
   testWidgets('main inbox and full chat share one IM login and unread state', (

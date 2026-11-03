@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -147,8 +148,13 @@ Future<RoomMoreSettingsFixture> mountRoomMoreSettings(
         builder: (_, _) => MaterialApp.router(
           routerConfig: router,
           theme: AppTheme.light,
-          localizationsDelegates: const [AppLocalizations.delegate],
-          supportedLocales: const [Locale('en')],
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('en'), Locale('zh')],
           builder: (context, child) => MediaQuery(
             data: MediaQuery.of(context).copyWith(
               viewInsets: EdgeInsets.only(bottom: inset),

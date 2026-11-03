@@ -101,6 +101,81 @@ void main() {
 
   for (final width in [320.0, 375.0, 430.0]) {
     testWidgets(
+      'room summaries update and localize without reading at $width',
+      (tester) async {
+        final title =
+            'System notice ${List.filled(25, 'long title').join(' ')}';
+        sdk.conversations.rows = [
+          imConversation('10000', pinned: true)
+            ..lastMessage = imCustom({
+              'type': 'SystemComplexIMMsg',
+              'payload': {
+                'titleMap': {'en': title, 'zh': '系统通知标题'},
+                'textMap': {'en': 'Do not show body'},
+              },
+            }, uid: '10000'),
+          imConversation('20', unread: 2)
+            ..lastMessage = imCustom({
+              'type': 'TextIMMsg',
+              'payload': {'text': 'Hello\nfriend 👋'},
+            }),
+        ];
+        final f = await mount(tester, width: width);
+        await open(tester);
+        expect(find.text('Hello friend 👋'), findsOneWidget);
+        expect(find.text(title), findsOneWidget);
+        final summary = tester.widget<Text>(find.text(title));
+        expect(summary.maxLines, 1);
+        expect(summary.overflow, TextOverflow.ellipsis);
+        expect(
+          tester.getRect(find.text(title)).right,
+          lessThanOrEqualTo(width),
+        );
+        expect(
+          find.byKey(const ValueKey('room-conversation-unread-20')),
+          findsOneWidget,
+        );
+        sdk.conversations.emit([
+          imConversation('20', unread: 2)
+            ..lastMessage = imCustom({
+              'type': 'SystemSendGiftStore',
+              'payload': {'targetUserId': 10},
+            }),
+        ]);
+        await tester.pumpAndSettle();
+        expect(find.text('Sent you'), findsOneWidget);
+        expect(find.text('Hello friend 👋'), findsNothing);
+        tester.platformDispatcher.localesTestValue = const [Locale('zh')];
+        addTearDown(tester.platformDispatcher.clearLocalesTestValue);
+        await tester.pumpAndSettle();
+        expect(find.text('送给你'), findsOneWidget);
+        expect(find.text('系统通知标题'), findsOneWidget);
+        expect(find.text('Sent you'), findsNothing);
+        expect(f.container.read(messageViewModelProvider).totalUnreadCount, 2);
+        sdk.conversations.rows = [
+          sdk.conversations.rows.firstWhere((c) => c.userID == '10000'),
+          imConversation('20', unread: 2)
+            ..lastMessage = imCustom({
+              'type': 'TextIMMsg',
+              'payload': {'text': 'Refreshed server content'},
+            }),
+        ];
+        await f.container.read(messageViewModelProvider.notifier).refresh();
+        await tester.pumpAndSettle();
+        expect(find.text('Refreshed server content'), findsOneWidget);
+        expect(find.text('送给你'), findsNothing);
+        expect(sdk.conversations.reads, isEmpty);
+        expect(sdk.conversations.deleted, isEmpty);
+        expect(sdk.messages.sent, isEmpty);
+        expect(sdk.conversations.listeners, hasLength(1));
+        expect(http.requests, hasLength(1));
+        expect(f.room.speaker, isFalse);
+        expect(f.room.leaves, 0);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
       'room message entry and two half sheets preserve audio at $width',
       (tester) async {
         final f = await mount(tester, width: width);

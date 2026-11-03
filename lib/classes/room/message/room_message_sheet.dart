@@ -109,6 +109,7 @@ class RoomMessageSheet extends HookConsumerWidget {
                   final item = state.conversations[index];
                   return _ConversationRow(
                     conversation: item,
+                    currentUid: state.connection.uid,
                     deleting: state.deleting.contains(item.conversationID),
                     onTap: () async {
                       if (!room.beginChat()) return;
@@ -173,105 +174,115 @@ class _ConversationRow extends StatelessWidget {
     required this.onTap,
     required this.onDelete,
     required this.deleting,
+    required this.currentUid,
   });
   final V2TimConversation conversation;
   final VoidCallback onTap, onDelete;
   final bool deleting;
+  final int? currentUid;
   @override
-  Widget build(BuildContext context) => Material(
-    color: conversation.isPinned == true
-        ? AppColors.roomMessagePinned
-        : AppColors.transparent,
-    child: InkWell(
-      key: ValueKey('room-conversation-${conversation.userID}'),
-      onTap: deleting ? null : onTap,
-      onLongPress: deleting ? null : onDelete,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          minHeight: AppSpacing.roomMessageRowHeight.h,
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(AppSpacing.lg.r),
-          child: Row(
-            children: [
-              RoomAudienceAvatar(
-                url: conversation.faceUrl,
-                size: AppSpacing.roomMessageAvatar.r,
-              ),
-              SizedBox(width: AppSpacing.lg.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            imConversationTitle(conversation),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTextStyles.roomMessageTitle,
-                          ),
-                        ),
-                        SizedBox(width: AppSpacing.sm.w),
-                        if (conversation.lastMessage != null)
-                          Text(
-                            imDisplayTime(
-                              context,
-                              imMessageTime(conversation.lastMessage),
-                            ),
-                            style: AppTextStyles.roomMessageHint,
-                          ),
-                      ],
-                    ),
-                    SizedBox(height: AppSpacing.xs.h),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            imMessagePreview(conversation.lastMessage),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTextStyles.roomMessageHint,
-                          ),
-                        ),
-                        if (deleting)
-                          const SizedBox.square(
-                            dimension: AppSpacing.messageBadgeSize,
-                            child: CircularProgressIndicator(
-                              strokeWidth: AppSpacing.xxs,
-                            ),
-                          )
-                        else if ((conversation.unreadCount ?? 0) > 0)
-                          Container(
-                            key: ValueKey(
-                              'room-conversation-unread-${conversation.userID}',
-                            ),
-                            constraints: const BoxConstraints(
-                              minWidth: AppSpacing.messageBadgeSize,
-                            ),
-                            padding: const EdgeInsets.all(AppSpacing.xs),
-                            decoration: const BoxDecoration(
-                              color: AppColors.danger,
-                              borderRadius: AppRadius.fieldBorder,
-                            ),
-                            child: Text(
-                              conversation.unreadCount! > 99
-                                  ? '99+'
-                                  : '${conversation.unreadCount}',
-                              textAlign: TextAlign.center,
-                              style: AppTextStyles.messageUnread,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
+  Widget build(BuildContext context) {
+    final preview = imConversationPreview(
+      conversation,
+      languageCode: context.l10n.locale.languageCode,
+      currentUid: currentUid,
+    );
+    return Material(
+      color: conversation.isPinned == true
+          ? AppColors.roomMessagePinned
+          : AppColors.transparent,
+      child: InkWell(
+        key: ValueKey('room-conversation-${conversation.userID}'),
+        onTap: deleting ? null : onTap,
+        onLongPress: deleting ? null : onDelete,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: AppSpacing.roomMessageRowHeight.h,
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(AppSpacing.lg.r),
+            child: Row(
+              children: [
+                RoomAudienceAvatar(
+                  url: conversation.faceUrl,
+                  size: AppSpacing.roomMessageAvatar.r,
                 ),
-              ),
-            ],
+                SizedBox(width: AppSpacing.lg.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              imConversationTitle(conversation),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTextStyles.roomMessageTitle,
+                            ),
+                          ),
+                          SizedBox(width: AppSpacing.sm.w),
+                          if (conversation.lastMessage != null)
+                            Text(
+                              imDisplayTime(
+                                context,
+                                imMessageTime(conversation.lastMessage),
+                              ),
+                              style: AppTextStyles.roomMessageHint,
+                            ),
+                        ],
+                      ),
+                      SizedBox(height: AppSpacing.xs.h),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              preview.text ??
+                                  context.l10n.t(preview.localizationKey!),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTextStyles.roomMessageHint,
+                            ),
+                          ),
+                          if (deleting)
+                            const SizedBox.square(
+                              dimension: AppSpacing.messageBadgeSize,
+                              child: CircularProgressIndicator(
+                                strokeWidth: AppSpacing.xxs,
+                              ),
+                            )
+                          else if ((conversation.unreadCount ?? 0) > 0)
+                            Container(
+                              key: ValueKey(
+                                'room-conversation-unread-${conversation.userID}',
+                              ),
+                              constraints: const BoxConstraints(
+                                minWidth: AppSpacing.messageBadgeSize,
+                              ),
+                              padding: const EdgeInsets.all(AppSpacing.xs),
+                              decoration: const BoxDecoration(
+                                color: AppColors.danger,
+                                borderRadius: AppRadius.fieldBorder,
+                              ),
+                              child: Text(
+                                conversation.unreadCount! > 99
+                                    ? '99+'
+                                    : '${conversation.unreadCount}',
+                                textAlign: TextAlign.center,
+                                style: AppTextStyles.messageUnread,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }

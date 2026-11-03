@@ -101,6 +101,7 @@ class _MessageBody extends ConsumerWidget {
         return _ConversationTile(
           conversation: conversation,
           overlayEntry: overlayEntry,
+          currentUid: state.connection.uid,
         );
       },
     );
@@ -111,16 +112,22 @@ class _ConversationTile extends ConsumerWidget {
   const _ConversationTile({
     required this.conversation,
     required this.overlayEntry,
+    required this.currentUid,
   });
 
   final V2TimConversation conversation;
   final ValueNotifier<OverlayEntry?> overlayEntry;
+  final int? currentUid;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final targetUID = conversation.userID;
     final title = _conversationTitle(context, conversation);
-    final preview = imMessagePreview(conversation.lastMessage);
+    final preview = imConversationPreview(
+      conversation,
+      languageCode: context.l10n.locale.languageCode,
+      currentUid: currentUid,
+    );
     final time = _formatTime(context, imMessageTime(conversation.lastMessage));
     final unreadCount = conversation.unreadCount ?? 0;
 
@@ -177,9 +184,8 @@ class _ConversationTile extends ConsumerWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          preview.isEmpty
-                              ? context.l10n.t('message.emptyPreview')
-                              : preview,
+                          preview.text ??
+                              context.l10n.t(preview.localizationKey!),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTextStyles.body,

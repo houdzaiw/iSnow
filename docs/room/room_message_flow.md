@@ -82,3 +82,16 @@
 - 已验收 Keep 返回 Party、通过 Restore room 恢复 hei，再次打开消息列表成功；未读保持清零，房间代次及音频静音状态不变。
 - 当前账号仅有 System 会话，**普通私聊真实键盘、双机收发与真实审核/发送/删除未验收**。普通私聊键盘、小屏、草稿和发送/删除失败由自动化覆盖，不替代原生验收。
 - 本地截图：`/tmp/isnow-room-message-inbox-device.png`、`/tmp/isnow-room-message-system-device.png`、`/tmp/isnow-room-message-read-device.png`。截图仅用于本次验收，不作为版本库基线。
+
+## 会话摘要修复（2026-11-03）
+
+- 主消息页和房间内会话列表统一使用 `imConversationPreview()`，传入会话、当前 IM 账号 UID、界面语言，返回 `ImConversationPreview`（实际文本或本地化文案键）。View 仅渲染结果，不解析 JSON。
+- `ImCustomMessageEnvelope` 兼容外层和 payload 的 Map/JSON 字符串，严格只提取 Nady 已确认的字段。损坏或未知数据不展示原始 JSON、`desc` 或其他私有字段，也不无依据提示升级。
+- 普通消息的 `TextIMMsg` 使用 `text`；转账使用 `titleEn/titleAr/titleTr/titleId`；`SystemComplexIMMsg` 和 `InviteAcceptedPrivateComplexMsg` 使用 `textMap`。分享、赠礼方向、币种、代理/主播/BD 邀请等使用对应的本地化业务摘要。
+- 系统 UID 10000–10003 使用 Nady 的系统会话规则：钱包的 `title/titleAr/...`、奖励包的 `enTitle/arTitle/...`、复杂通知/VIP/邀请成功的 `titleMap`；互动通知按评论/回复/@/点赞展示。没有标题的好友激活通知沿用 Nady 的 event 文案。
+- 多语言优先当前语言，空缺或错误类型回退英文；仍无内容时使用相应类型提示。未知普通消息显示“不支持的消息”，未知系统通知显示“你有一条新消息”；只有真实空文本或没有最后一条消息时显示“暂无消息内容”。
+- 摘要单行化不修改 SDK 原文；图片、语音、视频、文件、位置、表情、群通知、聊天记录均有明确的本地化摘要。
+- **边界**：保留聊天正文 `imMessagePreview()` 的签名和行为，未迁移系统通知卡片、跳转或活动功能。SDK 监听、排序、已读、删除和接口不变，不持久化已翻译摘要，语言切换和实时更新会重新生成。
+- 参考 Nady `ConversationList.getLastMessageShowText()` 和 `NadySystemMsgModel.getLatestSystemMessage()`。测试使用脱敏协议样例，不代表已取得本次异常会话的真实 payload；未实际发送或删除消息。
+- 测试：`im_conversation_preview_test.dart` 覆盖普通/系统类型、双层 JSON、语言回退、账号方向、媒体、错误和正文兼容；两处列表在 320/375/430 宽度验证长摘要、实时更新、语言切换、刷新和未读数，沿用旧截图基线。
+- 验证结果：新增 100 项摘要单元测试、6 项列表界面用例；连同既有消息测试共 142 项通过。完整房间回归 559 项通过，`flutter analyze --no-pub`、`git diff --check HEAD` 及 `git diff --exit-code HEAD -- test/goldens` 均通过。

@@ -15,6 +15,7 @@ import 'package:tencent_cloud_chat_sdk/models/v2_tim_conversation_result.dart';
 import 'package:tencent_cloud_chat_sdk/models/v2_tim_conversation.dart';
 import 'package:tencent_cloud_chat_sdk/models/v2_tim_message.dart';
 import 'package:tencent_cloud_chat_sdk/models/v2_tim_text_elem.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_custom_elem.dart';
 import 'package:tencent_cloud_chat_sdk/models/v2_tim_msg_create_info_result.dart';
 
 import 'package:project/manager/auth_session.dart';
@@ -57,6 +58,23 @@ V2TimConversation imConversation(
   isPinned: pinned,
   lastMessage: imText('last-$uid', uid: uid, time: time),
 );
+
+V2TimMessage imCustom(
+  Object? data, {
+  String uid = '20',
+  bool payloadAsString = false,
+}) {
+  if (payloadAsString && data is Map<String, Object?>) {
+    data = {...data, 'payload': jsonEncode(data['payload'])};
+  }
+  return imText('custom-$uid', uid: uid)
+    ..elemType = 2
+    ..textElem = null
+    ..customElem = V2TimCustomElem(
+      data: data is String ? data : jsonEncode(data),
+      desc: 'Private metadata must not appear in previews',
+    );
+}
 
 class ImAuthFake extends ChangeNotifier implements AuthSession {
   int? currentUid = 10;
