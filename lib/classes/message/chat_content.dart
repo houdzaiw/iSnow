@@ -13,6 +13,7 @@ import '../room/more/room_invitation_card.dart';
 import 'chat_view_model.dart';
 import 'im_message_formatter.dart';
 import 'message_view_model.dart';
+import 'system/system_message_view.dart';
 
 class ChatContent extends HookConsumerWidget {
   const ChatContent({
@@ -27,6 +28,7 @@ class ChatContent extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final system = isImSystemUser(targetUID);
     final source = provider ?? chatViewModelProvider(targetUID);
     final state = ref.watch(source);
     final vm = ref.read(source.notifier);
@@ -57,6 +59,7 @@ class ChatContent extends HookConsumerWidget {
     useEffect(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (context.mounted &&
+            (!system || visible) &&
             scroll.hasClients &&
             (scroll.offset < AppSpacing.messageHistoryThreshold ||
                 latest?.isSelf == true)) {
@@ -65,7 +68,9 @@ class ChatContent extends HookConsumerWidget {
       });
       return null;
     }, [latest?.msgID ?? latest?.id]);
-    final bodyStyle = dark ? AppTextStyles.roomMessageBody : AppTextStyles.body;
+    final bodyStyle = dark || system
+        ? AppTextStyles.roomMessageBody
+        : AppTextStyles.body;
     Future<void> send() async {
       final text = input.text;
       if (text.trim().isEmpty) return;
@@ -73,7 +78,7 @@ class ChatContent extends HookConsumerWidget {
       if (context.mounted && success && input.text == text) input.clear();
     }
 
-    return Column(
+    final content = Column(
       children: [
         if (connection.status == ImConnectionStatus.error)
           Padding(
@@ -118,7 +123,9 @@ class ChatContent extends HookConsumerWidget {
             ),
           ),
         Expanded(
-          child: state.isLoading
+          child: system
+              ? SystemMessageView(state: state, viewModel: vm, scroll: scroll)
+              : state.isLoading
               ? const Center(child: CircularProgressIndicator())
               : state.messages.isEmpty
               ? Center(
@@ -215,6 +222,9 @@ class ChatContent extends HookConsumerWidget {
           ),
       ],
     );
+    return system
+        ? ColoredBox(color: AppColors.systemMessageBackground, child: content)
+        : content;
   }
 }
 

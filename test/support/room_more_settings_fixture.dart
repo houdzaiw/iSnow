@@ -108,6 +108,7 @@ Future<RoomMoreSettingsFixture> mountRoomMoreSettings(
   ToolsRoomFake? room,
   bool settle = true,
   ImRepository? im,
+  List<Override> overrides = const [],
 }) async {
   final activeRoom = room ?? ToolsRoomFake();
   api ??= RoomSettingsApiFake();
@@ -142,6 +143,7 @@ Future<RoomMoreSettingsFixture> mountRoomMoreSettings(
         roomToolsRepositoryProvider.overrideWithValue(api),
         roomGiftRepositoryProvider.overrideWithValue(_Gifts()),
         roomMoreToolsRepositoryProvider.overrideWithValue(banners),
+        ...overrides,
       ],
       child: ScreenUtilInit(
         designSize: const Size(375, 812),

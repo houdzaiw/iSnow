@@ -95,3 +95,48 @@
 - 参考 Nady `ConversationList.getLastMessageShowText()` 和 `NadySystemMsgModel.getLatestSystemMessage()`。测试使用脱敏协议样例，不代表已取得本次异常会话的真实 payload；未实际发送或删除消息。
 - 测试：`im_conversation_preview_test.dart` 覆盖普通/系统类型、双层 JSON、语言回退、账号方向、媒体、错误和正文兼容；两处列表在 320/375/430 宽度验证长摘要、实时更新、语言切换、刷新和未读数，沿用旧截图基线。
 - 验证结果：新增 100 项摘要单元测试、6 项列表界面用例；连同既有消息测试共 142 项通过。完整房间回归 559 项通过，`flutter analyze --no-pub`、`git diff --check HEAD` 及 `git diff --exit-code HEAD -- test/goldens` 均通过。
+
+## 系统消息图文详情（2026-11-03）
+
+### 入口与分层
+
+- 系统 UID 10000–10003 从主消息页进入 `SystemMessagePage`，从房间消息列表进入原半屏容器；两处均通过 `ChatContent` 渲染独立的 `SystemMessageView` / `SystemMessageCard`。系统详情没有普通私聊气泡、输入框或私聊 More 菜单；会话列表摘要继续沿用上一节规则。
+- 复用 `ChatViewModel` 的历史分页、去重、实时消息、已读、连接和账号绑定；不新增缓存、SDK 监听、接口或插件。VM 生成类型化卡片、校验动作及处理重复点击；View 只渲染与导航。
+- `SystemMessageCardData` 复用 `ImCustomMessageEnvelope` 解码外层与 payload 的 Map/JSON。首版读取 `SystemComplexIMMsg.titleMap/textMap/picUrl/linkUrl/event`，支持纯文字、纯图片和图文；SDK 原生文本同样可读。正文保留换行和段落，优先当前语言、回退英文。
+- 通用图文之外的系统消息显示本地化安全提示，不展示 JSON 或 `desc`；即使有 `event=2`，也只展示通用图文，不解析或执行 `eventPayload`。奖励网格、领取、支付、VIP、私密照片及活动专用按钮不在本次范围。
+- 优先使用自定义消息外层有效 `timestamp`（秒或毫秒），缺失或越界回退 SDK 秒时间；两者均无效时不展示时间，不使用当前时间代替。
+
+### Nady 布局与图片
+
+- 对照 `/Users/huili/nady/lib/pages/main/sub_pages/message/widget/nady_system_message_widget.dart` 的通用复杂消息布局：背景 `#1C120C`、白色 10% 卡片，外边距 16、卡片内横向 16 / 纵向 24、圆角 16；图片比例 311:120，圆角 12；标题 16 半粗，正文 12，居中时间分隔。保留项目字体，不增加 Poppins。
+- 视觉参数集中在 `lib/theme/`。整页与半屏共用卡片；半屏保持原约六成高度、两层返回、透明外部遮罩及房间音频规则。正文可滚动，不限制为摘要的一行。
+- 图片复用 `AppNetworkImage` / 现有缓存，卡片用 cover，根导航全屏预览用 contain 和 `InteractiveViewer` 缩放。图片点击独立消费事件，不触发 Details；返回保留列表滚动位置。
+- 图片不携带登录请求头；失败显示既有红色缺省图片和“重试”。重试重建图片请求，沿用缓存组件失败后的逐出机制，不改变服务端 URL。未新增 Flutter `Icon/Icons.*` 或图片资源。
+
+### Details 与生命周期
+
+- 仅支持有效 HTTP(S) 链接，以及已核对的 Nady `me-wallet`、`voice-room?roomId=<正整数>`；不支持的链接不展示 Details，不执行未知协议或活动参数。
+- HTTP(S) 复用 `WebViewPage`，通过 `Uri` 合并 `language`，保留其他查询参数（包括重复参数）及 fragment。钱包复用 `WalletPage`；房间目标复用 `enterSharedRoom`，继续执行切房确认和密码流程，不直接替换当前房间。
+- `enterSharedRoom` 增加可选动作有效性检查，在详情请求、切房确认、密码输入后重新检查。服务端错误优先显示 `msg`；无服务端文案时显示本地化兜底。
+- VM 的动作代次与账号、房间生命周期隔离；预览遮住详情期间不因可见性变化误取消当前操作，但不能从被遮住的列表发起新动作。关闭、退房、被踢、切房或切账号后，迟到动作不继续导航。
+- View 只移除自己持有的预览／网页／钱包路由，不盲目 `pop` 顶层页面；关闭这些页面不停止房间语音、音乐或触发 Keep/Exit。
+
+### 验证记录
+
+- 新增解析、动作、界面和进房保护测试，覆盖图文组合、多语言及段落、双层 JSON、异常字段、安全提示、时间单位与越界、链接白名单和编码、重复点击、分页实时更新、图片失败重试、预览返回与滚动位置。
+- 覆盖整页／半屏的 320/375/430 宽度、长正文、键盘及底部安全区；覆盖退房、房间代次和账号变化清理预览，以及保留不属于本功能的顶层路由。网页、钱包和进房测试使用替身或测试路由，不执行真实支付或切房。
+- 先在 `/tmp/isnow-system-message-candidates/` 生成并逐一检查候选图，再建立六张独立基线 `test/goldens/system_message_detail_{full,half}_{320,375,430}.png`。图片使用已有资源作脱敏解码样例，不代表线上通知素材；原有摘要、私聊、More、Share、音乐和礼物基线保持不变。
+- 消息相关测试共 184 项、完整房间回归 559 项通过；`flutter analyze --no-pub` 和 `git diff --check HEAD` 通过。
+- PLL110 真机补充：用户提供的 `127.0.0.1:9100` 是 DevTools 前端；IDE 旧调试会话已断开。App 在后台时 VM 端口无响应，用户将 App 切到前台后，通过只读调试信息找回当前 VM 地址，重新附加成功。整个过程保持 PID 5087，未重装或重启。
+- 首次附加后的普通 `r` 显示 0 个库更新；检查运行中 isolate 确认新模块尚未加载，因此刷新本次 Dart 文件的修改时间，再次热重载成功更新 19 个库，并确认六个系统消息相关库已加载。文件正文没有为触发重载而改动。
+- 初次查看时 IM 提示 `IM logged in on another device`，另有设备端调试高亮遮罩；用户关闭高亮并通过现有 Retry 恢复连接后，继续完成以下真机验收。Mac 独立镜像窗口的点击落点异常，后续使用 Android 设备调试接口截图、点击和滑动，不修改 App 业务数据。
+
+### PLL110 真实图文验收结果（2026-11-03）
+
+- 保留用户当前已进入的房间 `xtctcttf`（展示 ID `75245990`），从房间消息按钮打开列表，再进入 System 半屏。真实 SDK 历史中的图片、标题 `11` / 正文 `12`，以及较早的图片、标题 `1` / 正文 `11` 均正常展示；没有普通气泡 `[Custom message]`、私聊输入框或 More 菜单。
+- 半屏历史可滑动，图片点击打开黑底根导航预览，完整等比展示。带 Details 的图文卡片点击图片也只进入预览，未触发业务链接。预览返回后仍在原历史位置；等待动画和滚动结束后，对比消息区域 `(0,1120)–(1080,2300)`，前后像素完全一致。
+- 返回顺序为图片预览 → System 半屏 → Messages 列表 → 原房间。消息列表摘要仍显示真实标题 `11`，没有发送或删除动作；房间期间继续收到其他用户的公屏事件。
+- 使用 Keep 保留房间，再从主消息页打开系统整页。整页复用同一图片、标题、正文、时间和 Details 布局，图片预览正常；排除悬浮入口的动画区域后，对比整页消息区域 `(0,290)–(780,2250)`，预览返回前后像素完全一致。
+- 整页返回主消息页后，通过房间悬浮入口恢复同一房间。验收结束的只读状态：服务端房间 ID `2112760181039828993`，`isInRoom=true`、`isMinimized=false`、会话代次 `1`，Socket `ready`，App PID 仍为 `5087`。未重启、重装、退出房间或进入其他房间；未发送、删除、支付或打开 Details 链接。
+- 音频边界：结束时 Agora 状态为 `initialized=false`、`joined=false`，因此本次不宣称真机语音收听或双机音频连续性已验收。手势缩放、真实链接跳转、异常图片重试及账号/房间切换隔离继续以自动化覆盖，本次未在真机触发这些场景。
+- 本地验收截图（不作为截图基线）：`/tmp/isnow-system-device-half-return.png`、`/tmp/isnow-system-device-history-preview.png`、`/tmp/isnow-system-device-scroll-before.png`、`/tmp/isnow-system-device-scroll-after.png`、`/tmp/isnow-system-device-full.png`、`/tmp/isnow-system-device-full-preview.png`、`/tmp/isnow-system-device-full-return.png`、`/tmp/isnow-system-device-room-restored.png`。自动化基线保持不变。

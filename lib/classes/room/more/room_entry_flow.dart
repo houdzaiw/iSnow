@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../manager/api_error_message.dart';
 import '../../../manager/http_api.dart';
 import '../room_repository.dart';
 import 'room_tools_models.dart';
@@ -22,9 +23,11 @@ final roomEntryInfoProvider = FutureProvider.autoDispose
 Future<void> enterSharedRoom(
   BuildContext context,
   WidgetRef ref,
-  String roomId,
-) async {
-  if (roomId.trim().isEmpty) return;
+  String roomId, {
+  bool Function()? isCurrent,
+}) async {
+  bool valid() => isCurrent?.call() != false;
+  if (!context.mounted || !valid() || roomId.trim().isEmpty) return;
   final repository = ref.read(roomRepositoryProvider);
   final existing = repository.roomState;
   final generation = repository.roomGeneration;
@@ -37,14 +40,23 @@ Future<void> enterSharedRoom(
   try {
     info = await ref.read(roomEntryInfoProvider(roomId).future);
   } catch (error) {
-    if (context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('$error')));
+    if (context.mounted && valid()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            userFacingErrorMessage(
+              error,
+              fallback: toolText(context, 'Unable to open room', '无法打开房间'),
+            ),
+          ),
+        ),
+      );
     }
     return;
   }
-  if (!context.mounted || generation != repository.roomGeneration) return;
+  if (!context.mounted || !valid() || generation != repository.roomGeneration) {
+    return;
+  }
   if (existing.isInRoom &&
       !await confirmRoomTool(
         context,
@@ -57,7 +69,9 @@ Future<void> enterSharedRoom(
       )) {
     return;
   }
-  if (!context.mounted || generation != repository.roomGeneration) return;
+  if (!context.mounted || !valid() || generation != repository.roomGeneration) {
+    return;
+  }
   String password = '';
   if (toolBool(info['roomLock'])) {
     final controller = TextEditingController();
@@ -87,7 +101,9 @@ Future<void> enterSharedRoom(
     if (supplied == null || supplied.isEmpty) return;
     password = supplied;
   }
-  if (!context.mounted || generation != repository.roomGeneration) return;
+  if (!context.mounted || !valid() || generation != repository.roomGeneration) {
+    return;
+  }
   context.push(
     Uri(
       path: '/room/$roomId',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class AppNetworkImage extends StatelessWidget {
   final String url;
@@ -26,6 +27,7 @@ class AppNetworkImage extends StatelessWidget {
 
   /// 自定义缓存 key
   final String? cacheKey;
+  final BaseCacheManager? cacheManager;
 
   const AppNetworkImage({
     super.key,
@@ -39,6 +41,7 @@ class AppNetworkImage extends StatelessWidget {
     this.errorWidget,
     this.lowQuality = false,
     this.cacheKey,
+    this.cacheManager,
   });
 
   @override
@@ -53,14 +56,14 @@ class AppNetworkImage extends StatelessWidget {
         height: height,
         fit: fit,
         cacheKey: cacheKey,
+        cacheManager: cacheManager,
 
         /// 占位图
-        placeholder: (context, url) =>
-        placeholder ?? _defaultPlaceholder(),
+        placeholder: (context, url) => placeholder ?? _defaultPlaceholder(),
 
         /// 错误图
         errorWidget: (context, url, error) =>
-        errorWidget ?? _defaultErrorWidget(),
+            errorWidget ?? _defaultErrorWidget(),
 
         /// 关键：降低内存占用
         memCacheWidth: _memCacheWidth(),

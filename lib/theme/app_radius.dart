@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 
 class AppRadius {
   const AppRadius._();
+  static const BorderRadius systemMessageCardBorder = BorderRadius.all(
+    Radius.circular(16),
+  );
+  static const BorderRadius systemMessageImageBorder = BorderRadius.all(
+    Radius.circular(12),
+  );
 
   static const double xs = 4;
   static const double sm = 6;

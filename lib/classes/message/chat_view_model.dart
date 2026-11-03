@@ -6,6 +6,7 @@ import 'package:tencent_cloud_chat_sdk/models/v2_tim_message.dart';
 
 import '../../manager/api_error_message.dart';
 import '../../model/im_models.dart';
+import '../../model/system_message_card_data.dart';
 import 'im_repository.dart';
 import 'message_view_model.dart';
 
@@ -69,6 +70,64 @@ class ChatViewModel extends StateNotifier<ChatState> {
   bool _closed = false;
   bool _active = true;
   bool _visible = true;
+  int _actionGeneration = 0;
+  bool _actionBusy = false;
+  final _invalidationListeners = <void Function()>{};
+
+  void Function() addActionInvalidationListener(void Function() listener) {
+    _invalidationListeners.add(listener);
+    return () => _invalidationListeners.remove(listener);
+  }
+
+  void _invalidateActions() {
+    _actionGeneration++;
+    _actionBusy = false;
+    for (final listener in List.of(_invalidationListeners)) {
+      listener();
+    }
+  }
+
+  List<SystemMessageCardData> systemCards(String language) => state.messages
+      .map(
+        (m) => SystemMessageCardData.fromMessage(
+          m,
+          id: _key(m),
+          languageCode: language,
+        ),
+      )
+      .toList(growable: false);
+
+  SystemMessageActionRequest? beginSystemAction(
+    String id,
+    SystemMessageActionKind kind,
+    String language,
+  ) {
+    if (!_current || !_visible || _actionBusy || !isImSystemUser(targetUID)) {
+      return null;
+    }
+    final card = systemCards(language).where((c) => c.id == id).firstOrNull;
+    if (card == null) return null;
+    final action = kind == SystemMessageActionKind.image && card.picture != null
+        ? SystemMessageAction(
+            SystemMessageDestination.image,
+            uri: card.picture,
+            title: card.title,
+          )
+        : kind == SystemMessageActionKind.details
+        ? card.details(language)
+        : null;
+    if (action == null) return null;
+    _actionBusy = true;
+    return SystemMessageActionRequest(action, _actionGeneration);
+  }
+
+  bool isSystemActionCurrent(SystemMessageActionRequest request) =>
+      _current && request.generation == _actionGeneration;
+
+  void finishSystemAction(SystemMessageActionRequest request) {
+    if (request.generation == _actionGeneration) _actionBusy = false;
+  }
+
   void setVisible(bool value) {
     final resumed = value && !_visible;
     _visible = value;
@@ -85,6 +144,7 @@ class ChatViewModel extends StateNotifier<ChatState> {
     if (!mounted || _closed) return;
     final connection = repository.session.state;
     if (_revision != connection.revision) {
+      _invalidateActions();
       _revision = connection.revision;
       _active = false;
       _epoch++;
@@ -237,9 +297,11 @@ class ChatViewModel extends StateNotifier<ChatState> {
   String _key(V2TimMessage m) =>
       m.msgID ?? m.id ?? '${m.sender}-${m.timestamp}';
   void close() {
+    if (_closed) return;
     _closed = true;
     _active = false;
     _epoch++;
+    _invalidateActions();
   }
 
   void _remove(V2TimAdvancedMsgListener listener) => unawaited(

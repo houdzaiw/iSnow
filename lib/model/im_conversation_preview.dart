@@ -15,10 +15,15 @@ class ImConversationPreview {
 }
 
 class ImCustomMessageEnvelope {
-  const ImCustomMessageEnvelope({required this.type, required this.payload});
+  const ImCustomMessageEnvelope({
+    required this.type,
+    required this.payload,
+    this.timestamp,
+  });
 
   final String type;
   final Map<String, Object?> payload;
+  final int? timestamp;
 
   static ImCustomMessageEnvelope? tryParse(Object? raw) {
     final data = decodeMap(raw);
@@ -27,6 +32,9 @@ class ImCustomMessageEnvelope {
     return ImCustomMessageEnvelope(
       type: type,
       payload: decodeMap(data?['payload']) ?? const {},
+      timestamp: data?['timestamp'] is int
+          ? data!['timestamp'] as int
+          : int.tryParse('${data?['timestamp']}'),
     );
   }
 

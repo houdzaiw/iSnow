@@ -1,4 +1,8 @@
 class AppSpacing {
+  static const double systemMessageImageRatio = 311 / 120;
+  static const double systemImageMaxScale = 5;
+  static const double systemMessageTimeTop = 24;
+  static const double systemMessageTimeBottom = 12;
   static const double roomMessageHeightRatio = 0.6;
   static const double roomMessageHandleWidth = 32;
   static const double roomMessageHandleHeight = 4;

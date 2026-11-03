@@ -62,6 +62,7 @@ class RoomPrivateChatSheet extends ConsumerWidget {
         key: const ValueKey('room-private-chat-sheet'),
         title: imConversationTitle(conversation),
         chat: true,
+        system: isImSystemUser(uid),
         onBack: () {
           FocusManager.instance.primaryFocus?.unfocus();
           Navigator.of(context).pop();

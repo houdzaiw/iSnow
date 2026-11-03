@@ -11,11 +11,13 @@ class RoomMessageFrame extends StatelessWidget {
     required this.title,
     required this.child,
     this.chat = false,
+    this.system = false,
     this.onBack,
   });
   final String title;
   final Widget child;
   final bool chat;
+  final bool system;
   final VoidCallback? onBack;
   @override
   Widget build(BuildContext context) {
@@ -32,12 +34,16 @@ class RoomMessageFrame extends StatelessWidget {
                 : media.size.height * AppSpacing.roomMessageHeightRatio,
           ),
           child: Material(
-            color: AppColors.roomMessagePanel,
+            color: system
+                ? AppColors.systemMessageBackground
+                : AppColors.roomMessagePanel,
             borderRadius: AppRadius.roomToolsSheetBorder,
             clipBehavior: Clip.antiAlias,
             child: ScaffoldMessenger(
               child: Scaffold(
-                backgroundColor: AppColors.roomMessageSurface,
+                backgroundColor: system
+                    ? AppColors.systemMessageBackground
+                    : AppColors.roomMessageSurface,
                 resizeToAvoidBottomInset: false,
                 body: SafeArea(
                   top: false,
@@ -80,7 +86,9 @@ class RoomMessageFrame extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 title,
-                                style: AppTextStyles.roomMessageTitle,
+                                style: system
+                                    ? AppTextStyles.systemMessageTitle
+                                    : AppTextStyles.roomMessageTitle,
                                 textAlign: TextAlign.center,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,

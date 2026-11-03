@@ -3,6 +3,27 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 class AppTextStyles {
+  static const TextStyle systemMessageTitle = TextStyle(
+    color: AppColors.systemMessageTitle,
+    fontSize: 16,
+    height: 1.5,
+    fontWeight: FontWeight.w600,
+  );
+  static const TextStyle systemMessageBody = TextStyle(
+    color: AppColors.systemMessageBody,
+    fontSize: 12,
+    height: 1.5,
+  );
+  static const TextStyle systemMessageTime = TextStyle(
+    color: AppColors.systemMessageTime,
+    fontSize: 12,
+    height: 1.5,
+  );
+  static const TextStyle systemMessageDetails = TextStyle(
+    color: AppColors.systemMessageBody,
+    fontSize: 14,
+    height: 1.5,
+  );
   static const TextStyle roomMessageTitle = TextStyle(
     color: AppColors.textInverse,
     fontSize: 16,
