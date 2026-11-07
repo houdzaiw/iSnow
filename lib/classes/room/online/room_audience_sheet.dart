@@ -8,10 +8,16 @@ import '../../../localization/app_localizations.dart';
 import '../../../model/room_models.dart';
 import '../../../model/room_user_info.dart';
 import '../../../theme/app_theme.dart';
+import '../interaction/room_interaction_frame.dart';
+import '../interaction/room_interaction_view_model.dart';
 import 'room_audience_avatar.dart';
 import 'room_audience_view_model.dart';
 
-Future<int?> showRoomAudienceSheet(BuildContext context, String roomId) {
+Future<int?> showRoomAudienceSheet(
+  BuildContext context,
+  String roomId, {
+  RoomInteractionKey? session,
+}) {
   return showModalBottomSheet<int>(
     context: context,
     useRootNavigator: true,
@@ -19,17 +25,21 @@ Future<int?> showRoomAudienceSheet(BuildContext context, String roomId) {
     backgroundColor: AppColors.roomMoreSheet,
     barrierColor: AppColors.modalScrimStrong,
     shape: const RoundedRectangleBorder(borderRadius: AppRadius.sheetBorder),
-    builder: (_) => RoomAudienceSheet(roomId: roomId),
+    builder: (_) => RoomAudienceSheet(roomId: roomId, session: session),
   );
 }
 
 class RoomAudienceSheet extends ConsumerWidget {
-  const RoomAudienceSheet({super.key, required this.roomId});
+  const RoomAudienceSheet({super.key, required this.roomId, this.session});
 
   final String roomId;
+  final RoomInteractionKey? session;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (session case final key?) {
+      listenRoomInteractionLifetime(context, ref, key);
+    }
     final provider = roomAudienceViewModelProvider(roomId);
     final state = ref.watch(provider);
     final viewModel = ref.read(provider.notifier);

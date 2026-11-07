@@ -37,6 +37,7 @@ class RoomState {
     this.audienceLoaded = false,
     this.loadingAudience = false,
     this.audienceError,
+    this.silenceEndTime = 0,
     this.errorMessage,
   });
 
@@ -53,6 +54,7 @@ class RoomState {
   final bool audienceLoaded;
   final bool loadingAudience;
   final String? audienceError;
+  final int silenceEndTime;
   final String? errorMessage;
 
   int get onlineCount =>
@@ -78,6 +80,7 @@ class RoomState {
     bool? audienceLoaded,
     bool? loadingAudience,
     Object? audienceError = _sentinel,
+    int? silenceEndTime,
     Object? errorMessage = _sentinel,
   }) {
     return RoomState(
@@ -96,6 +99,7 @@ class RoomState {
       micList: micList ?? this.micList,
       audience: audience ?? this.audience,
       audienceLoaded: audienceLoaded ?? this.audienceLoaded,
+      silenceEndTime: silenceEndTime ?? this.silenceEndTime,
       loadingAudience: loadingAudience ?? this.loadingAudience,
       audienceError: identical(audienceError, _sentinel)
           ? this.audienceError
@@ -309,6 +313,7 @@ class RoomManager extends ChangeNotifier {
         _state.copyWith(
           currentRoomId: effectiveRoomId,
           enterResponse: enterResponse,
+          silenceEndTime: enterResponse.silenceEndTime ?? 0,
         ),
       );
 
@@ -754,6 +759,9 @@ class RoomManager extends ChangeNotifier {
     if (message.channel != 'room:$roomId' && message.channel != 'room') return;
 
     switch (message.event) {
+      case 'RoomUserPublicScreenSilenceUpdate':
+        unawaited(_updatePublicSilence(roomId, message.payload));
+        break;
       case 'RoomIdentityUpdateEvent':
         unawaited(_updateRoomIdentity(message.payload));
         break;
@@ -780,6 +788,32 @@ class RoomManager extends ChangeNotifier {
         break;
     }
   }
+
+  Future<void> _updatePublicSilence(String roomId, Object? payload) async {
+    final generation = _generation;
+    final revision = ++_publicSilenceRevision;
+    final decoded = _decodePayload(payload);
+    if (decoded is! Map) return;
+    if (decoded['roomId'] != null && decoded['roomId'].toString() != roomId) {
+      return;
+    }
+    final uid = await _authSession.uid();
+    if (uid == null ||
+        uid.toString() != decoded['uid']?.toString() ||
+        !_isCurrentSession(roomId, generation) ||
+        revision < _appliedSilenceRevision) {
+      return;
+    }
+    final type = int.tryParse('${decoded['eventType']}');
+    final end = int.tryParse('${decoded['endTime']}');
+    if (type == 2 || (type == 1 && end != null && end > 0)) {
+      _appliedSilenceRevision = revision;
+      _setState(_state.copyWith(silenceEndTime: type == 2 ? 0 : end));
+    }
+  }
+
+  int _publicSilenceRevision = 0;
+  int _appliedSilenceRevision = 0;
 
   Future<void> _handleKickOut(String roomId, Object? payload) async {
     final generation = _generation;

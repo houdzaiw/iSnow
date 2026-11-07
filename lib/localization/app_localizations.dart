@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'membership_translations.dart';
 
 class AppLocalizations {
   final Locale locale;
@@ -51,6 +52,7 @@ class _AppLocalizationsDelegate
 
 const Map<String, Map<String, String>> _localizedValues = {
   'en': {
+    ...membershipEnglish,
     'room.keep': 'Keep',
     'room.exit': 'Exit',
     'room.restore': 'Restore room',
@@ -475,6 +477,7 @@ const Map<String, Map<String, String>> _localizedValues = {
     'picker.cameraSelected': 'Camera selected',
   },
   'zh': {
+    ...membershipChinese,
     'room.keep': '保持',
     'room.exit': '退出',
     'room.restore': '返回房间',

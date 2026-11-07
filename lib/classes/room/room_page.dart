@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:tencent_cloud_chat_sdk/models/v2_tim_conversation.dart';
 
 import '../../localization/app_localizations.dart';
 import '../../manager/room_manager.dart';
@@ -46,6 +47,17 @@ import 'more/room_vehicle_layer.dart';
 import '../message/message_view_model.dart';
 import 'message/room_message_sheet.dart';
 import 'message/room_message_view_model.dart';
+import 'message/room_private_chat_sheet.dart';
+import 'interaction/room_animated_artwork.dart';
+import 'interaction/room_detail_sheet.dart';
+import 'interaction/room_expression_sheet.dart';
+import 'interaction/room_public_media.dart';
+import 'interaction/room_rank_sheet.dart';
+import 'interaction/room_rocket_pendant.dart';
+import 'interaction/room_interaction_frame.dart';
+import 'interaction/room_interaction_view_model.dart';
+import 'interaction/room_mention.dart';
+import 'interaction/room_user_card.dart';
 
 part 'views/room_bottom_bar.dart';
 part 'views/room_chat_panel.dart';
@@ -92,6 +104,142 @@ class RoomPage extends HookConsumerWidget {
       messageViewModelProvider.select((s) => s.totalUnreadCount),
     );
     final messageController = useTextEditingController();
+    final mention = useRef<RoomMentionTarget?>(null);
+    final generation = viewModel.sessionGeneration;
+    final viewToken = useMemoized(Object.new, [generation, giftRoomId]);
+    final interaction = (
+      roomId: giftRoomId,
+      generation: generation,
+      viewToken: viewToken,
+    );
+    if (state.isReady && !state.isMinimized) {
+      ref.watch(roomInteractionProvider(interaction));
+    }
+
+    void openComposer() {
+      if (!context.mounted || !ref.read(provider).isReady) return;
+      _showRoomComposer(
+        context,
+        ref,
+        provider,
+        messageController,
+        mention,
+        interaction,
+      );
+    }
+
+    Future<void> showUser(int uid) async {
+      if (uid <= 0 || !context.mounted || !ref.read(provider).isReady) return;
+      final session = ref.read(roomInteractionProvider(interaction).notifier);
+      if (!session.begin()) return;
+      try {
+        final result = await showRoomInteractionSheet<RoomUserCardSelection>(
+          context,
+          (_) => RoomUserCard(
+            target: (session: interaction, uid: uid),
+            currentUid: state.currentUid,
+          ),
+          backgroundColor: AppColors.transparent,
+        );
+        if (result == null || !context.mounted || !session.active) return;
+        switch (result.action) {
+          case RoomUserCardAction.profile:
+            context.push('/profile-homepage/$uid');
+          case RoomUserCardAction.message:
+            final messages = ref.read(
+              roomMessageViewModelProvider(giftRoomId).notifier,
+            );
+            if (!messages.beginChat()) return;
+            try {
+              await showRoomPrivateChatSheet(
+                context,
+                giftRoomId,
+                generation,
+                V2TimConversation(
+                  conversationID: 'c2c_$uid',
+                  type: 1,
+                  userID: '$uid',
+                  showName: result.nickname,
+                  faceUrl: result.avatar,
+                ),
+              );
+            } finally {
+              if (messages.mounted) messages.finishChat();
+            }
+          case RoomUserCardAction.gift:
+            await _showRoomGiftPanel(
+              context,
+              ref.read(provider),
+              target: (uid: uid, name: result.nickname, avatar: result.avatar),
+            );
+          case RoomUserCardAction.mention:
+            if (result.nickname.trim().isEmpty) return;
+            mention.value = (uid: uid, name: result.nickname);
+            final draft = '@${result.nickname} ';
+            messageController.value = TextEditingValue(
+              text: draft,
+              selection: TextSelection.collapsed(offset: draft.length),
+            );
+            openComposer();
+        }
+      } finally {
+        session.finish();
+      }
+    }
+
+    Future<void> shareRoom() async {
+      final session = ref.read(roomInteractionProvider(interaction).notifier);
+      if (!session.begin()) return;
+      try {
+        await showRoomShareSheet(context, giftRoomId);
+      } finally {
+        session.finish();
+      }
+    }
+
+    Future<void> showRoomDetail() async {
+      final session = ref.read(roomInteractionProvider(interaction).notifier);
+      if (!session.begin()) return;
+      try {
+        await showRoomInteractionSheet<void>(
+          context,
+          (sheetContext) => RoomDetailSheet(
+            session: interaction,
+            roomState: provider,
+            onShare: () => showRoomShareSheet(sheetContext, giftRoomId),
+          ),
+          backgroundColor: AppColors.transparent,
+        );
+      } finally {
+        session.finish();
+      }
+    }
+
+    Future<void> showRoomContent(WidgetBuilder builder) async {
+      final session = ref.read(roomInteractionProvider(interaction).notifier);
+      if (!session.begin()) return;
+      try {
+        await showRoomInteractionSheet<void>(context, builder);
+      } finally {
+        session.finish();
+      }
+    }
+
+    ref.listen(provider.select((value) => value.micInvite), (_, invite) async {
+      if (invite == null || !context.mounted) return;
+      final accept = await confirmRoomAction(
+        context,
+        toolText(
+          context,
+          '${invite.nickname} invites you to take the mic',
+          '${invite.nickname} 邀请你上麦',
+        ),
+        session: interaction,
+        confirmLabel: toolText(context, 'Accept', '接受'),
+        cancelLabel: toolText(context, 'Ignore', '忽略'),
+      );
+      if (viewModel.mounted) await viewModel.respondToMicInvite(invite, accept);
+    });
     final giftRootKey = useMemoized(() => GlobalKey(), [giftRoomId]);
     final bottomBarKey = useMemoized(() => GlobalKey(), [giftRoomId]);
     listenRoomMusicTakeover(context, ref, giftRoomId);
@@ -317,6 +465,19 @@ class RoomPage extends HookConsumerWidget {
                   child: Stack(
                     key: giftRootKey,
                     children: [
+                      if (roomMediaUrl(state.roomInfo?.backgroundUrl)
+                          case final background?)
+                        Positioned.fill(
+                          child: IgnorePointer(
+                            child: RoomAnimatedArtwork(
+                              key: ValueKey(background),
+                              url: background,
+                              fit: BoxFit.cover,
+                              repeat: true,
+                              backdrop: true,
+                            ),
+                          ),
+                        ),
                       Column(
                         children: [
                           _RoomHeader(
@@ -327,6 +488,13 @@ class RoomPage extends HookConsumerWidget {
                               if (viewModel.minimizeRoom()) closePage();
                             },
                             onExit: showExitChoices,
+                            onDetails: state.isReady ? showRoomDetail : null,
+                            onShare: state.isReady ? shareRoom : null,
+                            onRank: state.isReady
+                                ? () => showRoomContent(
+                                    (_) => RoomRankSheet(session: interaction),
+                                  )
+                                : null,
                           ),
                           _RoomMicGrid(
                             seats: state.seats,
@@ -346,13 +514,19 @@ class RoomPage extends HookConsumerWidget {
                             },
                             currentUid: state.currentUid,
                             pendingSeatPosition: state.pendingSeatPosition,
-                            onSeatTap: (seat) =>
-                                _handleSeatTap(context, ref, provider, seat),
+                            onSeatTap: (seat) => _handleSeatTap(
+                              context,
+                              ref,
+                              provider,
+                              seat,
+                              showUser,
+                            ),
                             onSeatLongPress: (seat) => _handleSeatLongPress(
                               context,
                               ref,
                               provider,
                               seat,
+                              showUser,
                             ),
                           ),
                           _RoomMusicStrip(
@@ -361,17 +535,22 @@ class RoomPage extends HookConsumerWidget {
                                 _openRoomMusic(ref, ref.read(provider)),
                             onAudienceTap: () async {
                               final roomId = state.currentRoomId;
+                              final capturedGeneration =
+                                  viewModel.sessionGeneration;
                               final uid = await showRoomAudienceSheet(
                                 context,
                                 roomId,
+                                session: interaction,
                               );
                               if (uid == null || !context.mounted) return;
                               final current = ref.read(provider);
                               if (!current.isReady ||
-                                  current.currentRoomId != roomId) {
+                                  current.currentRoomId != roomId ||
+                                  viewModel.sessionGeneration !=
+                                      capturedGeneration) {
                                 return;
                               }
-                              context.push('/profile-homepage/$uid');
+                              await showUser(uid);
                             },
                           ),
                           RoomToolsStrip(roomId: giftRoomId),
@@ -407,6 +586,17 @@ class RoomPage extends HookConsumerWidget {
                                   Expanded(
                                     child: _RoomChatPanel(
                                       state: state,
+                                      onUserTap: showUser,
+                                      onPartyTap: (id) => showRoomPartyDetails(
+                                        context,
+                                        interaction,
+                                        id,
+                                      ),
+                                      onImageTap: (url) => showRoomPublicImage(
+                                        context,
+                                        interaction,
+                                        url,
+                                      ),
                                       onClearMessages: () async {
                                         final current = ref.read(provider);
                                         if (!current.isReady ||
@@ -441,12 +631,15 @@ class RoomPage extends HookConsumerWidget {
                           _RoomBottomBar(
                             key: bottomBarKey,
                             state: state,
-                            onChatTap: () => _showRoomComposer(
-                              context,
-                              ref,
-                              provider,
-                              messageController,
-                            ),
+                            onChatTap: openComposer,
+                            onExpressionTap: state.isReady
+                                ? () => showRoomContent(
+                                    (_) => RoomExpressionSheet(
+                                      session: interaction,
+                                      onSend: viewModel.sendExpression,
+                                    ),
+                                  )
+                                : null,
                             onToggleMic: () => ref
                                 .read(provider.notifier)
                                 .toggleLocalMicrophone(),
@@ -468,7 +661,13 @@ class RoomPage extends HookConsumerWidget {
                               AppSpacing.roomBottomBarHeight.h +
                               MediaQuery.paddingOf(context).bottom +
                               AppSpacing.sm.h,
-                          child: RoomBigWinPendant(roomId: giftRoomId),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              RoomRocketPendant(session: interaction),
+                              RoomBigWinPendant(roomId: giftRoomId),
+                            ],
+                          ),
                         ),
                       RoomMusicOverlay(
                         roomId: giftRoomId,
@@ -522,26 +721,16 @@ void _handleSeatTap(
   WidgetRef ref,
   AutoDisposeStateNotifierProvider<RoomViewModel, RoomPageState> provider,
   RoomSeatViewData seat,
+  ValueChanged<int> showUser,
 ) {
   final state = ref.read(provider);
-  if (state.pendingSeatPosition != null) return;
-
-  final isMine = _isCurrentUserSeat(state, seat);
-  if (seat.isOccupied) {
-    if (isMine || state.isOwnerOrManager) {
-      _showSeatActions(context, ref, provider, seat);
-      return;
-    }
-    _openSeatUserProfile(context, seat);
-    return;
-  }
-
-  if (state.isOwnerOrManager) {
-    _showSeatActions(context, ref, provider, seat);
-    return;
-  }
-
-  if (!seat.isLocked) {
+  if (!state.isReady || state.pendingSeatPosition != null) return;
+  if (_isCurrentUserSeat(state, seat) ||
+      (!seat.isOccupied && state.isOwnerOrManager)) {
+    _showSeatActions(context, ref, provider, seat, showUser);
+  } else if (seat.isOccupied) {
+    showUser(seat.uid!);
+  } else if (!seat.isLocked) {
     ref.read(provider.notifier).upMic(seat.position);
   }
 }
@@ -551,17 +740,11 @@ void _handleSeatLongPress(
   WidgetRef ref,
   AutoDisposeStateNotifierProvider<RoomViewModel, RoomPageState> provider,
   RoomSeatViewData seat,
+  ValueChanged<int> showUser,
 ) {
   final state = ref.read(provider);
-  if (state.pendingSeatPosition != null) return;
-
-  if (_isCurrentUserSeat(state, seat) || state.isOwnerOrManager) {
-    _showSeatActions(context, ref, provider, seat);
-    return;
-  }
-
-  if (seat.isOccupied) {
-    _openSeatUserProfile(context, seat);
+  if (seat.isOccupied || state.isOwnerOrManager) {
+    _handleSeatTap(context, ref, provider, seat, showUser);
   }
 }
 
@@ -570,105 +753,114 @@ bool _isCurrentUserSeat(RoomPageState state, RoomSeatViewData seat) {
   return uid != null && uid > 0 && seat.uid == uid;
 }
 
-void _openSeatUserProfile(BuildContext context, RoomSeatViewData seat) {
-  final uid = seat.uid;
-  if (uid == null || uid <= 0) return;
-  context.push('/profile-homepage/$uid');
-}
-
 void _showRoomComposer(
   BuildContext context,
   WidgetRef ref,
   AutoDisposeStateNotifierProvider<RoomViewModel, RoomPageState> provider,
   TextEditingController controller,
+  ObjectRef<RoomMentionTarget?> mention,
+  RoomInteractionKey session,
 ) {
   showModalBottomSheet<void>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (sheetContext) {
-      return Padding(
-        padding: EdgeInsets.only(
-          left: 14.w,
-          right: 14.w,
-          bottom: MediaQuery.viewInsetsOf(sheetContext).bottom + 12.h,
-        ),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: const Color(0xFF252532),
-            borderRadius: BorderRadius.circular(24.r),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+    builder: (sheetContext) => Consumer(
+      builder: (context, ref, _) {
+        listenRoomInteractionLifetime(context, ref, session);
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 14.w,
+            right: 14.w,
+            bottom: MediaQuery.viewInsetsOf(sheetContext).bottom + 12.h,
           ),
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(14.w, 12.h, 8.w, 12.h),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: controller,
-                    autofocus: true,
-                    minLines: 1,
-                    maxLines: 3,
-                    maxLength: 120,
-                    cursorColor: AppColors.textInverse,
-                    style: TextStyle(
-                      color: AppColors.textInverse,
-                      fontSize: 15.sp,
-                    ),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: AppColors.roomMessageBubble,
-                      counterText: '',
-                      hintText: 'Say something...',
-                      hintStyle: TextStyle(
-                        color: AppColors.roomMessageMuted,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: const Color(0xFF252532),
+              borderRadius: BorderRadius.circular(24.r),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+            ),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(14.w, 12.h, 8.w, 12.h),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: controller,
+                      autofocus: true,
+                      minLines: 1,
+                      maxLines: 3,
+                      maxLength: 120,
+                      cursorColor: AppColors.textInverse,
+                      style: TextStyle(
+                        color: AppColors.textInverse,
                         fontSize: 15.sp,
                       ),
-                      border: InputBorder.none,
-                      isDense: true,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: AppColors.roomMessageBubble,
+                        counterText: '',
+                        hintText: 'Say something...',
+                        hintStyle: TextStyle(
+                          color: AppColors.roomMessageMuted,
+                          fontSize: 15.sp,
+                        ),
+                        border: InputBorder.none,
+                        isDense: true,
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(width: 8.w),
-                Material(
-                  color: AppColors.transparent,
-                  shape: const CircleBorder(),
-                  child: InkWell(
-                    customBorder: const CircleBorder(),
-                    onTap: () async {
-                      final text = controller.text;
-                      if (text.trim().isEmpty) return;
-                      await ref.read(provider.notifier).sendMessage(text);
-                      controller.clear();
-                      if (sheetContext.mounted) {
-                        Navigator.pop(sheetContext);
-                      }
-                    },
-                    child: SizedBox(
-                      width: AppSpacing.controlHeightMd.r,
-                      height: AppSpacing.controlHeightMd.r,
-                      child: Center(
-                        child: _RoomAssetIcon(
-                          asset: AppAssets.roomChatSend,
-                          size: AppSpacing.controlHeightMd.r,
+                  SizedBox(width: 8.w),
+                  Material(
+                    color: AppColors.transparent,
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: () async {
+                        final text = controller.text;
+                        if (text.trim().isEmpty) return;
+                        final sent = await ref
+                            .read(provider.notifier)
+                            .sendMessage(text, mention: mention.value);
+                        if (!sent ||
+                            !sheetContext.mounted ||
+                            ModalRoute.of(sheetContext)?.isCurrent != true) {
+                          return;
+                        }
+                        controller.clear();
+                        mention.value = null;
+                        if (sheetContext.mounted) {
+                          Navigator.pop(sheetContext);
+                        }
+                      },
+                      child: SizedBox(
+                        width: AppSpacing.controlHeightMd.r,
+                        height: AppSpacing.controlHeightMd.r,
+                        child: Center(
+                          child: _RoomAssetIcon(
+                            asset: AppAssets.roomChatSend,
+                            size: AppSpacing.controlHeightMd.r,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      );
-    },
+        );
+      },
+    ),
   );
 }
 
 Future<void> _showRoomGiftPanel(
   BuildContext context,
-  RoomPageState state,
-) async {
+  RoomPageState state, {
+  ({int uid, String name, String? avatar})? target,
+}) async {
   final roomId = state.currentRoomId.trim().isNotEmpty
       ? state.currentRoomId.trim()
       : state.roomId.trim();
@@ -686,13 +878,24 @@ Future<void> _showRoomGiftPanel(
           seatPosition: seat.position,
         ),
       )
-      .toList(growable: false);
+      .toList();
+  if (target != null && !recipients.any((entry) => entry.uid == target.uid)) {
+    recipients.add(
+      RoomGiftRecipient(
+        uid: target.uid,
+        nickname: target.name,
+        seatPosition: -1,
+        avatar: target.avatar,
+      ),
+    );
+  }
   final result = await showRoomGiftSheet(
     context: context,
     roomId: roomId,
     onlineCount: state.onlineCount,
     currentUid: state.currentUid,
     recipients: recipients,
+    targetUid: target?.uid,
   );
   if (!context.mounted || result == null) return;
   if (result == RoomGiftSheetResult.openWallet) {
@@ -705,9 +908,19 @@ void _showSeatActions(
   WidgetRef ref,
   AutoDisposeStateNotifierProvider<RoomViewModel, RoomPageState> provider,
   RoomSeatViewData seat,
+  ValueChanged<int> showUser,
 ) {
+  final model = ref.read(provider.notifier);
+  final generation = model.sessionGeneration;
   final state = ref.read(provider);
-  final actions = _seatActionsFor(context, ref, provider, seat, state);
+  final actions = _seatActionsFor(
+    context,
+    ref,
+    provider,
+    seat,
+    state,
+    showUser,
+  );
   if (actions.isEmpty) return;
 
   showModalBottomSheet<void>(
@@ -734,10 +947,27 @@ void _showSeatActions(
               for (final action in actions)
                 _SeatActionTile(
                   label: action.label,
-                  destructive: action.destructive,
                   onTap: () {
                     Navigator.pop(sheetContext);
-                    action.onTap();
+                    if (!context.mounted ||
+                        !model.mounted ||
+                        model.sessionGeneration != generation) {
+                      return;
+                    }
+                    final current = ref.read(provider);
+                    final now = current.seats
+                        .where((entry) => entry.position == seat.position)
+                        .firstOrNull;
+                    if (current.isReady &&
+                        !current.isMinimized &&
+                        now != null &&
+                        now.uid == seat.uid &&
+                        now.isLocked == seat.isLocked &&
+                        now.isMuted == seat.isMuted &&
+                        (_isCurrentUserSeat(current, now) ||
+                            current.isOwnerOrManager)) {
+                      action.onTap();
+                    }
                   },
                 ),
             ],
@@ -754,6 +984,7 @@ List<_SeatAction> _seatActionsFor(
   AutoDisposeStateNotifierProvider<RoomViewModel, RoomPageState> provider,
   RoomSeatViewData seat,
   RoomPageState state,
+  ValueChanged<int> showUser,
 ) {
   final notifier = ref.read(provider.notifier);
   final isMine = _isCurrentUserSeat(state, seat);
@@ -764,7 +995,7 @@ List<_SeatAction> _seatActionsFor(
     actions.add(
       _SeatAction(
         label: context.l10n.t('room.checkProfile'),
-        onTap: () => _openSeatUserProfile(context, seat),
+        onTap: () => showUser(seat.uid!),
       ),
     );
   }
@@ -781,26 +1012,6 @@ List<_SeatAction> _seatActionsFor(
       return actions;
     }
 
-    addProfileAction();
-    if (!canManage) return actions;
-
-    actions.addAll([
-      _SeatAction(
-        label: context.l10n.t(seat.isMuted ? 'room.unmuteMic' : 'room.muteMic'),
-        onTap: () => notifier.setSeatMuted(seat, !seat.isMuted),
-      ),
-      _SeatAction(
-        label: context.l10n.t('room.kickDownMic'),
-        destructive: true,
-        onTap: () => notifier.kickDownMic(seat),
-      ),
-      _SeatAction(
-        label: context.l10n.t(
-          seat.isLocked ? 'room.unlockMic' : 'room.lockMic',
-        ),
-        onTap: () => notifier.setSeatLocked(seat, !seat.isLocked),
-      ),
-    ]);
     return actions;
   }
 
@@ -834,31 +1045,20 @@ List<_SeatAction> _seatActionsFor(
 }
 
 class _SeatAction {
-  const _SeatAction({
-    required this.label,
-    required this.onTap,
-    this.destructive = false,
-  });
+  const _SeatAction({required this.label, required this.onTap});
 
   final String label;
   final VoidCallback onTap;
-  final bool destructive;
 }
 
 class _SeatActionTile extends StatelessWidget {
-  const _SeatActionTile({
-    required this.label,
-    required this.onTap,
-    this.destructive = false,
-  });
+  const _SeatActionTile({required this.label, required this.onTap});
 
   final String label;
   final VoidCallback onTap;
-  final bool destructive;
 
   @override
   Widget build(BuildContext context) {
-    final color = destructive ? AppColors.danger : AppColors.textInverse;
     return InkWell(
       onTap: onTap,
       child: SizedBox(
@@ -868,7 +1068,7 @@ class _SeatActionTile extends StatelessWidget {
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: AppTextStyles.roomAction.copyWith(color: color),
+            style: AppTextStyles.roomAction,
           ),
         ),
       ),

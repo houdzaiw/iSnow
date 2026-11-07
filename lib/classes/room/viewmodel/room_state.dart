@@ -7,7 +7,7 @@ import '../gift/models/room_gift_event_models.dart';
 
 enum RoomChatFilter { all, chat, gift }
 
-enum RoomChatEntryKind { chat, gift, system, enter, image, expression }
+enum RoomChatEntryKind { chat, gift, system, enter, image, expression, party }
 
 const int roomDefaultMicSeatCount = 4;
 const int roomMaxMicSeatCount = 20;
@@ -88,6 +88,9 @@ class RoomChatEntry {
     this.senderUid,
     this.isLocal = false,
     this.gift,
+    this.mediaUrl,
+    this.mediaPreviewUrl,
+    this.partyId,
   });
 
   final String id;
@@ -99,10 +102,16 @@ class RoomChatEntry {
   final int? senderUid;
   final bool isLocal;
   final RoomGiftPublicMessage? gift;
+  final String? mediaUrl, mediaPreviewUrl;
+  final int? partyId;
 
   bool get isGift => kind == RoomChatEntryKind.gift;
   bool get isChat =>
-      kind == RoomChatEntryKind.chat || kind == RoomChatEntryKind.enter;
+      kind == RoomChatEntryKind.chat ||
+      kind == RoomChatEntryKind.enter ||
+      kind == RoomChatEntryKind.image ||
+      kind == RoomChatEntryKind.expression ||
+      kind == RoomChatEntryKind.party;
 
   factory RoomChatEntry.system(String text) {
     return RoomChatEntry(
@@ -112,6 +121,16 @@ class RoomChatEntry {
       createdAt: DateTime.now(),
     );
   }
+}
+
+class RoomMicInvitation {
+  const RoomMicInvitation({
+    required this.id,
+    required this.nickname,
+    required this.generation,
+  });
+  final String id, nickname;
+  final int generation;
 }
 
 class RoomPageState {
@@ -142,6 +161,7 @@ class RoomPageState {
     this.socketReady = false,
     this.socketErrorMessage,
     this.agoraState = const RoomAgoraState(),
+    this.micInvite,
     this.sendingMessage = false,
     this.clearingMessages = false,
     this.togglingMicrophone = false,
@@ -175,6 +195,7 @@ class RoomPageState {
   final bool socketReady;
   final String? socketErrorMessage;
   final RoomAgoraState agoraState;
+  final RoomMicInvitation? micInvite;
   final bool sendingMessage;
   final bool clearingMessages;
   final bool togglingMicrophone;
@@ -263,6 +284,7 @@ class RoomPageState {
     bool? socketReady,
     Object? socketErrorMessage = _sentinel,
     RoomAgoraState? agoraState,
+    Object? micInvite = _unset,
     bool? sendingMessage,
     bool? clearingMessages,
     bool? togglingMicrophone,
@@ -310,6 +332,9 @@ class RoomPageState {
           ? this.socketErrorMessage
           : socketErrorMessage as String?,
       agoraState: agoraState ?? this.agoraState,
+      micInvite: identical(micInvite, _unset)
+          ? this.micInvite
+          : micInvite as RoomMicInvitation?,
       sendingMessage: sendingMessage ?? this.sendingMessage,
       clearingMessages: clearingMessages ?? this.clearingMessages,
       togglingMicrophone: togglingMicrophone ?? this.togglingMicrophone,
@@ -335,3 +360,5 @@ int? _intValue(Object? value) {
 }
 
 const Object _sentinel = Object();
+
+const Object _unset = Object();

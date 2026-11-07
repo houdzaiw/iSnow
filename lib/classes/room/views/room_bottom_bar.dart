@@ -5,6 +5,7 @@ class _RoomBottomBar extends StatelessWidget {
     super.key,
     required this.state,
     required this.onChatTap,
+    this.onExpressionTap,
     required this.onToggleMic,
     required this.onMessageTap,
     required this.unreadCount,
@@ -14,6 +15,7 @@ class _RoomBottomBar extends StatelessWidget {
 
   final RoomPageState state;
   final VoidCallback onChatTap;
+  final VoidCallback? onExpressionTap;
   final VoidCallback onToggleMic;
   final VoidCallback onMessageTap;
   final int unreadCount;
@@ -40,6 +42,12 @@ class _RoomBottomBar extends StatelessWidget {
             asset: AppAssets.lanhuRoomBottomChat,
             onTap: onChatTap,
             badge: state.messages.length > 99 ? '99+' : null,
+          ),
+          SizedBox(width: AppSpacing.toolbarItemSpacing.w),
+          _BottomIconButton(
+            key: const ValueKey('room-expression-button'),
+            asset: AppAssets.roomInteractionEmoji,
+            onTap: onExpressionTap,
           ),
           if (state.isOnMic) ...[
             SizedBox(width: AppSpacing.toolbarItemSpacing.w),

@@ -53,29 +53,40 @@ class RoomGiftAssetResolver {
   );
   static const maxResourceBytes = 32 * 1024 * 1024;
 
-  static RoomGiftAnimationFormat formatFor(RoomGift gift) {
-    final source =
-        AppAssets.roomGiftLocalAnimations[gift.id] ?? gift.animationUrl ?? '';
+  static RoomGiftAnimationFormat formatFor(RoomGift gift) => formatForSource(
+    AppAssets.roomGiftLocalAnimations[gift.id] ?? gift.animationUrl ?? '',
+    mp4: gift.animationType == 6,
+  );
+
+  static RoomGiftAnimationFormat formatForSource(
+    String source, {
+    bool mp4 = false,
+  }) {
     final path = Uri.tryParse(source)?.path.toLowerCase() ?? '';
     if (path.endsWith('.svga')) return RoomGiftAnimationFormat.svga;
     if (path.endsWith('.pag')) return RoomGiftAnimationFormat.pag;
     if (path.endsWith('.vap')) return RoomGiftAnimationFormat.vap;
     if (path.endsWith('.mp4')) {
-      return gift.animationType == 6
-          ? RoomGiftAnimationFormat.mp4
-          : RoomGiftAnimationFormat.vap;
+      return mp4 ? RoomGiftAnimationFormat.mp4 : RoomGiftAnimationFormat.vap;
     }
     return RoomGiftAnimationFormat.native;
   }
 
-  Future<RoomGiftAnimationResource> resolve(RoomGift gift) async {
-    final format = formatFor(gift);
-    final mode = (gift.videoMode ?? gift.direction ?? 1).clamp(0, 4);
+  Future<RoomGiftAnimationResource> resolve(RoomGift gift) => resolveSource(
+    AppAssets.roomGiftLocalAnimations[gift.id] ?? gift.animationUrl ?? '',
+    format: formatFor(gift),
+    mode: (gift.videoMode ?? gift.direction ?? 1).clamp(0, 4),
+  );
+
+  /// Shares the bounded, anonymous CDN cache with other room artwork.
+  Future<RoomGiftAnimationResource> resolveSource(
+    String source, {
+    required RoomGiftAnimationFormat format,
+    int mode = 1,
+  }) async {
     if (format == RoomGiftAnimationFormat.native) {
       return RoomGiftAnimationResource(format: format, videoMode: mode);
     }
-    final source =
-        AppAssets.roomGiftLocalAnimations[gift.id] ?? gift.animationUrl ?? '';
     File file;
     if (source.startsWith('assets/')) {
       final bytes = (await rootBundle.load(source)).buffer.asUint8List();

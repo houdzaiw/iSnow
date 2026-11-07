@@ -7,6 +7,8 @@ import '../../../theme/app_theme.dart';
 import '../mine/profile_menu_item.dart';
 import '../mine/profile_models.dart';
 import '../mine/profile_state.dart';
+import '../membership/membership_state.dart';
+import '../membership/views/membership_widgets.dart';
 
 class ProfileContentView extends StatelessWidget {
   const ProfileContentView({
@@ -18,6 +20,9 @@ class ProfileContentView extends StatelessWidget {
     required this.onMetricAction,
     required this.onBadgeAction,
     required this.onMenuAction,
+    required this.membership,
+    required this.onVipTap,
+    required this.onNobleTap,
   });
 
   final ProfileState state;
@@ -27,6 +32,8 @@ class ProfileContentView extends StatelessWidget {
   final ValueChanged<ProfileMetricItem> onMetricAction;
   final ValueChanged<ProfileBadgeItem> onBadgeAction;
   final ValueChanged<ProfileMenuItem> onMenuAction;
+  final MembershipState membership;
+  final VoidCallback onVipTap, onNobleTap;
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +83,11 @@ class ProfileContentView extends StatelessWidget {
                                   onMetricAction: onMetricAction,
                                 ),
                                 const SizedBox(height: 18),
-                                const _ProfileMembershipCards(),
+                                _ProfileMembershipCards(
+                                  state: membership,
+                                  onVipTap: onVipTap,
+                                  onNobleTap: onNobleTap,
+                                ),
                                 const SizedBox(height: 16),
                                 _ProfileShortcutCard(
                                   items: state.quickItems,
@@ -427,21 +438,46 @@ class _ProfileMetrics extends StatelessWidget {
 }
 
 class _ProfileMembershipCards extends StatelessWidget {
-  const _ProfileMembershipCards();
+  const _ProfileMembershipCards({
+    required this.state,
+    required this.onVipTap,
+    required this.onNobleTap,
+  });
+  final MembershipState state;
+  final VoidCallback onVipTap, onNobleTap;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: MediaQuery.of(context).size.width - 24,
-      height: 68,
+      height: MembershipTheme.homeHeight,
       child: Row(
-        children: const [
+        children: [
           Expanded(
-            child: _ProfileImageCard(asset: AppAssets.lanhuProfileVipCard),
+            child: _ProfileImageCard(
+              asset: state.vip?.user.userLevel?.vipIcon.isNotEmpty == true
+                  ? state.vip!.user.userLevel!.vipIcon
+                  : AppAssets.lanhuProfileVipCard,
+              imageRegion: state.vip?.user.userLevel?.vipIcon.isNotEmpty == true
+                  ? null
+                  : MembershipTheme.homeVipLogo,
+              title: (state.vip?.level ?? 0) > 0
+                  ? 'VIP ${state.vip!.level}'
+                  : 'MY VIP',
+              subtitle: vipMembershipStatus(context, state),
+              gradient: MembershipTheme.vipCardGradient,
+              onTap: onVipTap,
+            ),
           ),
-          SizedBox(width: 5),
+          const SizedBox(width: MembershipTheme.homeGap),
           Expanded(
-            child: _ProfileImageCard(asset: AppAssets.lanhuProfileNobleCard),
+            child: _ProfileImageCard(
+              asset: AppAssets.lanhuProfileNobleCard,
+              imageRegion: MembershipTheme.homeNobleLogo,
+              title: context.l10n.t('membership.noble'),
+              subtitle: nobleMembershipStatus(context, state),
+              gradient: MembershipTheme.nobleCardGradient,
+              onTap: onNobleTap,
+            ),
           ),
         ],
       ),
@@ -450,15 +486,93 @@ class _ProfileMembershipCards extends StatelessWidget {
 }
 
 class _ProfileImageCard extends StatelessWidget {
-  const _ProfileImageCard({required this.asset});
-
-  final String asset;
+  const _ProfileImageCard({
+    required this.asset,
+    required this.title,
+    required this.subtitle,
+    required this.gradient,
+    required this.onTap,
+    this.imageRegion,
+  });
+  final String asset, title, subtitle;
+  final Rect? imageRegion;
+  final Gradient gradient;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(AppRadius.md),
-      child: Image.asset(asset, fit: BoxFit.cover),
+    return Semantics(
+      button: true,
+      label: '$title, $subtitle',
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: MembershipTheme.radius,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: gradient,
+            borderRadius: MembershipTheme.radius,
+          ),
+          child: Padding(
+            padding: MembershipTheme.smallPadding,
+            child: Row(
+              children: [
+                if (imageRegion == null)
+                  MembershipImage(asset, size: MembershipTheme.homeBadge)
+                else
+                  _ProfileCardGraphic(asset: asset, region: imageRegion!),
+                MembershipTheme.rowGap,
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: MembershipTheme.cardTitle,
+                      ),
+                      Text(
+                        subtitle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: MembershipTheme.cardDetail,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Clips only the original crown/star artwork; baked promotional text stays out.
+class _ProfileCardGraphic extends StatelessWidget {
+  const _ProfileCardGraphic({required this.asset, required this.region});
+  final String asset;
+  final Rect region;
+  @override
+  Widget build(BuildContext context) {
+    final scale = MembershipTheme.homeBadge / region.width;
+    return SizedBox.square(
+      dimension: MembershipTheme.homeBadge,
+      child: ClipRect(
+        child: Stack(
+          children: [
+            Positioned(
+              left: -region.left * scale,
+              top: -region.top * scale,
+              width: MembershipTheme.homeImageSize.width * scale,
+              height: MembershipTheme.homeImageSize.height * scale,
+              child: Image.asset(asset, fit: BoxFit.fill),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

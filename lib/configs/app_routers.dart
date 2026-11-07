@@ -24,6 +24,11 @@ import '../classes/profile/settings_page.dart';
 import '../classes/rank/rank_page.dart';
 import '../classes/room/room_page.dart';
 import '../classes/wallet/wallet_page.dart';
+import '../classes/profile/membership/membership_models.dart';
+import '../classes/profile/membership/views/membership_page.dart';
+import '../classes/profile/membership/views/membership_settings_page.dart';
+import '../classes/profile/membership/views/membership_history_page.dart';
+import '../classes/profile/membership/views/membership_titles_page.dart';
 import '../classes/launch_page.dart';
 import '../classes/oauth/login_detail_page.dart';
 import '../classes/oauth/register_page.dart';
@@ -39,6 +44,42 @@ final GoRouter goRouter = GoRouter(
   navigatorKey: appRootNavigatorKey,
   initialLocation: _initialRoute,
   routes: [
+    GoRoute(
+      path: '/vip',
+      name: 'vip',
+      builder: (context, state) => MembershipPage(
+        kind: MembershipKind.vip,
+        initialLevel: int.tryParse(state.uri.queryParameters['level'] ?? ''),
+      ),
+    ),
+    GoRoute(
+      path: '/vip/settings',
+      name: 'vip-settings',
+      builder: (context, state) => const MembershipSettingsPage(),
+    ),
+    GoRoute(
+      path: '/vip/history',
+      name: 'vip-history',
+      builder: (context, state) =>
+          const MembershipHistoryPage(kind: MembershipKind.vip),
+    ),
+    GoRoute(
+      path: '/noble',
+      name: 'noble',
+      builder: (context, state) =>
+          const MembershipPage(kind: MembershipKind.noble),
+    ),
+    GoRoute(
+      path: '/noble/history',
+      name: 'noble-history',
+      builder: (context, state) =>
+          const MembershipHistoryPage(kind: MembershipKind.noble),
+    ),
+    GoRoute(
+      path: '/noble/titles',
+      name: 'noble-titles',
+      builder: (context, state) => const MembershipTitlesPage(),
+    ),
     // 启动页（不需要底部导航）
     GoRoute(
       path: '/launch',

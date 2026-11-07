@@ -302,6 +302,42 @@ class ImRepository {
     _throwIfFailed(response.code, response.desc);
   }
 
+  /// Send Nady's Party card to a chosen conversation.
+  Future<void> sendPartyInvitation({
+    required String targetUID,
+    required Map<String, dynamic> party,
+    required bool Function() isCurrent,
+  }) async {
+    await ensureReady();
+    final revision = session.revision;
+    _check(revision, isCurrent);
+    final manager = _sdk.getMessageManager();
+    final created = await manager.createCustomMessage(
+      data: jsonEncode({
+        'type': 'shareParty',
+        'payload': jsonEncode(party),
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      }),
+      desc: '[Share Party]',
+      extension: '',
+    );
+    _check(revision, isCurrent);
+    _throwIfFailed(created.code, created.desc);
+    final message = created.data?.messageInfo;
+    if (message == null) {
+      throw const NadyApiException(
+        message: 'Failed to create party invitation',
+      );
+    }
+    final response = await manager.sendMessage(
+      message: message,
+      receiver: targetUID,
+      groupID: '',
+    );
+    _check(revision, isCurrent);
+    _throwIfFailed(response.code, response.desc);
+  }
+
   Future<V2TimAdvancedMsgListener> addC2CMessageListener({
     required String targetUID,
     required ValueChanged<V2TimMessage> onMessageReceived,

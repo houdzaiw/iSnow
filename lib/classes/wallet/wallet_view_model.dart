@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
 import '../../manager/api_error_message.dart';
+import '../../manager/account_balance_revision.dart';
 import 'wallet_models.dart';
 import 'wallet_payment_service.dart';
 import 'wallet_repository.dart';
@@ -24,18 +25,32 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
   final Map<String, ProductDetails> _iapProducts = <String, ProductDetails>{};
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
   bool? _iapAvailable;
+  int _purseRevision = 0;
 
   @override
   WalletState build() {
+    ref.listen(accountBalanceRevisionProvider, (_, _) => refreshPurse());
     _purchaseSubscription = _paymentService.purchaseStream.listen(
       _handlePurchaseUpdates,
       onError: _handlePurchaseStreamError,
     );
     ref.onDispose(() {
+      _purseRevision++;
       unawaited(_purchaseSubscription?.cancel());
     });
     Future.microtask(_initialize);
     return const WalletState(isLoading: true);
+  }
+
+  /// Refresh only the balance after a membership debit; do not restart billing.
+  Future<void> refreshPurse() async {
+    final revision = ++_purseRevision;
+    try {
+      final purse = await _repository.fetchPurse();
+      if (revision == _purseRevision) state = state.copyWith(purse: purse);
+    } catch (_) {
+      /* Existing balance remains visible until a manual refresh. */
+    }
   }
 
   Future<void> _initialize() async {

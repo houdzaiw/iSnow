@@ -1,3 +1,5 @@
+import 'user_membership_level.dart';
+
 enum NadyLoginStatus {
   none,
   normal,
@@ -58,6 +60,8 @@ class UserData {
     this.phone,
     this.roomId,
     this.userStatus,
+    this.userLevel,
+    this.roleType,
   });
 
   final int? uid;
@@ -73,6 +77,8 @@ class UserData {
   final String? phone;
   final String? roomId;
   final NadyLoginStatus? userStatus;
+  final UserMembershipLevel? userLevel;
+  final int? roleType;
 
   String? get userId => uid?.toString();
   String? get email => null;
@@ -93,6 +99,12 @@ class UserData {
       phone: json['phone']?.toString(),
       roomId: json['roomId']?.toString(),
       userStatus: nadyLoginStatusFromJson(json['userStatus']),
+      roleType: int.tryParse('${json['roleType']}'),
+      userLevel: json['userLevel'] is Map
+          ? UserMembershipLevel.fromJson(
+              (json['userLevel'] as Map).cast<String, dynamic>(),
+            )
+          : null,
     );
   }
 
@@ -110,6 +122,8 @@ class UserData {
     String? phone,
     String? roomId,
     NadyLoginStatus? userStatus,
+    UserMembershipLevel? userLevel,
+    int? roleType,
   }) {
     return UserData(
       uid: uid ?? this.uid,
@@ -125,6 +139,8 @@ class UserData {
       phone: phone ?? this.phone,
       roomId: roomId ?? this.roomId,
       userStatus: userStatus ?? this.userStatus,
+      userLevel: userLevel ?? this.userLevel,
+      roleType: roleType ?? this.roleType,
     );
   }
 
@@ -142,6 +158,8 @@ class UserData {
       'areaCode': areaCode,
       'phone': phone,
       'roomId': roomId,
+      if (userLevel != null) 'userLevel': userLevel!.toJson(),
+      if (roleType != null) 'roleType': roleType,
       'userStatus': userStatus == null
           ? null
           : nadyLoginStatusToJson(userStatus!),

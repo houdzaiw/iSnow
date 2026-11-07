@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../manager/api_error_message.dart';
+import '../../../../manager/account_balance_revision.dart';
 import '../../room_repository.dart';
 import '../models/room_gift_models.dart';
 import '../room_gift_repository.dart';
@@ -20,6 +21,10 @@ final roomGiftViewModelProvider = StateNotifierProvider.autoDispose
         ),
       );
       final roomRepository = ref.read(roomRepositoryProvider);
+      ref.listen(
+        accountBalanceRevisionProvider,
+        (_, _) => unawaited(model.refreshBalance()),
+      );
       var syncedRoom = roomRepository.roomState;
       void syncAudience() {
         final audience = roomRepository.giftAudience(roomId);

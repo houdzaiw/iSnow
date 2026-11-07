@@ -1,0 +1,217 @@
+{
+  "reference": "Nady native membership screens; copied without raster modification",
+  "assets": [
+    {
+      "asset": "assets/lanhu/profile/membership/vip_badge.webp",
+      "source": "/Users/huili/nady/assets/images/ic_vip.webp",
+      "sha256": "078cb890530c6f630c5eca836281253395e2141979f34a3c32b8d259020cb3c2",
+      "usage": "vip_badge"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/noble_badge.webp",
+      "source": "/Users/huili/nady/assets/images/aristocracy_icon.webp",
+      "sha256": "3cf47a4bafee9a094e8e931a145acf286cdde129d8ec6586474620e05ac01b4e",
+      "usage": "noble_badge"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/coin.webp",
+      "source": "/Users/huili/nady/assets/images/ic_others_coin.webp",
+      "sha256": "62827abf1bd1775290f64b4bb45ea6707c87628029a9f3a921dd29b83ff4cf43",
+      "usage": "coin"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/back.webp",
+      "source": "/Users/huili/nady/assets/images/app_back.webp",
+      "sha256": "5e0337b9414b9abe0690c189e91220776dbafc78849be7be51458979c4525b1f",
+      "usage": "back"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/settings.webp",
+      "source": "/Users/huili/nady/assets/images/ic_outline_setting.webp",
+      "sha256": "96fef4b2582b67791624ff16dc7cc6bb701435afb3312726e33644f3a43fa138",
+      "usage": "settings"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/history.webp",
+      "source": "/Users/huili/nady/assets/images/ic_outline_order.webp",
+      "sha256": "eb57274cd544a66082ed7c4ca0c06f018c0c3425d3290afe42ebb5ee4b09bfef",
+      "usage": "history"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/rules.webp",
+      "source": "/Users/huili/nady/assets/images/ic_outline_rules.webp",
+      "sha256": "0fe4d788efdfd653930311e6f0e7a8325afdc02c5f695bc3bea995f74cddda3e",
+      "usage": "rules"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/arrow.webp",
+      "source": "/Users/huili/nady/assets/images/ic_fill_aristocracy_arrow.webp",
+      "sha256": "e8dc6c487127a41d3939f76acb2d4c7d3cdc087eb8d7a4d5839c393cb712cc2c",
+      "usage": "arrow"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/vip_1_background.webp",
+      "source": "/Users/huili/nady/assets/images/vip1_top_bg.webp",
+      "sha256": "e80291ac49b0935d7e3da8b05c1f5cacd480d9d1349b9f84d1cd8104492b5912",
+      "usage": "vip_1_background"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/vip_1_card.webp",
+      "source": "/Users/huili/nady/assets/images/vip1_center_top_card_bg.webp",
+      "sha256": "8ac64d7eeead31881fe21c74087e7974045148bad8a35c76acb5c2fabbf095b0",
+      "usage": "vip_1_card"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/vip_2_background.webp",
+      "source": "/Users/huili/nady/assets/images/vip2_top_bg.webp",
+      "sha256": "3a1764feb24afcf1b805321b9c18ce1f150b1315449bfa724730b5c832c89338",
+      "usage": "vip_2_background"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/vip_2_card.webp",
+      "source": "/Users/huili/nady/assets/images/vip2_center_top_card_bg.webp",
+      "sha256": "bb019473d3bb101136565f3c07b29de02a8e1f28358c8f94e72e73cbc469d042",
+      "usage": "vip_2_card"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/vip_3_background.webp",
+      "source": "/Users/huili/nady/assets/images/vip3_top_bg.webp",
+      "sha256": "bbc4e939cc5b90793899f06c652e069d7fce2e4c55cd797f8d543f7808b80cb4",
+      "usage": "vip_3_background"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/vip_3_card.webp",
+      "source": "/Users/huili/nady/assets/images/vip3_center_top_card_bg.webp",
+      "sha256": "eea353b60f5b2f84d7dac6729ea431e170552c140e778bfdb1db8c81ea44d023",
+      "usage": "vip_3_card"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/vip_4_background.webp",
+      "source": "/Users/huili/nady/assets/images/vip4_top_bg.webp",
+      "sha256": "157416102c59250796ff772f3e2f28025be1e5191335387fbeb3b76217700740",
+      "usage": "vip_4_background"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/vip_4_card.webp",
+      "source": "/Users/huili/nady/assets/images/vip4_center_top_card_bg.webp",
+      "sha256": "50bc510422a2eb8c3421594a7e1c079b4c0dee1fb1312191bfc6ae95b3589f92",
+      "usage": "vip_4_card"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/vip_5_background.webp",
+      "source": "/Users/huili/nady/assets/images/vip5_top_bg.webp",
+      "sha256": "7dbb793d40b903bdfea04cdc268b9d9c913dd617049beabba29548843fa168c4",
+      "usage": "vip_5_background"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/vip_5_card.webp",
+      "source": "/Users/huili/nady/assets/images/vip5_center_top_card_bg.webp",
+      "sha256": "2bcb16c2a986af2bd367a5bacbaee0ae4458aa80caa8b0d6f4f965a1b85a126e",
+      "usage": "vip_5_card"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/vip_6_background.webp",
+      "source": "/Users/huili/nady/assets/images/vip6_top_bg.webp",
+      "sha256": "99e707ca3111bc516de6cf801ffa3e9c6743e679301091b6ad7e6dd0775c777e",
+      "usage": "vip_6_background"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/vip_6_card.webp",
+      "source": "/Users/huili/nady/assets/images/vip6_center_top_card_bg.webp",
+      "sha256": "ec44c7696d5dffd33451129aff7a2bfb3a8b67b3227ecfb920e73f4fd3fab94a",
+      "usage": "vip_6_card"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/noble_1_background.webp",
+      "source": "/Users/huili/nady/assets/images/aristocracy_top_baron.webp",
+      "sha256": "1c77de5ca5aab60de63b84d51580ba7ecfbbea93033db5ff59823367a24983b9",
+      "usage": "noble_1_background"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/noble_1_container.webp",
+      "source": "/Users/huili/nady/assets/images/aristocracy_container_baron.webp",
+      "sha256": "1728abcd92c6a3511218c6b222b394e12a721693b67194f3e1b8e6fb2123c5cb",
+      "usage": "noble_1_container"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/noble_2_background.webp",
+      "source": "/Users/huili/nady/assets/images/aristocracy_top_viscount.webp",
+      "sha256": "5929a1be6399018c727d2033d1e62819eeb708f16c24cf99641bd12f599840ac",
+      "usage": "noble_2_background"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/noble_2_container.webp",
+      "source": "/Users/huili/nady/assets/images/aristocracy_container_viscount.webp",
+      "sha256": "ffcfb4e25d446542fe655672d5ca95d8c0c354e39508c816296cc4ef4b8b98a1",
+      "usage": "noble_2_container"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/noble_3_background.webp",
+      "source": "/Users/huili/nady/assets/images/aristocracy_top_marquis.webp",
+      "sha256": "cb52f7276f2032ddcfc86abb362dbac8ff51bce5ce9a221984bd95f2d3f6559e",
+      "usage": "noble_3_background"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/noble_3_container.webp",
+      "source": "/Users/huili/nady/assets/images/aristocracy_container_marquis.webp",
+      "sha256": "e4ddfd0979278e4a95ee5b169e90d189fc9f6f53403c3b5479d876fc4c8108d8",
+      "usage": "noble_3_container"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/noble_4_background.webp",
+      "source": "/Users/huili/nady/assets/images/aristocracy_top_duke.webp",
+      "sha256": "ba5b805cf2924394f17f469bb811224b4096303d2b16842401bf4d3d5c950d1d",
+      "usage": "noble_4_background"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/noble_4_container.webp",
+      "source": "/Users/huili/nady/assets/images/aristocracy_container_duke.webp",
+      "sha256": "c2dd6e86ec9e5665554cd191e8ab3a10d93a207cddb63021a062db39c865794d",
+      "usage": "noble_4_container"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/noble_5_background.webp",
+      "source": "/Users/huili/nady/assets/images/aristocracy_top_king.webp",
+      "sha256": "5c3a9bd5bd66925c4ce6fec71019c4a0664b4e06b7b38b64dbd07a87ba775441",
+      "usage": "noble_5_background"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/noble_5_container.webp",
+      "source": "/Users/huili/nady/assets/images/aristocracy_container_king.webp",
+      "sha256": "e312e5900b0e28243f95c84f39fb8e7e116519ba6fd054a3d93698a10fd764a7",
+      "usage": "noble_5_container"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/noble_6_background.webp",
+      "source": "/Users/huili/nady/assets/images/aristocracy_top_emperor.webp",
+      "sha256": "09244504cc7e176a26fb2c4a8623724ae914b47f12069930103831a3b0e347ba",
+      "usage": "noble_6_background"
+    },
+    {
+      "asset": "assets/lanhu/profile/membership/noble_6_container.webp",
+      "source": "/Users/huili/nady/assets/images/aristocracy_container_emperor.webp",
+      "sha256": "b86f292ff8a8379f4571ed3170b66a3737b85754152a2932a749e65139486e26",
+      "usage": "noble_6_container"
+    }
+  ],
+  "reused_home_artwork": [
+    {
+      "asset": "assets/lanhu/profile/profile_vip_card.png",
+      "source_region": [
+        65,
+        65,
+        150,
+        150
+      ]
+    },
+    {
+      "asset": "assets/lanhu/profile/profile_noble_card.png",
+      "source_region": [
+        0,
+        40,
+        195,
+        195
+      ]
+    }
+  ]
+}

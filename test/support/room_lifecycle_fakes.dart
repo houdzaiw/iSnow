@@ -85,6 +85,15 @@ class FakeRoomHttp implements HttpDioManager {
   final clearMessagesRequests = <Map<String, dynamic>>[];
   Map<String, dynamic> clearMessagesResponse = const {'code': 200};
   String? roomIdentity;
+  int? enterSilenceEndTime;
+  Map<String, dynamic>? rocketData;
+  Completer<void>? rocketGate;
+  final publicMessages = <Map<String, dynamic>>[];
+  Map<String, dynamic> publicMessageResponse = const {'code': 200, 'data': 1};
+  List<Map<String, dynamic>> micList = const [
+    {'position': 0, 'uid': 10},
+  ];
+  final micUpRequests = <Map<String, dynamic>>[];
   bool? roomIsFollowed;
   int? roomOwnerUid;
   int infoCalls = 0;
@@ -103,6 +112,17 @@ class FakeRoomHttp implements HttpDioManager {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
+    if (path == HttpApi.roomMsgPush) {
+      publicMessages.add(Map<String, dynamic>.from(data as Map));
+      return publicMessageResponse;
+    }
+    if (path == HttpApi.roomMicUp) {
+      micUpRequests.add(Map<String, dynamic>.from(data as Map));
+      return {
+        'code': 200,
+        'data': {'micListInfo': micList},
+      };
+    }
     if (path == HttpApi.roomChatClean) {
       clearMessagesRequests.add(Map<String, dynamic>.from(data as Map));
       final response = clearMessagesResponse;
@@ -124,6 +144,8 @@ class FakeRoomHttp implements HttpDioManager {
           'roomId': canonicalRoomId ?? data['roomId'],
           'agoraToken': 'agora-token',
           if (roomIdentity != null) 'identity': roomIdentity,
+          if (enterSilenceEndTime != null)
+            'silenceEndTime': enterSilenceEndTime,
         },
       };
     }
@@ -146,6 +168,11 @@ class FakeRoomHttp implements HttpDioManager {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
+    if (path == HttpApi.roomActiveRocket) {
+      final data = rocketData;
+      await rocketGate?.future;
+      return {'code': 200, 'data': data};
+    }
     if (path == HttpApi.roomAudienceList) {
       audienceRequests.add(Map<String, dynamic>.from(queryParameters!));
       final users = List<Map<String, dynamic>>.of(audience);
@@ -166,12 +193,7 @@ class FakeRoomHttp implements HttpDioManager {
       return {'code': 200, 'data': roomInfo};
     }
     if (path == HttpApi.roomMicListInfo) {
-      return {
-        'code': 200,
-        'data': [
-          {'position': 0, 'uid': 10},
-        ],
-      };
+      return {'code': 200, 'data': micList};
     }
     if (path == HttpApi.agoraToken) return {'code': 200, 'data': 'token'};
     throw StateError('Unexpected GET $path');

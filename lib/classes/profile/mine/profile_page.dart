@@ -9,6 +9,7 @@ import 'profile_menu_item.dart';
 import 'profile_state.dart';
 import 'profile_view_model.dart';
 import '../views/profile_content_view.dart';
+import '../membership/membership_view_model.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -19,12 +20,20 @@ class ProfilePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(profileViewModelProvider);
+    final membership = ref.watch(membershipViewModelProvider);
 
     return Scaffold(
       body: ProfileContentView(
         state: state,
-        onRefresh: () =>
+        membership: membership,
+        onVipTap: () => _openMembership(context, ref, '/vip'),
+        onNobleTap: () => _openMembership(context, ref, '/noble'),
+        onRefresh: () async {
+          await Future.wait([
             ref.read(profileViewModelProvider.notifier).loadProfile(),
+            ref.read(membershipViewModelProvider.notifier).load(force: true),
+          ]);
+        },
         onEditProfile: () => context.push('/edit-profile'),
         onAvatarAction: () => _openHomepage(context, state),
         onMetricAction: (item) =>
@@ -33,6 +42,19 @@ class ProfilePage extends ConsumerWidget {
         onMenuAction: (item) => _handleMenuAction(context, ref, item),
       ),
     );
+  }
+
+  Future<void> _openMembership(
+    BuildContext context,
+    WidgetRef ref,
+    String path,
+  ) async {
+    await context.push(path);
+    if (!context.mounted) return;
+    await ref.read(membershipViewModelProvider.notifier).load(force: true);
+    if (context.mounted) {
+      await ref.read(profileViewModelProvider.notifier).loadProfile();
+    }
   }
 
   void _openHomepage(BuildContext context, ProfileState state) {
@@ -121,7 +143,6 @@ class ProfilePage extends ConsumerWidget {
         await _confirmLogout(context, ref);
         break;
       case 'wallet':
-      case 'recharge':
         _openWalletPage(context);
         break;
       case 'invite-friends':

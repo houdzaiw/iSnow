@@ -21,7 +21,12 @@ void main() {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          home: const LoginDetailPage(),
+          // This picker test exercises an explicitly supplied Kyrgyzstan code;
+          // the app's current default country is Saudi Arabia.
+          home: const LoginDetailPage(
+            initialAreaCode: '996',
+            initialCountryCode: 'KG',
+          ),
         ),
       ),
     );

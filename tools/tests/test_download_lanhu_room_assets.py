@@ -8,6 +8,19 @@ from tools import download_lanhu_room_assets as downloader
 
 
 class LanhuRoomAssetsTest(unittest.TestCase):
+    def test_profile_exports_are_scoped_to_the_exact_design_and_layer(self):
+        for design_id, exports in downloader.ROOM_PROFILE_EXPORTS.items():
+            expected = [(name, f"https://example.com/{name}")
+                        for name in exports.values()]
+            sketch = {"artboard": {"layers": [
+                {"id": "unrelated", "name": "Frame", "image": {"imageUrl": "wrong.png"}},
+                *[{"id": layer_id, "image": {"imageUrl": url}}
+                  for layer_id, (_, url) in zip(exports, expected)],
+            ]}}
+            self.assertEqual(downloader._room_profile_assets(sketch, design_id), expected)
+            with self.assertRaisesRegex(RuntimeError, "exports missing"):
+                downloader._room_profile_assets({}, design_id)
+
     def test_music_uses_exact_layer_ids_not_generated_css_names(self):
         layers = [{"name": "section_30", "id": "other", "image": {
             "imageUrl": "wrong.png"}}]

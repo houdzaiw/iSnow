@@ -2,6 +2,12 @@
 
 房间语聊 UI 必须严格执行以下资源规则。
 
+## 房间资料、用户卡和 Party History
+
+- 三张稿分别使用 `a1e67d83-ec46-4bd1-999b-de5c48569c7d`、`82047090-c466-4e71-97be-4879e7136278`、`8b867e6b-e9e5-4346-abbb-cb3fe1501601` 为上下文，现有下载脚本按原始 layer id 提取十张通用按钮图片，manifest 同时记录设计 URL。
+- 样例人物、头像框、徽章和派对海报由真实接口数据驱动。等级图标配合真实等级数值显示，未拥有的会员装饰隐藏。头像框动画复用 RoomAnimatedArtwork，加载失败使用红色缺省图。
+- 所有新增视觉参数集中在 RoomProfileTheme。管理菜单复用现有 More 图片，真实开关和表单控件负责交互，禁止 Flutter Icon/Icons。详细说明见 `docs/room/room_profile_lanhu_ui.md`。
+
 ## Lanhu Asset Download
 
 - 蓝湖 MCP 设计稿中的房间图标、切图、徽章等图片资源，必须自动下载到 `assets/lanhu/room/`。
@@ -21,6 +27,8 @@
 - `pubspec.yaml` 必须包含 `assets/lanhu/room/`。
 
 ## Flutter Room UI
+
+- Edit info 使用 `image_id=f9cf062d-4932-4ca6-8eaa-e11434d3f766` 的真实相机导出，原始图层 `15457:347946` 对应 `room_edit_camera.png`。返回箭头与 Party History 的资源 URL 完全相同，直接复用 `AppAssets.roomPartyHistoryBack`，不重复下载。下载脚本、AppAssets 与 manifest 必须同步维护；名称/简介的动态计数和输入框必须使用真实表单控件。
 
 - `lib/classes/room/` 下的页面和组件禁止使用 Flutter 内置 `Icon`/`Icons.*` 作为视觉图标。
 - 房间 UI 的按钮、麦位、底部工具栏、提示、管理操作等图标必须使用 `Image.asset` 或封装后的图片组件。

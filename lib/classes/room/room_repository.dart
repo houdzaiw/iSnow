@@ -14,6 +14,7 @@ import '../../model/room_socket_message.dart';
 import '../../model/server_response.dart';
 import '../../model/user_profile.dart';
 import 'gift/models/room_gift_models.dart';
+import 'interaction/room_rocket.dart';
 
 final roomRepositoryProvider = Provider<RoomRepository>(
   (ref) => RoomRepository(),
@@ -185,6 +186,19 @@ class RoomRepository {
       _roomManager.seekMusic(roomId, position);
   Future<void> setMusicVolume(String roomId, int volume) =>
       _roomManager.setMusicVolume(roomId, volume);
+
+  Future<RoomRocket?> activeRocket(String roomId) async {
+    final response = await _httpManager.get(
+      HttpApi.roomActiveRocket,
+      queryParameters: {'roomId': roomId},
+    );
+    final server = NadyServerResponse<RoomRocket?>.fromJson(
+      _asMap(response),
+      RoomRocket.parse,
+    );
+    if (!server.isSuccess) throw server.toException();
+    return server.data;
+  }
 
   Future<int?> sendTextMessage({required String roomId, required String text}) {
     return sendRoomMessage(

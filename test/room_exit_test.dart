@@ -614,7 +614,7 @@ void main() {
       }
       await expectLater(
         find.byKey(const ValueKey('room-lifecycle-snapshot')),
-        matchesGoldenFile('goldens/room_exit_choices.png'),
+        matchesGoldenFile('goldens/room_interactions_v1/room_exit_choices.png'),
       );
       await tester.tap(find.byKey(const ValueKey('room-exit-keep')));
       await tester.pump();

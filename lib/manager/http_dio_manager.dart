@@ -415,6 +415,19 @@ class HttpDioManager {
       );
       return;
     }
+    if (const {
+      HttpApi.roomInfo,
+      HttpApi.roomUpdateInfo,
+    }.contains(response.requestOptions.path)) {
+      final body = response.data;
+      debugPrint(
+        '[NadyAPI] <- ${response.requestOptions.path} '
+        'http=${response.statusCode} '
+        'code=${body is Map ? body['code'] : null} '
+        'traceId=${body is Map ? body['traceId'] : null} room data redacted',
+      );
+      return;
+    }
     final prefix =
         response.requestOptions.extra[_anonymousExternalRequest] == true
         ? '[ExternalHTTP]'
@@ -507,6 +520,10 @@ class HttpDioManager {
     }
     final params = _requestParamsForSign(options);
     return params.map((key, value) {
+      if (options.path == HttpApi.roomUpdateInfo &&
+          const {'latitude', 'longitude', 'address'}.contains(key)) {
+        return MapEntry(key, '[redacted]');
+      }
       if (key.toLowerCase().contains('passwd') ||
           key.toLowerCase().contains('password') ||
           key.toLowerCase().contains('sms')) {

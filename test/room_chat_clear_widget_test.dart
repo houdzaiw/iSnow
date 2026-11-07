@@ -5,7 +5,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:project/classes/room/interaction/room_interaction_repository.dart';
 import 'package:project/classes/room/room_page.dart';
+import 'package:project/manager/http_api.dart';
 import 'package:project/classes/room/room_repository.dart';
 import 'package:project/localization/app_localizations.dart';
 import 'package:project/model/room_socket_message.dart';
@@ -15,6 +17,69 @@ import 'support/room_lifecycle_fakes.dart';
 
 void main() {
   for (final width in [320.0, 375.0, 430.0]) {
+    testWidgets('opens room profile, party and sender card at $width', (
+      tester,
+    ) async {
+      final api = _EntryApi();
+      final fixture = await _openRoom(
+        tester,
+        width: width,
+        interactionApi: api,
+      );
+      await tester.tap(find.byKey(const ValueKey('room-cover-details')));
+      await tester.pumpAndSettle();
+      expect(find.text('Profile'), findsOneWidget);
+      expect(find.bySemanticsLabel('Edit info'), findsOneWidget);
+      await tester.tap(find.text('Party'));
+      await tester.pumpAndSettle();
+      expect(find.text('Party History'), findsOneWidget);
+      expect(api.partyQueries.single, {
+        'roomId': 'first',
+        'history': false,
+        'pageNum': 1,
+      });
+      await tester.tap(find.text('Party History'));
+      await tester.pumpAndSettle();
+      expect(api.partyQueries.last['history'], isTrue);
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+
+      fixture.socket.controller.add(
+        const RoomSocketMessage(
+          channel: 'room:first',
+          event: 'RoomScreenMessageEvent',
+          raw: {},
+          msgId: 'card-test',
+          payload: {
+            'from': {'uid': 20, 'nick': 'Peer'},
+            'msg': 'Hello',
+          },
+        ),
+      );
+      await tester.pump();
+      final avatar = find.byKey(const ValueKey('room-chat-avatar-card-test'));
+      await tester.tap(avatar);
+      await tester.pumpAndSettle();
+      expect(find.text('Peer'), findsOneWidget);
+      expect(find.text('ID:20002'), findsOneWidget);
+      expect(find.text('Send Gift'), findsOneWidget);
+      expect(find.text('Set as Admin'), findsNothing);
+      await tester.tap(find.byTooltip('Manage member'));
+      await tester.pumpAndSettle();
+      expect(find.text('Set as Admin'), findsOneWidget);
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(api.userQueries.single, {'roomId': 'first', 'targetUid': 20});
+      await tester.tap(find.bySemanticsLabel('@'));
+      await tester.pumpAndSettle();
+      final input = tester.widget<TextField>(find.byType(TextField));
+      expect(input.controller!.text, '@Peer ');
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+    });
+
     testWidgets('chat input loads the supplied send artwork at $width', (
       tester,
     ) async {
@@ -116,6 +181,7 @@ Future<RoomLifecycleFixture> _openRoom(
   WidgetTester tester, {
   double width = 375,
   int ownerUid = 10,
+  RoomInteractionRepository? interactionApi,
 }) async {
   tester.view.physicalSize = Size(width, 812);
   tester.view.devicePixelRatio = 1;
@@ -134,7 +200,11 @@ Future<RoomLifecycleFixture> _openRoom(
   );
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [roomRepositoryProvider.overrideWithValue(repository)],
+      overrides: [
+        roomRepositoryProvider.overrideWithValue(repository),
+        if (interactionApi != null)
+          roomInteractionRepositoryProvider.overrideWithValue(interactionApi),
+      ],
       child: ScreenUtilInit(
         designSize: const Size(375, 812),
         builder: (_, __) => const MaterialApp(
@@ -163,3 +233,29 @@ void _emitChat(RoomLifecycleFixture fixture, String text) =>
         raw: const {},
       ),
     );
+
+class _EntryApi extends RoomInteractionRepository {
+  final partyQueries = <Map<String, dynamic>>[];
+  final userQueries = <Map<String, dynamic>>[];
+
+  @override
+  Future<Object?> get(String path, Map<String, dynamic> query) async {
+    if (path == HttpApi.roomUserInfo) {
+      userQueries.add(query);
+      return {
+        'userBase': {'uid': 20, 'userNo': 20002, 'nick': 'Peer'},
+        'roomIdentity': 'ROOM_AUDIENCE',
+      };
+    }
+    throw StateError('Unexpected GET $path');
+  }
+
+  @override
+  Future<Object?> post(String path, Map<String, dynamic> body) async {
+    if (path == HttpApi.roomPartyList) {
+      partyQueries.add(body);
+      return [];
+    }
+    throw StateError('Unexpected POST $path');
+  }
+}

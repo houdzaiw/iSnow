@@ -43,6 +43,26 @@ android {
     buildTypes {
         getByName("debug") {
             signingConfig = signingConfigs.getByName("release")
+            val splitPerAbi = providers.gradleProperty("split-per-abi").orNull.toBoolean()
+            if (!splitPerAbi) {
+                val targetAbis = providers.gradleProperty("target-platform").orNull
+                    ?.split(",")
+                    ?.map { platform ->
+                        when (platform.trim()) {
+                            "android-arm" -> "armeabi-v7a"
+                            "android-arm64" -> "arm64-v8a"
+                            "android-x64" -> "x86_64"
+                            else -> error("Unsupported Flutter target platform: $platform")
+                        }
+                    }
+                if (!targetAbis.isNullOrEmpty()) {
+                    ndk {
+                        // Also filter third-party native libraries for the debug device.
+                        abiFilters.clear()
+                        abiFilters.addAll(targetAbis)
+                    }
+                }
+            }
         }
         getByName("release") {
             signingConfig = signingConfigs.getByName("release")

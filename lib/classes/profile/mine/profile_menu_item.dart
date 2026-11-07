@@ -68,11 +68,6 @@ class ProfileMenuData {
         action: 'wallet',
       ),
       ProfileMenuItem(
-        AppAssets.lanhuProfileQuickRecharge,
-        titleKey: 'profile.recharge',
-        action: 'recharge',
-      ),
-      ProfileMenuItem(
         AppAssets.lanhuProfileQuickInvite,
         titleKey: 'profile.inviteFriends',
         action: 'invite-friends',

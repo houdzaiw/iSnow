@@ -15,11 +15,15 @@ class RoomGiftEffectPlayer extends StatefulWidget {
   const RoomGiftEffectPlayer({
     super.key,
     required this.resource,
-    required this.gift,
+    this.gift,
+    this.repeat = false,
+    this.fit = BoxFit.contain,
     required this.onEnd,
   });
   final RoomGiftAnimationResource resource;
-  final RoomGift gift;
+  final RoomGift? gift;
+  final bool repeat;
+  final BoxFit fit;
   final VoidCallback onEnd;
   @override
   State<RoomGiftEffectPlayer> createState() => _RoomGiftEffectPlayerState();
@@ -37,7 +41,7 @@ class _RoomGiftEffectPlayerState extends State<RoomGiftEffectPlayer>
   @override
   void initState() {
     super.initState();
-    _watchdog = Timer(const Duration(seconds: 25), _end);
+    if (!widget.repeat) _watchdog = Timer(const Duration(seconds: 25), _end);
     unawaited(_initialize());
   }
 
@@ -63,17 +67,27 @@ class _RoomGiftEffectPlayerState extends State<RoomGiftEffectPlayer>
           }
           controller.videoItem = movie;
           setState(() {});
-          await controller.forward().orCancel;
-          _end();
+          if (widget.repeat) {
+            controller.repeat();
+          } else {
+            await controller.forward().orCancel;
+            _end();
+          }
         case RoomGiftAnimationFormat.mp4:
-          final controller = VideoPlayerController.file(widget.resource.file!);
+          final controller = VideoPlayerController.file(
+            widget.resource.file!,
+            videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+          );
           _video = controller;
           await controller.initialize();
           if (!mounted) return;
           await controller.setVolume(0);
           if (!mounted) return;
+          if (widget.repeat) await controller.setLooping(true);
+          if (!mounted) return;
           controller.addListener(() {
-            if (controller.value.hasError || controller.value.isCompleted) {
+            if (controller.value.hasError ||
+                (!widget.repeat && controller.value.isCompleted)) {
               _end();
             }
           });
@@ -115,14 +129,14 @@ class _RoomGiftEffectPlayerState extends State<RoomGiftEffectPlayer>
         case RoomGiftAnimationFormat.svga:
           return _svga?.videoItem == null
               ? const SizedBox.shrink()
-              : SVGAImage(_svga!, fit: BoxFit.contain);
+              : SVGAImage(_svga!, fit: widget.fit);
         case RoomGiftAnimationFormat.mp4:
           final video = _video;
           if (video == null || !video.value.isInitialized) {
             return const SizedBox.shrink();
           }
           return FittedBox(
-            fit: BoxFit.contain,
+            fit: widget.fit,
             child: SizedBox(
               width: video.value.size.width,
               height: video.value.size.height,
@@ -133,7 +147,10 @@ class _RoomGiftEffectPlayerState extends State<RoomGiftEffectPlayer>
           return VapView(
             fit: VapScaleFit.FIT_CENTER,
             onEvent: (event, _) {
-              if (event == 'onComplete' || event == 'onFailed') _end();
+              if (event == 'onFailed' ||
+                  (!widget.repeat && event == 'onComplete')) {
+                _end();
+              }
             },
             onControllerCreated: (controller) async {
               _vap = controller;
@@ -149,11 +166,16 @@ class _RoomGiftEffectPlayerState extends State<RoomGiftEffectPlayer>
                   await _stopVap();
                   return;
                 }
-                await controller.playPath(widget.resource.file!.path);
+                await controller.playPath(
+                  widget.resource.file!.path,
+                  loop: widget.repeat,
+                );
               } catch (error) {
                 debugPrint('[RoomGift] VAP failed: $error');
+                _end();
+                return;
               }
-              _end();
+              if (!widget.repeat) _end();
             },
           );
         case RoomGiftAnimationFormat.pag:
@@ -162,7 +184,7 @@ class _RoomGiftEffectPlayerState extends State<RoomGiftEffectPlayer>
             width: constraints.maxWidth,
             height: constraints.maxHeight,
             autoPlay: true,
-            repeatCount: 1,
+            repeatCount: widget.repeat ? PAGView.REPEAT_COUNT_LOOP : 1,
             onAnimationEnd: _end,
             onAnimationCancel: _end,
             defaultBuilder: (_) {
@@ -182,7 +204,7 @@ class _RoomGiftEffectPlayerState extends State<RoomGiftEffectPlayer>
                   child: Transform.scale(
                     scale: 0.6 + Curves.easeOutBack.transform(t),
                     child: RoomGiftImage(
-                      source: widget.gift.icon,
+                      source: widget.gift?.icon ?? '',
                       size: constraints.maxWidth * 0.55,
                     ),
                   ),

@@ -24,6 +24,8 @@ class EnterRoomResp {
   final int? lobbyType;
   final Map<String, dynamic> raw;
 
+  int? get silenceEndTime => _asInt(raw['silenceEndTime']);
+
   int? get digitalCurrency => _asInt(raw['digitalCurrency']);
 
   /// Nady defaults only a missing/null currency to Coins; 0 stays unselected.
@@ -67,6 +69,39 @@ class RoomInfo {
   final String? roomDesc;
   final int? roomOwnerUid;
   final bool? roomLock;
+  int get managerMaxNum {
+    final maximum = _asInt(_nestedRoomInfo(raw)['managerMaxNum']);
+    return maximum != null && maximum > 0 ? maximum : 20;
+  }
+
+  String? get countryCode {
+    final value = (_nestedRoomInfo(raw)['countryCode'] ?? countryName)
+        ?.toString()
+        .toUpperCase();
+    return value != null && RegExp(r'^[A-Z]{2}$').hasMatch(value)
+        ? value
+        : null;
+  }
+
+  String? get countryName {
+    final data = _nestedRoomInfo(raw);
+    return (data['countryName'] ??
+            data['country'] ??
+            data['countryCode'] ??
+            data['region'])
+        ?.toString();
+  }
+
+  String? get backgroundUrl =>
+      _nestedRoomInfo(raw)['backgroundUrl']?.toString();
+  bool get locationEnabled =>
+      _asBool(_nestedRoomInfo(raw)['locationEnabled']) == true;
+  double? get longitude =>
+      double.tryParse('${_nestedRoomInfo(raw)['longitude']}');
+  double? get latitude =>
+      double.tryParse('${_nestedRoomInfo(raw)['latitude']}');
+  String? get address => _nestedRoomInfo(raw)['address']?.toString();
+
   final bool? isFollow;
   final int? audienceCount;
   final Map<String, dynamic> raw;

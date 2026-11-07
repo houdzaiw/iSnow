@@ -1,4 +1,67 @@
 class AppAssets {
+  static const roomEditCamera = 'assets/lanhu/room/room_edit_camera.png';
+  static const roomProfileEdit = 'assets/lanhu/room/room_profile_edit.png';
+  static const roomProfileChevron =
+      'assets/lanhu/room/room_profile_chevron.png';
+  static const roomMemberCopy = 'assets/lanhu/room/room_member_copy.png';
+  static const roomMemberFollow = 'assets/lanhu/room/room_member_follow.png';
+  static const roomMemberChat = 'assets/lanhu/room/room_member_chat.png';
+  static const roomMemberMention = 'assets/lanhu/room/room_member_mention.png';
+  static const roomMemberGift = 'assets/lanhu/room/room_member_gift.png';
+  static const roomPartyHistoryBack =
+      'assets/lanhu/room/room_party_history_back.png';
+  static const roomPartyHistoryReminder =
+      'assets/lanhu/room/room_party_history_reminder.png';
+  static const roomPartyHistoryShare =
+      'assets/lanhu/room/room_party_history_share.png';
+  static const String membershipVipBadge =
+      'assets/lanhu/profile/membership/vip_badge.webp';
+  static const String membershipNobleBadge =
+      'assets/lanhu/profile/membership/noble_badge.webp';
+  static const String membershipCoin =
+      'assets/lanhu/profile/membership/coin.webp';
+  static const String membershipBack =
+      'assets/lanhu/profile/membership/back.webp';
+  static const String membershipSettings =
+      'assets/lanhu/profile/membership/settings.webp';
+  static const String membershipHistory =
+      'assets/lanhu/profile/membership/history.webp';
+  static const String membershipRules =
+      'assets/lanhu/profile/membership/rules.webp';
+  static const String membershipArrow =
+      'assets/lanhu/profile/membership/arrow.webp';
+  static const List<String> membershipVipBackgrounds = [
+    'assets/lanhu/profile/membership/vip_1_background.webp',
+    'assets/lanhu/profile/membership/vip_2_background.webp',
+    'assets/lanhu/profile/membership/vip_3_background.webp',
+    'assets/lanhu/profile/membership/vip_4_background.webp',
+    'assets/lanhu/profile/membership/vip_5_background.webp',
+    'assets/lanhu/profile/membership/vip_6_background.webp',
+  ];
+  static const List<String> membershipVipCards = [
+    'assets/lanhu/profile/membership/vip_1_card.webp',
+    'assets/lanhu/profile/membership/vip_2_card.webp',
+    'assets/lanhu/profile/membership/vip_3_card.webp',
+    'assets/lanhu/profile/membership/vip_4_card.webp',
+    'assets/lanhu/profile/membership/vip_5_card.webp',
+    'assets/lanhu/profile/membership/vip_6_card.webp',
+  ];
+  static const List<String> membershipNobleBackgrounds = [
+    'assets/lanhu/profile/membership/noble_1_background.webp',
+    'assets/lanhu/profile/membership/noble_2_background.webp',
+    'assets/lanhu/profile/membership/noble_3_background.webp',
+    'assets/lanhu/profile/membership/noble_4_background.webp',
+    'assets/lanhu/profile/membership/noble_5_background.webp',
+    'assets/lanhu/profile/membership/noble_6_background.webp',
+  ];
+  static const List<String> membershipNobleContainers = [
+    'assets/lanhu/profile/membership/noble_1_container.webp',
+    'assets/lanhu/profile/membership/noble_2_container.webp',
+    'assets/lanhu/profile/membership/noble_3_container.webp',
+    'assets/lanhu/profile/membership/noble_4_container.webp',
+    'assets/lanhu/profile/membership/noble_5_container.webp',
+    'assets/lanhu/profile/membership/noble_6_container.webp',
+  ];
   // Optional CDN-to-local mappings; keep resource paths out of room Views.
   static const Map<String, String> roomGiftLocalImages = {};
   static const Map<int, String> roomGiftLocalAnimations = {};
@@ -11,6 +74,43 @@ class AppAssets {
 
   static const String iconMissing = 'assets/lanhu/common/icon_missing.png';
   // User-approved Nady assets matching the room Share reference screenshot.
+  static const roomRocketStages = [
+    [
+      'assets/lanhu/room/room_rocket_1_1.png',
+      'assets/lanhu/room/room_rocket_1_2.png',
+      'assets/lanhu/room/room_rocket_1_3.png',
+      'assets/lanhu/room/room_rocket_1_4.png',
+      'assets/lanhu/room/room_rocket_1_5.png',
+      'assets/lanhu/room/room_rocket_1_6.png',
+    ],
+    [
+      'assets/lanhu/room/room_rocket_2_1.webp',
+      'assets/lanhu/room/room_rocket_2_2.webp',
+      'assets/lanhu/room/room_rocket_2_3.webp',
+      'assets/lanhu/room/room_rocket_2_4.webp',
+      'assets/lanhu/room/room_rocket_2_5.webp',
+      'assets/lanhu/room/room_rocket_2_6.webp',
+    ],
+    [
+      'assets/lanhu/room/room_rocket_3_1.webp',
+      'assets/lanhu/room/room_rocket_3_2.webp',
+      'assets/lanhu/room/room_rocket_3_3.webp',
+      'assets/lanhu/room/room_rocket_3_4.webp',
+      'assets/lanhu/room/room_rocket_3_5.webp',
+      'assets/lanhu/room/room_rocket_3_6.webp',
+    ],
+  ];
+  static const roomInteractionEmoji = 'assets/lanhu/room/room_emoji.webp';
+  static const roomInteractionShare =
+      'assets/lanhu/room/room_header_share.webp';
+  static const roomInteractionRank =
+      'assets/lanhu/room/room_contribution_rank.webp';
+  static const roomInteractionProfit =
+      'assets/lanhu/room/room_profit_rank.webp';
+  static const roomInteractionRankHelp =
+      'assets/lanhu/room/room_rank_help.webp';
+  static const roomInteractionRankBackground =
+      'assets/lanhu/room/room_rank_top_background.webp';
   static const roomShareWhatsapp = 'assets/lanhu/room/room_share_whatsapp.png';
   static const roomShareFacebook = 'assets/lanhu/room/room_share_facebook.png';
   static const roomShareSnapchat = 'assets/lanhu/room/room_share_snapchat.png';

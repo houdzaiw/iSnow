@@ -8,6 +8,7 @@ import '../../../manager/room_share_manager.dart';
 import '../../../model/room_share_models.dart';
 import '../../message/im_repository.dart';
 import '../../message/message_view_model.dart';
+import '../interaction/room_interaction_repository.dart';
 import '../room_repository.dart';
 import 'room_share_repository.dart';
 import 'room_share_state.dart';
@@ -31,6 +32,25 @@ final roomShareViewModelProvider = StateNotifierProvider.autoDispose
       return vm;
     });
 
+final roomPartyShareViewModelProvider = StateNotifierProvider.autoDispose
+    .family<
+      RoomShareViewModel,
+      RoomShareState,
+      ({RoomShareKey key, RoomLinkedParty party})
+    >((ref, input) {
+      final vm = RoomShareViewModel(
+        input.key,
+        ref.watch(roomToolsRepositoryProvider),
+        ref.watch(roomRepositoryProvider),
+        ref.watch(imRepositoryProvider),
+        sharing: ref.watch(roomShareRepositoryProvider),
+        platform: ref.watch(roomShareManagerProvider),
+        party: input.party,
+      );
+      Future.microtask(vm.load);
+      return vm;
+    });
+
 class RoomShareViewModel extends StateNotifier<RoomShareState> {
   RoomShareViewModel(
     this.key,
@@ -39,15 +59,24 @@ class RoomShareViewModel extends StateNotifier<RoomShareState> {
     this.im, {
     RoomShareRepository? sharing,
     RoomShareManager? platform,
+    this.party,
   }) : sharing = sharing ?? RoomShareRepository(repository),
        platform = platform ?? RoomShareManager(),
        _generation = room.roomGeneration,
-       super(const RoomShareState()) {
+       super(
+         party == null
+             ? const RoomShareState()
+             : const RoomShareState(
+                 tab: RoomShareTab.recent,
+                 materialsLoading: false,
+               ),
+       ) {
     room.addListener(_roomChanged);
     room.addAuthListener(close);
   }
 
   final RoomShareKey key;
+  final RoomLinkedParty? party;
   final RoomShareRepository sharing;
   final RoomShareManager platform;
   final RoomRepository room;
@@ -66,7 +95,8 @@ class RoomShareViewModel extends StateNotifier<RoomShareState> {
       !_closed &&
       room.roomGeneration == _generation &&
       room.roomState.currentRoomId == key.roomId &&
-      room.roomState.isInRoom;
+      room.roomState.isInRoom &&
+      !room.roomState.isMinimized;
 
   void _roomChanged() {
     if (!_valid) close();
@@ -123,7 +153,7 @@ class RoomShareViewModel extends StateNotifier<RoomShareState> {
   Future<void> load() async {
     if (!_valid) return;
     await Future.wait([
-      loadMaterials(),
+      if (party == null) loadMaterials(),
       loadRecent(),
       loadFriends(reset: true),
     ]);
@@ -321,7 +351,15 @@ class RoomShareViewModel extends StateNotifier<RoomShareState> {
         }
       }
       if (!await _sameAccount()) return false;
-      await im.sendRoomInvitation(targetUID: '$targetUid', room: roomCard());
+      if (party case final linked?) {
+        await im.sendPartyInvitation(
+          targetUID: '$targetUid',
+          party: linked.invitation(),
+          isCurrent: () => _valid,
+        );
+      } else {
+        await im.sendRoomInvitation(targetUID: '$targetUid', room: roomCard());
+      }
       return _valid && await _sameAccount();
     } catch (error) {
       if (_valid) state = state.copyWith(error: userFacingErrorMessage(error));

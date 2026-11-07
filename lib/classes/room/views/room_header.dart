@@ -6,24 +6,39 @@ class _RoomHeader extends StatelessWidget {
     required this.onMinimize,
     required this.onExit,
     required this.onFollowRoom,
+    this.onDetails,
+    this.onShare,
+    this.onRank,
   });
 
   final RoomPageState state;
   final VoidCallback onMinimize;
   final VoidCallback onExit;
   final VoidCallback onFollowRoom;
+  final VoidCallback? onDetails, onShare, onRank;
 
   @override
   Widget build(BuildContext context) {
     final occupiedCount = state.seats.where((seat) => seat.isOccupied).length;
     return SizedBox(
-      height: 90.h,
+      height: AppSpacing.roomHeaderHeight.h.clamp(
+        AppSpacing.roomHeaderMinHeight.w,
+        double.infinity,
+      ),
       child: Padding(
         padding: EdgeInsets.fromLTRB(11.w, 8.h, 11.w, 8.h),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            _RoomAvatarImage(url: state.roomAvatar, size: 66.r, radius: 14.r),
+            InkWell(
+              key: const ValueKey('room-cover-details'),
+              onTap: onDetails,
+              child: _RoomAvatarImage(
+                url: state.roomAvatar,
+                size: 66.r,
+                radius: 14.r,
+              ),
+            ),
             SizedBox(width: 6.w),
             Expanded(
               child: Column(
@@ -33,15 +48,18 @@ class _RoomHeader extends StatelessWidget {
                   Row(
                     children: [
                       Flexible(
-                        child: Text(
-                          state.roomTitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16.sp,
-                            height: 1,
-                            fontWeight: FontWeight.w700,
+                        child: InkWell(
+                          onTap: onDetails,
+                          child: Text(
+                            state.roomTitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16.sp,
+                              height: 1,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       ),
@@ -68,15 +86,18 @@ class _RoomHeader extends StatelessWidget {
                   Row(
                     children: [
                       Flexible(
-                        child: Text(
-                          'ID: ${state.roomNo}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 13.sp,
-                            height: 1,
-                            fontWeight: FontWeight.w500,
+                        child: InkWell(
+                          onTap: onDetails,
+                          child: Text(
+                            'ID: ${state.roomNo}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 13.sp,
+                              height: 1,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
                       ),
@@ -92,15 +113,29 @@ class _RoomHeader extends StatelessWidget {
                       ),
                     ],
                   ),
-                  if (state.roomWeekVal > 0)
-                    Text(
-                      'Week · ${_formatCompact(state.roomWeekVal)}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.giftEffectSubtitle,
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: Semantics(
+                      button: true,
+                      label: toolText(context, 'Room rankings', '房间榜单'),
+                      child: InkWell(
+                        key: const ValueKey('room-rank-entry'),
+                        onTap: onRank,
+                        child: _MetricChip(
+                          asset: AppAssets.roomInteractionRank,
+                          text: _formatCompact(state.roomWeekVal),
+                        ),
+                      ),
                     ),
+                  ),
                 ],
               ),
+            ),
+            _HeaderIconButton(
+              key: const ValueKey('room-header-share'),
+              asset: AppAssets.roomInteractionShare,
+              onTap: onShare,
+              label: toolText(context, 'Share', '分享'),
             ),
             _HeaderIconButton(asset: AppAssets.lanhuRoomPower, onTap: onExit),
           ],
@@ -150,21 +185,31 @@ class _MetricChip extends StatelessWidget {
 }
 
 class _HeaderIconButton extends StatelessWidget {
-  const _HeaderIconButton({required this.asset, required this.onTap});
+  const _HeaderIconButton({
+    super.key,
+    required this.asset,
+    required this.onTap,
+    this.label,
+  });
 
   final String asset;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      customBorder: const CircleBorder(),
-      onTap: onTap,
-      child: SizedBox(
-        width: 36.r,
-        height: 36.r,
-        child: Center(
-          child: _RoomAssetIcon(asset: asset, size: 24.r),
+    return Semantics(
+      label: label,
+      button: true,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: SizedBox(
+          width: 36.r,
+          height: 36.r,
+          child: Center(
+            child: _RoomAssetIcon(asset: asset, size: 24.r),
+          ),
         ),
       ),
     );

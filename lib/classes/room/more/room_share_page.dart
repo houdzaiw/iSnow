@@ -7,12 +7,17 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../model/room_share_models.dart';
 import '../../../theme/app_theme.dart';
+import '../interaction/room_interaction_repository.dart';
 import 'room_share_contacts.dart';
 import 'room_share_material_view.dart';
 import 'room_share_view_model.dart';
 import 'room_tools_widgets.dart';
 
-Future<void> showRoomShareSheet(BuildContext context, String roomId) async {
+Future<void> showRoomShareSheet(
+  BuildContext context,
+  String roomId, {
+  RoomLinkedParty? party,
+}) async {
   final router = GoRouter.maybeOf(context);
   ModalRoute<dynamic>? sheetRoute;
   final user = await showModalBottomSheet<RoomShareContact>(
@@ -24,11 +29,13 @@ Future<void> showRoomShareSheet(BuildContext context, String roomId) async {
     barrierColor: AppColors.modalScrimStrong,
     builder: (context) {
       sheetRoute = ModalRoute.of(context);
-      return RoomSharePage(roomId: roomId);
+      return RoomSharePage(roomId: roomId, party: party);
     },
   );
   await sheetRoute?.completed;
-  if (user == null || !context.mounted || router == null) return;
+  if (party != null || user == null || !context.mounted || router == null) {
+    return;
+  }
   router.push(
     Uri(
       path: '/chat-view',
@@ -39,8 +46,9 @@ Future<void> showRoomShareSheet(BuildContext context, String roomId) async {
 
 /// Room sharing is a root sheet, not a route that replaces the room page.
 class RoomSharePage extends HookConsumerWidget {
-  const RoomSharePage({super.key, required this.roomId});
+  const RoomSharePage({super.key, required this.roomId, this.party});
   final String roomId;
+  final RoomLinkedParty? party;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -48,7 +56,9 @@ class RoomSharePage extends HookConsumerWidget {
       roomId: roomId,
       language: Localizations.localeOf(context).languageCode,
     );
-    final provider = roomShareViewModelProvider(key);
+    final provider = party == null
+        ? roomShareViewModelProvider(key)
+        : roomPartyShareViewModelProvider((key: key, party: party!));
     final state = ref.watch(provider);
     final vm = ref.read(provider.notifier);
     final messenger = useMemoized(GlobalKey<ScaffoldMessengerState>.new);
@@ -58,8 +68,18 @@ class RoomSharePage extends HookConsumerWidget {
       }
     });
     useEffect(() => vm.close, [vm]);
-    const tabs = [
-      RoomShareTab.share,
+    final route = ModalRoute.of(context);
+    ref.listen(provider.select((value) => value.isActive), (_, active) {
+      if (!active) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted && route?.isActive == true) {
+            Navigator.of(context).removeRoute(route!);
+          }
+        });
+      }
+    });
+    final tabs = [
+      if (party == null) RoomShareTab.share,
       RoomShareTab.recent,
       RoomShareTab.friends,
     ];
@@ -385,8 +405,10 @@ class RoomSharePage extends HookConsumerWidget {
   ) async {
     final confirmed = await confirmRoomTool(
       context,
-      toolText(context, 'Invite to room', '邀请进入房间'),
-      '${user.nickname}\n${vm.roomCard()['title'] ?? roomId}',
+      party == null
+          ? toolText(context, 'Invite to room', '邀请进入房间')
+          : toolText(context, 'Share Party', '分享派对'),
+      '${user.nickname}\n${party?.title ?? vm.roomCard()['title'] ?? roomId}',
     );
     if (!confirmed || !context.mounted) return;
     if (await vm.invite(user.uid) && context.mounted) {

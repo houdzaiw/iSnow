@@ -76,6 +76,27 @@ ROOM_MORE_SEMANTIC_FILES = {
 
 ROOM_GIFT_DESIGN_ID = "dd85e4a7-00f5-41c9-a75b-b28a25da69ad"
 ROOM_MUSIC_DESIGN_ID = "f2616a5f-f98e-4a45-a1d2-05537e65aa76"
+ROOM_PROFILE_EXPORTS = {
+    "f9cf062d-4932-4ca6-8eaa-e11434d3f766": {
+        "15457:347946": "room_edit_camera.png",
+    },
+    "a1e67d83-ec46-4bd1-999b-de5c48569c7d": {
+        "I15235:257433;8977:122722": "room_profile_edit.png",
+        "I15235:257451;199:6142;16:1847": "room_profile_chevron.png",
+    },
+    "82047090-c466-4e71-97be-4879e7136278": {
+        "15385:187249": "room_member_copy.png",
+        "15385:187250": "room_member_follow.png",
+        "15385:187251": "room_member_chat.png",
+        "15385:187252": "room_member_mention.png",
+        "15385:187253": "room_member_gift.png",
+    },
+    "8b867e6b-e9e5-4346-abbb-cb3fe1501601": {
+        "15985:330242": "room_party_history_back.png",
+        "I15999:286094;15999:285703": "room_party_history_reminder.png",
+        "I15999:286094;15999:285756;15393:189807": "room_party_history_share.png",
+    },
+}
 # Exact original layer IDs for section_30, including the alternative pause state.
 ROOM_MUSIC_EXPORTS = {
     "15375:183487": "room_music_close.png",
@@ -135,6 +156,9 @@ def main() -> None:
     manifest = _load_manifest(args.output / MANIFEST)
     if args.design_url:
         assets = _fetch_design_assets(args.design_url)
+        if any(image_id in args.design_url for image_id in ROOM_PROFILE_EXPORTS):
+            for filename, _ in assets:
+                manifest[f"{filename}_source"] = args.design_url
     else:
         if args.html is None:
             parser.error("provide an HTML path or --design-url")
@@ -278,6 +302,8 @@ def _fetch_design_assets(design_url: str) -> list[tuple[str, str]]:
         return _room_gift_assets(sketch)
     if image_id == ROOM_MUSIC_DESIGN_ID:
         return _room_music_assets(sketch)
+    if image_id in ROOM_PROFILE_EXPORTS:
+        return _room_profile_assets(sketch, image_id)
 
     assets: list[tuple[str, str]] = []
     for section_name, filenames in ROOM_MORE_SEMANTIC_FILES.items():
@@ -294,6 +320,27 @@ def _fetch_design_assets(design_url: str) -> list[tuple[str, str]]:
                 # by the actual icon. The final export is the foreground icon.
                 assets.append((filename, urls[-1]))
     return assets
+
+
+def _room_profile_assets(sketch: dict, image_id: str) -> list[tuple[str, str]]:
+    expected = ROOM_PROFILE_EXPORTS[image_id]
+    exports: dict[str, str] = {}
+
+    def visit(layer: dict) -> None:
+        layer_id = layer.get("id") or layer.get("objectID")
+        if layer_id in expected:
+            url = (layer.get("image") or layer.get("ddsImage") or {}).get("imageUrl")
+            if url:
+                exports[layer_id] = url
+        for child in layer.get("layers") or []:
+            if isinstance(child, dict):
+                visit(child)
+
+    visit(sketch.get("artboard") or {})
+    missing = expected.keys() - exports.keys()
+    if missing:
+        raise RuntimeError(f"Room profile exports missing: {sorted(missing)}")
+    return [(filename, exports[layer_id]) for layer_id, filename in expected.items()]
 
 
 def _room_music_assets(sketch: dict) -> list[tuple[str, str]]:
@@ -423,7 +470,9 @@ def _download(url: str, target: Path) -> None:
     if url.startswith("file://"):
         target.write_bytes(Path(unquote(urlparse(url).path)).read_bytes())
         return
-    request = Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    request = Request(url, headers={
+        "User-Agent": "Mozilla/5.0", "Referer": "https://lanhuapp.com/web/",
+    })
     with urlopen(request, timeout=30) as response:
         target.write_bytes(response.read())
 

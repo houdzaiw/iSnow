@@ -6,16 +6,26 @@ import '../models/room_gift_event_models.dart';
 import 'room_gift_image.dart';
 
 class RoomGiftPublicScreenItem extends StatelessWidget {
-  const RoomGiftPublicScreenItem({super.key, required this.message});
+  const RoomGiftPublicScreenItem({
+    super.key,
+    required this.message,
+    this.onUserTap,
+  });
   final RoomGiftPublicMessage message;
+  final ValueChanged<int>? onUserTap;
   @override
   Widget build(BuildContext context) => Row(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      ClipOval(
-        child: RoomGiftImage(
-          source: message.sender.avatar,
-          size: AppSpacing.giftSlotAvatarSize.r,
+      InkWell(
+        onTap: message.sender.uid > 0 && onUserTap != null
+            ? () => onUserTap!(message.sender.uid)
+            : null,
+        child: ClipOval(
+          child: RoomGiftImage(
+            source: message.sender.avatar,
+            size: AppSpacing.giftSlotAvatarSize.r,
+          ),
         ),
       ),
       SizedBox(width: AppSpacing.sm.w),

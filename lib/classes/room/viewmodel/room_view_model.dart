@@ -4,6 +4,10 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../interaction/room_mention.dart';
+import '../interaction/room_interaction_repository.dart';
+import '../interaction/room_moderation.dart';
+import '../interaction/room_public_media.dart';
 import '../../../manager/app_socket_manager.dart';
 import '../../../manager/api_error_message.dart';
 import '../../../manager/room_manager.dart';
@@ -289,12 +293,21 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
     );
   }
 
-  Future<void> sendMessage(String text) async {
-    if (!mounted || !state.isReady || _leaving) return;
-    final message = text.trim();
-    if (message.isEmpty || state.sendingMessage) return;
+  int get sessionGeneration => _repository.roomGeneration;
+
+  Future<bool> sendMessage(String text, {RoomMentionTarget? mention}) async {
+    if (!mounted || !state.isReady || _leaving) return false;
+    if (roomSilenced(_repository.roomState.silenceEndTime)) {
+      state = state.copyWith(
+        errorMessage: 'You cannot send messages while silenced.',
+      );
+      return false;
+    }
+    final message = encodeRoomMention(text.trim(), mention);
+    if (message.isEmpty || state.sendingMessage) return false;
 
     final roomId = _effectiveRoomId;
+    final generation = sessionGeneration;
     final localEntry = RoomChatEntry(
       id: 'local-${DateTime.now().microsecondsSinceEpoch}',
       kind: RoomChatEntryKind.chat,
@@ -314,14 +327,62 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
 
     try {
       await _repository.sendTextMessage(roomId: roomId, text: message);
-      if (!mounted || !state.isReady) return;
+      if (!mounted || !state.isReady || generation != sessionGeneration) {
+        return false;
+      }
       state = state.copyWith(sendingMessage: false, errorMessage: null);
+      return true;
     } catch (error) {
-      if (!mounted || !state.isReady) return;
+      if (!mounted || !state.isReady || generation != sessionGeneration) {
+        return false;
+      }
       state = state.copyWith(
         sendingMessage: false,
+        messages: state.messages
+            .where((entry) => entry.id != localEntry.id)
+            .toList(),
         errorMessage: userFacingErrorMessage(error),
       );
+      return false;
+    }
+  }
+
+  Future<bool> sendExpression(RoomExpression expression) async {
+    if (!mounted ||
+        !state.isReady ||
+        _leaving ||
+        state.sendingMessage ||
+        expression.id <= 0 ||
+        !expression.allowed) {
+      return false;
+    }
+    if (roomSilenced(_repository.roomState.silenceEndTime)) {
+      state = state.copyWith(
+        errorMessage: 'You cannot send messages while silenced.',
+      );
+      return false;
+    }
+    final generation = sessionGeneration;
+    state = state.copyWith(sendingMessage: true, errorMessage: null);
+    try {
+      await _repository.sendRoomMessage(
+        event: 'RoomScreenExpressionEvent',
+        roomId: _effectiveRoomId,
+        data: expression.encode(),
+      );
+      if (!mounted || !state.isReady || generation != sessionGeneration) {
+        return false;
+      }
+      state = state.copyWith(sendingMessage: false);
+      return true;
+    } catch (error) {
+      if (mounted && state.isReady && generation == sessionGeneration) {
+        state = state.copyWith(
+          sendingMessage: false,
+          errorMessage: userFacingErrorMessage(error),
+        );
+      }
+      return false;
     }
   }
 
@@ -551,6 +612,31 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
       return;
     }
 
+    if (message.event == 'RoomMicInviteUpEvent') {
+      final payload = _payloadMap(message.payload);
+      final target = _intValue(payload['uid']);
+      if (target == null ||
+          target != state.currentUid ||
+          state.isMinimized ||
+          state.isOnMic ||
+          state.micInvite != null ||
+          (payload['roomId'] != null &&
+              payload['roomId'].toString() != _effectiveRoomId)) {
+        return;
+      }
+      final id = message.msgId ?? '${message.from}:${message.timestamp}';
+      if (_lastMicInvite == id) return;
+      _lastMicInvite = id;
+      state = state.copyWith(
+        micInvite: RoomMicInvitation(
+          id: id,
+          nickname: _stringValue(payload['nick']) ?? '',
+          generation: sessionGeneration,
+        ),
+      );
+      return;
+    }
+
     if (message.event == 'RoomScreenSystemClear') {
       _clearChatMessages(showNotice: true);
       return;
@@ -578,9 +664,40 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
       return;
     }
 
+    if (message.toType == 'EXCLUDE_OTHER' &&
+        !(message.ids ?? const []).contains('${state.currentUid}')) {
+      return;
+    }
+    if (message.toType == 'EXCLUDE_ONESELF' &&
+        (message.from == '${state.currentUid}' ||
+            (message.ids ?? const []).contains('${state.currentUid}'))) {
+      return;
+    }
     final entry = _chatEntryFromSocket(message);
     if (entry == null) return;
     state = state.copyWith(messages: _appendMessage(entry));
+  }
+
+  String? _lastMicInvite;
+
+  Future<void> respondToMicInvite(RoomMicInvitation invite, bool accept) async {
+    if (!mounted || !identical(state.micInvite, invite)) return;
+    state = state.copyWith(micInvite: null);
+    if (!accept ||
+        !state.isReady ||
+        state.isMinimized ||
+        state.isOnMic ||
+        invite.generation != sessionGeneration) {
+      return;
+    }
+    final current = _repository.roomState.micList
+        .where((seat) => (seat.uid ?? 0) <= 0 && seat.isLocked != true)
+        .firstOrNull;
+    if (current == null) {
+      state = state.copyWith(errorMessage: 'No available mic seat.');
+      return;
+    }
+    await upMic(current.position);
   }
 
   void _syncGiftState(RoomGiftEventState gifts) {
@@ -631,7 +748,30 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
     if (kind == null) return null;
     final payload = _payloadMap(message.payload);
     final user = _userMap(payload);
-    final text = _messageText(payload, message.event);
+    final mediaSource = payload['msg'] ?? payload['data'];
+    final party = kind == RoomChatEntryKind.party
+        ? RoomLinkedParty.fromJson(
+            payload['partyId'] != null
+                ? payload
+                : _payloadMap(payload['data'] ?? mediaSource),
+          )
+        : null;
+    if (party != null && party.id <= 0) return null;
+    final expression = kind == RoomChatEntryKind.expression
+        ? RoomExpression.parse(mediaSource)
+        : null;
+    final mediaUrl = switch (kind) {
+      RoomChatEntryKind.image => roomPublicImage(mediaSource),
+      RoomChatEntryKind.expression => expression?.media,
+      _ => null,
+    };
+    final text = switch (kind) {
+      RoomChatEntryKind.image => 'Photo',
+      RoomChatEntryKind.expression => 'Expression',
+      RoomChatEntryKind.party =>
+        party?.title.isNotEmpty == true ? party!.title : 'Party',
+      _ => _messageText(payload, message.event),
+    };
     if (text == null || text.isEmpty) return null;
     return RoomChatEntry(
       id:
@@ -640,6 +780,9 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
           'socket-${DateTime.now().microsecondsSinceEpoch}',
       kind: kind,
       text: text,
+      mediaUrl: mediaUrl,
+      mediaPreviewUrl: expression?.preview,
+      partyId: party?.id,
       createdAt: _messageTime(message, payload),
       senderName: _stringValue(
         payload['nick'] ??
@@ -660,6 +803,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
       'inRoomWelcomeContentEvent' => RoomChatEntryKind.enter,
       'RoomScreenSystemNoticeEvent' => RoomChatEntryKind.system,
       'RoomScreenImageEvent' => RoomChatEntryKind.image,
+      'RoomPartyEvent' => RoomChatEntryKind.party,
       'RoomScreenExpressionEvent' => RoomChatEntryKind.expression,
       'roomScreenSendGiftComboEvent' => RoomChatEntryKind.gift,
       'RoomSendGiftComboPublicScreenEvent' => RoomChatEntryKind.gift,
@@ -719,6 +863,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
 
   Map<String, dynamic> _userMap(Map<String, dynamic> payload) {
     final raw =
+        payload['from'] ??
         payload['userBaseInfo'] ??
         payload['userInfo'] ??
         payload['sendUserInfo'] ??

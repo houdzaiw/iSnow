@@ -51,6 +51,8 @@
 	<string>需要访问您的相册以选择照片</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>需要访问您的相册以保存照片</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Use your approximate location when you choose to show a location for your voice room.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>需要访问您的麦克风以录制音频</string>
 	<key>UIBackgroundModes</key>

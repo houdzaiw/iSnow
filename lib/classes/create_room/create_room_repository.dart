@@ -60,6 +60,11 @@ class CreateRoomRepository {
     return user;
   }
 
+  /// VIP backgrounds use the storage path in Nady's background endpoint.
+  Future<String> uploadRoomBackground(String filePath) {
+    return _uploadProvider.uploadAvatarFile(filePath);
+  }
+
   Future<String> uploadAvatar(String filePath) {
     return _uploadProvider.uploadAvatarFile(filePath, returnFullUrl: true);
   }

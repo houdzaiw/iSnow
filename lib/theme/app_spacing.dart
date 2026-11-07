@@ -3,6 +3,14 @@ class AppSpacing {
   static const double systemImageMaxScale = 5;
   static const double systemMessageTimeTop = 24;
   static const double systemMessageTimeBottom = 12;
+  static const double roomHeaderHeight = 90;
+  static const double roomHeaderMinHeight = 74;
+  static const double roomInteractionAvatar = 66;
+  static const double roomInteractionRankHeight = 0.8;
+  static const double roomInteractionMedia = 126;
+  static const double roomInteractionLockedOpacity = 0.45;
+  static const double roomInteractionExpression = 70;
+  static const double roomInteractionExpressionSheetHeight = 0.45;
   static const double roomMessageHeightRatio = 0.6;
   static const double roomMessageHandleWidth = 32;
   static const double roomMessageHandleHeight = 4;

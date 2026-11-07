@@ -26,6 +26,19 @@ class HttpApi {
   static const roomShareReport = '/api/activity/component/share-report';
   static const userFriends = '/api/user/follow/friends';
   static const userVipSetting = '/api/vip/setting';
+  static const membershipVip = '/api/vip';
+  static const membershipVipBuy = '/api/vip/buy';
+  static const membershipVipExperienceCard = '/api/vip/giveExperienceCard';
+  static const membershipVipBlock = '/api/vip/block';
+  static const membershipVipUnblock = '/api/vip/unblock';
+  static const membershipVipHistory = '/api/vip/history';
+  static const membershipNoble = '/api/aristocracy';
+  static const membershipNobleBuy = '/api/aristocracy/buy';
+  static const membershipNobleRewards = '/api/aristocracy/giveInfo';
+  static const membershipNobleGive = '/api/aristocracy/give';
+  static const membershipNobleTitles = '/api/aristocracy/plaque';
+  static const membershipNobleTitleClaim = '/api/aristocracy/get';
+  static const membershipNobleHistory = '/api/aristocracy/history';
   static const reportUploadParams = '/api/resource/header-upload-param/list';
   static const reportSubmit = '/api/report';
   static const gameToken = '/game/token';
@@ -97,6 +110,31 @@ class HttpApi {
 
   /// 房间详情
   static const roomInfo = '/api/room/get/info';
+  static const roomUserInfo = '/api/room/user/get';
+  static const roomPartyList = '/api/room/party/getPartyListByRoomId';
+  static const roomUpdateInfo = '/api/room/update/info';
+  static const roomMicAdjust = '/api/room/mic/adjust';
+  static const roomRankIncome = '/api/rank/income/commonly';
+  static const roomRankSummary = '/api/room/rank/val';
+  static const roomActiveRocket = '/api/rocket/room/schedule/hasActiveRocket';
+  static const roomExpressions = '/api/expression/queryList';
+  static const roomBackgrounds = '/api/backpack/prop/list';
+  static const roomUseBackground = '/api/backpack/use/goods';
+  static const roomVipBackground = '/api/vip/background';
+  static const roomUseVipBackground = '/api/vip/background/use';
+  static const roomPartyDetail = '/api/room/party/detail';
+  static const roomPartySubscribe = '/api/room/party/subscribe';
+  static const roomPartyCancel = '/api/room/party/cancle';
+  static const roomMicInvite = '/api/room/mic/invite/up';
+  static const roomAdminInfo = '/api/room/manager/get/info';
+  static const roomAdminAdd = '/api/room/manager/add';
+  static const roomAdminRemove = '/api/room/manager/cancel';
+  static const roomSilenceOptions = '/api/room/manager/silenceOption';
+  static const roomSilence = '/api/room/manager/silence';
+  static const roomSilenceList = '/api/room/manager/silenceList';
+  static const roomBlacklist = '/api/room/manager/blacklist';
+  static const roomRemoveBlacklist = '/api/room/manager/removeBlacklist';
+  static const roomKickOut = '/api/room/kick/out';
 
   /// 房间完整在线用户列表
   static const roomAudienceList = '/api/room/list/audience';

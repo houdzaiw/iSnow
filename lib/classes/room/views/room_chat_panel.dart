@@ -5,11 +5,17 @@ class _RoomChatPanel extends HookWidget {
     required this.state,
     required this.onFilterChanged,
     required this.onClearMessages,
+    required this.onUserTap,
+    required this.onImageTap,
+    required this.onPartyTap,
   });
 
   final RoomPageState state;
   final ValueChanged<RoomChatFilter> onFilterChanged;
   final VoidCallback onClearMessages;
+  final ValueChanged<int> onUserTap;
+  final ValueChanged<String> onImageTap;
+  final ValueChanged<int> onPartyTap;
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +76,9 @@ class _RoomChatPanel extends HookWidget {
                 for (final filter in filters)
                   _RoomChatMessageList(
                     key: PageStorageKey<String>('room-chat-${filter.name}'),
+                    onUserTap: onUserTap,
+                    onImageTap: onImageTap,
+                    onPartyTap: onPartyTap,
                     messages: _messagesForFilter(state.messages, filter),
                   ),
               ],
@@ -200,9 +209,18 @@ class _RoomChatTab extends StatelessWidget {
 }
 
 class _RoomChatMessageList extends StatelessWidget {
-  const _RoomChatMessageList({super.key, required this.messages});
+  const _RoomChatMessageList({
+    super.key,
+    required this.messages,
+    required this.onUserTap,
+    required this.onImageTap,
+    required this.onPartyTap,
+  });
 
   final List<RoomChatEntry> messages;
+  final ValueChanged<int> onUserTap;
+  final ValueChanged<String> onImageTap;
+  final ValueChanged<int> onPartyTap;
 
   @override
   Widget build(BuildContext context) {
@@ -222,7 +240,12 @@ class _RoomChatMessageList extends StatelessWidget {
                 ? AppSpacing.roomChatMessageTopFirst.h
                 : AppSpacing.roomChatMessageTop.h,
           ),
-          child: _RoomChatMessageBubble(message: message),
+          child: _RoomChatMessageBubble(
+            message: message,
+            onUserTap: onUserTap,
+            onImageTap: onImageTap,
+            onPartyTap: onPartyTap,
+          ),
         );
       },
     );
@@ -230,21 +253,43 @@ class _RoomChatMessageList extends StatelessWidget {
 }
 
 class _RoomChatMessageBubble extends StatelessWidget {
-  const _RoomChatMessageBubble({required this.message});
+  const _RoomChatMessageBubble({
+    required this.message,
+    required this.onUserTap,
+    required this.onImageTap,
+    required this.onPartyTap,
+  });
 
   final RoomChatEntry message;
+  final ValueChanged<int> onUserTap;
+  final ValueChanged<String> onImageTap;
+  final ValueChanged<int> onPartyTap;
 
   @override
   Widget build(BuildContext context) {
     if (message.gift != null) {
-      return RoomGiftPublicScreenItem(message: message.gift!);
+      return RoomGiftPublicScreenItem(
+        message: message.gift!,
+        onUserTap: onUserTap,
+      );
     }
     final isSystem = message.kind == RoomChatEntryKind.system;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (!isSystem) ...[
-          _RoomAvatarImage(url: message.senderAvatar, size: 34.r, radius: 17.r),
+          InkWell(
+            key: ValueKey('room-chat-avatar-${message.id}'),
+            onTap: switch (message.senderUid) {
+              final uid? when uid > 0 => () => onUserTap(uid),
+              _ => null,
+            },
+            child: _RoomAvatarImage(
+              url: message.senderAvatar,
+              size: 34.r,
+              radius: 17.r,
+            ),
+          ),
           SizedBox(width: 8.w),
         ],
         Expanded(
@@ -256,7 +301,41 @@ class _RoomChatMessageBubble extends StatelessWidget {
                   : Colors.black.withValues(alpha: 0.22),
               borderRadius: BorderRadius.circular(14.r),
             ),
-            child: _ChatMessageText(message: message),
+            child: message.partyId != null
+                ? TextButton(
+                    onPressed: () => onPartyTap(message.partyId!),
+                    child: Text(
+                      message.text,
+                      style: AppTextStyles.roomMessageBody,
+                    ),
+                  )
+                : message.mediaUrl != null
+                ? Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: InkWell(
+                      onTap: message.kind == RoomChatEntryKind.image
+                          ? () => onImageTap(message.mediaUrl!)
+                          : null,
+                      child: SizedBox.square(
+                        dimension:
+                            (message.kind == RoomChatEntryKind.image
+                                    ? AppSpacing.roomInteractionMedia
+                                    : AppSpacing.roomInteractionExpression)
+                                .r,
+                        child: message.kind == RoomChatEntryKind.expression
+                            ? RoomAnimatedArtwork(
+                                key: ValueKey(message.id),
+                                url: message.mediaUrl!,
+                                preview: message.mediaPreviewUrl,
+                              )
+                            : RoomPublicImage(
+                                url: message.mediaUrl,
+                                fit: BoxFit.contain,
+                              ),
+                      ),
+                    ),
+                  )
+                : _ChatMessageText(message: message, onUserTap: onUserTap),
           ),
         ),
       ],
@@ -265,9 +344,10 @@ class _RoomChatMessageBubble extends StatelessWidget {
 }
 
 class _ChatMessageText extends StatelessWidget {
-  const _ChatMessageText({required this.message});
+  const _ChatMessageText({required this.message, required this.onUserTap});
 
   final RoomChatEntry message;
+  final ValueChanged<int> onUserTap;
 
   @override
   Widget build(BuildContext context) {
@@ -296,7 +376,17 @@ class _ChatMessageText extends StatelessWidget {
                 fontWeight: FontWeight.w800,
               ),
             ),
-          TextSpan(text: message.text),
+          for (final part in decodeRoomMentions(message.text))
+            if (part.uid case final uid?)
+              WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: InkWell(
+                  onTap: () => onUserTap(uid),
+                  child: Text(part.text, style: AppTextStyles.giftEffectTitle),
+                ),
+              )
+            else
+              TextSpan(text: part.text),
         ],
       ),
     );
