@@ -6,7 +6,7 @@ class RoomHeaderTheme {
   static const horizontalInset = 11.0, verticalInset = 8.0;
   static const avatar = 66.0, avatarRadius = 14.0;
   static const gap = 6.0, lineGap = 5.0;
-  static const metricWidth = 74.0, metricHeight = 20.0;
+  static const metricMaxWidth = 74.0, metricHeight = 20.0;
   static const metricHorizontal = 7.0, metricVertical = 3.0;
   static const metricIcon = 14.0, metricGap = 3.0;
   static const metricSurface = Color(0x7A000000);

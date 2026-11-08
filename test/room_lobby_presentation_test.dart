@@ -301,7 +301,7 @@ void main() {
         await expectLater(
           find.byType(MaterialApp),
           matchesGoldenFile(
-            'goldens/room_header_metrics_v2/regression/lobby_type_${type}_${width.toInt()}.png',
+            'goldens/room_header_adaptive_width_v3/regression/lobby_type_${type}_${width.toInt()}.png',
           ),
         );
       });

@@ -23,12 +23,57 @@ void main() {
 
   final entry = find.byKey(const ValueKey('room-rank-entry'));
   final heat = find.byKey(const ValueKey('room-header-heat'));
+  final carousel = find.byKey(const ValueKey('room-header-rank-carousel'));
   Finder valueIn(Finder parent, String value) =>
       find.descendant(of: parent, matching: find.text(value));
 
   for (final width in [320.0, 375.0, 430.0]) {
+    testWidgets('rank width follows current value and live updates at $width', (
+      tester,
+    ) async {
+      final h = RoomLobbyHarness();
+      h.room.current = h.room.current.copyWith(
+        roomInfo: RoomInfo.fromJson({
+          'roomGiftWeekVal': 0,
+          'roomGiftIncomeVal': 123456,
+        }),
+      );
+      await h.mount(tester, type: 0, width: width, interaction: _RankApi());
+      final shortWidth = tester.getSize(carousel).width;
+      final height = tester.getSize(carousel).height;
+      expect(
+        shortWidth,
+        lessThan(RoomHeaderTheme.metricMaxWidth * width / 375),
+      );
+      await tester.drag(entry, const Offset(0, -45));
+      await tester.pumpAndSettle();
+      expect(valueIn(entry, '123.5k'), findsWidgets);
+      final longWidth = tester.getSize(carousel).width;
+      expect(longWidth, greaterThan(shortWidth));
+      expect(
+        longWidth,
+        lessThanOrEqualTo(RoomHeaderTheme.metricMaxWidth * width / 375),
+      );
+      expect(tester.getSize(carousel).height, height);
+      await tester.drag(entry, const Offset(0, 45));
+      await tester.pumpAndSettle();
+      expect(tester.getSize(carousel).width, closeTo(shortWidth, .01));
+      h.room.current = h.room.current.copyWith(roomWeekVal: 98765);
+      h.room.emitState();
+      await tester.pumpAndSettle();
+      expect(valueIn(entry, '98.8k'), findsWidgets);
+      expect(tester.getSize(carousel).width, greaterThan(shortWidth));
+      h.room.current = h.room.current.copyWith(roomWeekVal: 0);
+      h.room.emitState();
+      await tester.pumpAndSettle();
+      expect(tester.getSize(carousel).width, closeTo(shortWidth, .01));
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  for (final width in [320.0, 375.0, 430.0]) {
     testWidgets(
-      'header metrics v2 at $width: carousel icon/value and rank target',
+      'header adaptive metrics v3 at $width: carousel icon/value and rank target',
       (tester) async {
         final h = RoomLobbyHarness();
         final ranks = _RankApi();
@@ -60,7 +105,7 @@ void main() {
         await expectLater(
           find.byType(MaterialApp),
           matchesGoldenFile(
-            'goldens/room_header_metrics_v2/contribution_${width.toInt()}.png',
+            'goldens/room_header_adaptive_width_v3/contribution_${width.toInt()}.png',
           ),
         );
         await tester.tap(entry);
@@ -80,7 +125,7 @@ void main() {
         await expectLater(
           find.byType(MaterialApp),
           matchesGoldenFile(
-            'goldens/room_header_metrics_v2/profit_${width.toInt()}.png',
+            'goldens/room_header_adaptive_width_v3/profit_${width.toInt()}.png',
           ),
         );
         await tester.tap(entry);

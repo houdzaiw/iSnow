@@ -26,6 +26,9 @@ class _RoomHeader extends HookWidget {
     final rankIndex = useState(0);
     String metricValue(int? value) =>
         value == null ? '—' : _formatCompact(value);
+    final rankText = metricValue(
+      rankIndex.value == 0 ? metrics.contribution : metrics.profit,
+    );
     return SizedBox(
       height: AppSpacing.roomHeaderHeight.h.clamp(
         AppSpacing.roomHeaderMinHeight.w,
@@ -136,7 +139,7 @@ class _RoomHeader extends HookWidget {
                               : () => onRank!(rankIndex.value == 1),
                           child: SizedBox(
                             key: const ValueKey('room-header-rank-carousel'),
-                            width: RoomHeaderTheme.metricWidth.w,
+                            width: _MetricChip.widthFor(context, rankText),
                             height: RoomHeaderTheme.metricHeight.h,
                             child: Swiper(
                               itemCount: 2,
@@ -187,10 +190,36 @@ class _MetricChip extends StatelessWidget {
   final String asset;
   final String text;
 
+  static TextStyle _textStyle() => RoomHeaderTheme.metric.copyWith(
+    fontSize: RoomHeaderTheme.metric.fontSize!.sp,
+  );
+
+  /// A vertical viewport needs a finite width; measure its current label
+  /// rather than forcing every value to fill the maximum chip width.
+  static double widthFor(BuildContext context, String text) {
+    final painter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: DefaultTextStyle.of(context).style.merge(_textStyle()),
+      ),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+      locale: Localizations.maybeLocaleOf(context),
+      maxLines: 1,
+    )..layout();
+    final textWidth = painter.width.ceilToDouble();
+    painter.dispose();
+    return (RoomHeaderTheme.metricHorizontal.w * 2 +
+            RoomHeaderTheme.metricIcon.r +
+            RoomHeaderTheme.metricGap.w +
+            textWidth)
+        .clamp(0.0, RoomHeaderTheme.metricMaxWidth.w);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: BoxConstraints(maxWidth: RoomHeaderTheme.metricWidth.w),
+      constraints: BoxConstraints(maxWidth: RoomHeaderTheme.metricMaxWidth.w),
       padding: EdgeInsets.symmetric(
         horizontal: RoomHeaderTheme.metricHorizontal.w,
         vertical: RoomHeaderTheme.metricVertical.h,
@@ -209,9 +238,7 @@ class _MetricChip extends StatelessWidget {
               text,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: RoomHeaderTheme.metric.copyWith(
-                fontSize: RoomHeaderTheme.metric.fontSize!.sp,
-              ),
+              style: _textStyle(),
             ),
           ),
         ],
