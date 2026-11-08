@@ -558,6 +558,23 @@ flowchart TD
 
 `RoomGameAwardEvent` 和 `RoomGameAwardEvent2` 分别更新 Win/Treasure 奖励展示及记录；同一事件不能被房间处理器和记录组件重复消费后重复插入。详细载荷见第 16 节。
 
+### 12.4 当前轻量大厅入口（2026-11-08）
+
+本轮按用户确认保留独立 `RoomLobbyPage`，不开发麦位内嵌大厅。上文描述的 Nady 完整麦位布局仍是后续目标，不能将当前独立页面记为已完成内嵌还原。
+
+- 移除 `RoomToolsStrip` 中常驻 Win/Treasure 文字及占位。右侧挂件列顺序为 Rocket、Game Big Win 活动、大厅入口；大厅图片 48×48，沿用主题间距，键盘出现时隐藏。
+- `lobbyType` 只表示服务端模式。`lobbyVisible` 只表示实际独立页面是否打开，进房为 false；服务端开启时默认收起显示图片入口，不自动打开页面。
+- 访问权限保持现有规则：对应类型 position=2，或房主/管理员拥有对应 position=7。页面打开、挂件显示和权限撤销统一由控制器判断，普通用户不因移除文字而丢失已有入口。
+- More、图片与奖励卡片统一调用 `openRoomLobby`，页面令牌防止重复打开，页面结束只释放所属令牌。打开和恢复只查询现有记录，返回或收起不请求 `/api/lobby/open`；Chat 沿用 `{status:0,lobbyType:1,roomId}` 关闭服务端模式。
+- Socket 开启只更新模式；已有页面随有效模式变化刷新记录，不新增页面。关闭、失去访问权限、Keep、退房、切房或切账号会关闭所属大厅页面。Keep 保留服务端模式，恢复房间后显示收起入口。新旧会话和旧页面完成回调相互隔离。
+- 奖励卡片与独立页面显示状态分开：允许访问的当前模式仍可显示新奖励，点击通过共享入口打开。恢复时清空旧奖励队列。与 Game Big Win（type=8）活动挂件和个人奖励反馈保持独立。
+- 修正关闭时的路由竞态：不使用退出动画中的旧路由误弹新页面；仅移除所属大厅，保留上方 Wallet 等页面；房间页已移除且只剩大厅时回到 Party。
+- Nady 图片 `ic_outline_win.webp`、`ic_outline_mining.webp` 经用户授权复制为 `room_lobby_win.webp`、`room_lobby_treasure.webp`，通过 AppAssets 引用，manifest 标记真实来源，不冒充蓝湖导出，不使用 Flutter Icon。
+
+本轮验收：新增 27 项大厅页面/挂件测试（含 6 张 Win/Treasure × 320/375/430 独立截图），完整房间 646 项通过。覆盖角色与配置、进房默认收起、More/挂件/奖励共用入口、重复打开、收起与返回、Socket 开关/模式切换、旧记录查询竞态、权限撤销、Keep、退房、账号/会话切换、旧页面完成回调以及 Wallet 上层页面保留。截图使用真实空 Gift 分类隔离无关公屏富文本的测试默认字体，不改写生产字体或历史基线。
+
+Pixel_9 沿用当前 `hei`（展示 ID 30317291）和 PID29887，热重载后完成 Win 图片打开、收起、再次打开及返回，并查看 More 模式入口后关闭；没有热重启、重装、退进房或切换模式。验收时 `/api/lobby/open` 提交为 0，进房请求为 0，没有新增未处理 Flutter 异常。最终运行态为 `lobbyType=1, lobbyVisible=false`，页面令牌已释放；记录接口当前返回空列表，显示 No records yet。Treasure、服务端关闭、角色变化和账号切换仅通过替身验证，没有为设备验收提交这些操作。`flutter analyze --no-pub` 与 `git diff --check HEAD` 通过。
+
 ## 13. M09 PK 全链路
 
 ### 13.1 设置页

@@ -281,7 +281,7 @@ flowchart TD
 | `RoomDetailInfo` | `quickWelcomeStr` | `String` | 快捷欢迎语 | 是 | 欢迎消息 |
 | `RoomDetailInfo` | `isFollow` | `bool` | 是否收藏/关注房间 | 是 | 收藏按钮 |
 | `RoomDetailInfo` | `country` | `String` | 国家/地区 | 是 | 房间信息 |
-| `RoomDetailInfo` | `roomGiftWeekVal` | `int` | 房间周礼物流水 | 是 | 房间热度/礼物流水 |
+| `RoomDetailInfo` | `roomGiftWeekVal` | `int` | 房间周礼物流水 | 是 | Header 贡献榜数值；热度另取 getHotScore |
 | `RoomDetailInfo` | `roomGiftIncomeVal` | `int?` | 礼物收益 | 否 | 房主收益展示 |
 | `RoomDetailInfo` | `hasPrettyNo` | `bool?` | 是否靓号 | 否 | 房号展示 |
 | `RoomDetailInfo` | `backgroundUrl` | `String?` | 房间背景图 | 否 | 背景层 |

@@ -7,7 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../theme/app_theme.dart';
 import 'room_big_win_page.dart';
 import 'room_entry_flow.dart';
-import 'room_lobby_page.dart';
+import 'room_lobby_navigation.dart';
 import 'room_lucky_box_page.dart';
 import 'room_pk_page.dart';
 import 'room_tools_controller.dart';
@@ -71,8 +71,7 @@ class RoomToolsStrip extends HookConsumerWidget {
                   ),
                   onTap: () {
                     vm.completeAward('${award['_key']}');
-                    vm.restoreLobby();
-                    pushRoomTool(context, RoomLobbyPage(roomId: roomId));
+                    openRoomLobby(context, ref, roomId);
                   },
                 ),
               ),
@@ -103,22 +102,6 @@ class RoomToolsStrip extends HookConsumerWidget {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  if ([1, 2].contains(state.lobbyType) &&
-                      (state.config.enabled(state.lobbyType, 2) ||
-                          vm.canManage &&
-                              state.config.moreModes.contains(state.lobbyType)))
-                    TextButton(
-                      onPressed: () {
-                        vm.restoreLobby();
-                        pushRoomTool(context, RoomLobbyPage(roomId: roomId));
-                      },
-                      child: Text(
-                        state.lobbyType == 2
-                            ? toolText(context, 'Treasure', '宝藏大厅')
-                            : 'Win',
-                        style: AppTextStyles.roomGiftStatus,
-                      ),
-                    ),
                   if (state.pk.active || state.pk.terminal)
                     TextButton(
                       onPressed: () {

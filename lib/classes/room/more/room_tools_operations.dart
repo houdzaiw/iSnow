@@ -126,8 +126,6 @@ extension RoomToolsOperations on RoomToolsController {
       throw const NadyApiException(message: 'Room mode is unavailable');
     }
     if (type != 0 && _value.lobbyType == type) {
-      _value = _value.copy(lobbyVisible: true);
-      await loadLobby();
       return;
     }
     await repository.post(HttpApi.lobbyOpen, {
@@ -137,16 +135,12 @@ extension RoomToolsOperations on RoomToolsController {
     });
     if (!current()) return;
     if (version != (_snapshotVersions['mode'] ?? 0)) {
-      if (_value.lobbyType == type && type != 0) {
-        _value = _value.copy(lobbyVisible: true);
-        await loadLobby();
-      }
       return;
     }
     _lobbyInsert?.cancel();
     _value = _value.copy(
       lobbyType: type,
-      lobbyVisible: type != 0,
+      lobbyVisible: type != 0 && _value.lobbyVisible,
       lobbyRecords: [],
       treasureGifts: [],
       lobbyAwards: [],
@@ -158,11 +152,27 @@ extension RoomToolsOperations on RoomToolsController {
     if (active) _value = _value.copy(lobbyVisible: false, lobbyAwards: []);
   }
 
-  void restoreLobby() {
-    if (active && _value.lobbyType != 0) {
-      _value = _value.copy(lobbyVisible: true, lobbyAwards: []);
-      unawaited(loadLobby());
-    }
+  /// Reserves one local page, without changing the server's lobby mode.
+  int? beginLobbyPanel() {
+    if (!visible || !canAccessLobby || _lobbyPageToken != null) return null;
+    final token = ++_lobbyPageSequence;
+    _lobbyPageToken = token;
+    _value = _value.copy(lobbyVisible: true, lobbyAwards: []);
+    unawaited(loadLobby());
+    return token;
+  }
+
+  bool ownsLobbyPanel(int token) =>
+      active &&
+      canAccessLobby &&
+      !room.roomState.isMinimized &&
+      _lobbyPageToken == token &&
+      _value.lobbyVisible;
+
+  void endLobbyPanel(int token) {
+    if (!mounted || _lobbyPageToken != token) return;
+    _lobbyPageToken = null;
+    if (active) _value = _value.copy(lobbyVisible: false, lobbyAwards: []);
   }
 
   Future<void> loadLobby() async {

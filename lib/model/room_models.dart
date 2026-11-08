@@ -106,6 +106,10 @@ class RoomInfo {
   final int? audienceCount;
   final Map<String, dynamic> raw;
 
+  int? get roomGiftWeekVal => _asInt(_nestedRoomInfo(raw)['roomGiftWeekVal']);
+  int? get roomGiftIncomeVal =>
+      _asInt(_nestedRoomInfo(raw)['roomGiftIncomeVal']);
+
   factory RoomInfo.fromJson(Map<String, dynamic> json) {
     final data = _nestedRoomInfo(json);
     return RoomInfo(

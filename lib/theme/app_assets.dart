@@ -145,6 +145,10 @@ class AppAssets {
   static const String roomExitKeep = 'assets/lanhu/room/room_exit_keep.png';
   static const String roomExitClose = 'assets/lanhu/room/room_exit_close.png';
   static const String roomMiniClose = 'assets/lanhu/room/room_mini_close.webp';
+  // User-approved Nady lobby pendants; not Game Big Win activity art.
+  static const String roomLobbyWin = 'assets/lanhu/room/room_lobby_win.webp';
+  static const String roomLobbyTreasure =
+      'assets/lanhu/room/room_lobby_treasure.webp';
   static const String lanhuLoginBackground =
       'assets/lanhu/base/login_background.png';
   static const String lanhuAuthButtonPrimary =
@@ -244,6 +248,10 @@ class AppAssets {
   static const String lanhuRoomMicSeat = 'assets/lanhu/room/room_mic_seat.png';
   static const String lanhuRoomOnlineCount =
       'assets/lanhu/room/room_online_count.png';
+  static const roomHeaderHeat = 'assets/lanhu/room/room_header_heat.png';
+  static const roomHeaderContribution =
+      'assets/lanhu/room/room_header_contribution.png';
+  static const roomHeaderProfit = 'assets/lanhu/room/room_header_profit.png';
   static const String lanhuRoomHeaderMicSeat =
       'assets/lanhu/room/room_header_mic_seat.png';
   static const String lanhuRoomHeat = 'assets/lanhu/room/room_heat.png';

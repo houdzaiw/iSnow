@@ -2,6 +2,12 @@
 
 房间语聊 UI 必须严格执行以下资源规则。
 
+## Header 热度与双榜入口
+
+- 按用户指定的原图替换：`魅力值icon.png` → `room_header_heat.png`，`贡献榜.png` → `room_header_contribution.png`，`profit ranktub.png` → `room_header_profit.png`。来源目录为 `/Users/huili/Downloads/isnow图标/`，文件原样复制并在 manifest 标注本地来源，不冒充蓝湖导出。
+- 通过 `AppAssets.roomHeaderHeat`、`roomHeaderContribution`、`roomHeaderProfit` 引用，视觉参数统一由 `RoomHeaderTheme` 管理，不新增 Flutter Icon。
+- 第一项是房间热度，不是在线人数或用户魅力；第二项为贡献榜／收益榜纵向轮播，不显示麦位占用数。字段、刷新与截图说明见 `room_header_metrics.md`。
+
 ## 房间资料、用户卡和 Party History
 
 - 三张稿分别使用 `a1e67d83-ec46-4bd1-999b-de5c48569c7d`、`82047090-c466-4e71-97be-4879e7136278`、`8b867e6b-e9e5-4346-abbb-cb3fe1501601` 为上下文，现有下载脚本按原始 layer id 提取十张通用按钮图片，manifest 同时记录设计 URL。
@@ -44,6 +50,12 @@
 此授权仅限上述五个音乐图标，不作为其他缺图随意复用 Nady 的依据。其他无设计资源且未获授权的图标仍使用红色缺省图。已有音乐入口继续复用设计图。本地曲目多选使用标准 Checkbox 表单控件，不新增 Flutter Icon/Icons。
 
 后续补齐图标时，只替换 `assets/lanhu/room/` 下的语义化图片文件或更新 `AppAssets` 常量，不要改动业务逻辑。
+
+## Lobby Pendant Reference UI
+
+- 2026-11-08 用户确认大厅入口轻量修正，并明确授权复用 Nady `ic_outline_win.webp` / `ic_outline_mining.webp`。文件原样复制至房间资源目录，分别命名 `room_lobby_win.webp` / `room_lobby_treasure.webp`，由 `AppAssets.roomLobbyWin` / `roomLobbyTreasure` 引用，manifest 记录 Nady 来源。
+- 图片只用于 Win/Treasure 大厅的本地打开与恢复，48×48；不替换独立 Game Big Win 活动图片，不把该授权扩大到其他缺失图标，不使用 Flutter Icon/Icons。
+- 挂件沿用房间右侧浮层、主题间距与键盘避让；图片解码失败显示现有红色缺省图。
 
 ## Keep/Exit Reference UI
 

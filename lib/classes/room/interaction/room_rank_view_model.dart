@@ -43,7 +43,10 @@ extension RoomRankRepository on RoomInteractionRepository {
     int? total;
     try {
       final summary = roomInteractionMap(
-        await get(HttpApi.roomRankSummary, params),
+        await get(HttpApi.roomRankSummary, {
+          'roomId': key.session.roomId,
+          'type': key.period.frequency,
+        }),
       );
       total = int.tryParse('${summary[key.profit ? 'diamondVal' : 'coinVal']}');
     } catch (_) {

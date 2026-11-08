@@ -19,7 +19,7 @@ void _showRoomMoreToolsSheet(
         roomProvider: provider,
         onOpenTool: (action) async {
           final roomId = _roomMoreRoomId(ref.read(provider));
-          if (action == 'share' || action == 'currency') {
+          if (action == 'share' || action == 'currency' || action == 'lobby') {
             if (openingStandaloneSheet ||
                 !(ModalRoute.of(sheetContext)?.isCurrent ?? false)) {
               return;
@@ -37,6 +37,8 @@ void _showRoomMoreToolsSheet(
                 repository.roomState.currentRoomId == roomId) {
               if (action == 'share') {
                 await showRoomShareSheet(context, roomId);
+              } else if (action == 'lobby') {
+                await openRoomLobby(context, ref, roomId);
               } else if (ref
                   .read(roomToolsControllerProvider(roomId).notifier)
                   .canManage) {
@@ -57,8 +59,9 @@ void _showRoomMoreToolsSheet(
             ),
             'pk' => RoomPkPage(roomId: roomId),
             'lucky' => RoomLuckyBoxPage(roomId: roomId),
-            _ => RoomLobbyPage(roomId: roomId),
+            _ => null,
           };
+          if (page == null) return;
           Navigator.of(sheetContext).pop();
           if (context.mounted) pushRoomTool(context, page);
         },

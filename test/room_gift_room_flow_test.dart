@@ -266,7 +266,7 @@ void main() {
         if (musicOpened && width == 375 && scenario.name.startsWith('other')) {
           await expectLater(
             find.byKey(const ValueKey('room-flow')),
-            matchesGoldenFile('goldens/room_interactions_v1/room_flow_${scenario.name}_reveal.png'),
+            matchesGoldenFile('goldens/room_header_metrics_v2/regression/room_flow_${scenario.name}_reveal.png'),
           );
         }
         await tester.pump(const Duration(milliseconds: 650));
@@ -317,7 +317,7 @@ void main() {
         if (musicOpened && width == 375 && scenario.name.startsWith('other')) {
           await expectLater(
             find.byKey(const ValueKey('room-flow')),
-            matchesGoldenFile('goldens/room_interactions_v1/room_flow_${scenario.name}_flight.png'),
+            matchesGoldenFile('goldens/room_header_metrics_v2/regression/room_flow_${scenario.name}_flight.png'),
           );
         }
         await tester.tap(combo);

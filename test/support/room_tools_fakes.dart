@@ -24,6 +24,7 @@ class ToolsRoomFake extends ChangeNotifier implements RoomRepository {
   );
   int generation = 1;
   int? uid = 10;
+  int headerHeat = 0;
   final authListeners = <VoidCallback>[];
   bool speaker = false;
   Map<int, int> volumes = {};
@@ -46,6 +47,8 @@ class ToolsRoomFake extends ChangeNotifier implements RoomRepository {
   @override
   Future<UserData?> currentUser() async =>
       UserData(uid: uid, userNo: 987, nick: 'Tester');
+  @override
+  Future<int> fetchRoomHeat(String roomId) async => headerHeat;
   @override
   void addAuthListener(VoidCallback listener) => authListeners.add(listener);
   @override

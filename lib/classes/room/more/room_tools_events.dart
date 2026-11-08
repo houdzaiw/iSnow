@@ -75,8 +75,8 @@ extension RoomToolsEvents on RoomToolsController {
             lobbyType: type,
             lobbyVisible:
                 [1, 2].contains(type) &&
-                _value.config.enabled(type, 2) &&
-                visible,
+                _value.lobbyVisible &&
+                !room.roomState.isMinimized,
             lobbyRecords: [],
             treasureGifts: [],
             lobbyAwards: [],
@@ -96,7 +96,7 @@ extension RoomToolsEvents on RoomToolsController {
           );
           if (visible &&
               _freshVisual(message) &&
-              _value.lobbyVisible &&
+              canAccessLobby &&
               _value.effects.gift &&
               _value.config.enabled(type, 1) &&
               toolInt(toolMap(map['userBaseInfo'])['uid']) > 0) {

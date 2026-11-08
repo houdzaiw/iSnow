@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'room_treasure_gift_view_model.dart';
@@ -8,13 +9,28 @@ import 'room_tools_models.dart';
 import 'room_tools_widgets.dart';
 import 'room_game_page.dart';
 
-class RoomLobbyPage extends ConsumerWidget {
-  const RoomLobbyPage({super.key, required this.roomId});
+class RoomLobbyPage extends HookConsumerWidget {
+  const RoomLobbyPage({
+    super.key,
+    required this.roomId,
+    required this.presentationToken,
+  });
   final String roomId;
+  final int presentationToken;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(roomToolsControllerProvider(roomId));
     final vm = ref.read(roomToolsControllerProvider(roomId).notifier);
+    final owner = useMemoized(() => vm);
+    final valid = identical(vm, owner) && vm.ownsLobbyPanel(presentationToken);
+    useEffect(() {
+      if (!valid) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) dismissOwnedRoomTool(context);
+        });
+      }
+      return null;
+    }, [valid]);
     return RoomToolPage(
       roomId: roomId,
       title: state.lobbyType == 2
@@ -32,10 +48,7 @@ class RoomLobbyPage extends ConsumerWidget {
                 child: Text(toolText(context, 'Refresh', '刷新')),
               ),
               TextButton(
-                onPressed: () {
-                  vm.foldLobby();
-                  Navigator.pop(context);
-                },
+                onPressed: vm.foldLobby,
                 child: Text(toolText(context, 'Minimize', '收起')),
               ),
             ],

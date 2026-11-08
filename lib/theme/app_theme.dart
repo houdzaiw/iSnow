@@ -8,6 +8,7 @@ import 'app_text_styles.dart';
 export 'app_assets.dart';
 export 'home_activity_theme.dart';
 export 'room_profile_theme.dart';
+export 'room_header_theme.dart';
 export 'app_colors.dart';
 export 'app_gradients.dart';
 export 'app_motion.dart';

@@ -136,5 +136,10 @@
   "room_party_history_reminder.png": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNGddc9473f915639a9b27d1a789e9b18e9.png",
   "room_party_history_share.png": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNG9c9727021798a546871ef5ef2f0acf3b.png",
   "room_edit_camera.png_source": "https://lanhuapp.com/web/#/item/project/detailDetach?pid=9ab318f9-4876-4218-a940-73d4c98780c2&image_id=f9cf062d-4932-4ca6-8eaa-e11434d3f766&tid=7aacbbd3-8118-4f56-b35e-8ce2cb33a5c6",
-  "room_edit_camera.png": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNG3ac07b165540fcb0e05c833492df6a45.png"
+  "room_edit_camera.png": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaSlicePNG3ac07b165540fcb0e05c833492df6a45.png",
+  "room_lobby_win.webp": "User-approved Nady lobby pendant: assets/images/ic_outline_win.webp; copied unchanged; local lobby entry, not Lanhu export or Game Big Win activity",
+  "room_lobby_treasure.webp": "User-approved Nady lobby pendant: assets/images/ic_outline_mining.webp; copied unchanged; local lobby entry, not Lanhu export or Game Big Win activity",
+  "room_header_heat.png": "User-provided local asset: /Users/huili/Downloads/isnow图标/魅力值icon.png; copied unchanged; room header heat metric, not a Lanhu export",
+  "room_header_contribution.png": "User-provided local asset: /Users/huili/Downloads/isnow图标/贡献榜.png; copied unchanged; room header contribution metric, not a Lanhu export",
+  "room_header_profit.png": "User-provided local asset: /Users/huili/Downloads/isnow图标/profit ranktub.png; copied unchanged; room header profit metric, not a Lanhu export"
 }

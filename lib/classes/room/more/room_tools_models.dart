@@ -147,6 +147,7 @@ class RoomToolsState {
     this.charmEnabled = false,
     this.currency = 0,
     this.lobbyType = 0,
+    // Actual local page presentation; server mode snapshots never open a page.
     this.lobbyVisible = false,
     this.lobbyRecords = const [],
     this.lobbyAwards = const [],

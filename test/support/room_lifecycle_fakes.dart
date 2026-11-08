@@ -97,6 +97,7 @@ class FakeRoomHttp implements HttpDioManager {
   bool? roomIsFollowed;
   int? roomOwnerUid;
   int infoCalls = 0;
+  Map<String, dynamic> roomInfoExtras = {};
   final followRequests = <Map<String, dynamic>>[];
   Map<String, dynamic> followResponse = const {'code': 200, 'msg': 'success'};
   Completer<void>? audienceGate;
@@ -184,6 +185,7 @@ class FakeRoomHttp implements HttpDioManager {
     if (path == HttpApi.roomInfo) {
       infoCalls++;
       final roomInfo = {
+        ...roomInfoExtras,
         'roomId': queryParameters!['roomId'],
         'title': 'Test room',
         if (roomIsFollowed != null) 'isFollow': roomIsFollowed,

@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:card_swiper/card_swiper.dart';
 import 'package:extended_tabs/extended_tabs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,12 +28,15 @@ import 'online/room_audience_sheet.dart';
 import 'viewmodel/room_state.dart';
 import 'viewmodel/room_more_tools_view_model.dart';
 import 'viewmodel/room_view_model.dart';
+import 'viewmodel/room_header_metrics_view_model.dart';
 import 'views/room_chat_clear_dialog.dart';
 import 'views/room_exit_dialog.dart';
 import 'more/room_tools_controller.dart';
 import 'more/room_tools_widgets.dart';
 import 'more/room_tools_strip.dart';
 import 'more/room_big_win_pendant.dart';
+import 'more/room_lobby_pendant.dart';
+import 'more/room_lobby_navigation.dart';
 import 'more/room_settings_page.dart';
 import 'more/room_settings_content.dart';
 import 'more/room_charm_settings_sheet.dart';
@@ -40,7 +44,6 @@ import 'more/room_report_page.dart';
 import 'more/room_share_page.dart';
 import 'more/room_pk_page.dart';
 import 'more/room_lucky_box_page.dart';
-import 'more/room_lobby_page.dart';
 import 'more/room_game_page.dart';
 import 'more/room_mic_wave.dart';
 import 'more/room_vehicle_layer.dart';
@@ -112,6 +115,14 @@ class RoomPage extends HookConsumerWidget {
       generation: generation,
       viewToken: viewToken,
     );
+    final headerMetrics = state.isReady && !state.isMinimized
+        ? ref.watch(
+            roomHeaderMetricsProvider((
+              roomId: giftRoomId,
+              generation: generation,
+            )),
+          )
+        : const RoomHeaderMetrics();
     if (state.isReady && !state.isMinimized) {
       ref.watch(roomInteractionProvider(interaction));
     }
@@ -481,7 +492,9 @@ class RoomPage extends HookConsumerWidget {
                       Column(
                         children: [
                           _RoomHeader(
+                            key: ValueKey('header:$giftRoomId:$generation'),
                             state: state,
+                            metrics: headerMetrics,
                             onFollowRoom: viewModel.followRoom,
                             onMinimize: () {
                               if (isExiting.value) return;
@@ -491,8 +504,11 @@ class RoomPage extends HookConsumerWidget {
                             onDetails: state.isReady ? showRoomDetail : null,
                             onShare: state.isReady ? shareRoom : null,
                             onRank: state.isReady
-                                ? () => showRoomContent(
-                                    (_) => RoomRankSheet(session: interaction),
+                                ? (profit) => showRoomContent(
+                                    (_) => RoomRankSheet(
+                                      session: interaction,
+                                      initialProfit: profit,
+                                    ),
                                   )
                                 : null,
                           ),
@@ -666,6 +682,7 @@ class RoomPage extends HookConsumerWidget {
                             children: [
                               RoomRocketPendant(session: interaction),
                               RoomBigWinPendant(roomId: giftRoomId),
+                              RoomLobbyPendant(roomId: giftRoomId),
                             ],
                           ),
                         ),

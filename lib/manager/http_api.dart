@@ -110,6 +110,7 @@ class HttpApi {
 
   /// 房间详情
   static const roomInfo = '/api/room/get/info';
+  static const roomHotScore = '/api/room/getHotScore';
   static const roomUserInfo = '/api/room/user/get';
   static const roomPartyList = '/api/room/party/getPartyListByRoomId';
   static const roomUpdateInfo = '/api/room/update/info';

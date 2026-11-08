@@ -242,7 +242,7 @@ void main() {
             await expectLater(
               find.byKey(const ValueKey('room-more-snapshot')),
               matchesGoldenFile(
-                'goldens/room_interactions_v1/room_more_basic_v2_${width.toInt()}.png',
+                'goldens/room_header_metrics_v2/regression/room_more_basic_v2_${width.toInt()}.png',
               ),
             );
           }
@@ -272,7 +272,7 @@ void main() {
         await expectLater(
           find.byKey(const ValueKey('room-more-snapshot')),
           matchesGoldenFile(
-            'goldens/room_interactions_v1/room_more_setting_effects_v3_${width.toInt()}.png',
+            'goldens/room_header_metrics_v2/regression/room_more_setting_effects_v3_${width.toInt()}.png',
           ),
         );
         Navigator.of(

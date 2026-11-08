@@ -200,6 +200,24 @@ class RoomRepository {
     return server.data;
   }
 
+  Future<int> fetchRoomHeat(String roomId) async {
+    final response = await _httpManager.get(
+      HttpApi.roomHotScore,
+      queryParameters: {'roomId': roomId},
+    );
+    final server = NadyServerResponse<Object?>.fromJson(
+      _asMap(response),
+      (v) => v,
+    );
+    if (!server.isSuccess) throw server.toException();
+    final data = server.data;
+    final value = data is int ? data : int.tryParse('$data');
+    if (value == null || value < 0) {
+      throw const NadyApiException(message: 'Room heat is unavailable');
+    }
+    return value;
+  }
+
   Future<int?> sendTextMessage({required String roomId, required String text}) {
     return sendRoomMessage(
       event: 'RoomScreenMessageEvent',

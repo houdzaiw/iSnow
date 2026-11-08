@@ -241,6 +241,8 @@ void main() {
       },
     ));
     expect(api.requests.last.path, HttpApi.roomRankSummary);
+    expect(api.requests.last.body, {'roomId': 'first', 'type': 5});
+    expect(api.requests[1].body, {'roomId': 'first', 'type': 4});
   });
 
   test(

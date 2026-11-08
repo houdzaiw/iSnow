@@ -158,18 +158,36 @@ Future<T?> pushRoomTool<T>(BuildContext context, Widget page) {
 void dismissOwnedRoomTool(BuildContext context) {
   final route = ModalRoute.of(context);
   if (route == null || !route.isActive) return;
-  if (route.isCurrent) {
-    Navigator.of(context).pop();
-    return;
-  }
   final router = GoRouter.maybeOf(context);
   final page = route.settings;
-  if (router == null || page is! Page) return;
+  if (router == null || page is! Page) {
+    if (route.isCurrent) {
+      Navigator.of(context).pop();
+    } else {
+      Navigator.of(context).removeRoute(route);
+    }
+    return;
+  }
   final current = router.routerDelegate.currentConfiguration;
+  // A replaced route can remain mounted during its exit animation.
+  // Its stale context must not pop the new current page.
+  if (!current.matches.any((match) => match.pageKey == page.key)) return;
   final matches = current.matches
       .where((match) => match.pageKey != page.key)
       .toList();
-  if (matches.isEmpty || matches.length == current.matches.length) return;
+  if (matches.isEmpty) {
+    for (final match in current.matches) {
+      if (match.pageKey == page.key && match is ImperativeRouteMatch) {
+        match.complete(null);
+      }
+    }
+    router.go('/party');
+    return;
+  }
+  if (route.isCurrent) {
+    if (router.canPop()) router.pop();
+    return;
+  }
   for (final match in current.matches) {
     if (match.pageKey == page.key && match is ImperativeRouteMatch) {
       match.complete(null);

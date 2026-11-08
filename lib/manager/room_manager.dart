@@ -32,6 +32,7 @@ class RoomState {
     this.isFollowingRoom = false,
     this.enterResponse,
     this.roomInfo,
+    this.roomWeekVal,
     this.micList = const [],
     this.audience = const [],
     this.audienceLoaded = false,
@@ -49,6 +50,7 @@ class RoomState {
   final bool isFollowingRoom;
   final EnterRoomResp? enterResponse;
   final RoomInfo? roomInfo;
+  final int? roomWeekVal;
   final List<RoomMicModel> micList;
   final List<RoomUserInfo> audience;
   final bool audienceLoaded;
@@ -75,6 +77,7 @@ class RoomState {
     bool? clearEnterResponse,
     RoomInfo? roomInfo,
     bool? clearRoomInfo,
+    Object? roomWeekVal = _sentinel,
     List<RoomMicModel>? micList,
     List<RoomUserInfo>? audience,
     bool? audienceLoaded,
@@ -96,6 +99,9 @@ class RoomState {
           ? null
           : enterResponse ?? this.enterResponse,
       roomInfo: clearRoomInfo == true ? null : roomInfo ?? this.roomInfo,
+      roomWeekVal: identical(roomWeekVal, _sentinel)
+          ? this.roomWeekVal
+          : roomWeekVal as int?,
       micList: micList ?? this.micList,
       audience: audience ?? this.audience,
       audienceLoaded: audienceLoaded ?? this.audienceLoaded,
@@ -166,6 +172,7 @@ class RoomManager extends ChangeNotifier {
   String? _requestedRoomId;
   String? _serverRoomId;
   int _generation = 0;
+  int _roomMetricVersion = 0;
   Future<void>? _musicQueue;
   Future<void>? _musicStatusQueue;
   String? _musicPlayerRoomId;
@@ -287,6 +294,7 @@ class RoomManager extends ChangeNotifier {
         isFollowed: false,
         isFollowingRoom: false,
         clearRoomInfo: true,
+        roomWeekVal: null,
         clearEnterResponse: true,
         micList: const [],
         audience: const [],
@@ -490,12 +498,17 @@ class RoomManager extends ChangeNotifier {
   Future<void> refreshRoomInfo() async {
     final roomId = _requireCurrentRoomId();
     final generation = _generation;
+    final metricVersion = _roomMetricVersion;
     try {
       final roomInfo = await _api.getRoomInfo(roomId);
       if (!_isCurrentSession(roomId, generation)) return;
       _setState(
         _state.copyWith(
           roomInfo: roomInfo,
+          // A stream event newer than this HTTP request owns the week value.
+          roomWeekVal: metricVersion == _roomMetricVersion
+              ? null
+              : _state.roomWeekVal,
           // A stale detail response must not undo a successful follow.
           isFollowed: _state.isFollowed || roomInfo.isFollow == true,
           errorMessage: null,
@@ -759,6 +772,17 @@ class RoomManager extends ChangeNotifier {
     if (message.channel != 'room:$roomId' && message.channel != 'room') return;
 
     switch (message.event) {
+      case 'RoomGiftStreamUpdateEvent':
+        final data = _decodePayload(message.payload);
+        if (data is! Map) break;
+        if (data['roomId'] != null && '${data['roomId']}' != roomId) break;
+        if (message.channel == 'room' && '${data['roomId']}' != roomId) break;
+        final value = int.tryParse('${data['roomWeekVal']}');
+        if (value != null && value >= 0) {
+          _roomMetricVersion++;
+          _setState(_state.copyWith(roomWeekVal: value));
+        }
+        break;
       case 'RoomUserPublicScreenSilenceUpdate':
         unawaited(_updatePublicSilence(roomId, message.payload));
         break;

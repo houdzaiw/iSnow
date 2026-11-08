@@ -47,13 +47,17 @@ void main() {
     expect(config.enabled(8, 17), isTrue);
   });
   test(
-    'selected mode restores locally without toggling or requesting again',
+    'selected mode keeps server state and only a local page marks it visible',
     () async {
       expect(await vm.selectMode(1), isTrue);
+      final token = vm.beginLobbyPanel()!;
+      expect(vm.snapshot.lobbyVisible, isTrue);
       vm.foldLobby();
+      vm.endLobbyPanel(token);
       expect(await vm.selectMode(1), isTrue);
       expect(api.count(HttpApi.lobbyOpen), 1);
-      expect(vm.snapshot.lobbyVisible, isTrue);
+      expect(vm.snapshot.lobbyVisible, isFalse);
+      expect(vm.showLobbyPendant, isTrue);
       expect(await vm.selectMode(0), isTrue);
       expect(
         api.calls.lastWhere((call) => call.path == HttpApi.lobbyOpen).body,

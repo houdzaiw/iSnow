@@ -1,8 +1,10 @@
 part of '../room_page.dart';
 
-class _RoomHeader extends StatelessWidget {
+class _RoomHeader extends HookWidget {
   const _RoomHeader({
+    super.key,
     required this.state,
+    required this.metrics,
     required this.onMinimize,
     required this.onExit,
     required this.onFollowRoom,
@@ -12,21 +14,28 @@ class _RoomHeader extends StatelessWidget {
   });
 
   final RoomPageState state;
+  final RoomHeaderMetrics metrics;
   final VoidCallback onMinimize;
   final VoidCallback onExit;
   final VoidCallback onFollowRoom;
-  final VoidCallback? onDetails, onShare, onRank;
+  final VoidCallback? onDetails, onShare;
+  final ValueChanged<bool>? onRank;
 
   @override
   Widget build(BuildContext context) {
-    final occupiedCount = state.seats.where((seat) => seat.isOccupied).length;
+    final rankIndex = useState(0);
+    String metricValue(int? value) =>
+        value == null ? '—' : _formatCompact(value);
     return SizedBox(
       height: AppSpacing.roomHeaderHeight.h.clamp(
         AppSpacing.roomHeaderMinHeight.w,
         double.infinity,
       ),
       child: Padding(
-        padding: EdgeInsets.fromLTRB(11.w, 8.h, 11.w, 8.h),
+        padding: EdgeInsets.symmetric(
+          horizontal: RoomHeaderTheme.horizontalInset.w,
+          vertical: RoomHeaderTheme.verticalInset.h,
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -35,11 +44,11 @@ class _RoomHeader extends StatelessWidget {
               onTap: onDetails,
               child: _RoomAvatarImage(
                 url: state.roomAvatar,
-                size: 66.r,
-                radius: 14.r,
+                size: RoomHeaderTheme.avatar.r,
+                radius: RoomHeaderTheme.avatarRadius.r,
               ),
             ),
-            SizedBox(width: 6.w),
+            SizedBox(width: RoomHeaderTheme.gap.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -54,11 +63,8 @@ class _RoomHeader extends StatelessWidget {
                             state.roomTitle,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16.sp,
-                              height: 1,
-                              fontWeight: FontWeight.w700,
+                            style: RoomHeaderTheme.title.copyWith(
+                              fontSize: RoomHeaderTheme.title.fontSize!.sp,
                             ),
                           ),
                         ),
@@ -82,7 +88,7 @@ class _RoomHeader extends StatelessWidget {
                       ],
                     ],
                   ),
-                  SizedBox(height: 5.h),
+                  SizedBox(height: RoomHeaderTheme.lineGap.h),
                   Row(
                     children: [
                       Flexible(
@@ -92,41 +98,71 @@ class _RoomHeader extends StatelessWidget {
                             'ID: ${state.roomNo}',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 13.sp,
-                              height: 1,
-                              fontWeight: FontWeight.w500,
+                            style: RoomHeaderTheme.number.copyWith(
+                              fontSize: RoomHeaderTheme.number.fontSize!.sp,
                             ),
                           ),
                         ),
                       ),
-                      SizedBox(width: 8.w),
-                      _MetricChip(
-                        asset: AppAssets.lanhuRoomOnlineCount,
-                        text: _formatCompact(state.onlineCount),
-                      ),
-                      SizedBox(width: 6.w),
-                      _MetricChip(
-                        asset: AppAssets.lanhuRoomHeaderMicSeat,
-                        text: '$occupiedCount/${state.seats.length}',
-                      ),
                     ],
                   ),
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: Semantics(
-                      button: true,
-                      label: toolText(context, 'Room rankings', '房间榜单'),
-                      child: InkWell(
-                        key: const ValueKey('room-rank-entry'),
-                        onTap: onRank,
-                        child: _MetricChip(
-                          asset: AppAssets.roomInteractionRank,
-                          text: _formatCompact(state.roomWeekVal),
+                  SizedBox(height: RoomHeaderTheme.lineGap.h),
+                  Row(
+                    children: [
+                      Semantics(
+                        label: toolText(context, 'Room heat', '房间热度'),
+                        value: metricValue(metrics.heat),
+                        child: Tooltip(
+                          message:
+                              metrics.heatError ??
+                              toolText(context, 'Room heat', '房间热度'),
+                          child: _MetricChip(
+                            key: const ValueKey('room-header-heat'),
+                            asset: AppAssets.roomHeaderHeat,
+                            text: metricValue(metrics.heat),
+                          ),
                         ),
                       ),
-                    ),
+                      SizedBox(width: RoomHeaderTheme.gap.w),
+                      Semantics(
+                        button: true,
+                        label: rankIndex.value == 0
+                            ? toolText(context, 'Contribution Rank', '贡献榜')
+                            : toolText(context, 'Profit Rank', '收益榜'),
+                        child: InkWell(
+                          key: const ValueKey('room-rank-entry'),
+                          onTap: onRank == null
+                              ? null
+                              : () => onRank!(rankIndex.value == 1),
+                          child: SizedBox(
+                            key: const ValueKey('room-header-rank-carousel'),
+                            width: RoomHeaderTheme.metricWidth.w,
+                            height: RoomHeaderTheme.metricHeight.h,
+                            child: Swiper(
+                              itemCount: 2,
+                              autoplay:
+                                  metrics.active &&
+                                  (ModalRoute.of(context)?.isCurrent ?? true),
+                              duration: RoomHeaderTheme.carouselDuration,
+                              autoplayDelay: RoomHeaderTheme.carouselDelay,
+                              scrollDirection: Axis.vertical,
+                              onIndexChanged: (index) =>
+                                  rankIndex.value = index,
+                              itemBuilder: (_, index) => _MetricChip(
+                                asset: index == 0
+                                    ? AppAssets.roomHeaderContribution
+                                    : AppAssets.roomHeaderProfit,
+                                text: metricValue(
+                                  index == 0
+                                      ? metrics.contribution
+                                      : metrics.profit,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -146,7 +182,7 @@ class _RoomHeader extends StatelessWidget {
 }
 
 class _MetricChip extends StatelessWidget {
-  const _MetricChip({required this.asset, required this.text});
+  const _MetricChip({super.key, required this.asset, required this.text});
 
   final String asset;
   final String text;
@@ -154,27 +190,27 @@ class _MetricChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: BoxConstraints(maxWidth: 74.w),
-      padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.48),
-        borderRadius: BorderRadius.circular(18.r),
+      constraints: BoxConstraints(maxWidth: RoomHeaderTheme.metricWidth.w),
+      padding: EdgeInsets.symmetric(
+        horizontal: RoomHeaderTheme.metricHorizontal.w,
+        vertical: RoomHeaderTheme.metricVertical.h,
+      ),
+      decoration: const BoxDecoration(
+        color: RoomHeaderTheme.metricSurface,
+        borderRadius: RoomHeaderTheme.metricBorder,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _RoomAssetIcon(asset: asset, size: 14.r),
-          SizedBox(width: 3.w),
+          _RoomAssetIcon(asset: asset, size: RoomHeaderTheme.metricIcon.r),
+          SizedBox(width: RoomHeaderTheme.metricGap.w),
           Flexible(
             child: Text(
               text,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: _roomGold,
-                fontSize: 12.sp,
-                height: 1,
-                fontWeight: FontWeight.w500,
+              style: RoomHeaderTheme.metric.copyWith(
+                fontSize: RoomHeaderTheme.metric.fontSize!.sp,
               ),
             ),
           ),

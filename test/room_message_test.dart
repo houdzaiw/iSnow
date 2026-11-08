@@ -194,7 +194,7 @@ void main() {
         await precacheRoomAssets(tester, tester.element(inbox));
         await expectLater(
           find.byKey(const ValueKey('room-settings-snapshot')),
-          matchesGoldenFile('goldens/room_interactions_v1/room_message_inbox_${width.toInt()}.png'),
+          matchesGoldenFile('goldens/room_header_metrics_v2/regression/room_message_inbox_${width.toInt()}.png'),
         );
         await tester.tap(find.byKey(const ValueKey('room-conversation-20')));
         await tester.pumpAndSettle();
@@ -203,7 +203,7 @@ void main() {
         await precacheRoomAssets(tester, tester.element(chat));
         await expectLater(
           find.byKey(const ValueKey('room-settings-snapshot')),
-          matchesGoldenFile('goldens/room_interactions_v1/room_message_chat_${width.toInt()}.png'),
+          matchesGoldenFile('goldens/room_header_metrics_v2/regression/room_message_chat_${width.toInt()}.png'),
         );
         expect(sdk.conversations.reads, contains('c2c_20'));
         expect(f.container.read(messageViewModelProvider).totalUnreadCount, 0);

@@ -50,6 +50,8 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
   int? uid;
   int _generation = -1;
   int _entryEffectsGeneration = -1;
+  int _lobbyPageSequence = 0;
+  int? _lobbyPageToken, _blockedGeneration;
   bool _started = false, _foreground = true;
   bool _wasVisible = true;
   bool _wasManager = false;
@@ -65,6 +67,7 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
   set _value(RoomToolsState next) => state = next;
   bool get active =>
       mounted &&
+      room.roomGeneration != _blockedGeneration &&
       room.roomGeneration == _generation &&
       room.roomState.currentRoomId == roomId &&
       room.roomState.isInRoom &&
@@ -74,6 +77,13 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
       (room.roomState.enterResponse?.identity?.isOwnerOrManager == true ||
           uid != null && room.roomState.roomInfo?.roomOwnerUid == uid);
   bool get visible => active && !room.roomState.isMinimized && _foreground;
+  bool get canAccessLobby =>
+      active &&
+      [1, 2].contains(state.lobbyType) &&
+      (state.config.enabled(state.lobbyType, 2) ||
+          canManage && state.config.moreModes.contains(state.lobbyType));
+  bool get showLobbyPendant =>
+      visible && canAccessLobby && _lobbyPageToken == null;
   String? get errorOperation => _errorOperation;
   bool get charmStatusReady => _snapshotVersions.containsKey('charm');
   bool get charmStatusBusy =>
@@ -87,6 +97,7 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
         WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
     WidgetsBinding.instance.addObserver(this);
     room.addListener(_sync);
+    room.addAuthListener(_invalidateAccount);
     _messages = room.socketMessages.listen(receive);
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
       if (active && visible && (state.pk.active || state.bags.isNotEmpty)) {
@@ -101,6 +112,7 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
     final current = room.roomState;
     final valid =
         current.currentRoomId == roomId &&
+        room.roomGeneration != _blockedGeneration &&
         current.isInRoom &&
         current.status == RoomStatus.ready;
     if (!valid) {
@@ -109,6 +121,7 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
         _lobbyInsert?.cancel();
         _awardRemoval?.cancel();
         _gameOpened = false;
+        _lobbyPageToken = null;
         _gameId = null;
         _errorOperation = null;
         state = const RoomToolsState();
@@ -125,15 +138,14 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
       _snapshotVersions.clear();
       _reloadKeys.clear();
       _errorOperation = null;
+      _lobbyPageToken = null;
+      uid = null;
       state = RoomToolsState(
         sessionActive: true,
         currency: current.enterResponse?.initialCharmCurrency ?? 0,
         lobbyType: current.enterResponse?.status == 1
             ? current.enterResponse?.lobbyType ?? 0
             : 0,
-        lobbyVisible:
-            current.enterResponse?.status == 1 &&
-            [1, 2].contains(current.enterResponse?.lobbyType),
       );
       _keepAlive ??= retain?.call();
       unawaited(_initialize(_generation));
@@ -155,7 +167,9 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
     if (_wasVisible != visible) {
       _wasVisible = visible;
       _markVisualBoundary();
+      state = state.copy();
     }
+    if (current.isMinimized && state.lobbyVisible) foldLobby();
     if (!visible &&
         (state.vehicleEffects.isNotEmpty ||
             state.worldBanners.isNotEmpty ||
@@ -168,6 +182,11 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
         vehicleEffects: [],
       );
     }
+  }
+
+  void _invalidateAccount() {
+    _blockedGeneration = _generation;
+    _sync();
   }
 
   Future<void> _initialize(int generation) async {
@@ -264,7 +283,13 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
           busy: {...state.busy}..remove('load:$key'),
           error: state.error,
         );
-        if (_reloadKeys.remove(key)) unawaited(_load(key, load, apply));
+        if (_reloadKeys.remove(key)) {
+          if (key == 'lobby') {
+            unawaited(loadLobby());
+          } else {
+            unawaited(_load(key, load, apply));
+          }
+        }
       }
     }
   }
@@ -331,6 +356,7 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
   void dispose() {
     if (_started) {
       room.removeListener(_sync);
+      room.removeAuthListener(_invalidateAccount);
       WidgetsBinding.instance.removeObserver(this);
     }
     _ticker?.cancel();
