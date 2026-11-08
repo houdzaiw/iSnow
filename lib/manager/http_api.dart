@@ -192,6 +192,8 @@ class HttpApi {
 
   /// 正在玩的好友列表
   static const friendPlayingList = '/api/user/homepage/friends/play';
+  static const homeCountries = '/country-list/home/default-country';
+  static const homeRoomHistory = '/api/follow/room/queryRelated';
 
   /// 派对列表
   static const partyList = '/api/room/party/list';

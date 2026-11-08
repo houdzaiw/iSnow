@@ -186,6 +186,8 @@ class AppAssets {
       'assets/lanhu/party/party_audio_bars.png';
   static const String lanhuPartyStateEmpty =
       'assets/lanhu/party/party_state_empty.png';
+  static const friendsActivityHall =
+      'assets/lanhu/party/friends_activity_hall.webp';
   static const String lanhuHomeRoomBanner =
       'assets/lanhu/party/home_room_banner.png';
   static const String lanhuHomeHotIcon = 'assets/lanhu/party/home_hot_icon.png';

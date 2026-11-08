@@ -5,184 +5,130 @@ class _CountryFilterBar extends StatelessWidget {
     required this.tabController,
     required this.tabs,
     required this.onSelect,
+    required this.onMore,
   });
-
   final TabController tabController;
   final List<_CountryFilterTab> tabs;
   final ValueChanged<String?> onSelect;
-
+  final VoidCallback onMore;
   @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 32,
-      child: Row(
-        children: [
-          Expanded(
-            child: AnimatedBuilder(
-              animation: tabController,
-              builder: (context, _) {
-                final selectedIndex = tabController.index;
-                return ExtendedTabBar(
-                  controller: tabController,
-                  isScrollable: true,
-                  padding: const EdgeInsets.only(left: 12),
-                  labelPadding: const EdgeInsets.only(right: 8),
-                  indicator: const BoxDecoration(color: AppColors.transparent),
-                  indicatorColor: AppColors.transparent,
-                  dividerColor: AppColors.transparent,
-                  overlayColor: WidgetStateProperty.all(AppColors.transparent),
-                  splashFactory: NoSplash.splashFactory,
-                  onTap: (index) {
-                    if (index < 0 || index >= tabs.length) return;
-                    onSelect(tabs[index].countryCode);
-                  },
-                  tabs: [
-                    for (var index = 0; index < tabs.length; index++)
-                      Tab(
-                        height: 32,
-                        child: _CountryFilterTabView(
-                          item: tabs[index],
-                          selected: index == selectedIndex,
-                        ),
-                      ),
-                  ],
-                );
-              },
+  Widget build(BuildContext context) => SizedBox(
+    height: HomeActivityTheme.countryTabHeight.h,
+    child: Row(
+      children: [
+        Expanded(
+          child: AnimatedBuilder(
+            animation: tabController,
+            builder: (context, _) => ExtendedTabBar(
+              controller: tabController,
+              isScrollable: true,
+              padding: EdgeInsets.only(left: HomeActivityTheme.mediumGap.w),
+              labelPadding: EdgeInsets.only(right: HomeActivityTheme.gap.w),
+              indicator: const BoxDecoration(color: AppColors.transparent),
+              indicatorColor: AppColors.transparent,
+              dividerColor: AppColors.transparent,
+              overlayColor: WidgetStateProperty.all(AppColors.transparent),
+              splashFactory: NoSplash.splashFactory,
+              onTap: (index) => onSelect(tabs[index].countryCode),
+              tabs: [
+                for (int i = 0; i < tabs.length; i++)
+                  Tab(
+                    height: HomeActivityTheme.countryTabHeight.h,
+                    child: _CountryFilterTabView(
+                      item: tabs[i],
+                      selected: i == tabController.index,
+                    ),
+                  ),
+              ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: _FilterChipButton(onTap: () {}),
+        ),
+        Padding(
+          padding: EdgeInsets.only(right: HomeActivityTheme.mediumGap.w),
+          child: Semantics(
+            button: true,
+            label: context.l10n.t('home.countries'),
+            child: InkWell(
+              key: const ValueKey('home-more-countries'),
+              onTap: onMore,
+              child: SizedBox(
+                width: HomeActivityTheme.moreWidth.w,
+                height: HomeActivityTheme.countryChipHeight.h,
+                child: Center(
+                  child: HomeActivityIcon(
+                    AppAssets.lanhuHomeFilterIcon,
+                    width: HomeActivityTheme.icon.w,
+                    height: HomeActivityTheme.flagHeight.h,
+                  ),
+                ),
+              ),
+            ),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
 }
 
-List<_CountryFilterTab> _buildCountryFilterTabs(List<CountryInfo> countries) {
-  return <_CountryFilterTab>[
-    const _CountryFilterTab.hot(),
-    for (final country in countries.take(5)) _CountryFilterTab.country(country),
-  ];
-}
-
-int _countryFilterSelectedIndex(
-  List<_CountryFilterTab> tabs,
-  String? selectedCountryCode,
-) {
-  final code = selectedCountryCode?.toUpperCase();
-  if (code == null) return 0;
-  final index = tabs.indexWhere((tab) => tab.countryCode == code);
+List<_CountryFilterTab> _buildCountryFilterTabs(List<CountryInfo> countries) =>
+    [
+      const _CountryFilterTab.hot(),
+      for (final c in countries) _CountryFilterTab.country(c),
+    ];
+int _countryFilterSelectedIndex(List<_CountryFilterTab> tabs, String? code) {
+  final index = tabs.indexWhere(
+    (t) => t.countryCode == normalizeHomeCountryCode(code),
+  );
   return index < 0 ? 0 : index;
 }
 
 class _CountryFilterTab {
   const _CountryFilterTab.hot() : country = null;
   const _CountryFilterTab.country(this.country);
-
   final CountryInfo? country;
-
-  bool get isHot => country == null;
-
-  String? get countryCode => _normalizeHomeCountryCode(country?.isoCode);
+  String? get countryCode => normalizeHomeCountryCode(country?.isoCode);
 }
 
 class _CountryFilterTabView extends StatelessWidget {
   const _CountryFilterTabView({required this.item, required this.selected});
-
   final _CountryFilterTab item;
   final bool selected;
-
   @override
-  Widget build(BuildContext context) {
-    if (item.isHot) {
-      return _HotCountryChip(selected: selected);
-    }
-    return _CountryChip(country: item.country!, selected: selected);
-  }
-}
-
-class _HotCountryChip extends StatelessWidget {
-  const _HotCountryChip({required this.selected});
-
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 65,
-      height: 28,
+  Widget build(BuildContext context) => Semantics(
+    selected: selected,
+    label: item.country == null
+        ? context.l10n.t('home.hot')
+        : countryDisplayName(context, item.country!),
+    child: Container(
+      key: ValueKey('home-country-${item.countryCode ?? 'hot'}'),
+      width:
+          (item.country == null
+                  ? HomeActivityTheme.hotChipWidth
+                  : HomeActivityTheme.countryChipWidth)
+              .w,
+      height: HomeActivityTheme.countryChipHeight.h,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: selected ? null : const Color(0xFFF0F0F0),
+        color: selected ? null : HomeActivityTheme.field,
         gradient: selected ? AppGradients.sendButton : null,
-        borderRadius: AppRadius.pillBorder,
+        borderRadius: HomeActivityTheme.pill,
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(AppAssets.lanhuHomeHotIcon, width: 16, height: 16),
-          const SizedBox(width: 4),
-          Text(
-            context.l10n.t('home.hot'),
-            style: TextStyle(
-              color: selected ? AppColors.textInverse : AppColors.textPrimary,
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
+      child: item.country != null
+          ? HomeCountryFlag(country: item.country!)
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                HomeActivityIcon(
+                  AppAssets.lanhuHomeHotIcon,
+                  size: HomeActivityTheme.flagHeight.r,
+                ),
+                SizedBox(width: HomeActivityTheme.smallGap.w),
+                Text(
+                  context.l10n.t('home.hot'),
+                  style: HomeActivityTheme.hotLabel(selected),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CountryChip extends StatelessWidget {
-  const _CountryChip({required this.country, required this.selected});
-
-  final CountryInfo country;
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 46,
-      height: 28,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: selected ? null : const Color(0xFFF0F0F0),
-        gradient: selected ? AppGradients.sendButton : null,
-        borderRadius: AppRadius.pillBorder,
-      ),
-      child: CountryFlag.fromCountryCode(
-        country.isoCode,
-        theme: ImageTheme(width: 24, height: 16, shape: RoundedRectangle(3)),
-      ),
-    );
-  }
-}
-
-class _FilterChipButton extends StatelessWidget {
-  const _FilterChipButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: SizedBox(
-        width: 32,
-        height: 28,
-        child: Center(
-          child: Image.asset(
-            AppAssets.lanhuHomeFilterIcon,
-            width: 20,
-            height: 16,
-          ),
-        ),
-      ),
-    );
-  }
+    ),
+  );
 }

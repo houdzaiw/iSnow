@@ -1,30 +1,56 @@
 part of '../party_page.dart';
 
 class _HomeFeedListView extends StatelessWidget {
-  const _HomeFeedListView({
-    required this.tabController,
-    required this.tabs,
-    required this.rooms,
-    required this.onRefresh,
-  });
-
+  const _HomeFeedListView({required this.tabController, required this.tabs});
   final TabController tabController;
   final List<_CountryFilterTab> tabs;
-  final List<_HomeRoomItem> rooms;
-  final Future<void> Function() onRefresh;
-
   @override
-  Widget build(BuildContext context) {
-    return ExtendedTabBarView(
-      controller: tabController,
-      cacheExtent: 1,
+  Widget build(BuildContext context) => ExtendedTabBarView(
+    controller: tabController,
+    cacheExtent: 1,
+    children: [
+      for (final tab in tabs)
+        _HomeCountryGrid(
+          key: ValueKey(tab.countryCode ?? 'hot'),
+          code: tab.countryCode,
+        ),
+    ],
+  );
+}
+
+class _HomeCountryGrid extends ConsumerWidget {
+  const _HomeCountryGrid({super.key, required this.code});
+  final String? code;
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final provider = homeCountryRoomsProvider(code);
+    final state = ref.watch(provider);
+    final refresh = ref.read(provider.notifier).refresh;
+    if (state.loading && state.items.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (state.error != null && state.items.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: refresh,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            HomeActivityNotice(text: state.error!, error: true, retry: refresh),
+          ],
+        ),
+      );
+    }
+    return Column(
       children: [
-        for (final tab in tabs)
-          _HomeRoomGrid(
-            key: ValueKey(tab.countryCode ?? 'hot'),
-            rooms: rooms,
-            onRefresh: onRefresh,
+        if (state.error != null)
+          HomeActivityNotice(text: state.error!, error: true, retry: refresh),
+        Expanded(
+          child: _HomeRoomGrid(
+            key: PageStorageKey('home-rooms-${code ?? 'hot'}'),
+            rooms: state.items,
+            onRefresh: refresh,
           ),
+        ),
       ],
     );
   }
@@ -37,7 +63,7 @@ class _HomeRoomGrid extends StatelessWidget {
     required this.onRefresh,
   });
 
-  final List<_HomeRoomItem> rooms;
+  final List<HomeRoomItem> rooms;
   final Future<void> Function() onRefresh;
 
   @override
@@ -77,7 +103,7 @@ class _HomeRoomGrid extends StatelessWidget {
 class _HomeRoomCard extends StatelessWidget {
   const _HomeRoomCard({required this.room});
 
-  final _HomeRoomItem room;
+  final HomeRoomItem room;
 
   @override
   Widget build(BuildContext context) {
@@ -277,18 +303,18 @@ class _RoomTitle extends StatelessWidget {
   }
 }
 
-String _homeRoomTagLabel(_HomeRoomTagType type) {
+String _homeRoomTagLabel(HomeRoomTagType type) {
   return switch (type) {
-    _HomeRoomTagType.pk => 'PK',
-    _HomeRoomTagType.lucky => 'Lucky',
-    _HomeRoomTagType.bigWin => 'Big Win',
+    HomeRoomTagType.pk => 'PK',
+    HomeRoomTagType.lucky => 'Lucky',
+    HomeRoomTagType.bigWin => 'Big Win',
   };
 }
 
-String _homeRoomTagAsset(_HomeRoomTagType type) {
+String _homeRoomTagAsset(HomeRoomTagType type) {
   return switch (type) {
-    _HomeRoomTagType.pk => AppAssets.lanhuHomeBadgePk,
-    _HomeRoomTagType.lucky => AppAssets.lanhuHomeBadgeMining,
-    _HomeRoomTagType.bigWin => AppAssets.lanhuHomeBadgeBigWin,
+    HomeRoomTagType.pk => AppAssets.lanhuHomeBadgePk,
+    HomeRoomTagType.lucky => AppAssets.lanhuHomeBadgeMining,
+    HomeRoomTagType.bigWin => AppAssets.lanhuHomeBadgeBigWin,
   };
 }

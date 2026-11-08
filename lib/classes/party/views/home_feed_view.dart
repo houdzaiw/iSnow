@@ -1,113 +1,84 @@
 part of '../party_page.dart';
 
-class _HomeFeedView extends ConsumerWidget {
-  const _HomeFeedView();
-
+class HomeFeedView extends ConsumerWidget {
+  const HomeFeedView({super.key});
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(_homeFeedViewModelProvider);
-    return state.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stackTrace) {
-        debugPrint('[HomeFeed] page failed: $error\n$stackTrace');
-        return _StateList(
-          text: context.l10n.t('home.feedLoadFailed'),
-          actionLabel: context.l10n.t('app.retry'),
-          onAction: () =>
-              ref.read(_homeFeedViewModelProvider.notifier).reload(),
-        );
-      },
-      data: (state) => _HomeFeedContent(
-        state: state,
-        onRefreshRooms: () =>
-            ref.read(_homeFeedViewModelProvider.notifier).refreshRooms(),
-        onSelectCountry: (countryCode) {
-          ref
-              .read(_homeFeedViewModelProvider.notifier)
-              .selectCountry(countryCode);
-        },
-      ),
-    );
-  }
+  Widget build(BuildContext context, WidgetRef ref) => _HomeFeedContent(
+    state: ref.watch(homeFeedProvider),
+    onSelectCountry: ref.read(homeFeedProvider.notifier).selectCountry,
+  );
 }
 
 class _HomeFeedContent extends HookWidget {
-  const _HomeFeedContent({
-    required this.state,
-    required this.onRefreshRooms,
-    required this.onSelectCountry,
-  });
-
-  final _HomeFeedState state;
-  final Future<void> Function() onRefreshRooms;
+  const _HomeFeedContent({required this.state, required this.onSelectCountry});
+  final HomeFeedState state;
   final ValueChanged<String?> onSelectCountry;
-
   @override
   Widget build(BuildContext context) {
-    final countryTabs = _buildCountryFilterTabs(state.hotCountries);
+    final countryTabs = _buildCountryFilterTabs(state.countries);
     final selectedIndex = _countryFilterSelectedIndex(
       countryTabs,
       state.selectedCountryCode,
     );
+    final tabsKey = countryTabs.map((t) => t.countryCode ?? 'hot').join('|');
     final tabController = useTabController(
       initialLength: countryTabs.length,
       initialIndex: selectedIndex,
-      keys: [countryTabs.length],
+      keys: [tabsKey],
     );
-    final lastSelectedIndex = useRef(selectedIndex);
-
+    final lastSelected = useRef(selectedIndex);
+    final moreOpen = useState(false);
     useEffect(() {
+      lastSelected.value = selectedIndex;
       if (tabController.index != selectedIndex) {
-        lastSelectedIndex.value = selectedIndex;
         tabController.index = selectedIndex;
       }
       return null;
-    }, [selectedIndex, countryTabs.length, tabController]);
-
+    }, [selectedIndex, tabsKey, tabController]);
     useEffect(() {
-      void handleTabSettled() {
-        if (tabController.indexIsChanging) return;
-        if (tabController.offset.abs() > 0.001) return;
-
+      void settled() {
+        if (tabController.indexIsChanging ||
+            tabController.offset.abs() > .001) {
+          return;
+        }
         final index = tabController.index;
-        if (index < 0 || index >= countryTabs.length) return;
-        if (lastSelectedIndex.value == index) return;
-
-        lastSelectedIndex.value = index;
+        if (index == lastSelected.value) return;
+        lastSelected.value = index;
         onSelectCountry(countryTabs[index].countryCode);
       }
 
-      tabController.addListener(handleTabSettled);
-      return () => tabController.removeListener(handleTabSettled);
-    }, [tabController, countryTabs, onSelectCountry]);
-
+      tabController.addListener(settled);
+      return () => tabController.removeListener(settled);
+    }, [tabController, tabsKey, onSelectCountry]);
     return Column(
       children: [
-        const SizedBox(height: 6),
+        SizedBox(height: HomeActivityTheme.gap.h),
         _HomeBanner(banners: state.banners),
-        const SizedBox(height: 16),
-        _FriendsActivityHeader(),
-        const SizedBox(height: 10),
-        _FriendsPlayingStrip(friends: state.friends),
-        const SizedBox(height: 12),
+        SizedBox(height: HomeActivityTheme.sectionGap.h),
+        const HomeFriendsActivity(),
+        SizedBox(height: HomeActivityTheme.mediumGap.h),
         _CountryFilterBar(
           tabController: tabController,
           tabs: countryTabs,
-          onSelect: (countryCode) {
-            lastSelectedIndex.value = _countryFilterSelectedIndex(
-              countryTabs,
-              countryCode,
-            );
-            onSelectCountry(countryCode);
+          onSelect: (code) {
+            lastSelected.value = _countryFilterSelectedIndex(countryTabs, code);
+            onSelectCountry(code);
+          },
+          onMore: () async {
+            if (moreOpen.value) return;
+            moreOpen.value = true;
+            try {
+              await showHomeCountriesSheet(context);
+            } finally {
+              if (context.mounted) moreOpen.value = false;
+            }
           },
         ),
-        const SizedBox(height: 14),
+        SizedBox(height: HomeActivityTheme.mediumGap.h),
         Expanded(
           child: _HomeFeedListView(
             tabController: tabController,
             tabs: countryTabs,
-            rooms: state.rooms,
-            onRefresh: onRefreshRooms,
           ),
         ),
       ],
@@ -118,7 +89,7 @@ class _HomeFeedContent extends HookWidget {
 class _HomeBanner extends StatelessWidget {
   const _HomeBanner({required this.banners});
 
-  final List<_HomeBannerItem> banners;
+  final List<HomeBannerItem> banners;
 
   @override
   Widget build(BuildContext context) {
@@ -187,115 +158,4 @@ class _HomeBannerFallback extends StatelessWidget {
       ),
     );
   }
-}
-
-class _FriendsActivityHeader extends StatelessWidget {
-  const _FriendsActivityHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              context.l10n.t('home.friendsActivity'),
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          Text(
-            context.l10n.t('home.all'),
-            style: const TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-          const SizedBox(width: 4),
-          Image.asset(
-            AppAssets.lanhuCreatePartyChevronRight,
-            width: AppSpacing.iconSizeXs,
-            height: AppSpacing.iconSizeSm,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FriendsPlayingStrip extends StatelessWidget {
-  const _FriendsPlayingStrip({required this.friends});
-
-  final List<_HomeFriendItem> friends;
-
-  @override
-  Widget build(BuildContext context) {
-    final visibleFriends = friends.isEmpty
-        ? List.generate(5, _HomeFriendItem.placeholder)
-        : friends.take(12).toList();
-    return SizedBox(
-      height: 64,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: visibleFriends.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 28),
-        itemBuilder: (context, index) {
-          return _FriendAvatar(item: visibleFriends[index], index: index);
-        },
-      ),
-    );
-  }
-}
-
-class _FriendAvatar extends StatelessWidget {
-  const _FriendAvatar({required this.item, required this.index});
-
-  final _HomeFriendItem item;
-  final int index;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 60,
-      height: 64,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          ClipOval(
-            child: _PartyImage(
-              url: item.avatar,
-              assetName: AppAssets.lanhuPartyAvatar,
-              width: 60,
-              height: 60,
-            ),
-          ),
-          Positioned(
-            right: -2,
-            bottom: 0,
-            child: Image.asset(
-              _friendBadgeAsset(item.type, index),
-              width: 22,
-              height: 17,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-String _friendBadgeAsset(int type, int index) {
-  final normalized = type == 0 ? index : type;
-  return switch (normalized % 4) {
-    0 => AppAssets.lanhuHomeBadgeBigWin,
-    1 => AppAssets.lanhuHomeBadgeVoice,
-    2 => AppAssets.lanhuHomeBadgeMining,
-    _ => AppAssets.lanhuHomeBadgePk,
-  };
 }

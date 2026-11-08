@@ -1,0 +1,12 @@
+{
+  "friends_activity_hall.webp": {
+    "source": "/Users/huili/nady/assets/images/ic_home_hall_icon.webp",
+    "usage": "Friends activity label=1 hall badge; Nady resource, not a Lanhu export"
+  },
+  "existing_assets": {
+    "mining": "AppAssets.lanhuHomeBadgeMining",
+    "voice": "AppAssets.lanhuHomeBadgeVoice",
+    "rocket": "AppAssets.roomRocketStages[0]",
+    "back": "AppAssets.roomPartyHistoryBack"
+  }
+}

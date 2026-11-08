@@ -24,6 +24,7 @@ Future<void> enterSharedRoom(
   BuildContext context,
   WidgetRef ref,
   String roomId, {
+  int followUid = 0,
   bool Function()? isCurrent,
 }) async {
   bool valid() => isCurrent?.call() != false;
@@ -107,7 +108,10 @@ Future<void> enterSharedRoom(
   context.push(
     Uri(
       path: '/room/$roomId',
-      queryParameters: {if (password.isNotEmpty) 'roomPassword': password},
+      queryParameters: {
+        if (password.isNotEmpty) 'roomPassword': password,
+        if (followUid > 0) 'followUid': '$followUid',
+      },
     ).toString(),
   );
 }

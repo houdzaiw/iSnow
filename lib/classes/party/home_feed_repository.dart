@@ -1,94 +1,49 @@
-part of 'party_page.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-final _homeFeedRepositoryProvider = Provider<_HomeFeedRepository>((ref) {
-  return _HomeFeedRepository(HttpDioManager());
-});
+import '../../manager/http_api.dart';
+import '../../manager/http_dio_manager.dart';
+import '../../model/country_info.dart';
+import 'home_response.dart';
+import 'model/home_feed_model.dart';
+import 'model/home_json.dart';
 
-class _HomeFeedRepository {
-  const _HomeFeedRepository(this._httpManager);
+typedef HomeGet =
+    Future<Object?> Function(String path, Map<String, dynamic> query);
+typedef HomePost = Future<Object?> Function(String path);
+final homeFeedRepositoryProvider = Provider((ref) => HomeFeedRepository());
 
-  final HttpDioManager _httpManager;
+class HomeFeedRepository {
+  HomeFeedRepository({HomeGet? get, HomePost? post})
+    : _get = get ?? ((p, q) => HttpDioManager().get(p, queryParameters: q)),
+      _post =
+          post ??
+          ((p) => HttpDioManager().post(p, data: const <String, dynamic>{}));
+  final HomeGet _get;
+  final HomePost _post;
 
-  Future<List<_HomeBannerItem>> fetchBanners() async {
-    final response = await _httpManager.post(
-      HttpApi.homeResourceBanner,
-      data: const <String, dynamic>{},
-    );
-    return _requireList(
-      response,
-    ).whereType<Map>().map((item) => _HomeBannerItem.fromJson(item)).toList();
+  Future<List<HomeBannerItem>> fetchBanners() async => homeResponseRows(
+    await _post(HttpApi.homeResourceBanner),
+  ).map(HomeBannerItem.fromJson).toList();
+
+  Future<List<CountryInfo>> fetchHomeCountries() async {
+    final rows = homeResponseRows(await _get(HttpApi.homeCountries, const {}));
+    final seen = <String>{};
+    return [
+      for (final row in rows)
+        if (normalizeHomeCountryCode(homeString(row['isoCode']))
+            case final code?)
+          if (RegExp(r'^[A-Z]{2}$').hasMatch(code) && seen.add(code))
+            CountryInfo.fromJson({...row, 'isoCode': code}),
+    ];
   }
 
-  Future<List<_HomeFriendItem>> fetchFriendsPlaying() async {
-    final response = await _httpManager.get(HttpApi.friendPlayingList);
-    final server = NadyServerResponse<List<_HomeFriendItem>>.fromJson(
-      _asMap(response),
-      _parseFriendsPlaying,
-    );
-    if (!server.isSuccess) {
-      throw server.toException();
-    }
-    return server.data ?? const <_HomeFriendItem>[];
-  }
-
-  Future<List<CountryInfo>> fetchHotCountries() async {
-    final response = await _httpManager.get(HttpApi.hotCountry);
-    return _requireList(response)
-        .whereType<Map>()
-        .map((item) => CountryInfo.fromJson(item.cast<String, dynamic>()))
-        .toList();
-  }
-
-  Future<List<_HomeRoomItem>> fetchRecommendRooms({
+  Future<List<HomeRoomItem>> fetchRecommendRooms({
     required String? countryCode,
-  }) async {
-    final normalizedCountryCode = _normalizeHomeCountryCode(countryCode);
-    final queryParameters = <String, dynamic>{
+  }) async => homeResponseRows(
+    await _get(HttpApi.homeRecommendRoom, {
       'page': 1,
-      if (normalizedCountryCode != null) 'country': normalizedCountryCode,
-    };
-    final response = await _httpManager.get(
-      HttpApi.homeRecommendRoom,
-      queryParameters: queryParameters,
-    );
-    return _requireList(
-      response,
-    ).whereType<Map>().map((item) => _HomeRoomItem.fromJson(item)).toList();
-  }
-
-  List<dynamic> _requireList(dynamic response) {
-    final server = NadyServerResponse<dynamic>.fromJson(
-      _asMap(response),
-      (json) => json,
-    );
-    if (!server.isSuccess) {
-      throw server.toException();
-    }
-    final data = server.data;
-    if (data is Map && data['data'] != null) {
-      return _extractList(data['data']);
-    }
-    return _extractList(data);
-  }
-
-  List<dynamic> _extractList(dynamic data) {
-    if (data is List) return data;
-    if (data is Map && data['list'] is List) return data['list'] as List;
-    if (data is Map && data['data'] != null) return _extractList(data['data']);
-    return const [];
-  }
-
-  List<_HomeFriendItem> _parseFriendsPlaying(Object? data) {
-    return _extractList(data)
-        .whereType<Map>()
-        .map(_HomeFriendItem.fromJson)
-        .where((item) => item.hasContent)
-        .toList(growable: false);
-  }
-
-  Map<String, dynamic> _asMap(dynamic response) {
-    if (response is Map<String, dynamic>) return response;
-    if (response is Map) return response.cast<String, dynamic>();
-    throw const NadyApiException(message: 'Invalid server response');
-  }
+      if (normalizeHomeCountryCode(countryCode) case final code?)
+        'country': code,
+    }),
+  ).map(HomeRoomItem.fromJson).toList();
 }

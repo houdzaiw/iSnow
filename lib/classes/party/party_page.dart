@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../localization/app_localizations.dart';
 import '../../manager/http_api.dart';
@@ -15,8 +16,11 @@ import '../../model/server_response.dart';
 import '../../theme/app_theme.dart';
 import '../create_room/create_room_entry_flow.dart';
 
-part 'model/home_feed_model.dart';
-part 'home_feed_repository.dart';
+import 'model/home_feed_model.dart';
+import 'model/home_json.dart';
+import 'viewmodel/home_feed_controller.dart';
+import 'friends_activity/friends_activity_widgets.dart';
+import 'views/home_countries_sheet.dart';
 part 'viewmodel/home_feed_state.dart';
 part 'viewmodel/home_feed_view_model.dart';
 part 'views/home_country_filter_bar.dart';
@@ -427,7 +431,7 @@ class _FeedSection extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return switch (mainTab) {
       _MainFeedTab.party => const _PartyFeedSection(),
-      _MainFeedTab.room => const _HomeFeedView(),
+      _MainFeedTab.room => const HomeFeedView(),
     };
   }
 }

@@ -14,6 +14,7 @@ import '../classes/home/home_page.dart';
 import '../classes/oauth/agree_policy_page.dart';
 import '../classes/oauth/login_page.dart';
 import '../classes/party/party_page.dart';
+import '../classes/party/friends_activity/friends_activity_page.dart';
 import '../classes/profile/about_us_page.dart';
 import '../classes/profile/edit_profile_page.dart';
 import '../classes/profile/edit_nickname_page.dart';
@@ -44,6 +45,11 @@ final GoRouter goRouter = GoRouter(
   navigatorKey: appRootNavigatorKey,
   initialLocation: _initialRoute,
   routes: [
+    GoRoute(
+      path: '/party/friends-activity',
+      name: 'friends-activity',
+      builder: (context, state) => const FriendsActivityPage(),
+    ),
     GoRoute(
       path: '/vip',
       name: 'vip',
