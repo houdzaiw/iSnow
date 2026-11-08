@@ -104,7 +104,9 @@ class _RoomMusicStrip extends ConsumerWidget {
                         SizedBox(width: AppSpacing.inlineActionGap.w),
                       ],
                       Container(
-                        width: AppSpacing.roomAudienceCountWidth.w,
+                        constraints: BoxConstraints(
+                          maxWidth: AppSpacing.roomAudienceCountMaxWidth.w,
+                        ),
                         height: AppSpacing.controlHeightSm.h,
                         padding: EdgeInsets.symmetric(
                           horizontal: AppSpacing.xs.w,
@@ -114,16 +116,19 @@ class _RoomMusicStrip extends ConsumerWidget {
                           borderRadius: AppRadius.pillBorder,
                         ),
                         child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             _RoomAssetIcon(
                               asset: AppAssets.lanhuRoomOnlineIcon,
                               size: AppSpacing.iconSizeSm.r,
                             ),
                             SizedBox(width: AppSpacing.xs.w),
-                            Expanded(
+                            Flexible(
                               child: Text(
                                 _formatCompact(state.onlineCount),
                                 key: const ValueKey('room-online-count'),
+                                textAlign: TextAlign.center,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: AppTextStyles.roomAudienceName,

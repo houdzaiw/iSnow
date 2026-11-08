@@ -18,6 +18,22 @@
 
 榜单汇总接口 `/api/room/rank/val` 修正为 Nady 的 `type=5/4/3`（日／周／月）和 roomId；榜单列表仍使用其原有 `frequencyType` 参数。汇总数据与 Header 详情字段分别使用，不能拿在线人数或麦位数替代。
 
+## 榜单分类联动
+
+`RoomRankSheet` 参考 `rank_content_view.dart`，外层 Contribution Rank／Profit Rank 和各自的内层 Daily／Weekly／Monthly 都使用 ExtendedTabBar 与 ExtendedTabBarView，内外 `link: true`。一级由 Header 的目标决定，首次二级仍默认 Weekly。
+
+- 列表左滑：贡献榜 Daily → Weekly → Monthly → Profit Rank Daily → Weekly → Monthly；右滑反向，首尾不循环。优先处理二级，越过其边界才交给一级。
+- 点击一级标题直接恢复该分类的独立周期记忆；点击二级标题直接选择。记忆仅在本次弹框内保留，关闭重开恢复 Weekly。
+- `RoomRankTabNavigation` 仅协调临时 UI 状态：跨一级拖动开始时先准备目标的 Daily／Monthly，成功后保留，取消则恢复原周期；标题点击与滑动分别处理。控制器和临时状态均随弹框释放，不进入持久化或业务缓存。
+- 六组列表由 `RoomRankBoardView` 继续订阅原有 `roomRankBoardProvider`，只在首次成为当前页时请求；已访问页保留数据及独立滚动位置，切回不重复请求。未访问页不因滑动预览而请求，隐藏页暂停 Ticker 动画。
+- 汇总、倒计时、本人排名、下拉刷新、错误重试及规则沿用现有实现；规则跟随当前一级。接口、参数、入口签名和房间／账号会话隔离不变，迟到响应不会切换当前页。
+
+`room_rank_tabs_test.dart` 覆盖 320／375／430 的完整正反向六步顺序、边界停止、默认入口、独立周期及六页滚动记忆、双向取消、快速手势、滑动中点击标题、刷新／规则、错误／空榜，以及关闭、切房和切账号后的迟到响应。现有截图基线不覆盖，本轮不重启 App、不进行真实账户操作。
+
+本轮榜单双层联动、Header 入口及房间交互联合回归 30 项通过；`flutter analyze --no-pub` 无问题，`git diff --check HEAD` 通过，历史 PNG 未修改。
+
+Rank rules 改用根导航居中弹框，依据当前榜单面板的实际区域定位在其中心，替代原底部弹层；沿用深色主题和当前贡献榜／收益榜规则文案。关闭按钮、遮罩点击或返回只收起规则，保留榜单分类、周期和滚动状态；重复点击不叠加弹框。正文可滚动，宽度及内边距由 theme 管理，房间／账号失效时同时关闭所属规则和榜单。`room_rank_rules_dialog_test.dart` 验证 320／375／430 宽度、短屏、中心位置、关闭／返回／遮罩及会话失效。
+
 ## 资源与验证
 
 三张用户原图及 AppAssets 映射见 `room_ui_asset_policy.md`；manifest 记录精确本地路径，pubspec 已声明整个房间资源目录。原文件和复制文件 SHA-256 一致。

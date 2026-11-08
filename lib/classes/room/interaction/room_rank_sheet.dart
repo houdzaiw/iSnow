@@ -1,18 +1,16 @@
-import 'dart:async';
-
+import 'package:extended_tabs/extended_tabs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../../manager/api_error_message.dart';
 import '../../../theme/app_theme.dart';
 import '../more/room_tools_widgets.dart';
-import '../online/room_audience_avatar.dart';
 import 'room_interaction_frame.dart';
 import 'room_interaction_view_model.dart';
 import 'room_rank_view_model.dart';
+import 'room_rank_board_view.dart';
+import 'room_rank_tab_navigation.dart';
 
 class RoomRankSheet extends HookConsumerWidget {
   const RoomRankSheet({
@@ -25,16 +23,28 @@ class RoomRankSheet extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final profit = useState(initialProfit);
-    final period = useState(RoomRankPeriod.weekly);
-    final provider = roomRankBoardProvider((
-      session: session,
-      period: period.value,
-      profit: profit.value,
-    ));
-    final state = ref.watch(provider);
+    final tabs = useTabController(
+      initialLength: 2,
+      initialIndex: initialProfit ? 1 : 0,
+    );
+    useListenable(tabs);
+    final contributionPeriods = useTabController(
+      initialLength: 3,
+      initialIndex: 1,
+    );
+    final profitPeriods = useTabController(initialLength: 3, initialIndex: 1);
+    final navigation = useMemoized(
+      () => RoomRankTabNavigation(
+        categories: tabs,
+        periods: [contributionPeriods, profitPeriods],
+      ),
+      [tabs, contributionPeriods, profitPeriods],
+    );
+    useEffect(() => navigation.dispose, [navigation]);
+    final showingRules = useState(false);
     listenRoomInteractionLifetime(context, ref, session);
     return DecoratedBox(
+      key: const ValueKey('room-rank-sheet'),
       decoration: const BoxDecoration(
         image: DecorationImage(
           image: AssetImage(AppAssets.roomInteractionRankBackground),
@@ -49,25 +59,35 @@ class RoomRankSheet extends HookConsumerWidget {
             Row(
               children: [
                 Expanded(
-                  child: TextButton(
-                    onPressed: () => profit.value = false,
-                    child: Text(
-                      toolText(context, 'Contribution Rank', '贡献榜'),
-                      style: profit.value
-                          ? AppTextStyles.roomMessageHint
-                          : AppTextStyles.roomMessageBody,
+                  child: ExtendedTabBar(
+                    key: const ValueKey('room-rank-tabs'),
+                    controller: tabs,
+                    onTap: navigation.onCategoryTap,
+                    labelColor: AppColors.textInverse,
+                    unselectedLabelColor: AppColors.roomMessageMuted,
+                    labelStyle: AppTextStyles.roomMessageBody,
+                    unselectedLabelStyle: AppTextStyles.roomMessageHint,
+                    labelPadding: EdgeInsets.symmetric(
+                      horizontal: AppSpacing.xs.w,
                     ),
-                  ),
-                ),
-                Expanded(
-                  child: TextButton(
-                    onPressed: () => profit.value = true,
-                    child: Text(
-                      toolText(context, 'Profit Rank', '收益榜'),
-                      style: profit.value
-                          ? AppTextStyles.roomMessageBody
-                          : AppTextStyles.roomMessageHint,
+                    dividerColor: AppColors.transparent,
+                    indicator: const BoxDecoration(
+                      color: AppColors.transparent,
                     ),
+                    tabs: [
+                      for (final title in [
+                        toolText(context, 'Contribution Rank', '贡献榜'),
+                        toolText(context, 'Profit Rank', '收益榜'),
+                      ])
+                        Tab(
+                          height: AppSpacing.controlHeightLg.h,
+                          child: Text(
+                            title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 IconButton(
@@ -76,117 +96,44 @@ class RoomRankSheet extends HookConsumerWidget {
                     AppAssets.roomInteractionRankHelp,
                     width: AppSpacing.iconSizeMd.r,
                   ),
-                  onPressed: () => showRoomInteractionSheet<void>(
-                    context,
-                    (_) => _RankRules(session: session, profit: profit.value),
-                  ),
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                for (final range in RoomRankPeriod.values)
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () => period.value = range,
-                      child: Text(
-                        switch (range) {
-                          RoomRankPeriod.daily => toolText(
-                            context,
-                            'Daily',
-                            '日榜',
-                          ),
-                          RoomRankPeriod.weekly => toolText(
-                            context,
-                            'Weekly',
-                            '周榜',
-                          ),
-                          RoomRankPeriod.monthly => toolText(
-                            context,
-                            'Monthly',
-                            '月榜',
-                          ),
+                  onPressed: showingRules.value
+                      ? null
+                      : () async {
+                          if (showingRules.value) return;
+                          showingRules.value = true;
+                          try {
+                            await _showRankRulesDialog(
+                              context,
+                              session: session,
+                              profit: tabs.index == 1,
+                            );
+                          } finally {
+                            if (context.mounted) showingRules.value = false;
+                          }
                         },
-                        style: period.value == range
-                            ? AppTextStyles.roomMessageBody
-                            : AppTextStyles.roomMessageHint,
-                      ),
-                    ),
-                  ),
+                ),
               ],
             ),
             Expanded(
-              child: state.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, _) => Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+              child: NotificationListener<ScrollNotification>(
+                onNotification: navigation.onScroll,
+                child: ExtendedTabBarView(
+                  key: const ValueKey('room-rank-pages'),
+                  controller: tabs,
+                  link: true,
                   children: [
-                    Text(
-                      userFacingErrorMessage(error),
-                      style: AppTextStyles.roomMessageHint,
-                    ),
-                    TextButton(
-                      onPressed: () => ref.invalidate(provider),
-                      child: Text(toolText(context, 'Retry', '重试')),
-                    ),
+                    for (final profit in [false, true])
+                      _RankCategoryPage(
+                        key: ValueKey(profit),
+                        session: session,
+                        profit: profit,
+                        active: tabs.index == (profit ? 1 : 0),
+                        periods: profit ? profitPeriods : contributionPeriods,
+                        onPeriodTap: (index) =>
+                            navigation.onPeriodTap(profit ? 1 : 0, index),
+                      ),
                   ],
                 ),
-                data: (board) {
-                  if (board == null) return const SizedBox.shrink();
-                  return Column(
-                    children: [
-                      if (board.total != null)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              profit.value
-                                  ? AppAssets.roomInteractionProfit
-                                  : AppAssets.roomInteractionRank,
-                              width: AppSpacing.iconSizeMd.r,
-                            ),
-                            SizedBox(width: AppSpacing.xs.w),
-                            Text(
-                              '${board.total}',
-                              style: AppTextStyles.roomMessageBody,
-                            ),
-                          ],
-                        ),
-                      if (board.endsAt case final end?)
-                        _RankCountdown(
-                          end: end,
-                          onEnd: () => ref.invalidate(provider),
-                        ),
-                      Expanded(
-                        child: RefreshIndicator(
-                          onRefresh: () => ref.refresh(provider.future),
-                          child: ListView(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            children: [
-                              if (board.rows.isEmpty)
-                                Padding(
-                                  padding: EdgeInsets.all(AppSpacing.lg.r),
-                                  child: Text(
-                                    toolText(
-                                      context,
-                                      'No ranked users',
-                                      '暂无上榜用户',
-                                    ),
-                                    textAlign: TextAlign.center,
-                                    style: AppTextStyles.roomMessageHint,
-                                  ),
-                                ),
-                              for (final entry in board.rows)
-                                _RankRow(row: entry),
-                            ],
-                          ),
-                        ),
-                      ),
-                      if (board.me case final me?)
-                        _RankRow(row: me, isMe: true),
-                    ],
-                  );
-                },
               ),
             ),
           ],
@@ -196,101 +143,183 @@ class RoomRankSheet extends HookConsumerWidget {
   }
 }
 
-class _RankRow extends StatelessWidget {
-  const _RankRow({required this.row, this.isMe = false});
-  final RoomRankRow row;
-  final bool isMe;
+class _RankCategoryPage extends HookWidget {
+  const _RankCategoryPage({
+    super.key,
+    required this.session,
+    required this.profit,
+    required this.active,
+    required this.periods,
+    required this.onPeriodTap,
+  });
+  final RoomInteractionKey session;
+  final bool profit, active;
+  final TabController periods;
+  final ValueChanged<int> onPeriodTap;
+
   @override
-  Widget build(BuildContext context) => ListTile(
-    tileColor: isMe ? AppColors.roomMessageBubble : AppColors.transparent,
-    onTap: row.uid > 0 && !isMe
-        ? () => context.push('/profile-homepage/${row.uid}')
-        : null,
-    leading: Row(
-      mainAxisSize: MainAxisSize.min,
+  Widget build(BuildContext context) {
+    useAutomaticKeepAlive();
+    useListenable(periods);
+    return Column(
       children: [
-        Text(
-          row.position <= 0 ? '—' : '${row.position}',
-          style: AppTextStyles.roomMessageBody,
+        ExtendedTabBar(
+          key: ValueKey('room-rank-period-tabs-$profit'),
+          controller: periods,
+          onTap: onPeriodTap,
+          labelColor: AppColors.textInverse,
+          unselectedLabelColor: AppColors.roomMessageMuted,
+          labelStyle: AppTextStyles.roomMessageBody,
+          unselectedLabelStyle: AppTextStyles.roomMessageHint,
+          labelPadding: EdgeInsets.symmetric(horizontal: AppSpacing.xs.w),
+          dividerColor: AppColors.transparent,
+          indicator: const BoxDecoration(color: AppColors.transparent),
+          tabs: [
+            for (final period in RoomRankPeriod.values)
+              Tab(
+                height: AppSpacing.controlHeightLg.h,
+                text: switch (period) {
+                  RoomRankPeriod.daily => toolText(context, 'Daily', '日榜'),
+                  RoomRankPeriod.weekly => toolText(context, 'Weekly', '周榜'),
+                  RoomRankPeriod.monthly => toolText(context, 'Monthly', '月榜'),
+                },
+              ),
+          ],
         ),
-        SizedBox(width: AppSpacing.sm.w),
-        RoomAudienceAvatar(
-          url: row.avatar,
-          size: AppSpacing.roomMessageAvatar.r,
+        Expanded(
+          child: ExtendedTabBarView(
+            key: ValueKey('room-rank-period-pages-$profit'),
+            controller: periods,
+            link: true,
+            children: [
+              for (final period in RoomRankPeriod.values)
+                TickerMode(
+                  key: ValueKey(period),
+                  enabled: active && periods.index == period.index,
+                  child: RoomRankBoardView(
+                    session: session,
+                    period: period,
+                    profit: profit,
+                    active: active && periods.index == period.index,
+                  ),
+                ),
+            ],
+          ),
         ),
       ],
-    ),
-    title: Text(
-      row.name,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: AppTextStyles.roomMessageBody,
-    ),
-    trailing: Text('${row.amount}', style: AppTextStyles.giftEffectTitle),
-  );
+    );
+  }
 }
 
-class _RankRules extends ConsumerWidget {
-  const _RankRules({required this.session, required this.profit});
+Future<void> _showRankRulesDialog(
+  BuildContext context, {
+  required RoomInteractionKey session,
+  required bool profit,
+}) async {
+  final sheet = context.findRenderObject();
+  final overlay = Navigator.of(
+    context,
+    rootNavigator: true,
+  ).overlay?.context.findRenderObject();
+  if (sheet is! RenderBox || overlay is! RenderBox || !sheet.hasSize) return;
+  final bounds =
+      sheet.localToGlobal(Offset.zero, ancestor: overlay) & sheet.size;
+  ModalRoute<void>? route;
+  await showGeneralDialog<void>(
+    context: context,
+    useRootNavigator: true,
+    barrierDismissible: true,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    barrierColor: AppColors.modalScrimStrong,
+    pageBuilder: (context, _, __) {
+      final current = ModalRoute.of(context);
+      if (current is ModalRoute<void>) route = current;
+      return Stack(
+        children: [
+          Positioned.fromRect(
+            rect: bounds,
+            child: _RankRulesDialog(session: session, profit: profit),
+          ),
+        ],
+      );
+    },
+  );
+  await route?.completed;
+}
+
+class _RankRulesDialog extends ConsumerWidget {
+  const _RankRulesDialog({required this.session, required this.profit});
   final RoomInteractionKey session;
   final bool profit;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     listenRoomInteractionLifetime(context, ref, session);
-    return RoomInteractionFrame(
-      title: toolText(context, 'Rank rules', '榜单规则'),
-      child: ListView(
-        padding: EdgeInsets.all(AppSpacing.lg.r),
-        children: [
-          Text(
-            profit
-                ? toolText(
-                    context,
-                    'Ranked by diamonds received in this room.',
-                    '按在本房间收到的钻石排名。',
-                  )
-                : toolText(
-                    context,
-                    'Ranked by coins spent on gifts in this room.',
-                    '按在本房间送礼花费的金币排名。',
-                  ),
-            style: AppTextStyles.roomMessageBody,
-          ),
-          Text(
-            toolText(context, 'Ranking periods use UTC.', '统计周期以 UTC 为准。'),
-            style: AppTextStyles.roomMessageHint,
-          ),
-        ],
+    return Dialog(
+      key: const ValueKey('room-rank-rules-dialog'),
+      backgroundColor: AppColors.roomMessageSurface,
+      shape: const RoundedRectangleBorder(borderRadius: AppRadius.cardBorder),
+      constraints: BoxConstraints(maxWidth: AppSpacing.roomRankRulesMaxWidth.w),
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.xl.w,
+        vertical: AppSpacing.xl.h,
       ),
-    );
-  }
-}
-
-class _RankCountdown extends HookWidget {
-  const _RankCountdown({required this.end, required this.onEnd});
-  final DateTime end;
-  final VoidCallback onEnd;
-  @override
-  Widget build(BuildContext context) {
-    final now = useState(DateTime.now());
-    final callback = useRef(onEnd)..value = onEnd;
-    useEffect(() {
-      final timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-        now.value = DateTime.now();
-        if (!now.value.isBefore(end)) {
-          timer.cancel();
-          callback.value();
-        }
-      });
-      return timer.cancel;
-    }, [end]);
-    final seconds = end.difference(now.value).inSeconds.clamp(0, 2147483647);
-    final rest = Duration(seconds: seconds);
-    String pad(int v) => v.toString().padLeft(2, '0');
-    return Text(
-      '${rest.inDays}d ${pad(rest.inHours % 24)}:${pad(rest.inMinutes % 60)}:${pad(rest.inSeconds % 60)}',
-      style: AppTextStyles.roomMessageTitle,
+      child: Padding(
+        key: const ValueKey('room-rank-rules-card'),
+        padding: EdgeInsets.all(AppSpacing.xxxl.r),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              toolText(context, 'Rank rules', '榜单规则'),
+              textAlign: TextAlign.center,
+              style: AppTextStyles.roomMessageTitle,
+            ),
+            SizedBox(height: AppSpacing.lg.h),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      profit
+                          ? toolText(
+                              context,
+                              'Ranked by diamonds received in this room.',
+                              '按在本房间收到的钻石排名。',
+                            )
+                          : toolText(
+                              context,
+                              'Ranked by coins spent on gifts in this room.',
+                              '按在本房间送礼花费的金币排名。',
+                            ),
+                      style: AppTextStyles.roomMessageBody,
+                    ),
+                    Text(
+                      toolText(
+                        context,
+                        'Ranking periods use UTC.',
+                        '统计周期以 UTC 为准。',
+                      ),
+                      style: AppTextStyles.roomMessageHint,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: AppSpacing.lg.h),
+            TextButton(
+              key: const ValueKey('room-rank-rules-close'),
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                toolText(context, 'Close', '关闭'),
+                style: AppTextStyles.roomMessageBody,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

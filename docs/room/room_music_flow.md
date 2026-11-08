@@ -7,6 +7,7 @@
 - `RoomMusicRepository.instance` 在应用生命周期内持有曲库和循环模式，按 UID 隔离，重复打开不重复读盘。
 - 音乐盒 `isOpened` 由 Repository 按当前房间会话保存在内存，ViewModel 对外提供，与 `expanded` 分开：初次进房为 false，成功展开后为 true；收起、下麦收起及 Keep 不清除，恢复页面仍默认收起。右上角关闭立即清除，即使释放占用失败也不恢复；退出、被踢、切房、重新进房或账号变化清除。状态不持久化，旧房间代次的关闭不能修改新会话或停止新会话的音乐。
 - `isOpened` 只控制当前操作者音乐条左侧入口的显示，不同步给同房其他用户；右侧在线列表始终显示并靠右，音乐条高度保持不变。More 的 Music 对房主/管理员始终显示，不受 `isOpened` 限制。首次从 More 打开后音乐条才出现入口，后续可用音乐条重新展开；关闭音乐盒后仍可从 More 再次开启。
+- 在线人数黑色区域按图标和格式化数值自然收缩，文字居中；`roomAudienceCountMaxWidth` 仅为 64 的设计上限，不固定撑宽。保留头像预览、右对齐、单行省略及在线列表点击。新版截图使用 `room_online_adaptive_width_v1`，历史 Header 和在线人数截图不覆盖。
 - 房间页订阅播放器状态但不主动读盘；首次展开音乐盒或挂载歌曲列表才初始化，复用已有内存数据，不因普通进房触发额外曲库错误提示。列表生命周期持有 ViewModel，避免路由动画期间 autoDispose 后一直 loading。
 - Android 的 Add 打开独立 `RoomLocalMusicSheet`，由 `RoomLocalMusicViewModel` 管理权限、扫描、按名称忽略大小写搜索、多选与导入；关闭选择页不停止现有音乐。
 - `RoomLocalMusicManager` 通过私有本地插件 `packages/room_music_scan` 查询 Android MediaStore，沿用 Nady 扫描/多选流程。默认筛选大于 100 KB 的 mp3/m4a/aac/wav/ogg/flac/mp4 音频；查询不限制 IS_MUSIC，避免遗漏系统归类为录音的音频。未被系统收录的文件可通过辅助导入选择。

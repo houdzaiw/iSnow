@@ -7,6 +7,7 @@ class AppSpacing {
   static const double roomHeaderMinHeight = 74;
   static const double roomInteractionAvatar = 66;
   static const double roomInteractionRankHeight = 0.8;
+  static const double roomRankRulesMaxWidth = 300;
   static const double roomInteractionMedia = 126;
   static const double roomInteractionLockedOpacity = 0.45;
   static const double roomInteractionExpression = 70;
@@ -70,7 +71,7 @@ class AppSpacing {
   static const double roomAudiencePreviewAvatarSize = 30;
   static const double roomAudiencePreviewAvatarOffset = 20;
   static const int roomAudiencePreviewLimit = 3;
-  static const double roomAudienceCountWidth = 64;
+  static const double roomAudienceCountMaxWidth = 64;
   static const double roomAudienceSheetHeight = 454;
   static const double roomAudienceSheetMaxHeightRatio = 0.8;
   static const double roomAudienceHeaderHeight = 44;

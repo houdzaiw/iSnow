@@ -105,7 +105,7 @@ void main() {
         await expectLater(
           find.byType(MaterialApp),
           matchesGoldenFile(
-            'goldens/room_header_adaptive_width_v3/contribution_${width.toInt()}.png',
+            'goldens/room_online_adaptive_width_v1/contribution_${width.toInt()}.png',
           ),
         );
         await tester.tap(entry);
@@ -125,7 +125,7 @@ void main() {
         await expectLater(
           find.byType(MaterialApp),
           matchesGoldenFile(
-            'goldens/room_header_adaptive_width_v3/profit_${width.toInt()}.png',
+            'goldens/room_online_adaptive_width_v1/profit_${width.toInt()}.png',
           ),
         );
         await tester.tap(entry);
