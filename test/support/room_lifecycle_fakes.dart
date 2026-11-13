@@ -89,6 +89,7 @@ class FakeRoomHttp implements HttpDioManager {
   Map<String, dynamic>? rocketData;
   Completer<void>? rocketGate;
   final publicMessages = <Map<String, dynamic>>[];
+  Completer<void>? publicMessageGate;
   Map<String, dynamic> publicMessageResponse = const {'code': 200, 'data': 1};
   List<Map<String, dynamic>> micList = const [
     {'position': 0, 'uid': 10},
@@ -115,7 +116,9 @@ class FakeRoomHttp implements HttpDioManager {
   }) async {
     if (path == HttpApi.roomMsgPush) {
       publicMessages.add(Map<String, dynamic>.from(data as Map));
-      return publicMessageResponse;
+      final response = publicMessageResponse;
+      await publicMessageGate?.future;
+      return response;
     }
     if (path == HttpApi.roomMicUp) {
       micUpRequests.add(Map<String, dynamic>.from(data as Map));

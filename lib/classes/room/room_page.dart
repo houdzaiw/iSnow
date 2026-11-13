@@ -16,7 +16,7 @@ import 'gift/models/room_gift_models.dart';
 import 'gift/views/room_gift_sheet.dart';
 import 'gift/views/room_gift_overlay.dart';
 import 'gift/views/room_gift_slot_layer.dart';
-import 'gift/views/room_gift_public_screen_item.dart';
+import 'chat/room_public_message_item.dart';
 import 'gift/event/room_gift_event_provider.dart';
 import 'gift/trajectory/room_gift_seat_registry.dart';
 import 'models/room_more_tools_models.dart';

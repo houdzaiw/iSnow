@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:project/classes/room/interaction/room_interaction_repository.dart';
+import 'package:project/classes/room/interaction/room_member_card_content.dart';
 import 'package:project/classes/room/room_page.dart';
 import 'package:project/manager/http_api.dart';
 import 'package:project/classes/room/room_repository.dart';
@@ -62,7 +63,13 @@ void main() {
       final avatar = find.byKey(const ValueKey('room-chat-avatar-card-test'));
       await tester.tap(avatar);
       await tester.pumpAndSettle();
-      expect(find.text('Peer'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(RoomMemberCardContent),
+          matching: find.text('Peer'),
+        ),
+        findsOneWidget,
+      );
       expect(find.text('ID:20002'), findsOneWidget);
       expect(find.text('Send Gift'), findsOneWidget);
       expect(find.text('Set as Admin'), findsNothing);

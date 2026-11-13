@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../theme/app_theme.dart';
+import '../../chat/room_public_message.dart';
 import '../models/room_gift_event_models.dart';
-import 'room_gift_image.dart';
 
 class RoomGiftPublicScreenItem extends StatelessWidget {
   const RoomGiftPublicScreenItem({
@@ -14,63 +14,36 @@ class RoomGiftPublicScreenItem extends StatelessWidget {
   final RoomGiftPublicMessage message;
   final ValueChanged<int>? onUserTap;
   @override
-  Widget build(BuildContext context) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      InkWell(
-        onTap: message.sender.uid > 0 && onUserTap != null
-            ? () => onUserTap!(message.sender.uid)
-            : null,
-        child: ClipOval(
-          child: RoomGiftImage(
-            source: message.sender.avatar,
-            size: AppSpacing.giftSlotAvatarSize.r,
-          ),
+  Widget build(BuildContext context) => RoomPublicMessageFrame(
+    uid: message.sender.uid,
+    name: message.sender.name,
+    avatar: message.sender.avatar,
+    appearance: message.sender.appearance,
+    avatarKey: ValueKey('room-chat-avatar-gift-${message.key}'),
+    onUserTap: onUserTap,
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Text(message.sentText, style: RoomPublicChatTheme.body),
+            ),
+            SizedBox(width: RoomPublicChatTheme.badgeGap.w),
+            SizedBox.square(
+              dimension: RoomPublicChatTheme.gift.r,
+              child: RoomPublicChatImage(source: message.gift.icon),
+            ),
+          ],
         ),
-      ),
-      SizedBox(width: AppSpacing.sm.w),
-      Expanded(
-        child: Container(
-          padding: EdgeInsets.all(AppSpacing.sm.r),
-          decoration: const BoxDecoration(
-            color: AppColors.giftSlotBackground,
-            borderRadius: AppRadius.cardBorder,
+        if (message.winAmount > 0)
+          Text(
+            '${message.winText}${message.multiplier >= 1 ? ' (${message.multiplier} times)' : ''}',
+            style: RoomPublicChatTheme.giftText,
           ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      message.sender.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.giftEffectTitle,
-                    ),
-                    Text(
-                      message.sentText,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.giftEffectSubtitle,
-                    ),
-                    if (message.winAmount > 0)
-                      Text(
-                        '${message.winText}${message.multiplier >= 1 ? ' (${message.multiplier} times)' : ''}',
-                        style: AppTextStyles.giftEffectTitle,
-                      ),
-                  ],
-                ),
-              ),
-              SizedBox(width: AppSpacing.xs.w),
-              RoomGiftImage(
-                source: message.gift.icon,
-                size: AppSpacing.giftSlotAvatarSize.r,
-              ),
-            ],
-          ),
-        ),
-      ),
-    ],
+      ],
+    ),
   );
 }

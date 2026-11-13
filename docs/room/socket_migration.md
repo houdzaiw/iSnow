@@ -182,6 +182,13 @@ nady 使用 `centrifuge` 作为长连接客户端。`LongLinkManager` 初始化�
 | 清屏 | `RoomScreenSystemClear` | `/api/room/clean` 后端回推 | 清空 `RoomMsg` 后插入清屏提示 |
 | party | `RoomPartyEvent` | 活动/party 后端推送 | 公屏 party item |
 
+#### iSnow 文本发送与回传（2026-11-13）
+
+- 沿用 Nady 文本流程：HTTP `/api/room/msg/push` 管理提交结果，公屏行只从 `RoomScreenMessageEvent` 回传生成。移除发送前的本地临时行，避免本人看到“本地回显＋服务端回传”两条。
+- 当前列表内已有的有效 `msgId`／payload `msgID`、`msgId` 不重复插入；空 ID 不作为去重依据。去重不比较文案，连续两次发送相同内容以及其他用户的相同内容仍分别保留。
+- HTTP 与 Socket 无论谁先返回，都只显示收到的服务端消息。提交失败保留错误反馈与输入；已经收到的回传不会因为 HTTP 超时而被删除。成功、失败和关闭后的迟到结果沿用现有房间代次及 mounted 检查。
+- All／Chat 复用同一份 ViewModel 消息列表；View、接口参数、表情和送礼链路不变。覆盖发送顺序、回传重放、相同文案、@、失败重试、清屏与会话失效的测试位于 `test/room_chat_send_test.dart`，不进行真实消息发送。
+
 ### 麦位与 RTC
 
 | 功能 | 事件/API | payload/请求字段 | 接收后状态 |

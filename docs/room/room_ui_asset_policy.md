@@ -43,6 +43,8 @@
 
 ## Replacement Rule
 
+房间公屏使用 `image_id=cc03dc0c-a1e5-4dcc-ba8f-6bb2cfd909d2` 的 `group_28` 用户信息区及紧随的正文气泡。该类名必须与设计稿 ID 一起核对。通用男性符号按原始图层 `I15344:276765;15186:295461` 下载为 `room_chat_gender_male.png`，女性符号复用现有蓝湖资产；正文和系统背景为 CSS 颜色及圆角，用真实控件绘制。示例人物、80/10/20 等级和示例铭牌不得当作用户装饰；头像框、徽章、贵族/VIP 与铭牌只使用消息中的真实资源。细节见 `room_public_chat_ui.md`。
+
 音乐盒使用 `image_id=f2616a5f-f98e-4a45-a1d2-05537e65aa76` 的 `section_30`。Schema/HTML 的 CSS 组合图层须继续核对原始图层的真实导出，不可因为组合节点没有 src 就改用缺省图。下载脚本按该设计稿精确图层 ID 提取关闭、收起、循环、上一首、播放/暂停、下一首、列表、音乐音量和系统音量共 10 张切图；播放/暂停按 PNG 内容核对，不能只相信图层名。动态滑杆必须使用可交互控件，不使用静态滑杆切图代替。
 
 单曲/随机状态、停止、删除、搜索未提供蓝湖真实导出，现按用户明确要求使用 Nady 图片补齐，复制到同一房间资源目录并通过 AppAssets 引用。对应文件为 `room_music_single.webp`、`room_music_shuffle.webp`、`room_music_stop.webp`、`room_music_delete.webp`、`room_music_search.webp`；manifest 记录 Nady 原始文件和语义映射，不能冒充蓝湖切图。停止使用 Nady 播放器实际执行 stopPlayMusic + closePlayerAction 的 `room_music_close.webp` 电源图，不使用旧版删除叉号 `ic_room_music_close.webp` 或暂停图替代；删除和搜索保留原图并沿用 Nady 的白色着色。WebP 必须核对 Flutter 实际解码截图，不能仅依据文件名或外部预览判断形状。已有蓝湖图标不替换，播放模式顺序与业务逻辑不变。

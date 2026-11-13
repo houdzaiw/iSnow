@@ -274,6 +274,8 @@ class AppAssets {
   static const String lanhuRoomBottomChat =
       'assets/lanhu/room/room_bottom_chat.png';
   static const String roomChatSend = 'assets/lanhu/room/room_chat_send.png';
+  static const String roomChatGenderMale =
+      'assets/lanhu/room/room_chat_gender_male.png';
   static const String lanhuRoomBottomMic =
       'assets/lanhu/room/room_bottom_mic.png';
   static const String lanhuRoomBottomGift =

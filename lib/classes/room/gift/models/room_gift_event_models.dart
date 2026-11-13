@@ -1,16 +1,25 @@
+import '../../../../model/room_user_info.dart';
+
 import 'room_gift_models.dart';
 
 class RoomGiftUser {
-  const RoomGiftUser({required this.uid, this.name = '', this.avatar = ''});
+  const RoomGiftUser({
+    required this.uid,
+    this.name = '',
+    this.avatar = '',
+    this.appearance = const RoomUserAppearance(),
+  });
 
   final int uid;
   final String name;
   final String avatar;
+  final RoomUserAppearance appearance;
 
   factory RoomGiftUser.fromJson(Map<String, dynamic> json) => RoomGiftUser(
     uid: giftInt(json['uid']),
     name: '${json['nick'] ?? json['nickname'] ?? json['userName'] ?? ''}',
     avatar: '${json['avatar'] ?? json['headUrl'] ?? ''}',
+    appearance: RoomUserAppearance.fromJson(json),
   );
 }
 

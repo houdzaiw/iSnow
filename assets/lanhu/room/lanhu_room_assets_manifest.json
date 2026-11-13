@@ -141,5 +141,10 @@
   "room_lobby_treasure.webp": "User-approved Nady lobby pendant: assets/images/ic_outline_mining.webp; copied unchanged; local lobby entry, not Lanhu export or Game Big Win activity",
   "room_header_heat.png": "User-provided local asset: /Users/huili/Downloads/isnow图标/魅力值icon.png; copied unchanged; room header heat metric, not a Lanhu export",
   "room_header_contribution.png": "User-provided local asset: /Users/huili/Downloads/isnow图标/贡献榜.png; copied unchanged; room header contribution metric, not a Lanhu export",
-  "room_header_profit.png": "User-provided local asset: /Users/huili/Downloads/isnow图标/profit ranktub.png; copied unchanged; room header profit metric, not a Lanhu export"
+  "room_header_profit.png": "User-provided local asset: /Users/huili/Downloads/isnow图标/profit ranktub.png; copied unchanged; room header profit metric, not a Lanhu export",
+  "room_chat_gender_male.png_source": "https://lanhuapp.com/web/#/item/project/detailDetach?pid=9ab318f9-4876-4218-a940-73d4c98780c2&image_id=cc03dc0c-a1e5-4dcc-ba8f-6bb2cfd909d2&tid=7aacbbd3-8118-4f56-b35e-8ce2cb33a5c6",
+  "room_chat_gender_male.png": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaDDSSlicePNG7fe86f94834025c6511c9d6accac54ce.png",
+  "room_public_chat_layout_source": "https://lanhuapp.com/web/#/item/project/detailDetach?pid=9ab318f9-4876-4218-a940-73d4c98780c2&image_id=cc03dc0c-a1e5-4dcc-ba8f-6bb2cfd909d2",
+  "room_public_chat_backgrounds": "group_44: CSS rgba(0,0,0,0.4), radius 6/16/16/16; text-wrapper_2: CSS rgba(0,0,0,0.55), radius 10; real Flutter decoration, no static bubble image",
+  "room_public_chat_sender_assets": "Sender avatar/frame/levels/noble/VIP/plaque/medals come from typed message data; unowned items hidden, unavailable artwork uses red missing icon; no Lanhu example sender assets"
 }

@@ -8,6 +8,17 @@ from tools import download_lanhu_room_assets as downloader
 
 
 class LanhuRoomAssetsTest(unittest.TestCase):
+    def test_chat_export_does_not_download_example_senders_or_badges(self):
+        layer_id, filename = next(iter(downloader.ROOM_CHAT_EXPORTS.items()))
+        sketch = {"artboard": {"layers": [
+            {"id": "sample-avatar", "name": "group_28", "image": {"imageUrl": "wrong.png"}},
+            {"id": layer_id, "image": {"imageUrl": "https://example.com/male.png"}},
+        ]}}
+        self.assertEqual(downloader._room_layer_assets(sketch, downloader.ROOM_CHAT_EXPORTS),
+                         [(filename, "https://example.com/male.png")])
+        with self.assertRaisesRegex(RuntimeError, "exports missing"):
+            downloader._room_layer_assets({}, downloader.ROOM_CHAT_EXPORTS)
+
     def test_profile_exports_are_scoped_to_the_exact_design_and_layer(self):
         for design_id, exports in downloader.ROOM_PROFILE_EXPORTS.items():
             expected = [(name, f"https://example.com/{name}")

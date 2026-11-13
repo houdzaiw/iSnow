@@ -225,22 +225,20 @@ class _RoomChatMessageList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      padding: EdgeInsets.fromLTRB(
-        AppSpacing.roomChatMessageHorizontalInset.w,
-        AppSpacing.xxs.h,
-        AppSpacing.roomChatMessageHorizontalInset.w,
-        AppSpacing.roomChatMessageBottomInset.h,
-      ),
+      padding: EdgeInsets.only(bottom: RoomPublicChatTheme.listBottom.h),
       itemCount: messages.length,
       itemBuilder: (context, index) {
         final message = messages[index];
         return Padding(
           padding: EdgeInsets.only(
             top: index == 0
-                ? AppSpacing.roomChatMessageTopFirst.h
-                : AppSpacing.roomChatMessageTop.h,
+                ? RoomPublicChatTheme.firstGap.h
+                : RoomPublicChatTheme.rowGap.h,
           ),
-          child: _RoomChatMessageBubble(
+          child: RoomPublicMessageItem(
+            key: ValueKey(
+              'room-public-entry-${message.kind.name}-${message.id}',
+            ),
             message: message,
             onUserTap: onUserTap,
             onImageTap: onImageTap,
@@ -248,147 +246,6 @@ class _RoomChatMessageList extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _RoomChatMessageBubble extends StatelessWidget {
-  const _RoomChatMessageBubble({
-    required this.message,
-    required this.onUserTap,
-    required this.onImageTap,
-    required this.onPartyTap,
-  });
-
-  final RoomChatEntry message;
-  final ValueChanged<int> onUserTap;
-  final ValueChanged<String> onImageTap;
-  final ValueChanged<int> onPartyTap;
-
-  @override
-  Widget build(BuildContext context) {
-    if (message.gift != null) {
-      return RoomGiftPublicScreenItem(
-        message: message.gift!,
-        onUserTap: onUserTap,
-      );
-    }
-    final isSystem = message.kind == RoomChatEntryKind.system;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (!isSystem) ...[
-          InkWell(
-            key: ValueKey('room-chat-avatar-${message.id}'),
-            onTap: switch (message.senderUid) {
-              final uid? when uid > 0 => () => onUserTap(uid),
-              _ => null,
-            },
-            child: _RoomAvatarImage(
-              url: message.senderAvatar,
-              size: 34.r,
-              radius: 17.r,
-            ),
-          ),
-          SizedBox(width: 8.w),
-        ],
-        Expanded(
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 9.h),
-            decoration: BoxDecoration(
-              color: isSystem
-                  ? Colors.black.withValues(alpha: 0.58)
-                  : Colors.black.withValues(alpha: 0.22),
-              borderRadius: BorderRadius.circular(14.r),
-            ),
-            child: message.partyId != null
-                ? TextButton(
-                    onPressed: () => onPartyTap(message.partyId!),
-                    child: Text(
-                      message.text,
-                      style: AppTextStyles.roomMessageBody,
-                    ),
-                  )
-                : message.mediaUrl != null
-                ? Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: InkWell(
-                      onTap: message.kind == RoomChatEntryKind.image
-                          ? () => onImageTap(message.mediaUrl!)
-                          : null,
-                      child: SizedBox.square(
-                        dimension:
-                            (message.kind == RoomChatEntryKind.image
-                                    ? AppSpacing.roomInteractionMedia
-                                    : AppSpacing.roomInteractionExpression)
-                                .r,
-                        child: message.kind == RoomChatEntryKind.expression
-                            ? RoomAnimatedArtwork(
-                                key: ValueKey(message.id),
-                                url: message.mediaUrl!,
-                                preview: message.mediaPreviewUrl,
-                              )
-                            : RoomPublicImage(
-                                url: message.mediaUrl,
-                                fit: BoxFit.contain,
-                              ),
-                      ),
-                    ),
-                  )
-                : _ChatMessageText(message: message, onUserTap: onUserTap),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ChatMessageText extends StatelessWidget {
-  const _ChatMessageText({required this.message, required this.onUserTap});
-
-  final RoomChatEntry message;
-  final ValueChanged<int> onUserTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final name = message.senderName;
-    final textColor = switch (message.kind) {
-      RoomChatEntryKind.gift => _roomGold,
-      RoomChatEntryKind.system => const Color(0xFFFF80D8),
-      _ => Colors.white,
-    };
-    return RichText(
-      maxLines: 4,
-      overflow: TextOverflow.ellipsis,
-      text: TextSpan(
-        style: TextStyle(
-          color: textColor,
-          fontSize: 15.sp,
-          height: 1.24,
-          fontWeight: FontWeight.w600,
-        ),
-        children: [
-          if (name != null && name.isNotEmpty)
-            TextSpan(
-              text: '$name ',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.92),
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          for (final part in decodeRoomMentions(message.text))
-            if (part.uid case final uid?)
-              WidgetSpan(
-                alignment: PlaceholderAlignment.middle,
-                child: InkWell(
-                  onTap: () => onUserTap(uid),
-                  child: Text(part.text, style: AppTextStyles.giftEffectTitle),
-                ),
-              )
-            else
-              TextSpan(text: part.text),
-        ],
-      ),
     );
   }
 }

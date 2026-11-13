@@ -76,6 +76,12 @@ ROOM_MORE_SEMANTIC_FILES = {
 
 ROOM_GIFT_DESIGN_ID = "dd85e4a7-00f5-41c9-a75b-b28a25da69ad"
 ROOM_MUSIC_DESIGN_ID = "f2616a5f-f98e-4a45-a1d2-05537e65aa76"
+ROOM_CHAT_DESIGN_ID = "cc03dc0c-a1e5-4dcc-ba8f-6bb2cfd909d2"
+# group_28's generic gender symbol only. Avatars, frames and badge examples
+# in the design must never be exported as actual senders' decorations.
+ROOM_CHAT_EXPORTS = {
+    "I15344:276765;15186:295461": "room_chat_gender_male.png",
+}
 ROOM_PROFILE_EXPORTS = {
     "f9cf062d-4932-4ca6-8eaa-e11434d3f766": {
         "15457:347946": "room_edit_camera.png",
@@ -156,7 +162,7 @@ def main() -> None:
     manifest = _load_manifest(args.output / MANIFEST)
     if args.design_url:
         assets = _fetch_design_assets(args.design_url)
-        if any(image_id in args.design_url for image_id in ROOM_PROFILE_EXPORTS):
+        if any(image_id in args.design_url for image_id in [*ROOM_PROFILE_EXPORTS, ROOM_CHAT_DESIGN_ID]):
             for filename, _ in assets:
                 manifest[f"{filename}_source"] = args.design_url
     else:
@@ -302,6 +308,8 @@ def _fetch_design_assets(design_url: str) -> list[tuple[str, str]]:
         return _room_gift_assets(sketch)
     if image_id == ROOM_MUSIC_DESIGN_ID:
         return _room_music_assets(sketch)
+    if image_id == ROOM_CHAT_DESIGN_ID:
+        return _room_layer_assets(sketch, ROOM_CHAT_EXPORTS)
     if image_id in ROOM_PROFILE_EXPORTS:
         return _room_profile_assets(sketch, image_id)
 
@@ -323,7 +331,10 @@ def _fetch_design_assets(design_url: str) -> list[tuple[str, str]]:
 
 
 def _room_profile_assets(sketch: dict, image_id: str) -> list[tuple[str, str]]:
-    expected = ROOM_PROFILE_EXPORTS[image_id]
+    return _room_layer_assets(sketch, ROOM_PROFILE_EXPORTS[image_id])
+
+
+def _room_layer_assets(sketch: dict, expected: dict[str, str]) -> list[tuple[str, str]]:
     exports: dict[str, str] = {}
 
     def visit(layer: dict) -> None:
@@ -339,7 +350,7 @@ def _room_profile_assets(sketch: dict, image_id: str) -> list[tuple[str, str]]:
     visit(sketch.get("artboard") or {})
     missing = expected.keys() - exports.keys()
     if missing:
-        raise RuntimeError(f"Room profile exports missing: {sorted(missing)}")
+        raise RuntimeError(f"Room design exports missing: {sorted(missing)}")
     return [(filename, exports[layer_id]) for layer_id, filename in expected.items()]
 
 

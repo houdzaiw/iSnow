@@ -13,6 +13,7 @@ import '../../../manager/api_error_message.dart';
 import '../../../manager/room_manager.dart';
 import '../../../model/room_models.dart';
 import '../../../model/room_socket_message.dart';
+import '../../../model/room_user_info.dart';
 import '../room_repository.dart';
 import '../gift/event/room_gift_event_manager.dart';
 import '../gift/event/room_gift_event_parser.dart';
@@ -101,6 +102,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
           senderUid: _intValue(from['uid']),
           senderName: _stringValue(from['nick']),
           senderAvatar: _stringValue(from['avatar']),
+          senderAppearance: RoomUserAppearance.fromJson(from),
         ),
       );
       _luckyIds.add(id);
@@ -308,22 +310,9 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
 
     final roomId = _effectiveRoomId;
     final generation = sessionGeneration;
-    final localEntry = RoomChatEntry(
-      id: 'local-${DateTime.now().microsecondsSinceEpoch}',
-      kind: RoomChatEntryKind.chat,
-      text: message,
-      createdAt: DateTime.now(),
-      senderName: state.currentUserName,
-      senderAvatar: state.currentUserAvatar,
-      senderUid: state.currentUid,
-      isLocal: true,
-    );
-
-    state = state.copyWith(
-      sendingMessage: true,
-      messages: _appendMessage(localEntry),
-      errorMessage: null,
-    );
+    // As in Nady, the room broadcast is the sole source of public text rows.
+    // HTTP acknowledges submission; inserting here would duplicate our echo.
+    state = state.copyWith(sendingMessage: true, errorMessage: null);
 
     try {
       await _repository.sendTextMessage(roomId: roomId, text: message);
@@ -338,9 +327,6 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
       }
       state = state.copyWith(
         sendingMessage: false,
-        messages: state.messages
-            .where((entry) => entry.id != localEntry.id)
-            .toList(),
         errorMessage: userFacingErrorMessage(error),
       );
       return false;
@@ -717,6 +703,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
         senderName: gift.sender.name,
         senderAvatar: gift.sender.avatar,
         senderUid: gift.sender.uid,
+        senderAppearance: gift.sender.appearance,
         gift: gift,
       );
       final index = entries.indexWhere((entry) => entry.id == id);
@@ -747,6 +734,18 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
     final kind = _kindForEvent(message.event);
     if (kind == null) return null;
     final payload = _payloadMap(message.payload);
+    final messageId =
+        _stringValue(message.msgId) ??
+        _stringValue(payload['msgID']) ??
+        _stringValue(payload['msgId']);
+    // Only a real server ID identifies a replay. Equal text is not a duplicate.
+    if (kind == RoomChatEntryKind.chat &&
+        messageId != null &&
+        state.messages.any(
+          (entry) => entry.kind == kind && entry.id == messageId,
+        )) {
+      return null;
+    }
     final user = _userMap(payload);
     final mediaSource = payload['msg'] ?? payload['data'];
     final party = kind == RoomChatEntryKind.party
@@ -774,10 +773,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
     };
     if (text == null || text.isEmpty) return null;
     return RoomChatEntry(
-      id:
-          message.msgId ??
-          _stringValue(payload['msgID'] ?? payload['msgId']) ??
-          'socket-${DateTime.now().microsecondsSinceEpoch}',
+      id: messageId ?? 'socket-${DateTime.now().microsecondsSinceEpoch}',
       kind: kind,
       text: text,
       mediaUrl: mediaUrl,
@@ -793,6 +789,9 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
       ),
       senderAvatar: _stringValue(payload['avatar'] ?? user['avatar']),
       senderUid: _intValue(payload['uid'] ?? user['uid']),
+      senderAppearance: RoomUserAppearance.fromJson(
+        user.isEmpty ? payload : user,
+      ),
     );
   }
 
@@ -868,8 +867,9 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
         payload['userInfo'] ??
         payload['sendUserInfo'] ??
         payload['fromUser'];
-    if (raw is Map<String, dynamic>) return raw;
-    if (raw is Map) return raw.cast<String, dynamic>();
+    final decoded = _decodePayload(raw);
+    if (decoded is Map<String, dynamic>) return decoded;
+    if (decoded is Map) return decoded.cast<String, dynamic>();
     return const {};
   }
 

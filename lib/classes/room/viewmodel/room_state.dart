@@ -86,6 +86,7 @@ class RoomChatEntry {
     this.senderName,
     this.senderAvatar,
     this.senderUid,
+    this.senderAppearance = const RoomUserAppearance(),
     this.isLocal = false,
     this.gift,
     this.mediaUrl,
@@ -100,6 +101,7 @@ class RoomChatEntry {
   final String? senderName;
   final String? senderAvatar;
   final int? senderUid;
+  final RoomUserAppearance senderAppearance;
   final bool isLocal;
   final RoomGiftPublicMessage? gift;
   final String? mediaUrl, mediaPreviewUrl;
