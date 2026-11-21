@@ -291,6 +291,8 @@ class _SeatCircle extends StatelessWidget {
                   : AppAssets.lanhuRoomMicSeat,
               size: circleSize.r,
             ),
+          if (seat.isOccupied)
+            Positioned.fill(child: RoomMicDecorations(seat: seat)),
           if (seat.isMuted)
             Positioned(
               left: 0,

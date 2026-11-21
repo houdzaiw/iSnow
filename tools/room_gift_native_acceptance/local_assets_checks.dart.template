@@ -1,0 +1,77 @@
+import 'dart:io';
+
+import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:path_provider/path_provider.dart';
+
+import 'package:room_gift_native_acceptance/production/theme/app_theme.dart';
+
+import 'environment.dart';
+
+void registerLocalAssetChecks() {
+  final assets = [
+    ...AppAssets.roomGiftLuckyNumbers.values,
+    ...AppAssets.roomGiftLuckyBubbles.values,
+  ];
+  for (final source in assets) {
+    final name = source.split('/').last.replaceAll('.mp4', '');
+    nativeCheck('local asset $name renders and releases on Android', (
+      tester,
+    ) async {
+      final clip = await RoomGiftAssetResolver().resolveSource(
+        source,
+        format: RoomGiftAnimationFormat.vap,
+      );
+      final avatarData = await rootBundle.load(
+        'assets/lanhu/room/room_icon_missing.png',
+      );
+      final avatar = File(
+        '${(await getTemporaryDirectory()).path}/qa_avatar.png',
+      );
+      await avatar.writeAsBytes(avatarData.buffer.asUint8List(), flush: true);
+      final player = GlobalKey<RoomGiftEffectPlayerState>();
+      final start = trace.length;
+      await scene(
+        tester,
+        RoomGiftEffectPlayer(
+          key: player,
+          resource: RoomGiftAnimationResource(
+            format: clip.format,
+            videoMode: clip.videoMode,
+            bytes: clip.bytes,
+            file: clip.file,
+            replacements: source.contains('luck_num')
+                ? const {'text': 'LOCAL QA'}
+                : {
+                    'Avatar': avatar.path,
+                    'Win': 'QA Win 100',
+                    'Times': '10 times',
+                  },
+          ),
+          repeat: true,
+          onEnd: () {},
+          onPlaybackFailed: (error) => playerErrors.add('$error'),
+          onReleaseFailed: (error) => playerErrors.add('$error'),
+        ),
+      );
+      await until(
+        tester,
+        () => trace.skip(start).any((x) => x.endsWith(':event:onStart')),
+        // The VAP controller already enforces its own 20s startup deadline.
+        // Allow view creation too; a slow emulator must not fail at an unrelated
+        // 8s test deadline before that production guard has made its decision.
+        seconds: 25,
+      );
+      await tester.pump(const Duration(milliseconds: 700));
+      // Keep transparent samples, and require a genuinely visible frame during
+      // the loop; do not pretend every point in an animated asset is opaque.
+      await capture(tester, 'native_$name', attempts: 4);
+      await player.currentState!.stop();
+      expect(
+        trace.skip(start).any((x) => x.endsWith(':stop:delivered')),
+        isTrue,
+      );
+    });
+  }
+}

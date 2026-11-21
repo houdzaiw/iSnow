@@ -1,0 +1,290 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_vap_plus/flutter_vap_plus.dart';
+import 'package:svgaplayer_flutter/svgaplayer_flutter.dart';
+import 'package:video_player/video_player.dart';
+
+import 'package:room_gift_native_acceptance/production/classes/room/gift/effects/room_gift_effect_layer.dart';
+import 'package:room_gift_native_acceptance/production/classes/room/gift/event/room_gift_event_manager.dart';
+import 'package:room_gift_native_acceptance/production/classes/room/gift/models/room_gift_event_models.dart';
+import 'package:room_gift_native_acceptance/production/classes/room/gift/models/room_gift_models.dart';
+
+import 'environment.dart';
+import 'barrage_checks.dart';
+import 'visibility_checks.dart';
+import 'local_assets_checks.dart';
+
+void main() {
+  configureRecording();
+  registerBarrageChecks();
+  registerVisibilityChecks();
+  registerLocalAssetChecks();
+  for (final format in [
+    RoomGiftAnimationFormat.svga,
+    RoomGiftAnimationFormat.pag,
+    RoomGiftAnimationFormat.mp4,
+    RoomGiftAnimationFormat.vap,
+  ]) {
+    nativeCheck('${format.name} initializes and completes on Android', (
+      tester,
+    ) async {
+      var completed = 0;
+      final start = trace.length;
+      final clip = await resource(format);
+      await scene(
+        tester,
+        RoomGiftEffectPlayer(resource: clip, onEnd: () => completed++),
+      );
+      switch (format) {
+        case RoomGiftAnimationFormat.svga:
+          await until(
+            tester,
+            () => find.byType(SVGAImage).evaluate().isNotEmpty,
+          );
+        case RoomGiftAnimationFormat.pag:
+          await until(tester, () => find.byType(Texture).evaluate().isNotEmpty);
+        case RoomGiftAnimationFormat.mp4:
+          await until(
+            tester,
+            () => find.byType(VideoPlayer).evaluate().isNotEmpty,
+          );
+          final video = tester
+              .widget<VideoPlayer>(find.byType(VideoPlayer))
+              .controller;
+          await until(tester, () => video.value.isPlaying);
+          expect(video.value.volume, 0);
+        case RoomGiftAnimationFormat.vap:
+          await until(
+            tester,
+            () => trace.skip(start).any((x) => x.endsWith(':event:onStart')),
+          );
+        default:
+          break;
+      }
+      await capture(tester, 'native_${format.name}');
+      await until(tester, () => completed == 1, seconds: 12);
+      await tester.pump();
+      await tester.pump();
+      expect(find.byType(Texture), findsNothing);
+    });
+  }
+
+  nativeCheck('repository SVGA fixture produces visible frames', (
+    tester,
+  ) async {
+    var completed = 0;
+    final clip = await resource(
+      RoomGiftAnimationFormat.svga,
+      decoderFixture: true,
+    );
+    await scene(
+      tester,
+      RoomGiftEffectPlayer(resource: clip, onEnd: () => completed++),
+    );
+    await until(tester, () => find.byType(SVGAImage).evaluate().isNotEmpty);
+    await capture(tester, 'native_svga_repository_fixture');
+    await until(tester, () => completed == 1);
+  });
+
+  nativeCheck(
+    'PAG close waits for a delayed real native initialization reply',
+    (tester) async {
+      final clip = await resource(RoomGiftAnimationFormat.pag);
+      final gate = Completer<void>();
+      holdPagInit = gate;
+      final start = trace.length;
+      var finished = false;
+      await scene(
+        tester,
+        _QueueScene(
+          resources: {'first': clip},
+          onComplete: (_) => finished = true,
+        ),
+        overrides: [
+          roomGiftAssetResolverProvider.overrideWithValue(
+            _Resolver({'first': clip}),
+          ),
+        ],
+      );
+      await until(
+        tester,
+        () => trace.skip(start).any((x) => x.endsWith(':initPag:nativeReply')),
+      );
+      await tester.tap(find.byKey(const ValueKey('room-gift-effect-close')));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(finished, isFalse);
+      expect(
+        trace.skip(start).where((x) => x.endsWith(':release:request')),
+        isEmpty,
+      );
+      gate.complete();
+      holdPagInit = null;
+      await until(tester, () => finished);
+      expect(
+        trace.skip(start).where((x) => x.endsWith(':release:delivered')),
+        hasLength(1),
+      );
+    },
+  );
+
+  nativeCheck('PAG close releases before the next MP4 task starts', (
+    tester,
+  ) async {
+    final clips = {
+      'first': await resource(RoomGiftAnimationFormat.pag),
+      'second': await resource(RoomGiftAnimationFormat.mp4),
+    };
+    final start = trace.length;
+    final completed = <String>[];
+    await scene(
+      tester,
+      _QueueScene(resources: clips, onComplete: completed.add),
+      overrides: [
+        roomGiftAssetResolverProvider.overrideWithValue(_Resolver(clips)),
+      ],
+    );
+    await until(tester, () => find.byType(Texture).evaluate().isNotEmpty);
+    await tester.tap(find.byKey(const ValueKey('room-gift-effect-close')));
+    await until(tester, () => completed.contains('first'));
+    await until(tester, () => find.byType(VideoPlayer).evaluate().isNotEmpty);
+    final records = trace.skip(start).toList();
+    expect(
+      records.indexWhere((x) => x.endsWith(':release:delivered')),
+      lessThan(records.indexOf('resolve:second')),
+    );
+    await until(tester, () => completed.length == 2);
+  });
+
+  nativeCheck('VAP stop acknowledges destruction and settles playback', (
+    tester,
+  ) async {
+    final clip = await resource(RoomGiftAnimationFormat.vap);
+    VapController? controller;
+    final events = <String>[];
+    await scene(
+      tester,
+      VapView(
+        onControllerCreated: (value) => controller = value,
+        onEvent: (event, _) => events.add('$event'),
+      ),
+    );
+    await until(tester, () => controller != null);
+    await controller!.setVideoMode(1);
+    var settled = false;
+    final playing = controller!
+        .playPath(clip.file!.path, loop: true)
+        .then((_) => settled = true);
+    unawaited(playing.catchError((Object _) => false));
+    await until(tester, () => events.contains('onStart'));
+    await controller!.stop();
+    expect(events, contains('onDestroy'));
+    await until(tester, () => settled);
+  });
+
+  nativeCheck(
+    'VAP close during real configuration cannot start late playback',
+    (tester) async {
+      final clip = await resource(RoomGiftAnimationFormat.vap);
+      final gate = Completer<void>();
+      holdVapConfiguration = gate;
+      final key = GlobalKey<RoomGiftEffectPlayerState>();
+      final start = trace.length;
+      await scene(
+        tester,
+        RoomGiftEffectPlayer(key: key, resource: clip, onEnd: () {}),
+      );
+      await until(
+        tester,
+        () => trace
+            .skip(start)
+            .any((x) => x.endsWith(':setFetchResource:nativeReply')),
+      );
+      await key.currentState!.stop();
+      gate.complete();
+      holdVapConfiguration = null;
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(
+        trace.skip(start).where((x) => x.endsWith(':playPath:request')),
+        isEmpty,
+      );
+    },
+  );
+
+  nativeCheck(
+    'VAP loop survives the former twenty-second completion deadline',
+    (tester) async {
+      final clip = await resource(RoomGiftAnimationFormat.vap, longLoop: true);
+      final key = GlobalKey<RoomGiftEffectPlayerState>();
+      var ended = 0;
+      final start = trace.length;
+      await scene(
+        tester,
+        RoomGiftEffectPlayer(
+          key: key,
+          resource: clip,
+          repeat: true,
+          onEnd: () => ended++,
+        ),
+      );
+      await until(
+        tester,
+        () => trace.skip(start).any((x) => x.endsWith(':playPath:delivered')),
+      );
+      await tester.pump(const Duration(seconds: 21));
+      expect(ended, 0);
+      expect(playerErrors, isEmpty);
+      await key.currentState!.stop();
+    },
+  );
+}
+
+class _Resolver extends RoomGiftAssetResolver {
+  _Resolver(this.resources);
+  final Map<String, RoomGiftAnimationResource> resources;
+  @override
+  Future<RoomGiftAnimationResource> resolve(RoomGift gift) async {
+    trace.add('resolve:${gift.name}');
+    return resources[gift.name]!;
+  }
+}
+
+class _QueueScene extends StatefulWidget {
+  const _QueueScene({required this.resources, required this.onComplete});
+  final Map<String, RoomGiftAnimationResource> resources;
+  final ValueChanged<String> onComplete;
+  @override
+  State<_QueueScene> createState() => _QueueSceneState();
+}
+
+class _QueueSceneState extends State<_QueueScene> {
+  late final tasks = widget.resources.keys
+      .map(
+        (name) => RoomGiftEffectTask(
+          key: name,
+          message: RoomScreenGiftMsg(
+            gift: RoomGift(
+              id: 9001,
+              name: name,
+              icon: '',
+              price: 0,
+              isCombo: 0,
+              tabId: 1,
+            ),
+            uid: 1,
+            userInfo: const RoomGiftUser(uid: 1),
+          ),
+          createdAt: DateTime.now(),
+        ),
+      )
+      .toList();
+  @override
+  Widget build(BuildContext context) => RoomGiftFullScreenEffectLayer(
+    tasks: tasks,
+    onCompleted: (key) {
+      widget.onComplete(key);
+      setState(() => tasks.removeWhere((task) => task.key == key));
+    },
+  );
+}

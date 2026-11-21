@@ -90,6 +90,8 @@ class AppColors {
   static const Color roomGiftQuantitySurface = Color(0x1AFFFFFF);
   static const Color roomGiftPopupSurface = Color(0xFF251F2B);
   static const Color roomGiftSelectedBorder = Color(0x99FF3DC5);
+  static const Color roomGiftSelectedBorderMuted = Color(0x33FF3DC5);
+  static const Color roomGiftSelectedSurface = Color(0x14FF3DC5);
   static const Color roomGiftSelectedAvatar = chipSelectedText;
   static const Color roomGiftAccent = chipSelectedText;
   static const Color roomGiftGold = Color(0xFFFBD792);

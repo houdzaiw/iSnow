@@ -1,0 +1,119 @@
+{
+  "reviewDate": "2026-11-20",
+  "timezone": "Asia/Shanghai",
+  "platformScope": "Android only; iOS deferred by user",
+  "source": {
+    "baseCommit": "caaecab2b9d326b617566a3636dd16b822393a8e",
+    "state": "current working tree; existing uncommitted changes retained",
+    "scope": [
+      "E14 account-level barrage dispatch and single presentation lane",
+      "E15 typed barrage click navigation and owned-route cancellation"
+    ]
+  },
+  "fullRegression": {
+    "files": "test/room_*_test.dart and test/app_socket_manager_test.dart",
+    "passed": 892,
+    "failed": 0,
+    "result": "All tests passed!",
+    "localLog": "/tmp/isnow-barrage-final-regression.log",
+    "logSha256": "9ffedea702b603e8af441e014a805e03b09b129c3908aee842d253fd9ae51d2f"
+  },
+  "finalFocusedRegression": {
+    "reason": "After adding same-UID reauthentication cleanup of the prior room",
+    "files": "barrage and account Socket tests",
+    "passed": 53,
+    "failed": 0,
+    "note": "Overlaps full regression; do not add counts together",
+    "localLog": "/tmp/isnow-barrage-last-focused.log",
+    "logSha256": "df7471bd08ef05ff49c2608b361bd39514ff77beb382d06dc2fb2e91213068c5"
+  },
+  "analysis": {
+    "command": "/usr/local/flutter/bin/flutter analyze --no-pub",
+    "result": "No issues found!",
+    "localLog": "/tmp/isnow-barrage-final-analyze.log",
+    "logSha256": "9d3731ad25e79cfcd773eacd91ce629495ad35d6041f36183c435ba4c4db5698"
+  },
+  "diffCheck": "git diff --check HEAD: passed",
+  "dependencyChanges": false,
+  "existingGoldenChanges": false,
+  "goldens": {
+    "directory": "test/goldens/room_barrage_v1/",
+    "manualReview": "New full-root banner snapshots inspected at 320, 375 and 430 widths; loaded icon, text constraints and usable room region checked",
+    "initialCaptureCorrection": "Initial capture sampled the underlying Scaffold. The test now captures the root overlay and precaches the real icon with the existing Roboto test font. Historical baselines were not changed.",
+    "files": [
+      {
+        "path": "test/goldens/room_barrage_v1/banner_320.png",
+        "sha256": "6b5399b736f73476f4600195e29fb334b6f1c79a1c9d67f870aefe49920c2003"
+      },
+      {
+        "path": "test/goldens/room_barrage_v1/banner_375.png",
+        "sha256": "cbce7a61dd56f1f3328af733b25299870dc9c8b98729a4895e1fe73c5341cae0"
+      },
+      {
+        "path": "test/goldens/room_barrage_v1/banner_430.png",
+        "sha256": "2d9d579f6a967ab3a3ad626f90e568a1b31713f03f6d744703b3f09e640daf83"
+      }
+    ]
+  },
+  "apk": {
+    "command": "/usr/local/flutter/bin/flutter build apk --debug --no-pub --target-platform android-arm64 -t lib/lib_dev.dart",
+    "result": "passed",
+    "path": "/Users/huili/project/iSnow/build/app/outputs/flutter-apk/app-debug.apk",
+    "mode": "debug",
+    "entry": "lib/lib_dev.dart",
+    "bytes": 224024251,
+    "sha256": "c9d1e1ef47ee606eda6290500ac8b700bfaa3fd16f3fa67413050cd5aa4a199d",
+    "nativeAbis": ["arm64-v8a"],
+    "zipChecks": {
+      "manifestPresent": true,
+      "classesDexPresent": true,
+      "debugKernelPresent": true,
+      "entryCount": 1350
+    },
+    "installed": false,
+    "successfulLocalLog": "/tmp/isnow-barrage-retry2-build.log",
+    "successfulLogSha256": "1ecba4f11442a9c3b240b8c1fd92ccf64b6a1117be3212a1b1c028a42c5f05f1"
+  },
+  "buildRecovery": {
+    "failedAttempts": 2,
+    "cause": "Host data volume full; not emulator storage or a demonstrated Gradle version conflict",
+    "cleanup": [
+      "Regenerable hash-named Gradle build-cache-1 entries",
+      "Project build/test_cache and build/unit_test_assets",
+      "Unused Flutter macOS desktop darwin-x64-release engine and its macos-sdk.stamp; future macOS use will redownload"
+    ],
+    "preserved": [
+      "Source and historical screenshots/evidence",
+      "Signing configuration and credentials",
+      "Android and iOS Flutter engines",
+      "Gradle dependency archives and other projects"
+    ],
+    "finalHostFreeSpace": "approximately 512 MiB"
+  },
+  "simulatedCoverage": [
+    "Twelve confirmed event contracts, string/Map payloads, numeric IDs, safe links, country/channel/TTL filters",
+    "Cross-channel and known game-award relay deduplication; pool amount distinguished from personal winnings",
+    "Prepared-only queue promotion, priority, capacity, expiry and native release acknowledgement",
+    "SUPER original-combo ownership at preparation, promotion and presentation",
+    "Account reauthentication, delayed transport/results, same-ID old callbacks, room changes and background cancellation",
+    "Password and prize route ownership, keyboard and account-switch cancellation; no real entry or account submissions",
+    "Root banner clicks and outside room interactions at 320/375/430 widths"
+  ],
+  "deviceActions": [],
+  "realOrders": 0,
+  "topUps": 0,
+  "notVerified": [
+    "Live account-channel authorization, transport reconnection and server event contracts",
+    "New root barrage PAG/VAP callbacks, foreground layers and native release on physical Android",
+    "Live cross-room, locked-room and game link navigation",
+    "Real paid combo; requires separate concrete confirmation before any send",
+    "Game Big Win independent full-screen effect; user-supplied asset still pending"
+  ],
+  "remainingOutsideThisBatch": [
+    "E13 background lifecycle state machine",
+    "E16 cache file leases",
+    "R01 total room-entry timeout",
+    "E09 strict cumulative qualification pending backend contract"
+  ],
+  "realComboRule": "Before any future live combo, confirm gift, unit price, quantity, recipient UID, target mode, send count and total expense. Previous budgets are not current authorization."
+}

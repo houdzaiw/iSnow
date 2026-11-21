@@ -9,19 +9,25 @@ import '../models/room_gift_event_models.dart';
 import '../models/room_gift_models.dart';
 import '../effects/room_gift_asset_resolver.dart';
 import '../queue/room_gift_slot_queue.dart';
+import '../queue/room_fullscreen_queue.dart';
+import '../queue/room_flight_queue.dart';
+import '../models/room_gift_effect_task.dart';
+import '../models/room_gift_panel_models.dart';
+import '../models/room_lucky_animation_policy.dart';
+import '../models/room_mic_effect.dart';
+import '../models/room_entrance.dart';
+import '../queue/room_entrance_queue.dart';
+import 'room_entrance_parser.dart';
 import 'room_gift_event_parser.dart';
+import 'room_fullscreen_event_parser.dart';
 import '../../more/room_tools_models.dart';
 
-class RoomGiftEffectTask {
-  const RoomGiftEffectTask({
-    required this.key,
-    required this.message,
-    required this.createdAt,
-  });
-  final String key;
-  final RoomScreenGiftMsg message;
-  final DateTime createdAt;
-}
+export '../models/room_gift_effect_task.dart';
+
+part 'room_gift_event_dispatch.dart';
+part 'room_gift_event_processing.dart';
+part 'room_mic_effect_events.dart';
+part 'room_entrance_events.dart';
 
 class RoomGiftEventState {
   const RoomGiftEventState({
@@ -33,6 +39,13 @@ class RoomGiftEventState {
     this.lucky = const [],
     this.roomWeekVal = 0,
     this.isVisible = true,
+    this.stopEffectKey,
+    this.stopLuckyKey,
+    this.canPlayFullscreen = true,
+    this.canPlayLucky = false,
+    this.jackpots = const {},
+    this.micEffects = const {},
+    this.entrance,
   });
   final List<RoomGiftSlot?> slots;
   final List<RoomGiftPublicMessage> publicMessages;
@@ -41,6 +54,11 @@ class RoomGiftEventState {
   final List<RoomLuckyGiftResult> lucky;
   final int roomWeekVal;
   final bool isVisible;
+  final String? stopEffectKey, stopLuckyKey;
+  final bool canPlayFullscreen, canPlayLucky;
+  final Map<int, RoomJackpotInfo> jackpots;
+  final Map<int, RoomMicEffect> micEffects;
+  final RoomEntrance? entrance;
 }
 
 /// Consumes each broadcast once and exposes independently bounded visual lanes.
@@ -51,8 +69,13 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
     DateTime Function()? now,
     this.onSelfGift,
     this.onComboEnd,
+    this.activeJackpotGift,
+    this.preparePrize,
+    this.prepareEntrance,
+    this.barrageManaged = false,
     bool startTimer = true,
   }) : _now = now ?? DateTime.now,
+       _timersEnabled = startTimer,
        super(const RoomGiftEventState()) {
     _subscription = messages?.listen(
       receive,
@@ -63,342 +86,146 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
     }
   }
   final String roomId;
+  final bool barrageManaged;
   bool get isAlive => mounted;
   RoomGiftEventState get snapshot => state;
   final DateTime Function() _now;
+  final bool _timersEnabled;
   final void Function(RoomScreenGiftMsg, DateTime)? onSelfGift;
   final void Function(String)? onComboEnd;
+  final RoomScreenGiftMsg? Function(int)? activeJackpotGift;
+  final Future<void> Function(RoomGiftEffectTask)? preparePrize;
+  final Future<void> Function(RoomEntrance)? prepareEntrance;
   final _parser = RoomGiftEventParser();
+  final _externalParser = RoomFullscreenEventParser();
   final _slotQueue = RoomGiftSlotQueue();
+  final _fullscreenQueue = RoomFullscreenQueue();
+  final _flightQueue = RoomFlightQueue();
+  final _numberPolicy = RoomLuckyNumberPolicy();
+  Map<int, int> _seatOccupants = const {};
+  final _micEffects = <int, RoomMicEffect>{};
+  final _entrances = RoomEntranceQueue();
+  String? _enqueuedEntrance;
+  String? _activeLucky;
+  String? countryCode;
   final LinkedHashMap<String, DateTime> _seen = LinkedHashMap();
   final LinkedHashMap<String, RoomScreenGiftMsg> _combos = LinkedHashMap();
   final LinkedHashMap<String, DateTime> _ended = LinkedHashMap();
+  final LinkedHashMap<String, DateTime> _cancelledFlights = LinkedHashMap();
   StreamSubscription<RoomSocketMessage>? _subscription;
   Timer? _timer;
+  Timer? _slotTimer;
   DateTime? _acceptAfter;
   bool _sessionActive = true;
+  bool _hostVisible = true, _routeVisible = true;
+  int _visualGeneration = 0;
   RoomEffectPreferences _effects = const RoomEffectPreferences();
 
   void setEffects(RoomEffectPreferences value) {
     _effects = value;
-    if (!value.gift) _slotQueue.clear();
+    if (!value.car) _entrances.clear();
+    _fullscreenQueue.cancelWhere(
+      (task) => task.kind == RoomGiftEffectKind.entrance
+          ? !value.car
+          : !value.bigGift,
+    );
+    if (!value.gift) {
+      _slotQueue.clear();
+      _flightQueue.clear();
+      _micEffects.clear();
+      _slotTimer?.cancel();
+    }
     _emit();
   }
 
   int? get currentUid => _slotQueue.currentUid;
-  set currentUid(int? uid) => _slotQueue.currentUid = uid;
+  set currentUid(int? uid) {
+    final changed = uid != currentUid;
+    _slotQueue.currentUid = uid;
+    _fullscreenQueue.currentUid = uid;
+    _flightQueue.currentUid = uid;
+    _entrances.currentUid = uid;
+    if (changed && mounted) _emit();
+  }
 
-  void receive(RoomSocketMessage message) {
-    if (!mounted || !_sessionActive) return;
-    if (message.event == 'RoomScreenSystemClear') {
-      if (message.channel == 'room:$roomId' || message.channel == 'room') {
-        clearPublicMessages();
-      }
+  void receive(RoomSocketMessage message) => _dispatch(message);
+
+  /// External visual sources share the same native-player lease as gifts.
+  void enqueueFullscreen(RoomGiftEffectTask task) {
+    if (!mounted || !_sessionActive || !state.isVisible) return;
+    if (_acceptAfter != null && task.createdAt.isBefore(_acceptAfter!)) return;
+    if (task.kind == RoomGiftEffectKind.entrance
+        ? !_effects.car
+        : !_effects.bigGift) {
       return;
     }
-    if (!RoomGiftEventParser.events.contains(message.event)) return;
+    final prepare = task.kind == RoomGiftEffectKind.prize ? preparePrize : null;
+    final accepted = _fullscreenQueue.add(task, _now(), ready: prepare == null);
+    _emit();
+    if (accepted && prepare != null) {
+      unawaited(_preparePrize(task, prepare, _visualGeneration));
+    }
+  }
+
+  Future<void> _preparePrize(
+    RoomGiftEffectTask task,
+    Future<void> Function(RoomGiftEffectTask) prepare,
+    int generation,
+  ) async {
+    var success = false;
     try {
-      final now = _now();
-      final event = _parser.parse(message, roomId, now);
-      if (event == null || _seen.containsKey(event.key)) {
-        _log(
-          'drop event=${message.event} msgId=${message.msgId} '
-          'reason=${event == null ? 'channel' : 'duplicate'}',
-        );
-        return;
-      }
-      _seen[event.key] = now;
-      while (_seen.length > 300) {
-        _seen.remove(_seen.keys.first);
-      }
-      if (event.kind == RoomGiftEventKind.stream) {
-        _emit(roomWeekVal: event.roomWeekVal);
-        return;
-      }
-      if ((_acceptAfter != null && event.createdAt.isBefore(_acceptAfter!)) ||
-          now.difference(event.createdAt) > const Duration(seconds: 10)) {
-        _log(
-          'drop event=${message.event} msgId=${message.msgId} '
-          'visible=${state.isVisible} ageMs=${now.difference(event.createdAt).inMilliseconds} '
-          'acceptAfter=${_acceptAfter?.millisecondsSinceEpoch}',
-        );
-        return;
-      }
-      if (!state.isVisible) {
-        // Keep/background preserve acknowledgements and chat, never animations.
-        switch (event.kind) {
-          case RoomGiftEventKind.gift:
-            _receiveGift(event, render: false);
-          case RoomGiftEventKind.finalCombo:
-            _finishCombo(event);
-          case RoomGiftEventKind.publicScreen:
-            _receivePublic(event.publicMessage!);
-          default:
-            break;
-        }
-        return;
-      }
-      _log(
-        'accept event=${message.event} msgId=${message.msgId} comboId=${event.comboId}',
-      );
-      switch (event.kind) {
-        case RoomGiftEventKind.gift:
-          _receiveGift(event);
-        case RoomGiftEventKind.finalCombo:
-          _finishCombo(event);
-        case RoomGiftEventKind.publicScreen:
-          _receivePublic(event.publicMessage!);
-        case RoomGiftEventKind.banner:
-          _emit(
-            banners: _merge(
-              state.banners,
-              event.banner!,
-              (item) => item.key,
-              12,
-            ),
-          );
-          final upper = event.banner!.upperEffect;
-          if (upper.isNotEmpty) {
-            _queueSpecialEffect(
-              event,
-              event.banner!.gift.copyWith(animationUrl: upper),
-              event.banner!.sender,
-            );
-          }
-        case RoomGiftEventKind.lucky:
-          if (!_ended.containsKey(event.comboId)) {
-            _emit(
-              lucky: _merge(state.lucky, event.lucky!, (item) => item.key, 8),
-            );
-            if (event.lucky!.isJackpot) {
-              _queueSpecialEffect(
-                event,
-                RoomGiftAssetResolver.luckyAnimation(event.lucky!),
-                event.lucky!.sender,
-              );
-            }
-          }
-        case RoomGiftEventKind.stream:
-          break;
-      }
+      await prepare(task);
+      success = true;
     } catch (error) {
-      _log('Discard ${message.event}: $error');
+      _log('Prize resource unavailable: $error');
     }
+    if (!mounted || generation != _visualGeneration || !state.isVisible) return;
+    _fullscreenQueue.prepared(task.key, _now(), success: success);
+    _emit();
   }
 
-  void _receiveGift(RoomGiftEvent event, {bool render = true}) {
-    final gift = event.gift!;
-    if (gift.comboId.isNotEmpty && _ended.containsKey(gift.comboId)) return;
-    final key = gift.comboId.isEmpty ? event.key : gift.comboKey;
-    final previous = _combos[key];
-    if (previous != null &&
-        gift.comboCount <= previous.comboCount &&
-        gift.displayCount <= previous.displayCount &&
-        gift.totalCoinCount <= previous.totalCoinCount) {
-      return;
-    }
-    _combos[key] = gift;
-    while (_combos.length > 300) {
-      _combos.remove(_combos.keys.first);
-    }
-    final now = _now();
-    if (render && _effects.gift) _slotQueue.add(gift, event.key, now);
-    if (gift.uid == currentUid) onSelfGift?.call(gift, event.createdAt);
-    final public = RoomGiftPublicMessage(
-      key: gift.comboId.isEmpty ? key : gift.comboId,
-      gift: gift.gift,
-      sender: gift.userInfo,
-      count: gift.displayCount,
-      targetLabel: gift.targetLabel,
-      createdAt: event.createdAt,
-      sendType: gift.sendType,
-    );
-    if (!render) {
-      _emit(
-        publicMessages: _merge(
-          state.publicMessages,
-          public,
-          (item) => item.key,
-          80,
-        ),
-      );
-      return;
-    }
-    final delta = gift.displayCount - (previous?.displayCount ?? 0);
-    final coinDelta = gift.totalCoinCount - (previous?.totalCoinCount ?? 0);
-    final task = RoomGiftEffectTask(
-      key: event.key,
-      message: gift,
-      createdAt: now,
-    );
-    final lucky =
-        gift.isLuckyGift &&
-            !gift.isHideLuckyGift &&
-            (delta > 0 || coinDelta > 0)
-        ? RoomLuckyGiftResult(
-            key: key,
-            sender: gift.userInfo,
-            amount: coinDelta.clamp(0, gift.totalCoinCount),
-            giftCount: delta.clamp(0, gift.displayCount),
-            showCoins: gift.playWinGoldCount,
-            isJackpot: gift.isJackpot,
-          )
-        : null;
-    final pendingEffectIndex = gift.comboId.isEmpty
-        ? -1
-        : state.effects.indexWhere(
-            (item) => item.message.comboKey == gift.comboKey,
-          );
-    final effects = [...state.effects];
-    if (pendingEffectIndex > 0) {
-      final existing = effects[pendingEffectIndex];
-      effects[pendingEffectIndex] = RoomGiftEffectTask(
-        key: existing.key,
-        message: gift,
-        createdAt: existing.createdAt,
+  void completeEffect(String key) {
+    _fullscreenQueue.complete(key, _now());
+    final entrance = _entrances.active;
+    if (entrance != null && key == '${entrance.key}:vehicle') {
+      _entrances.complete(
+        entrance.key,
+        _now(),
+        vehicle: true,
+        track: _entrances.startedAt == null,
       );
     }
-    _emit(
-      slots: _slotQueue.slots,
-      publicMessages:
-          state.publicMessages.any(
-            (item) => item.key == public.key && item.isFinal,
-          )
-          ? null
-          : _merge(state.publicMessages, public, (item) => item.key, 80),
-      flights: delta > 0 || gift.comboCount > (previous?.comboCount ?? 0)
-          ? [...state.flights, task].takeLast(32)
-          : null,
-      effects:
-          previous == null &&
-              !(gift.isLuckyGift && gift.isHideLuckyGift) &&
-              gift.gift.animationUrl?.isNotEmpty == true
-          ? _merge(effects, task, _effectKey, 12)
-          : effects,
-      lucky: lucky == null
-          ? null
-          : _merge(state.lucky, lucky, (item) => item.key, 8),
-    );
-    if (lucky?.isJackpot == true) {
-      _queueSpecialEffect(
-        event,
-        RoomGiftAssetResolver.luckyAnimation(lucky!),
-        lucky.sender,
-      );
+    _emit();
+  }
+
+  void cancelFullscreen(String key) {
+    if (!mounted) return;
+    _fullscreenQueue.cancelWhere((task) => task.key == key);
+    _emit();
+  }
+
+  void completeFlight(String key) {
+    _flightQueue.complete(key);
+    _emit();
+  }
+
+  void cancelComboFlights(String comboId, {int? uid}) {
+    if (comboId.isEmpty) return;
+    _cancelledFlights['${uid ?? 'any'}:$comboId'] = _now();
+    while (_cancelledFlights.length > 300) {
+      _cancelledFlights.remove(_cancelledFlights.keys.first);
     }
+    _flightQueue.cancelCombo(comboId, uid: uid);
+    _emit();
   }
 
-  void _receivePublic(RoomGiftPublicMessage message) {
-    // Nady's SendGiftMsgModel does not require comboId. Reconcile its public
-    // message with the provisional animation entry rather than showing both.
-    final previous = state.publicMessages
-        .where(
-          (item) =>
-              item.key == message.key ||
-              !item.isFinal &&
-                  message.sender.uid > 0 &&
-                  item.sender.uid == message.sender.uid &&
-                  item.gift.id == message.gift.id &&
-                  item.sendType == message.sendType,
-        )
-        .lastOrNull;
-    final merged = RoomGiftPublicMessage(
-      key: previous?.key ?? message.key,
-      gift: message.gift,
-      count: message.count,
-      targetLabel: message.targetLabel.isEmpty
-          ? previous?.targetLabel ?? ''
-          : message.targetLabel,
-      createdAt: message.createdAt,
-      sender: message.sender.uid > 0
-          ? message.sender
-          : previous?.sender ?? message.sender,
-      sendType: message.sendType,
-      isFinal: true,
-      winAmount: message.winAmount,
-      multiplier: message.multiplier,
-    );
-    _emit(
-      publicMessages: _merge(
-        state.publicMessages,
-        merged,
-        (item) => item.key,
-        80,
-      ),
-    );
-  }
-
-  void _queueSpecialEffect(
-    RoomGiftEvent event,
-    RoomGift gift,
-    RoomGiftUser sender,
-  ) {
-    final task = RoomGiftEffectTask(
-      key: 'special-${event.key}',
-      createdAt: _now(),
-      message: RoomScreenGiftMsg(
-        gift: gift,
-        uid: sender.uid,
-        userInfo: sender,
-        comboId: event.comboId,
-        roomId: roomId,
-        giftCount: 1,
-      ),
-    );
-    _emit(effects: _merge(state.effects, task, _effectKey, 12));
-  }
-
-  String _effectKey(RoomGiftEffectTask task) =>
-      task.message.comboId.isEmpty ? task.key : task.message.comboKey;
-
-  void _finishCombo(RoomGiftEvent event) {
-    _ended[event.comboId] = _now();
-    while (_ended.length > 300) {
-      _ended.remove(_ended.keys.first);
-    }
-    onComboEnd?.call(event.comboId);
-    final finalMessage = event.publicMessage!;
-    final old = state.publicMessages
-        .where((item) => item.key == event.comboId)
-        .firstOrNull;
-    final merged = RoomGiftPublicMessage(
-      key: finalMessage.key,
-      gift: finalMessage.gift,
-      count: finalMessage.count,
-      targetLabel: finalMessage.targetLabel.isEmpty
-          ? old?.targetLabel ?? ''
-          : finalMessage.targetLabel,
-      createdAt: finalMessage.createdAt,
-      sender: finalMessage.sender.uid > 0
-          ? finalMessage.sender
-          : old?.sender ?? finalMessage.sender,
-      sendType: finalMessage.sendType,
-      isFinal: true,
-      winAmount: finalMessage.winAmount,
-      multiplier: finalMessage.multiplier,
-    );
-    _emit(
-      publicMessages: old == null
-          ? null
-          : _merge(state.publicMessages, merged, (item) => item.key, 80),
-      lucky: state.lucky
-          .where(
-            (item) =>
-                item.key != event.comboId &&
-                !item.key.endsWith(':${event.comboId}'),
-          )
-          .toList(),
-    );
-  }
-
-  void completeEffect(String key) =>
-      _emit(effects: state.effects.where((item) => item.key != key).toList());
-  void completeFlight(String key) =>
-      _emit(flights: state.flights.where((item) => item.key != key).toList());
   void completeBanner(String key) =>
       _emit(banners: state.banners.where((item) => item.key != key).toList());
-  void completeLucky(String key) =>
-      _emit(lucky: state.lucky.where((item) => item.key != key).toList());
+  void completeLucky(String key) {
+    if (_activeLucky != key) return;
+    _activeLucky = null;
+    _emit(lucky: state.lucky.where((item) => item.key != key).toList());
+  }
 
   /// Clear chat history without ending paid combos or stopping their effects.
   void clearPublicMessages() {
@@ -407,6 +234,17 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
   }
 
   void setVisible(bool visible) {
+    _hostVisible = visible;
+    _syncVisible();
+  }
+
+  void setRouteVisible(bool visible) {
+    _routeVisible = visible;
+    _syncVisible();
+  }
+
+  void _syncVisible() {
+    final visible = _sessionActive && _hostVisible && _routeVisible;
     if (visible == state.isVisible) return;
     reset(visible: visible, resetCombo: false);
   }
@@ -421,11 +259,21 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
     bool clearHistory = false,
     bool resetCombo = true,
   }) {
+    _visualGeneration++;
     _slotQueue.clear();
+    _fullscreenQueue.clear();
+    _flightQueue.clear();
+    _micEffects.clear();
+    _entrances.clear();
+    _enqueuedEntrance = null;
+    _activeLucky = null;
+    _slotTimer?.cancel();
     if (clearHistory) {
       _seen.clear();
       _combos.clear();
       _ended.clear();
+      _cancelledFlights.clear();
+      _numberPolicy.clear();
     }
     // Socket timestamps can be second-resolution; accept fresh same-second events.
     final time = _now().millisecondsSinceEpoch;
@@ -435,6 +283,7 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
       isVisible: visible ?? state.isVisible,
       roomWeekVal: clearHistory ? 0 : state.roomWeekVal,
       publicMessages: clearHistory ? const [] : state.publicMessages,
+      jackpots: clearHistory ? const {} : state.jackpots,
     );
   }
 
@@ -442,43 +291,90 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
     if (!mounted) return;
     final now = _now();
     _slotQueue.expire(now);
+    _micEffects.removeWhere((_, effect) => !now.isBefore(effect.expiresAt));
     _seen.removeWhere(
       (_, time) => now.difference(time) > const Duration(minutes: 2),
     );
     _ended.removeWhere(
       (_, time) => now.difference(time) > const Duration(seconds: 60),
     );
-    _emit(
-      slots: _slotQueue.slots,
-      flights: state.flights
-          .where(
-            (task) =>
-                now.difference(task.createdAt) < const Duration(seconds: 2),
-          )
-          .toList(),
+    _cancelledFlights.removeWhere(
+      (_, time) => now.difference(time) > const Duration(minutes: 2),
     );
+    _emit(slots: _slotQueue.slots);
   }
 
   void _emit({
     List<RoomGiftSlot?>? slots,
     List<RoomGiftPublicMessage>? publicMessages,
-    List<RoomGiftEffectTask>? flights,
-    List<RoomGiftEffectTask>? effects,
     List<RoomGiftBanner>? banners,
     List<RoomLuckyGiftResult>? lucky,
     int? roomWeekVal,
+    Map<int, RoomJackpotInfo>? jackpots,
   }) {
     if (!mounted) return;
+    _syncEntrance();
+    final effects = _fullscreenQueue.tasks;
+    final hasActiveEffect = _fullscreenQueue.active != null;
+    final nextLucky = _effects.gift
+        ? List<RoomLuckyGiftResult>.of(lucky ?? state.lucky)
+        : <RoomLuckyGiftResult>[];
+    if (_activeLucky != null &&
+        !nextLucky.any((item) => item.key == _activeLucky)) {
+      _activeLucky = null;
+    }
+    if (_activeLucky == null && !hasActiveEffect && nextLucky.isNotEmpty) {
+      final arrival = {
+        for (var i = 0; i < nextLucky.length; i++) nextLucky[i].key: i,
+      };
+      nextLucky.sort((a, b) {
+        final bubble = (b.amount > 0 ? 1 : 0).compareTo(a.amount > 0 ? 1 : 0);
+        if (bubble != 0) return bubble;
+        final multiple = b.multiplier.compareTo(a.multiplier);
+        return multiple != 0
+            ? multiple
+            : arrival[a.key]!.compareTo(arrival[b.key]!);
+      });
+      _activeLucky = nextLucky.first.key;
+    }
+    final entrance = _entrances.active;
+    if (entrance != null &&
+        _entrances.startedAt == null &&
+        entrance.vehicle == null) {
+      _entrances.start(_now());
+    }
     state = RoomGiftEventState(
       slots: _effects.gift ? slots ?? state.slots : const [null, null],
       publicMessages: publicMessages ?? state.publicMessages,
-      flights: _effects.gift ? flights ?? state.flights : const [],
-      effects: _effects.bigGift ? effects ?? state.effects : const [],
+      flights: _effects.gift ? _flightQueue.tasks : const [],
+      effects: effects,
       banners: _effects.screen ? banners ?? state.banners : const [],
-      lucky: _effects.gift ? lucky ?? state.lucky : const [],
+      lucky: nextLucky,
       roomWeekVal: roomWeekVal ?? state.roomWeekVal,
       isVisible: state.isVisible,
+      stopEffectKey: _fullscreenQueue.stopRequestedKey,
+      stopLuckyKey: hasActiveEffect ? _activeLucky : null,
+      canPlayFullscreen: hasActiveEffect && _activeLucky == null,
+      canPlayLucky: _activeLucky != null,
+      jackpots: jackpots ?? state.jackpots,
+      micEffects: Map.unmodifiable(_micEffects),
+      entrance: _entrances.startedAt == null ? null : _entrances.active,
     );
+    if (slots != null) _scheduleSlotExpiry();
+  }
+
+  void _scheduleSlotExpiry() {
+    _slotTimer?.cancel();
+    if (!_timersEnabled) return;
+    final deadlines =
+        _slotQueue.slots
+            .whereType<RoomGiftSlot>()
+            .map((slot) => slot.expiresAt)
+            .toList()
+          ..sort();
+    if (deadlines.isEmpty) return;
+    final delay = deadlines.first.difference(_now());
+    _slotTimer = Timer(delay.isNegative ? Duration.zero : delay, expire);
   }
 
   List<T> _merge<T>(List<T> queue, T value, String Function(T) key, int limit) {
@@ -499,12 +395,8 @@ class RoomGiftEventManager extends StateNotifier<RoomGiftEventState> {
   @override
   void dispose() {
     _timer?.cancel();
+    _slotTimer?.cancel();
     unawaited(_subscription?.cancel());
     super.dispose();
   }
-}
-
-extension<T> on List<T> {
-  List<T> takeLast(int count) =>
-      length > count ? sublist(length - count) : this;
 }

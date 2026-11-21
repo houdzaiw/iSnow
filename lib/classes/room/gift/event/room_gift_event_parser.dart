@@ -3,8 +3,17 @@ import 'dart:convert';
 import '../../../../model/room_socket_message.dart';
 import '../models/room_gift_event_models.dart';
 import '../models/room_gift_models.dart';
+import '../models/room_gift_panel_models.dart';
 
-enum RoomGiftEventKind { gift, publicScreen, finalCombo, stream, banner, lucky }
+enum RoomGiftEventKind {
+  gift,
+  publicScreen,
+  finalCombo,
+  stream,
+  banner,
+  lucky,
+  jackpot,
+}
 
 class RoomGiftEvent {
   const RoomGiftEvent({
@@ -18,6 +27,8 @@ class RoomGiftEvent {
     this.lucky,
     this.roomWeekVal,
     this.comboId = '',
+    this.jackpot,
+    this.giftId,
   });
 
   final RoomGiftEventKind kind;
@@ -28,9 +39,12 @@ class RoomGiftEvent {
   final RoomGiftBanner? banner;
   final RoomLuckyGiftResult? lucky;
   final int? roomWeekVal;
+  final RoomJackpotInfo? jackpot;
+  final int? giftId;
 }
 
 class RoomGiftEventParser {
+  Map<String, dynamic> decodePayload(Object? value) => _decodeMap(value);
   static const events = {
     'roomScreenSendGiftComboEvent',
     'RoomSendGiftPublicScreenEvent',
@@ -76,6 +90,20 @@ class RoomGiftEventParser {
         ? message.msgId!
         : '${message.event}:${jsonEncode(json)}';
     final event = message.event;
+    if (event == 'LuckyGiftJackpotSuperMode' && giftInt(json['giftId']) > 0) {
+      return RoomGiftEvent(
+        kind: RoomGiftEventKind.jackpot,
+        key: key,
+        createdAt: createdAt,
+        roomId: roomId,
+        giftId: giftInt(json['giftId']),
+        jackpot: RoomJackpotInfo.fromJson({
+          ...json,
+          'enabled': true,
+          'mode': json['mode'] ?? 'SUPER',
+        }),
+      );
+    }
     if (event == 'RoomGiftStreamUpdateEvent') {
       if (!json.containsKey('roomWeekVal')) {
         throw const FormatException('Missing roomWeekVal');
@@ -202,7 +230,8 @@ class RoomGiftEventParser {
       roomId: roomId,
       comboId: comboId,
       lucky: RoomLuckyGiftResult(
-        key: comboId.isEmpty ? key : comboId,
+        key: key,
+        comboId: comboId,
         sender: user,
         amount: giftInt(json['amount'] ?? json['awardAmount']),
         multiplier: double.tryParse('${json['multiply']}') ?? 0,

@@ -191,7 +191,7 @@ void main() {
         await expectLater(
           find.byKey(const ValueKey('big-win-room-snapshot')),
           matchesGoldenFile(
-            'goldens/room_public_chat_lanhu_v1/regression/room_big_win_pendant_${width.toInt()}.png',
+            'goldens/room_gift_feedback_v2/regression/room_big_win_pendant_${width.toInt()}.png',
           ),
         );
         await refresh(tester, _activity(4));
@@ -239,7 +239,8 @@ void main() {
     }, channel: 'global:10');
     await tester.pumpAndSettle();
     expect(pendant, findsNothing);
-    expect(find.text('Big Win: 88'), findsOneWidget);
+    expect(find.text('Big Win: 88'), findsNothing); // Account banner owns presentation.
+    expect(container.read(roomToolsControllerProvider('123')).prize['userWinCoins'], 88);
     container.read(roomToolsControllerProvider('123').notifier).dismissPrize();
     await tester.pumpAndSettle();
     expect(find.text('Big Win: 88'), findsNothing);

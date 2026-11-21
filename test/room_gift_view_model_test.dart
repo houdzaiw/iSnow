@@ -161,7 +161,7 @@ RoomGiftCatalog _catalog({int balance = 1000, bool canSendSelf = true}) {
   );
 }
 
-class _FakeGiftRepository implements RoomGiftRepository {
+class _FakeGiftRepository extends RoomGiftRepository {
   _FakeGiftRepository({required this.catalog, this.cachedCatalogValue});
 
   final RoomGiftCatalog catalog;

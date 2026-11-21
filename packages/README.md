@@ -17,11 +17,31 @@ Compatibility changes:
   Decoding a Nady SVGA fixture is covered by the app's tests.
 - PAG retains Nady's Flutter 3.29-compatible Android/iOS runtime. The unused
   OHOS registration is omitted.
+  The local view exposes an idempotent asynchronous `release()` that also waits
+  for an in-flight initialization, and an optional `onError` callback. A loading
+  fallback is not an animation completion. Android acknowledges cached-render
+  release only after the worker has cleared it, matching the iOS handover order.
+  `onCreated` exposes the controller while initialization is pending. The room
+  player retains it across widget removal so its playback lease waits for native
+  destruction. The player disables native autoplay, binds callbacks first, then
+  starts explicitly from `onInit`; Android can otherwise emit its start event
+  before the initialization reply reaches Dart.
 - VAP targets Android API 23+, includes its process lifecycle dependency,
-  stops video and cancels coroutines on disposal, and completes pending Dart
-  playback futures when disposed. Android receives the resolved legacy alpha
+  stops video on disposal, and keeps native destruction acknowledgements alive
+  after the Flutter view detaches. Android `stop` waits for decoder destruction
+  (with a bounded failure reply), disarms automatic loop restart, and defers a
+  lifecycle restart until the previous decoder is gone. The Dart controller
+  coalesces stop calls, settles canceled playback after the native reply, and
+  rejects late starts after stop/disposal. Timeouts report failure; an actual
+  looping decoder's `onStart` cancels its completion deadline while startup
+  remains bounded. Android receives the resolved legacy alpha
   layout (`videoMode` / `direction`); embedded VAP metadata remains authoritative.
-  iOS retains Nady's metadata-based playback path.
+  iOS retains Nady's metadata-based playback and native stop path; Android
+  acceptance does not certify iOS release ordering.
+
+The isolated Android decoder/lifecycle harness lives in
+`tools/room_gift_native_acceptance/`. It imports these actual workspace sources
+and forwards real native calls; it does not log in or send gift orders.
 
 Each directory retains its upstream license. App-level analyzer rules exclude
 vendored sources to avoid restyling third-party code; player compilation is

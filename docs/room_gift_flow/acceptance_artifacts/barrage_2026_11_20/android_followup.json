@@ -1,0 +1,51 @@
+{
+  "reviewDate": "2026-11-20",
+  "stage": "Android read-only acceptance preflight after host storage cleanup",
+  "hostFreeSpace": "approximately 16 GiB",
+  "apk": {
+    "path": "/Users/huili/project/iSnow/build/app/outputs/flutter-apk/app-debug.apk",
+    "package": "com.nady.dev1",
+    "mode": "debug",
+    "abi": "arm64-v8a",
+    "bytes": 224024251,
+    "sha256": "c9d1e1ef47ee606eda6290500ac8b700bfaa3fd16f3fa67413050cd5aa4a199d",
+    "matchesPriorVerifiedBuild": true,
+    "apksignerVerify": "passed; APK Signature Scheme v2",
+    "rebuilt": false
+  },
+  "deviceDiscovery": {
+    "adbDevices": [],
+    "adbMdnsServices": [],
+    "additionalWatchSeconds": 40,
+    "result": "No Android device detected; user asked to reconnect PLL110 and allow USB debugging"
+  },
+  "emulatorFallback": {
+    "reason": "User asked to continue on an emulator; physical Android is not required for initial functional acceptance",
+    "result": "New build installed and launched on Medium_Phone_API_35; awaiting manual login and room entry",
+    "details": "emulator_api35/result.json"
+  },
+  "activeTargetSwitch": {
+    "requestedByUser": "Use already-running Pixel_9 in hei instead of Medium_Phone_API_35",
+    "target": "emulator-5556 / Pixel_9",
+    "details": "pixel9/inspection_result.json",
+    "result": "Older installed program could not fully initialize new fields and widget elements through hot reload; user approved a clean installation/restart on 2026-11-21",
+    "cleanStartEvidence": "../pixel9_clean_2026_11_21/verification.json"
+  },
+  "deviceAcceptance": "Pixel_9 new APK clean startup, retained login, hei entry and gift panel checked; user confirmed classification, reopen/balance and Keep/restore. Same room remains ready in final Keep state; real barrage visuals remain unverified.",
+  "deviceActions": [
+    "Started existing Pixel_9; no iSnow process was running",
+    "Reclaimed system cache on Pixel_9; replacement install still failed for insufficient internal storage",
+    "Stopped Pixel_9 normally without clearing application data",
+    "Started existing Medium_Phone_API_35",
+    "Installed the verified APK with adb install -r; no uninstall or clear-data",
+    "Launched iSnow; observed login page",
+    "Attached Flutter debugger without hot restart"
+  ],
+  "realOrders": 0,
+  "topUps": 0,
+  "nextSteps": [
+    "Inspect connected device, installed package, foreground room and running debug session",
+    "Use hot reload when available; assess room impact before any required installation or restart",
+    "Read-only room and barrage navigation acceptance; do not submit gift, chat, purchase or management actions"
+  ]
+}

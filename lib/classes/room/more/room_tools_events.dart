@@ -132,19 +132,8 @@ extension RoomToolsEvents on RoomToolsController {
           );
           unawaited(refreshBags());
         case 'WorldLuckyBagEvent':
-          if (!roomEvent ||
-              !visible ||
-              !_freshVisual(message) ||
-              !_value.effects.screen ||
-              map.isEmpty) {
-            return;
-          }
-          _value = _value.copy(
-            worldBanners: [
-              ..._value.worldBanners,
-              {...map, '_key': id.isEmpty ? '${_value.revision}' : id},
-            ].take(8).toList(),
-          );
+          // Account-level barrage owns this visual; no second room queue.
+          return;
         case 'RoomLobbyBigWinStatusEvent':
           if (channel != 'global_lobby' || !_value.config.enabled(8, 17)) {
             return;

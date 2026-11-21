@@ -1,0 +1,57 @@
+{
+  "recordedAt": "2026-11-16T22:51:44.267127+08:00",
+  "platformScope": "Android only; iOS deferred by user",
+  "source": "current working tree; uncommitted changes retained",
+  "scope": [
+    "E04 23-tier lucky numbers",
+    "E05 configured lucky bubbles",
+    "E11 entrance track/vehicle start coordination",
+    "E12 mic frame and temporary effects"
+  ],
+  "fullRoomRegression": {
+    "passed": 840,
+    "failed": 0,
+    "command": "flutter test --no-pub --concurrency=2 --reporter expanded test/room_*_test.dart"
+  },
+  "finalFocusedAfterLayeringCleanup": {
+    "passed": 39,
+    "failed": 0,
+    "note": "Overlaps full regression; do not add counts together"
+  },
+  "analysis": "flutter analyze --no-pub: no issues",
+  "diffCheck": "git diff --check HEAD: passed",
+  "assets": {
+    "files": 26,
+    "bytes": 6991829,
+    "checks": [
+      "byte-identical to Nady source",
+      "SHA-256 manifest",
+      "23 text slots",
+      "3 Avatar/Win/Times slot sets"
+    ]
+  },
+  "apk": {
+    "path": "/Users/huili/project/iSnow/build/app/outputs/flutter-apk/app-debug.apk",
+    "mode": "debug",
+    "platform": "android-arm64",
+    "entry": "lib/lib_dev.dart",
+    "bytes": 244829140,
+    "sha256": "0dd2c788b01eab7587eb3cb89209ec2b24c6b314200611ef84500988ff531ed7",
+    "installed": false
+  },
+  "deviceActions": [],
+  "realOrders": 0,
+  "topUps": 0,
+  "notVerified": [
+    "26 new asset variants on physical Android",
+    "live bubble config response and native slot appearance",
+    "live entrance and mic decoration rendering",
+    "real paid combo"
+  ],
+  "remaining": [
+    "E14/E15 account-level barrage and typed click dispatch",
+    "Game Big Win independent full-screen asset supplied later by user",
+    "Other deferred items remain listed in audit 8.10"
+  ],
+  "realComboRule": "Before any future live combo, confirm gift/price/count/recipient UID/mode/number of sends/total expense. Previous budgets are not this authorization."
+}

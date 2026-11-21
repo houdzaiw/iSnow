@@ -146,5 +146,16 @@
   "room_chat_gender_male.png": "https://lanhu-oss-2537-2.lanhuapp.com/FigmaDDSSlicePNG7fe86f94834025c6511c9d6accac54ce.png",
   "room_public_chat_layout_source": "https://lanhuapp.com/web/#/item/project/detailDetach?pid=9ab318f9-4876-4218-a940-73d4c98780c2&image_id=cc03dc0c-a1e5-4dcc-ba8f-6bb2cfd909d2",
   "room_public_chat_backgrounds": "group_44: CSS rgba(0,0,0,0.4), radius 6/16/16/16; text-wrapper_2: CSS rgba(0,0,0,0.55), radius 10; real Flutter decoration, no static bubble image",
-  "room_public_chat_sender_assets": "Sender avatar/frame/levels/noble/VIP/plaque/medals come from typed message data; unowned items hidden, unavailable artwork uses red missing icon; no Lanhu example sender assets"
+  "room_public_chat_sender_assets": "Sender avatar/frame/levels/noble/VIP/plaque/medals come from typed message data; unowned items hidden, unavailable artwork uses red missing icon; no Lanhu example sender assets",
+  "room_gift_button_animation.webp": "/Users/huili/Downloads/房间动效文件/直播间送礼按钮动效/直播间送礼.webp",
+  "room_gift_button_animation.webp_usage": "User-supplied animated gift entry; existing tap action preserved",
+  "room_member_gift_animation.webp": "/Users/huili/Downloads/房间动效文件/直播间-个人卡片-送礼按钮/直播间-个人卡片-送礼按钮.webp",
+  "room_member_gift_animation.webp_usage": "User-supplied animated gift entry; existing tap action preserved",
+  "room_gift_effect_close_source": "Reuses room_mini_close.webp from Nady ic_outline_close.webp; user approved Nady fallback",
+  "room_gift_jackpot_panel_bg.webp": "/Users/huili/nady/assets/images/jackpot_gift_panel_bg.webp",
+  "room_gift_jackpot_panel_bg.webp_usage": {
+    "source": "Nady gift panel background; not a Lanhu export",
+    "usage": "Static Jackpot panel behind real amount and SUPER animation",
+    "sha256": "15ebe89556c3ec9507ec5e0681a2d797e0f7c000daccf0e5f68a2507f2aaacef"
+  }
 }

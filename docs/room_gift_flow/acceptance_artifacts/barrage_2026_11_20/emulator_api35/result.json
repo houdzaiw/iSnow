@@ -1,0 +1,54 @@
+{
+  "reviewDate": "2026-11-20",
+  "scope": "Android emulator startup and read-only acceptance preparation",
+  "pixel9": {
+    "avd": "Pixel_9",
+    "initialInternalFreeSpace": "619 MiB",
+    "afterSystemCacheTrim": "691 MiB",
+    "installResult": "INSTALL_FAILED_INSUFFICIENT_STORAGE",
+    "applicationDataCleared": false,
+    "outcome": "Stopped normally; switched to another existing AVD rather than removing installed apps or account data"
+  },
+  "target": {
+    "avd": "Medium_Phone_API_35",
+    "serial": "emulator-5554",
+    "androidApi": 35,
+    "abi": "arm64-v8a",
+    "internalFreeSpaceAfterInstall": "approximately 3.3 GiB",
+    "renderer": "software GL due to host memory pressure",
+    "performanceAcceptance": false
+  },
+  "deployment": {
+    "package": "com.nady.dev1",
+    "method": "adb install -r",
+    "result": "Success",
+    "installedApkSha256": "c9d1e1ef47ee606eda6290500ac8b700bfaa3fd16f3fa67413050cd5aa4a199d",
+    "matchesVerifiedBuild": true,
+    "uninstalled": false,
+    "clearDataPerformed": false,
+    "flutterDebuggerAttached": true,
+    "hotRestartPerformed": false
+  },
+  "startupObservation": {
+    "screen": "Login / Sign up landing page",
+    "screenshot": "main_launch.png",
+    "processId": 4024,
+    "logSample": "Initial process logcat snapshot only; not a full-session guarantee",
+    "fatalExceptionsInSample": 0,
+    "flutterUnhandledExceptionsInSample": 0,
+    "barrageEventsInSample": 0,
+    "roomEntryPerformed": false
+  },
+  "status": "Awaiting user manual login and entry to hei, display room number 30317291",
+  "notVerified": [
+    "Authenticated account channels and live incoming barrage events",
+    "Room presentation and typed click navigation in this emulator session",
+    "New barrage native-player lifecycle and frame rendering",
+    "Physical Android decoder compatibility, thermal behavior and performance"
+  ],
+  "realOrders": 0,
+  "topUps": 0,
+  "chatSends": 0,
+  "micOrManagementSubmissions": 0,
+  "credentialAccess": "No credentials requested or copied; manual login requested"
+}

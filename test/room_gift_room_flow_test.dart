@@ -191,7 +191,7 @@ void main() {
                 widget is Image &&
                 widget.image is AssetImage &&
                 (widget.image as AssetImage).assetName ==
-                    AppAssets.lanhuRoomBottomGift,
+                    AppAssets.roomGiftButtonAnimation,
           ),
         );
         await tester.pump();
@@ -267,7 +267,7 @@ void main() {
           await expectLater(
             find.byKey(const ValueKey('room-flow')),
             matchesGoldenFile(
-              'goldens/room_public_chat_compact_v2/regression/room_flow_${scenario.name}_reveal.png',
+              'goldens/room_gift_feedback_v2/room_flow_${scenario.name}_reveal.png',
             ),
           );
         }
@@ -320,7 +320,7 @@ void main() {
           await expectLater(
             find.byKey(const ValueKey('room-flow')),
             matchesGoldenFile(
-              'goldens/room_public_chat_compact_v2/regression/room_flow_${scenario.name}_flight.png',
+              'goldens/room_gift_feedback_v2/room_flow_${scenario.name}_flight.png',
             ),
           );
         }

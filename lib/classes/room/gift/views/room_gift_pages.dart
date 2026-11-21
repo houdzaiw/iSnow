@@ -15,11 +15,13 @@ class RoomGiftPages extends HookWidget {
     required this.gifts,
     required this.selectedGiftKey,
     required this.onGiftSelected,
+    this.selectedCount = 1,
   });
 
   final List<RoomGift> gifts;
   final String? selectedGiftKey;
   final ValueChanged<RoomGift> onGiftSelected;
+  final int selectedCount;
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +69,7 @@ class RoomGiftPages extends HookWidget {
                             .take(AppSpacing.roomGiftPageSize)
                             .toList(growable: false),
                         selectedGiftKey: selectedGiftKey,
+                        selectedCount: selectedCount,
                         onGiftSelected: onGiftSelected,
                       ),
                   ],
@@ -111,11 +114,13 @@ class _GiftPage extends StatelessWidget {
     required this.gifts,
     required this.selectedGiftKey,
     required this.onGiftSelected,
+    required this.selectedCount,
   });
 
   final List<RoomGift> gifts;
   final String? selectedGiftKey;
   final ValueChanged<RoomGift> onGiftSelected;
+  final int selectedCount;
 
   @override
   Widget build(BuildContext context) {
@@ -135,6 +140,7 @@ class _GiftPage extends StatelessWidget {
           return _GiftTile(
             gift: gift,
             selected: gift.selectionKey == selectedGiftKey,
+            selectedCount: selectedCount,
             onTap: () => onGiftSelected(gift),
           );
         },
@@ -143,19 +149,42 @@ class _GiftPage extends StatelessWidget {
   }
 }
 
-class _GiftTile extends StatelessWidget {
+class _GiftTile extends HookWidget {
   const _GiftTile({
     required this.gift,
     required this.selected,
     required this.onTap,
+    required this.selectedCount,
   });
 
   final RoomGift gift;
   final bool selected;
   final VoidCallback onTap;
+  final int selectedCount;
 
   @override
   Widget build(BuildContext context) {
+    final pulse = useAnimationController(
+      duration: AppMotion.roomGiftSelectionPulse,
+      initialValue: 1,
+    );
+    final disabled = MediaQuery.disableAnimationsOf(context);
+    useEffect(() {
+      if (selected && !disabled) {
+        pulse.repeat(reverse: true);
+      } else {
+        pulse.stop();
+        pulse.value = 1;
+      }
+      return null;
+    }, [selected, disabled]);
+    useListenable(pulse);
+    final marks = [
+      ...gift.displayMarks,
+      if (gift.animationUrl?.isNotEmpty == true)
+        context.l10n.t('room.gift.hasEffect'),
+      if (gift.giftType == 3) context.l10n.t('room.gift.lucky'),
+    ];
     return Semantics(
       button: true,
       selected: selected,
@@ -165,9 +194,15 @@ class _GiftTile extends StatelessWidget {
         borderRadius: AppRadius.roomGiftItemBorder,
         child: DecoratedBox(
           decoration: BoxDecoration(
+            color: selected
+                ? AppColors.roomGiftSelectedSurface
+                : AppColors.transparent,
             border: Border.all(
               color: selected
-                  ? AppColors.roomGiftSelectedBorder
+                  ? ColorTween(
+                      begin: AppColors.roomGiftSelectedBorderMuted,
+                      end: AppColors.roomGiftSelectedBorder,
+                    ).evaluate(pulse)!
                   : AppColors.transparent,
             ),
             borderRadius: AppRadius.roomGiftItemBorder,
@@ -204,7 +239,7 @@ class _GiftTile extends StatelessWidget {
                           child: Text(
                             gift.isBackpack
                                 ? 'x${gift.amount ?? 0}'
-                                : '${gift.price}',
+                                : gift.formattedPrice,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: AppTextStyles.roomGiftPrice,
@@ -215,11 +250,26 @@ class _GiftTile extends StatelessWidget {
                   ],
                 ),
               ),
-              if (gift.cornerMark.isNotEmpty)
+              if (marks.isNotEmpty)
+                PositionedDirectional(
+                  top: 0,
+                  end: 0,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      for (final mark in marks.take(4))
+                        _GiftCornerMark(mark: mark),
+                    ],
+                  ),
+                ),
+              if (selected)
                 PositionedDirectional(
                   top: 0,
                   start: 0,
-                  child: _GiftCornerMark(mark: gift.cornerMark),
+                  child: Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: _GiftCornerMark(mark: 'x$selectedCount'),
+                  ),
                 ),
             ],
           ),

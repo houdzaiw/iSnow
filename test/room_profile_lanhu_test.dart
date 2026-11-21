@@ -283,7 +283,9 @@ void main() {
         await expectLater(
           find.byKey(const ValueKey('room-profile-golden')),
           matchesGoldenFile(
-            'goldens/room_profile_lanhu_v1/${kind}_${width.toInt()}.png',
+            kind == 'member'
+                ? 'goldens/room_gift_feedback_v2/regression/member_${width.toInt()}.png'
+                : 'goldens/room_profile_lanhu_v1/${kind}_${width.toInt()}.png',
           ),
         );
       });

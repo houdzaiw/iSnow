@@ -359,6 +359,91 @@ void main() {
   }
 
   test(
+    'combo feedback precedes HTTP, debounces and keeps attempted count',
+    () async {
+      sender.dispose();
+      var now = DateTime(2026, 11, 14);
+      var feedback = 0;
+      sender = RoomGiftSendController(
+        repository,
+        '123',
+        now: () => now,
+        feedback: () async {
+          feedback++;
+        },
+      );
+      await sender.send(
+        request: request(),
+        gift: gift,
+        targetCount: 1,
+        catalog: catalog,
+      );
+      repository.pending = Completer();
+      final first = sender.continueCombo();
+      expect(sender.snapshot.tapCount, 2);
+      expect(feedback, 1);
+      expect(sender.snapshot.isSending, isTrue);
+      expect(await sender.continueCombo(), isFalse);
+      repository.pending!.completeError(StateError('send failed'));
+      expect(await first, isFalse);
+      expect(sender.snapshot.tapCount, 2);
+      repository.pending = null;
+      now = now.add(const Duration(milliseconds: 199));
+      expect(await sender.continueCombo(), isFalse);
+      expect(feedback, 1);
+      now = now.add(const Duration(milliseconds: 1));
+      expect(await sender.continueCombo(), isFalse);
+      expect(sender.snapshot.canContinue, isFalse);
+      expect(sender.snapshot.tapCount, 2);
+      expect(feedback, 1);
+      expect(repository.requests, hasLength(2));
+    },
+  );
+
+  test(
+    'wall-clock expiry rejects stale combo even before a timer ticks',
+    () async {
+      sender.dispose();
+      var now = DateTime(2026, 11, 14);
+      sender = RoomGiftSendController(
+        repository,
+        '123',
+        now: () => now,
+        feedback: () async => throw StateError('no haptic hardware'),
+      );
+      await sender.send(
+        request: request(),
+        gift: gift,
+        targetCount: 1,
+        catalog: catalog,
+      );
+      expect(await sender.continueCombo(), isTrue);
+      now = now.add(const Duration(seconds: 6));
+      expect(await sender.continueCombo(), isFalse);
+      expect(sender.snapshot.comboId, isEmpty);
+      expect(sender.snapshot.tapCount, 0);
+      expect(repository.requests, hasLength(2));
+    },
+  );
+
+  test('a delayed socket echo does not renew the user tap deadline', () async {
+    sender.dispose();
+    var now = DateTime(2026, 11, 14);
+    sender = RoomGiftSendController(repository, '123', now: () => now);
+    await sender.send(
+      request: request(),
+      gift: gift,
+      targetCount: 1,
+      catalog: catalog,
+    );
+    now = now.add(const Duration(seconds: 4));
+    sender.acknowledge(echo(), now);
+    now = now.add(const Duration(seconds: 2));
+    expect(await sender.continueCombo(), isFalse);
+    expect(repository.requests, hasLength(1));
+  });
+
+  test(
     'selected multi mode sends type 6; invalid UIDs cannot be injected',
     () async {
       final vm = RoomGiftViewModel(

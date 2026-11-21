@@ -1,10 +1,213 @@
 {
-  "source": "nady/assets/animations",
+  "source": "Nady assets/animations and assets/images",
   "purpose": "Room gift effects approved by room_gift_flow_v1.0.md",
   "assets": [
-    {"file": "combo_button_animation.pag", "usage": "Server-confirmed combo button background"},
-    {"file": "jackpot_full_screen_anim.mp4", "usage": "Jackpot full-screen VAP"},
-    {"file": "luck_win_small.mp4", "usage": "Lucky result VAP background"}
+    {
+      "file": "combo_button_animation.pag",
+      "usage": "Server-confirmed combo button background"
+    },
+    {
+      "file": "jackpot_full_screen_anim.mp4",
+      "usage": "Jackpot full-screen VAP"
+    },
+    {
+      "file": "big_rocket_fly_lv1.mp4",
+      "source": "/Users/huili/nady/assets/animations/big_rocket_fly_lv1.mp4",
+      "usage": "RoomBigRocketPrizeEvent level 1",
+      "sha256": "375963bf81693acc88c57a7a40b39c80faaf15384ea4da269f377099a78c7c68"
+    },
+    {
+      "file": "big_rocket_fly_lv2.mp4",
+      "source": "/Users/huili/nady/assets/animations/big_rocket_fly_lv2.mp4",
+      "usage": "RoomBigRocketPrizeEvent level 2",
+      "sha256": "c4a190f06cc1d4a68bccd14ea9c463c796e502953a9aea049a0c19a0b0eb9b3a"
+    },
+    {
+      "file": "big_rocket_fly_lv3.mp4",
+      "source": "/Users/huili/nady/assets/animations/big_rocket_fly_lv3.mp4",
+      "usage": "RoomBigRocketPrizeEvent level 3",
+      "sha256": "3f73ff55c627afe6ff82dcbd82f908053c8edf1cb440b78975fb5467dcee1982"
+    },
+    {
+      "file": "big_rocket_fly_lv4.mp4",
+      "source": "/Users/huili/nady/assets/animations/big_rocket_fly_lv4.mp4",
+      "usage": "RoomBigRocketPrizeEvent level 4",
+      "sha256": "d223f11091fa705729596f1146d6a7648403cb56186c517e5078e6ca1a0b0104"
+    },
+    {
+      "file": "big_rocket_fly_lv5.mp4",
+      "source": "/Users/huili/nady/assets/animations/big_rocket_fly_lv5.mp4",
+      "usage": "RoomBigRocketPrizeEvent level 5",
+      "sha256": "b442a98158f35dcc28e19632c0fdedcaf642bfad9287e5c31a73739a1d6cdff9"
+    },
+    {
+      "file": "big_rocket_fly_lv6.mp4",
+      "source": "/Users/huili/nady/assets/animations/big_rocket_fly_lv6.mp4",
+      "usage": "RoomBigRocketPrizeEvent level 6",
+      "sha256": "89f0271f8bdc47459304d0a0c376de88b230dcee07ea7ad539f5d0785e4ece83"
+    },
+    {
+      "file": "jackpot_gift_panel_anim.mp4",
+      "source": "/Users/huili/nady/assets/animations/jackpot_gift_panel_anim.mp4",
+      "usage": "SUPER gift panel background loop",
+      "sha256": "4ab807828ba58a75a2c234564c59e05291c2cf9710b667b351948bcbf9de9bc0"
+    },
+    {
+      "file": "luck_num10.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_num10.mp4",
+      "usage": "23-tier cumulative lucky number VAP",
+      "sha256": "5af63cb6fe89ada603a3bcf5df3f2a2eb96bf6a6de8842ae6cfa11f0dd583b1c"
+    },
+    {
+      "file": "luck_num20.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_num20.mp4",
+      "usage": "23-tier cumulative lucky number VAP",
+      "sha256": "4ae3755e65f176f4f30aa0aeea347528f8291a6800508bf9d391a1701735787b"
+    },
+    {
+      "file": "luck_num30.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_num30.mp4",
+      "usage": "23-tier cumulative lucky number VAP",
+      "sha256": "950b63f5beca6f8fd74f68c71ce44b7b45e03530eb134b0f5d1801a6f832ff56"
+    },
+    {
+      "file": "luck_num50.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_num50.mp4",
+      "usage": "23-tier cumulative lucky number VAP",
+      "sha256": "4c0b600e5607efd408a0377d0da999317ce105e2ae67ef1a7aa1f294896f142d"
+    },
+    {
+      "file": "luck_num66.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_num66.mp4",
+      "usage": "23-tier cumulative lucky number VAP",
+      "sha256": "63cdf1a844d87eb1f038a13da08886aa4d8b4430e5b3037237f4d3a7c57773cb"
+    },
+    {
+      "file": "luck_num88.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_num88.mp4",
+      "usage": "23-tier cumulative lucky number VAP",
+      "sha256": "8a3590a78f40bb255b1eebc59a917b8868fe0ae0dd548f3be33967337ee75db2"
+    },
+    {
+      "file": "luck_num100.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_num100.mp4",
+      "usage": "23-tier cumulative lucky number VAP",
+      "sha256": "b930deac7aab4a232e19ed4a35fb447028e0ac7e9c6f3978fdc3436a1266be85"
+    },
+    {
+      "file": "luck_num200.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_num200.mp4",
+      "usage": "23-tier cumulative lucky number VAP",
+      "sha256": "792423950ade96079974f30a121877c98650f137d6440ab83b30268ab460ab69"
+    },
+    {
+      "file": "luck_num300.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_num300.mp4",
+      "usage": "23-tier cumulative lucky number VAP",
+      "sha256": "253edbba816343826bd55186210c661122c060ed33bf0bc7b7cc2334586a2b31"
+    },
+    {
+      "file": "luck_num400.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_num400.mp4",
+      "usage": "23-tier cumulative lucky number VAP",
+      "sha256": "8dc65307b7d8963acef5bc3ba11b6b2f6018440cf1aee7edb4e45153343b2861"
+    },
+    {
+      "file": "luck_num500.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_num500.mp4",
+      "usage": "23-tier cumulative lucky number VAP",
+      "sha256": "1404abf52eb2ba6950fd41cb666d468de4917c0b14d5a0f9442370712b73bc0d"
+    },
+    {
+      "file": "luck_num1000.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_num1000.mp4",
+      "usage": "23-tier cumulative lucky number VAP",
+      "sha256": "22b5f16a7cc4966be66f9de9f28825ebb88d8e3aa17b56b6bb5727299ed1f7de"
+    },
+    {
+      "file": "luck_num2000.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_num2000.mp4",
+      "usage": "23-tier cumulative lucky number VAP",
+      "sha256": "04a85a2bfc0742bf56c9e65c0f60c8a584ed4d27f8e05028e0fd136674884403"
+    },
+    {
+      "file": "luck_num5000.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_num5000.mp4",
+      "usage": "23-tier cumulative lucky number VAP",
+      "sha256": "f2d958d7d97c90781b99b08ec841b3af6c8bbf33b491f2b87cbfed7990d08d83"
+    },
+    {
+      "file": "luck_num5555.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_num5555.mp4",
+      "usage": "23-tier cumulative lucky number VAP",
+      "sha256": "e8d94aba21c9e2535a6f377968c73f4d535626a155b94e90a897141a41796532"
+    },
+    {
+      "file": "luck_num6000.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_num6000.mp4",
+      "usage": "23-tier cumulative lucky number VAP",
+      "sha256": "89bf35eeb5afc5f1e39aa477decff3c1dc0aa4a969ee4ed364281a9b4457ec6c"
+    },
+    {
+      "file": "luck_num6666.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_num6666.mp4",
+      "usage": "23-tier cumulative lucky number VAP",
+      "sha256": "ae9833c324ad8379e5340e5241c42d4c8762dca7a69a231392b92b594d2ba49b"
+    },
+    {
+      "file": "luck_num7000.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_num7000.mp4",
+      "usage": "23-tier cumulative lucky number VAP",
+      "sha256": "71e482d6b3680e4dc9433323235802774a9a04a4f3fc902ad9c71ea8efe4b026"
+    },
+    {
+      "file": "luck_num7777.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_num7777.mp4",
+      "usage": "23-tier cumulative lucky number VAP",
+      "sha256": "6d1aea89c237800aa47be3d89633273af34c6fff8449be4078d8325dc73f53a9"
+    },
+    {
+      "file": "luck_num8000.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_num8000.mp4",
+      "usage": "23-tier cumulative lucky number VAP",
+      "sha256": "272cc5a5645dd60461d12df4950ed5956b40eacf2dc0eddd28e99ea513724341"
+    },
+    {
+      "file": "luck_num8888.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_num8888.mp4",
+      "usage": "23-tier cumulative lucky number VAP",
+      "sha256": "3d9b21dc4e534d9cf6c2862e9ee54e5a2325ff6910c33730952c9749a8f43b03"
+    },
+    {
+      "file": "luck_num9000.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_num9000.mp4",
+      "usage": "23-tier cumulative lucky number VAP",
+      "sha256": "5921f65bc808d22775568f8cd016725662302691c6ed0499452ee06b5f0b67f9"
+    },
+    {
+      "file": "luck_num10000.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_num10000.mp4",
+      "usage": "23-tier cumulative lucky number VAP",
+      "sha256": "b0931b1d68b9ff3296b152912492f1395fa53e2dc6ac8b1adaaefa30676bdb36"
+    },
+    {
+      "file": "luck_win_small.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_win_small.mp4",
+      "usage": "Config-selected lucky bubble VAP",
+      "sha256": "bf07f475f7d21c38de38ac09257d8a3c3e9f4b3e8f96406d200b46d0791d1b1b"
+    },
+    {
+      "file": "luck_win_medium.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_win_medium.mp4",
+      "usage": "Config-selected lucky bubble VAP",
+      "sha256": "f9c6ed38c470cb8aadbf6d10a1945bbc627731b4ca899029f5dce5b55e9add0e"
+    },
+    {
+      "file": "luck_win_big.mp4",
+      "source": "/Users/huili/nady/assets/animations/luck_win_big.mp4",
+      "usage": "Config-selected lucky bubble VAP",
+      "sha256": "90dc43cce823e9d5fd675f848c827f33086f9c1ffad38392580a8eb466b7ccdc"
+    }
   ],
   "icons": "Use assets/lanhu/room assets; unavailable icons retain the red missing placeholder"
 }

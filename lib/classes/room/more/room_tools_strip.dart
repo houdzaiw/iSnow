@@ -5,15 +5,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../theme/app_theme.dart';
-import 'room_big_win_page.dart';
-import 'room_entry_flow.dart';
 import 'room_lobby_navigation.dart';
 import 'room_lucky_box_page.dart';
 import 'room_pk_page.dart';
 import 'room_tools_controller.dart';
 import 'room_tools_models.dart';
 import 'room_tools_widgets.dart';
-import 'room_world_banner.dart';
 
 class RoomToolsStrip extends HookConsumerWidget {
   const RoomToolsStrip({super.key, required this.roomId});
@@ -22,7 +19,6 @@ class RoomToolsStrip extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(roomToolsControllerProvider(roomId));
     final vm = ref.read(roomToolsControllerProvider(roomId).notifier);
-    final banner = state.worldBanners.firstOrNull;
     final award = state.lobbyAwards.firstOrNull;
     useEffect(() {
       if (award == null) return null;
@@ -34,13 +30,6 @@ class RoomToolsStrip extends HookConsumerWidget {
       );
       return timer.cancel;
     }, [award?['_key'], award?['_duration']]);
-    useEffect(() {
-      if (banner == null) return null;
-      final timer = Timer(const Duration(seconds: 5), () {
-        if (vm.mounted) vm.dismissWorld('${banner['_key']}');
-      });
-      return timer.cancel;
-    }, [banner?['_key']]);
     if (!state.sessionActive) return const SizedBox.shrink();
     final ready = state.bags
         .where((bag) => bag.remaining(DateTime.now()) == 0)
@@ -74,29 +63,6 @@ class RoomToolsStrip extends HookConsumerWidget {
                     openRoomLobby(context, ref, roomId);
                   },
                 ),
-              ),
-            if (banner != null)
-              RoomWorldBanner(
-                banner: banner,
-                onTap: () =>
-                    enterSharedRoom(context, ref, '${banner['roomId'] ?? ''}'),
-              ),
-            if (state.prize.isNotEmpty)
-              ListTile(
-                dense: true,
-                title: Text(
-                  '${toolText(context, 'Big Win', '大奖')}: ${state.prize['userWinCoins'] ?? 0}',
-                  style: AppTextStyles.roomGiftStatus,
-                ),
-                trailing: TextButton(
-                  onPressed: vm.dismissPrize,
-                  child: Image.asset(
-                    AppAssets.roomMiniClose,
-                    width: AppSpacing.iconSizeSm,
-                  ),
-                ),
-                onTap: () =>
-                    pushRoomTool(context, RoomBigWinPage(roomId: roomId)),
               ),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,

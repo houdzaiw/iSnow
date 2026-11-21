@@ -1,0 +1,45 @@
+package com.isnow.qa.room_gift_native_acceptance
+
+import android.util.Log
+import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodChannel
+
+class MainActivity : FlutterActivity() {
+    private var returnAfterStop = false
+    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+        super.configureFlutterEngine(flutterEngine)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "isnow.native.qa/lifecycle")
+            .setMethodCallHandler { call, result ->
+                if (call.method == "backgroundAndReturn") {
+                    returnAfterStop = true
+                    val moved = moveTaskToBack(true)
+                    Log.i("NativeLifecycleQA", "moveTaskToBack=$moved")
+                    result.success(null)
+                } else {
+                    result.notImplemented()
+                }
+            }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.i("NativeLifecycleQA", "onPause")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.i("NativeLifecycleQA", "onStop")
+        if (returnAfterStop) {
+            returnAfterStop = false
+            // Android restricts background activity launches. The isolated host
+            // driver brings this task back after observing the genuine stop.
+            Log.i("NativeLifecycleQA", "returnAfterStop")
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.i("NativeLifecycleQA", "onResume")
+    }
+}

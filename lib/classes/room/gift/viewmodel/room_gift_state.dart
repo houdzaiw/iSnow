@@ -9,6 +9,7 @@ enum RoomGiftIssue {
   notEnoughGift,
   requestFailed,
   roomUnavailable,
+  invalidCount,
 }
 
 class RoomGiftState {

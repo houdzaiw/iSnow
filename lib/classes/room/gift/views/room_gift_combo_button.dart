@@ -12,12 +12,14 @@ class RoomGiftComboButton extends StatelessWidget {
     required this.onTap,
     this.size = AppSpacing.giftComboButtonSize,
     this.remainingMilliseconds = 0,
+    this.tapCount = 0,
   });
 
   final bool enabled, sending;
   final VoidCallback onTap;
   final double size;
   final int remainingMilliseconds;
+  final int tapCount;
 
   @override
   Widget build(BuildContext context) => SizedBox(
@@ -66,6 +68,32 @@ class RoomGiftComboButton extends StatelessWidget {
             onTap: enabled ? onTap : null,
             child: Stack(
               children: [
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: Padding(
+                      padding: EdgeInsets.all(AppSpacing.giftComboRingInset.r),
+                      child: CircularProgressIndicator(
+                        key: const ValueKey('room-gift-combo-ring'),
+                        value: (remainingMilliseconds / 5000).clamp(0, 1),
+                        color: AppColors.textInverse,
+                        backgroundColor: AppColors.musicSliderInactive,
+                        strokeWidth: AppSpacing.giftComboRingWidth.r,
+                      ),
+                    ),
+                  ),
+                ),
+                if (tapCount > 0)
+                  Positioned(
+                    bottom: size.r * AppSpacing.giftComboTapBottomRatio,
+                    left: 0,
+                    right: 0,
+                    child: Text(
+                      'x$tapCount',
+                      key: const ValueKey('room-gift-combo-taps'),
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.giftComboCountdown,
+                    ),
+                  ),
                 if (sending)
                   Center(
                     child: SizedBox(

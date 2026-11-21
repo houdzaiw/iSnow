@@ -75,7 +75,14 @@ void main() {
       repository.pending = Completer();
       await tester.tap(button);
       await tester.pump();
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is CircularProgressIndicator && widget.value == null,
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('x2'), findsOneWidget);
       expect(repository.requests, hasLength(2));
       expect(repository.requests.last.comboId, 'server-combo');
       expect(repository.requests.last.comboCount, 1);
@@ -118,7 +125,13 @@ void main() {
       );
       expect(find.byType(RoomGiftComboButton), findsOneWidget);
       expect(manager.snapshot.publicMessages, hasLength(1));
-      expect(find.text('x1'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(RoomGiftSlotLayer),
+          matching: find.text('x1'),
+        ),
+        findsOneWidget,
+      );
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
     },

@@ -1,0 +1,12 @@
+{
+  "initialRun": "2026-11-16T02-09-03.651825Z",
+  "result": "Interrupted after a first-frame stall; not a player pass/fail",
+  "observed": "setUpAll completed, first production scene never reached a rendered frame; phone mirror remained on Flutter launch splash",
+  "cause": "Test harness converted SurfaceView to ImageView before first Flutter scene",
+  "change": "Convert only at screenshot capture after mounting; use the Flutter SDK per-test automatic reversion; bound each native case to 60 seconds and screenshot request to 15 seconds",
+  "productionAppChanged": false,
+  "isolatedSvgaRetest": "passed; visible frame and completion confirmed after the harness change",
+  "fullNativeRetest": "10/10 passed on the same PLL110 physical device",
+  "harnessSha256": "19e0f156bea283aed14d1e46095f3e7d65c0ffc9e0141c741da2162386aa09fc",
+  "fullNativeRun": "2026-11-16T02-24-10.996236Z"
+}

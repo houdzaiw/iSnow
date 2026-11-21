@@ -16,6 +16,7 @@ class RoomGiftCatalogView extends HookWidget {
     required this.selectedGiftKey,
     required this.onTabSelected,
     required this.onGiftSelected,
+    this.selectedCount = 1,
   });
 
   final List<RoomGiftTab> tabs;
@@ -23,6 +24,7 @@ class RoomGiftCatalogView extends HookWidget {
   final String? selectedGiftKey;
   final ValueChanged<int> onTabSelected;
   final ValueChanged<RoomGift> onGiftSelected;
+  final int selectedCount;
 
   @override
   Widget build(BuildContext context) {
@@ -69,6 +71,7 @@ class RoomGiftCatalogView extends HookWidget {
                   key: ValueKey<int>(tab.id),
                   gifts: tab.gifts,
                   selectedGiftKey: selectedGiftKey,
+                  selectedCount: selectedCount,
                   onGiftSelected: onGiftSelected,
                 ),
             ],

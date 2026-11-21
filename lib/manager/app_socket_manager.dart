@@ -10,6 +10,8 @@ import 'api_error_message.dart';
 import 'http_api.dart';
 import 'http_dio_manager.dart';
 
+part 'app_socket_account.dart';
+
 enum AppSocketStatus {
   idle,
   connecting,
@@ -190,11 +192,33 @@ class AppSocketManager extends ChangeNotifier {
   String? _musicControlChannel;
   bool _intentionalDisconnect = false;
   AppSocketState _state = const AppSocketState();
+  int? _accountUid, _desiredAccountUid;
+  int _accountRevision = 0;
+  final Set<String> _accountChannels = {};
+  Future<void>? _connectionTask;
+  Future<void> _accountOperation = Future.value();
 
   AppSocketState get state => _state;
   Stream<RoomSocketMessage> get messages => _messageController.stream;
 
   Future<void> connect({required String url}) async {
+    final pending = _connectionTask;
+    if (pending != null) {
+      await pending;
+      if (_socketUrl == url && _client?.state == centrifuge.State.connected) {
+        return;
+      }
+    }
+    final task = _connect(url: url);
+    _connectionTask = task;
+    try {
+      await task;
+    } finally {
+      if (identical(_connectionTask, task)) _connectionTask = null;
+    }
+  }
+
+  Future<void> _connect({required String url}) async {
     final client = _client;
     if (client != null && _socketUrl == url) {
       if (client.state == centrifuge.State.connected) {
@@ -223,6 +247,7 @@ class AppSocketManager extends ChangeNotifier {
       await newClient.connect().timeout(const Duration(seconds: 12));
       await newClient.ready().timeout(const Duration(seconds: 12));
       _syncConnectedState();
+      await _restoreBarrageChannels(_accountRevision);
     } catch (error) {
       _setState(
         _state.copyWith(
@@ -318,12 +343,13 @@ class AppSocketManager extends ChangeNotifier {
       await releaseRoomGame(consumer);
     }
     for (final channel in _toolChannels.toList()) {
+      if (_accountChannels.contains(channel)) continue;
       await _cleanup('tools unsubscribe', () => _unsubscribeChannel(channel));
     }
     _toolChannels.clear();
     final musicChannel = _musicControlChannel;
     _musicControlChannel = null;
-    if (musicChannel != null) {
+    if (musicChannel != null && !_accountChannels.contains(musicChannel)) {
       await _cleanup(
         'music control unsubscribe',
         () => _unsubscribeChannel(musicChannel),
@@ -333,7 +359,12 @@ class AppSocketManager extends ChangeNotifier {
       'room unsubscribe',
       () => _unsubscribeChannel('room:$roomId'),
     );
-    await _cleanup('broadcast unsubscribe', () => _unsubscribeChannel('room'));
+    if (!_accountChannels.contains('room')) {
+      await _cleanup(
+        'broadcast unsubscribe',
+        () => _unsubscribeChannel('room'),
+      );
+    }
     _setState(
       _state.copyWith(
         status: _client?.state == centrifuge.State.connected
@@ -342,14 +373,23 @@ class AppSocketManager extends ChangeNotifier {
         clearRoomId: true,
         roomChannelSubscribed: false,
         broadcastChannelSubscribed: false,
-        subscribedChannels: const [],
+        subscribedChannels: _accountChannels.toList(growable: false),
         errorMessage: null,
         isTerminal: false,
       ),
     );
+    _syncConnectedState();
   }
 
   Future<void> disconnect() async {
+    if (_accountUid != null && _accountUid == _desiredAccountUid) {
+      // Room teardown releases its channels, while the logged-in account keeps
+      // Nady's global/broadcast transport. No second Socket client is created.
+      final room = _state.roomId ?? _joiningRoomId;
+      if (room != null) await leaveRoom(room);
+      _syncConnectedState();
+      return;
+    }
     _roomJoinGeneration += 1;
     _joiningRoomId = null;
     _intentionalDisconnect = true;

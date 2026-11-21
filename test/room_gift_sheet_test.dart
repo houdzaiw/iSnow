@@ -8,6 +8,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:project/classes/room/gift/models/room_gift_models.dart';
+import 'package:project/classes/room/gift/event/room_gift_event_manager.dart';
+import 'package:project/classes/room/gift/event/room_gift_event_provider.dart';
 import 'package:project/classes/room/gift/room_gift_repository.dart';
 import 'package:project/classes/room/gift/views/room_gift_sheet.dart';
 import 'package:project/classes/room/gift/viewmodel/room_gift_view_model.dart';
@@ -169,6 +171,133 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Select menu sends only the chosen user instead of all room', (
+    tester,
+  ) async {
+    final repository = _SheetGiftRepository();
+    await _openPanel(tester, repository: repository);
+
+    await tester.tap(find.byType(PopupMenuButton<RoomGiftTargetMode>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Select'));
+    await tester.pumpAndSettle();
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(RoomGiftSheet)),
+    );
+    final selected = container.read(roomGiftViewModelProvider('room-1'));
+    expect(selected.targetMode, RoomGiftTargetMode.selected);
+    expect(selected.selectedRecipientUids, {10});
+    expect(selected.totalCoinCost, 20);
+    expect(repository.lastRequest, isNull);
+
+    await tester.tap(find.text('Send'));
+    await tester.pumpAndSettle();
+    expect(repository.lastRequest?.sendType, RoomGiftSendType.single);
+    expect(repository.lastRequest?.targetUids, [10]);
+    expect(repository.lastRequest?.giftCount, 1);
+    expect(find.byType(RoomGiftSheet), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('an empty mic list exposes no unavailable single-user choice', (
+    tester,
+  ) async {
+    final repository = _SheetGiftRepository();
+    await _openPanel(
+      tester,
+      repository: repository,
+      recipients: const [],
+      onlineCount: 1,
+    );
+
+    expect(find.text('All Room'), findsOneWidget);
+    await tester.tap(find.byType(PopupMenuButton<RoomGiftTargetMode>));
+    await tester.pumpAndSettle();
+    expect(find.text('Select'), findsNothing);
+    expect(find.text('All On Mic'), findsNothing);
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(find.byType(RoomGiftSheet), findsOneWidget);
+    expect(repository.lastRequest, isNull);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'an off-mic user preset remains the only recipient when sending',
+    (tester) async {
+      final repository = _SheetGiftRepository();
+      await _openPanel(
+        tester,
+        repository: repository,
+        recipients: const [],
+        targetUid: 20,
+        audience: const RoomGiftAudience(
+          isInRoom: true,
+          onlineCount: 2,
+          recipients: [],
+        ),
+      );
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(RoomGiftSheet)),
+      );
+      final selected = container.read(roomGiftViewModelProvider('room-1'));
+      expect(selected.targetMode, RoomGiftTargetMode.selected);
+      expect(selected.selectedRecipientUids, {20});
+      expect(selected.targetCount, 1);
+      expect(repository.lastRequest, isNull);
+
+      await tester.tap(find.text('Send'));
+      await tester.pumpAndSettle();
+      expect(repository.lastRequest?.sendType, RoomGiftSendType.single);
+      expect(repository.lastRequest?.targetUids, [20]);
+      expect(repository.lastRequest?.giftCount, 1);
+      expect(repository.lastRequest?.price, 20);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'dismiss and reopen reset recipient and quantity without sending',
+    (tester) async {
+      final repository = _SheetGiftRepository()..useCache = true;
+      await _openPanel(tester, repository: repository);
+      await tester.tap(find.byType(PopupMenuButton<RoomGiftTargetMode>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Select'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('room-gift-count-18')));
+      await tester.pumpAndSettle();
+
+      final initialContainer = ProviderScope.containerOf(
+        tester.element(find.byType(RoomGiftSheet)),
+      );
+      final beforeClose = initialContainer.read(
+        roomGiftViewModelProvider('room-1'),
+      );
+      expect(beforeClose.selectedRecipientUids, {10});
+      expect(beforeClose.giftCount, 18);
+
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
+      expect(find.byType(RoomGiftSheet), findsNothing);
+      await tester.tap(find.text('Open gift panel'));
+      await tester.pumpAndSettle();
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(RoomGiftSheet)),
+      );
+      final reopened = container.read(roomGiftViewModelProvider('room-1'));
+      expect(reopened.targetMode, RoomGiftTargetMode.allMic);
+      expect(reopened.selectedRecipientUids, {10, 20});
+      expect(reopened.giftCount, 1);
+      expect(repository.catalogLoads, 0);
+      expect(repository.balanceReads, 2);
+      expect(repository.lastRequest, isNull);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('recharge artwork uses the existing wallet navigation result', (
     tester,
   ) async {
@@ -286,6 +415,37 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets(
+    'custom quantity rejects zero, overflow and text without sending',
+    (tester) async {
+      final repository = _SheetGiftRepository();
+      await _openPanel(tester, repository: repository);
+      await tester.tap(find.byType(PopupMenuButton<int>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Other'));
+      await tester.pumpAndSettle();
+      for (final value in ['0', '10000', '-1', 'abc']) {
+        await tester.enterText(find.byType(TextField), value);
+        await tester.tap(find.text('Confirm'));
+        await tester.pumpAndSettle();
+        expect(find.byType(AlertDialog), findsOneWidget);
+        expect(repository.lastRequest, isNull);
+      }
+      await tester.enterText(find.byType(TextField), '9999');
+      await tester.tap(find.text('Confirm'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AlertDialog), findsNothing);
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(RoomGiftSheet)),
+      );
+      expect(
+        container.read(roomGiftViewModelProvider('room-1')).giftCount,
+        9999,
+      );
+      expect(repository.lastRequest, isNull);
+    },
+  );
+
   for (final size in [
     const Size(320, 568),
     const Size(375, 812),
@@ -306,6 +466,9 @@ void main() {
                 (index) => RoomGift(
                   id: index + 1,
                   name: 'Gift name that is much longer than the tile',
+                  // Preserve the historical layout fixture's server counts;
+                  // default-count changes have separate model assertions.
+                  defaultGiftNumConfig: '1,8,18,888',
                   icon: '',
                   cornerMark: index == 0 ? 'NEW' : '',
                   price: 19999,
@@ -339,7 +502,7 @@ void main() {
           await expectLater(
             find.byKey(const ValueKey('gift-test-screen')),
             matchesGoldenFile(
-              'goldens/room_gift_panel_${size.width.toInt()}.png',
+              'goldens/room_gift_panel_v3/room_gift_panel_${size.width.toInt()}.png',
             ),
           );
         }
@@ -357,8 +520,12 @@ Future<void> _openPanel(
   RoomGiftAudience? audience,
   int onlineCount = 2,
   List<RoomGiftRecipient>? recipients,
+  int? targetUid,
 }) async {
   final giftRepository = repository ?? _SheetGiftRepository();
+  tester.platformDispatcher.accessibilityFeaturesTestValue =
+      FakeAccessibilityFeatures(disableAnimations: true);
+  addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   tester.view.padding = FakeViewPadding(bottom: bottomPadding);
@@ -370,6 +537,9 @@ Future<void> _openPanel(
     ProviderScope(
       overrides: [
         roomGiftRepositoryProvider.overrideWithValue(giftRepository),
+        roomGiftEventManagerProvider('room-1').overrideWith(
+          (ref) => RoomGiftEventManager(roomId: 'room-1', startTimer: false),
+        ),
         if (audience != null)
           roomGiftSendControllerProvider('room-1').overrideWith(
             (ref) =>
@@ -396,6 +566,7 @@ Future<void> _openPanel(
             onResult: onResult,
             onlineCount: onlineCount,
             recipients: recipients,
+            targetUid: targetUid,
           ),
         ),
       ),
@@ -412,11 +583,13 @@ class _GiftSheetHarness extends StatelessWidget {
     this.onResult,
     this.onlineCount = 2,
     this.recipients,
+    this.targetUid,
   });
 
   final ValueChanged<RoomGiftSheetResult?>? onResult;
   final int onlineCount;
   final List<RoomGiftRecipient>? recipients;
+  final int? targetUid;
 
   @override
   Widget build(BuildContext context) {
@@ -430,6 +603,7 @@ class _GiftSheetHarness extends StatelessWidget {
               roomId: 'room-1',
               onlineCount: onlineCount,
               currentUid: 10,
+              targetUid: targetUid,
               recipients:
                   recipients ??
                   const [

@@ -97,11 +97,24 @@ class AppSpacing {
   static const double giftComboButtonSize = 100;
   static const double giftComboLabelTopRatio = 0.22;
   static const double giftComboCountdownBottomRatio = 0.43;
+  static const double giftComboTapBottomRatio = 0.23;
+  static const double giftComboRingInset = 6;
+  static const double giftComboRingWidth = 3;
+  static const double giftEffectErrorWidth = 240;
   static const double giftBannerHeight = 52;
   static const double giftBannerTop = 64;
   static const double giftLuckyBottom = 190;
+  static const double roomEntranceWidth = 251;
+  static const double roomEntranceHeight = 56;
+  static const double roomEntranceAvatar = 48;
   static const double giftOverlayBottom = 52;
   static const double giftPanelSummaryHeight = 20;
+  static const double giftPreviewMaxWidth = 180;
+  static const double giftPreviewMaxHeight = 230;
+  static const double giftPreviewMinHeight = 120;
+  static const double giftPanelExtrasHeight = 80;
+  static const double giftPanelJackpotWidth = 160;
+  static const double giftPanelSlideFraction = 0.2;
   static const double giftSlotAreaMaxRatio = 0.6;
   const AppSpacing._();
 

@@ -1,0 +1,28 @@
+{
+  "fullRoomRegression": {
+    "passed": 811,
+    "command": "flutter test --no-pub --concurrency=2 --reporter expanded test/room_*_test.dart",
+    "note": "Completed before the final SUPER deferred-ownership guard; related cases rerun afterwards below."
+  },
+  "finalOwnershipAndPanelRegression": {
+    "passed": 28,
+    "files": [
+      "test/room_gift_panel_view_model_test.dart",
+      "test/room_gift_panel_extras_test.dart",
+      "test/room_gift_sheet_test.dart"
+    ]
+  },
+  "nativePlayerChecks": {
+    "passed": 10,
+    "device": "emulator-5554",
+    "physicalDevice": false
+  },
+  "staticAnalysis": "No issues found",
+  "diffCheck": "git diff --check HEAD passed",
+  "oldTrackedGoldensModified": false,
+  "newGoldens": 5,
+  "physicalAndroidAcceptance": "awaiting device connection",
+  "iOSAcceptance": "not performed",
+  "GameBigWinFullScreen": "required; awaiting user-supplied asset",
+  "paidRequestsByAgent": 0
+}

@@ -1,0 +1,87 @@
+{
+  "date": "2026-11-16",
+  "timezone": "Asia/Shanghai",
+  "device": {
+    "model": "OPPO PLL110",
+    "physical": true,
+    "android": "15",
+    "api": "35",
+    "abi": "arm64-v8a"
+  },
+  "application": {
+    "package": "com.nady.dev1",
+    "pidAtStart": 1950,
+    "installedBy": "User-started Android Studio run; no second installation by agent",
+    "installedApkMatchesIdeOutput": true,
+    "installedApkSha256": "cc64933857a971654b2065d8bf8e24788887666a9d02ea0ac60c5d54932b35d0"
+  },
+  "room": {
+    "name": "31",
+    "id": "31",
+    "displayId": "27465417",
+    "audienceCountObserved": 1
+  },
+  "requestCountsBeforeNativeTests": {
+    "/api/gift/info/tabGiftList": 1,
+    "/api/gift/info/getBackpack": 1,
+    "/api/revenue/purse": 2,
+    "/api/gift/info/lucky/banner-snapshots": 1,
+    "/api/gift/send": 0,
+    "/api/room/mic/up": 1,
+    "/api/room/mic/down": 1
+  },
+  "purseValues": [
+    4,
+    4
+  ],
+  "observedPassed": [
+    "Room entry and gift catalog/backpack/purse responses succeeded",
+    "Gift panel shows 4 coins, matching purse",
+    "Selecting 18 updates selected x18 and total cost",
+    "Changing gift restores its configured default; replaying same gift retains selected 8",
+    "Turkey preview shows visible flags and fireworks in physical phone mirror",
+    "Preview can be closed; outside dismiss and panel reopen work",
+    "Catalog and backpack requested once; reopening refreshes purse only",
+    "Lucky snapshots returned 200 and real records rotate; SUPER pool amount displayed"
+  ],
+  "notVerified": [
+    "System loudspeaker listening and simultaneous remote Agora audio",
+    "Paid send, combo deductions, multi-user gift flights and prize preemption on physical devices",
+    "Full SUPER dynamic image slots on physical device",
+    "iOS physical playback"
+  ],
+  "incident": {
+    "type": "Accidental own mic entry during panel dismissal",
+    "cause": "Preview had already ended; first coordinate closed the panel; subsequent coordinate hit seat 2",
+    "upRequestLocalTime": "09:57:30",
+    "upResponseLocalTime": "09:57:33",
+    "downResponseLocalTime": "09:59:05",
+    "upBusinessCode": 200,
+    "downBusinessCode": 200,
+    "restored": true,
+    "visualRestored": "All four seats empty; bottom own-mic button absent",
+    "disclosedToUser": true
+  },
+  "logErrors": {
+    "FATAL EXCEPTION": 0,
+    "RenderFlex": 0,
+    "Unhandled Exception": 0,
+    "MissingPluginException": 1,
+    "[RoomGift] Player failed": 0,
+    "[RoomGift] Release failed": 0,
+    "[RoomGiftPreview] Release blocked": 0
+  },
+  "nativeChecks": {
+    "passed": 10,
+    "result": "native_result.json",
+    "physicalDevice": true
+  },
+  "rawLogs": "Stored only in protected local temporary files; not included here",
+  "restoredAfterNativeTests": {
+    "room": "31",
+    "displayId": "27465417",
+    "role": "audience",
+    "seats": "all four empty",
+    "source": "Observed in the actual device mirror after returning from recent apps"
+  }
+}

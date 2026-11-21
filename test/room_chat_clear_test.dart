@@ -230,10 +230,11 @@ void main() {
       expect(state.messages, hasLength(1));
       expect(gifts.snapshot.publicMessages, isEmpty);
       expect(gifts.snapshot.slots, same(before.slots));
-      expect(gifts.snapshot.flights, same(before.flights));
-      expect(gifts.snapshot.effects, same(before.effects));
+      // Queue snapshots are immutable list copies; the tasks must be unchanged.
+      expect(gifts.snapshot.flights, orderedEquals(before.flights));
+      expect(gifts.snapshot.effects, orderedEquals(before.effects));
       expect(gifts.snapshot.banners, same(before.banners));
-      expect(gifts.snapshot.lucky, same(before.lucky));
+      expect(gifts.snapshot.lucky, orderedEquals(before.lucky));
       expect(gifts.snapshot.roomWeekVal, before.roomWeekVal);
       expect(ended, isEmpty);
       fixture.socket.controller.add(firstGift);

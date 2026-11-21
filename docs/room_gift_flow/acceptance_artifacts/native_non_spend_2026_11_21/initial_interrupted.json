@@ -1,0 +1,27 @@
+{
+  "status": "interrupted after actionable failures; not a completed run",
+  "failedCasesObserved": [
+    "barrage pag background and foreground release",
+    "barrage vap background and foreground release",
+    "barrage replacement waits for old real PAG initialization and release",
+    "local visibility clears VAP and restore does not replay old tasks",
+    "prepared prize releases active PAG before resolving next VAP",
+    "local asset luck_num10 renders and releases on Android",
+    "local asset luck_num20 renders and releases on Android",
+    "local asset luck_num30 renders and releases on Android",
+    "local asset luck_num50 renders and releases on Android",
+    "local asset luck_num66 renders and releases on Android",
+    "local asset luck_num88 renders and releases on Android",
+    "local asset luck_num100 renders and releases on Android",
+    "local asset luck_num200 renders and releases on Android",
+    "local asset luck_num300 renders and releases on Android",
+    "local asset luck_num400 renders and releases on Android",
+    "local asset luck_num500 renders and releases on Android",
+    "local asset luck_num1000 renders and releases on Android",
+    "local asset luck_num2000 renders and releases on Android",
+    "local asset luck_num5000 renders and releases on Android",
+    "local asset luck_num5555 renders and releases on Android"
+  ],
+  "sourceFingerprints": "run1_source_hashes.json",
+  "note": "Initial VAP post-unmount checks watched a detached view callback; revised checks require actual native stop acknowledgement. PAG startup and disposal handover defects were separately fixed and unit-regressed."
+}

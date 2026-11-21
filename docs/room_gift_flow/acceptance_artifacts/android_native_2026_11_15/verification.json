@@ -1,0 +1,49 @@
+{
+  "date": "2026-11-15",
+  "device": "Pixel_9 / emulator-5554",
+  "platform": "Android 15 / ARM64",
+  "qaPackage": "com.isnow.qa.room_gift_native_acceptance",
+  "nativeChecks": 10,
+  "roomRegressionTests": 758,
+  "newControllerTests": 9,
+  "paidRequestsInitiated": 0,
+  "sourceSha256": {
+    "packages/room_vap/lib/vap_controller.dart": "31b7e9ef367c1d3d72cbb09977db65e82a683b9c6c7b2f30de2dfc4ea0d25557",
+    "packages/room_vap/android/src/main/kotlin/com/nell/flutter_vap_plus/NativeVapView.kt": "8affbc2b38ce8cc9f2cb94f91a6af66cbacb3d51c46658ae0d8d6a126c4d4085",
+    "packages/room_vap/android/src/main/kotlin/com/nell/flutter_vap_plus/VapStopCoordinator.kt": "e3804114cd4b92ce983e9f1785105b89839a9aeddcb4385aa3979b779a0501b8",
+    "lib/classes/room/gift/effects/room_gift_effect_player.dart": "38aaea7fc2aeb51989b8e0687f597be61b505a58d4f325a7dd15cb362813be9a",
+    "lib/classes/room/gift/effects/room_gift_effect_layer.dart": "3461d8a0ddd78c7648852fbbbe65fc85bc42c24d21115b6e4f6f501d2dea5e8a"
+  },
+  "frameQuality": [
+    "frame:native_svga:foregroundSamples=4888",
+    "frame:native_pag:foregroundSamples=11096",
+    "frame:native_mp4:foregroundSamples=3068",
+    "frame:native_vap:foregroundSamples=30080",
+    "frame:native_svga_repository_fixture:foregroundSamples=2060"
+  ],
+  "limits": [
+    "Android emulator only; no iOS native verification",
+    "No real combo or second-device broadcast yet",
+    "Standalone package; existing iSnow process was not replaced"
+  ],
+  "apk": {
+    "bytes": 244893736,
+    "sha256": "27699fb0d47d9e2201fa3bafa40e8681521e7df0e44c4609707d0af9742e0cea",
+    "abis": [
+      "arm64-v8a"
+    ],
+    "hasStopCoordinator": true,
+    "package": "com.nady.dev1"
+  },
+  "nativeRuns": [
+    {
+      "report": "native_result.json",
+      "checks": 9
+    },
+    {
+      "report": "svga_repository_result.json",
+      "checks": 1
+    }
+  ],
+  "repositorySvgaSha256": "e4d9cf468c470da4c4389a6886ed371d59f99d4d25b5391f64f7413681e4a1ca"
+}

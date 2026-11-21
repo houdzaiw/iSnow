@@ -1,0 +1,7 @@
+{
+  "collectedAtUtc": "2026-11-21T01:26:54.179666+00:00",
+  "scope": "retained main PID1756 log buffer only; raw credentials and payloads not exported",
+  "requestCount": 72,
+  "giftSendRequests": 0,
+  "flutterOrPlayerExceptionCount": 0
+}

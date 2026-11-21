@@ -328,7 +328,7 @@ class _RoomHttp extends FakeRoomHttp {
   }
 }
 
-class _GiftRepository implements RoomGiftRepository {
+class _GiftRepository extends RoomGiftRepository {
   @override
   RoomGiftCatalog? get cachedCatalog => null;
   @override

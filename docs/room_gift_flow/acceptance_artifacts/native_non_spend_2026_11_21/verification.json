@@ -1,0 +1,152 @@
+{
+  "date": "2026-11-21",
+  "completedAtUtc": "2026-11-21T01:28:15.880229+00:00",
+  "head": "caaecab2b9d326b617566a3636dd16b822393a8e",
+  "worktreeDirty": true,
+  "device": "Pixel_9 / emulator-5556 (software rendering)",
+  "productionFixes": [
+    "PAG listeners are bound before explicit start; native autoplay disabled by room player",
+    "PAG controller retained from onCreated; removed/pending view cannot release its lease before native destruction"
+  ],
+  "native": {
+    "distinctChecks": 42,
+    "allPassedAcrossRetests": true,
+    "notASingleClean42CaseRun": true,
+    "runs": [
+      {
+        "run": "initial_interrupted",
+        "completed": false,
+        "note": "Stopped after actionable PAG failures; exit status is not a pass"
+      },
+      {
+        "run": "run2",
+        "checks": 42,
+        "passed": 19,
+        "failed": 23
+      },
+      {
+        "run": "run3",
+        "checks": 42,
+        "passed": 41,
+        "failed": 1,
+        "report": "run3/native_result_recovered.json",
+        "reportRecovery": "Read original VM fields after ADB dropped; no report rewriting to pass",
+        "pngExportLost": true
+      },
+      {
+        "run": "run4",
+        "checks": 1,
+        "passed": 0,
+        "failed": 1,
+        "reason": "Real paused reached; Android blocked self-resume and test timed out"
+      },
+      {
+        "run": "run5",
+        "checks": 27,
+        "passed": 27,
+        "failed": 0,
+        "hostExitCode": 0,
+        "report": "run5/native_result.json"
+      }
+    ],
+    "shippingLuckyNumbers": 23,
+    "shippingLuckyBubbles": 3,
+    "finalSavedFrames": 29,
+    "transparentSamplesRetained": 3,
+    "pixelThreshold": "foregroundSamples > 8, unchanged",
+    "osLifecycleEvents": [
+      {
+        "at": "2026-11-21T01:18:10.893424Z",
+        "event": "os:inactive"
+      },
+      {
+        "at": "2026-11-21T01:18:16.175010Z",
+        "event": "os:hidden"
+      },
+      {
+        "at": "2026-11-21T01:18:16.175091Z",
+        "event": "os:paused"
+      },
+      {
+        "at": "2026-11-21T01:18:17.050362Z",
+        "event": "os:hidden"
+      },
+      {
+        "at": "2026-11-21T01:18:17.050424Z",
+        "event": "os:inactive"
+      },
+      {
+        "at": "2026-11-21T01:18:18.242667Z",
+        "event": "os:resumed"
+      }
+    ],
+    "manualVisualReview": "Reviewed all 26 visible native frames in run5/lucky_frames_contact_sheet.jpg; sampled transition frames do not certify complete visual timing or live event semantics"
+  },
+  "automated": {
+    "focusedPagAndLifecyclePassed": 16,
+    "roomAndSocketRegressionPassed": 895,
+    "roomTestFiles": 92,
+    "rootAnalyze": "No issues found",
+    "qaAnalyze": "No issues found",
+    "gitDiffCheck": "passed",
+    "historicalGoldenAndPubspecGuardUnchanged": true,
+    "guardedFiles": 259
+  },
+  "mainApp": {
+    "package": "com.nady.dev1",
+    "pidBefore": 1756,
+    "pidAfter": 1756,
+    "roomName": "hei",
+    "displayRoomId": "30317291",
+    "roomId": "2113269920442130433",
+    "roomGeneration": "1",
+    "roomAndSocketReady": true,
+    "keptMinimized": true,
+    "foregroundAtEnd": true,
+    "hotReload": "2 of 3012 libraries; no restart or installation",
+    "loadedNewFields": {
+      "PAGView.onCreated": true,
+      "RoomGiftEffectPlayerState._pag": true
+    },
+    "runtime": "main_final.json",
+    "logSample": "main_log_summary.json",
+    "qaAppStoppedAtEnd": true
+  },
+  "build": {
+    "type": "ARM64 Debug",
+    "target": "lib/lib_dev.dart",
+    "path": "/Users/huili/project/iSnow/build/app/outputs/flutter-apk/app-debug.apk",
+    "bytes": 224085069,
+    "sha256": "a9ee7b63a547b6be4a78786d52c3a3729d7270b876a8b46504da7e12e7171250",
+    "nativeArchitectures": [
+      "arm64-v8a"
+    ],
+    "manifestDexKernelChecked": true,
+    "installed": false,
+    "note": "Main app received Dart fix through hot reload; this newly built APK was verified but not installed"
+  },
+  "notPerformed": [
+    "Gift/combo orders, recharge, chat, mic or management submissions",
+    "Live server barrage and click navigation",
+    "New asset playback/performance on a physical Android phone",
+    "Every entrance/vehicle/mic effect variant",
+    "Cross-account and network failure live scenarios",
+    "Paid combo acceptance; requires fresh exact authorization",
+    "Game Big Win independent full-screen animation: user asset still pending",
+    "iOS, deferred by user"
+  ],
+  "sourceHashes": {
+    "lib/classes/room/gift/effects/room_gift_effect_player.dart": "d0a5b6f3d463eb712abf97744ac2cdd22efc24b2576ce6641f83e2e8dd7a4278",
+    "packages/room_pag/lib/pag.dart": "ff076a142b1f77bf2315c17f1391398a979f0a1f751bd1e53312bc4eb2292f8f",
+    "tools/room_gift_native_acceptance/environment.dart.template": "91cf327707e2a86d1d3f4732b410858924cadfdfaeb33b9a1da742fd7db49ee0",
+    "tools/room_gift_native_acceptance/barrage_checks.dart.template": "56539dc2528f7d6fa55ba5a938bd98c3e00ef69dde41c0c48ded5406e1aa6a7a",
+    "tools/room_gift_native_acceptance/visibility_checks.dart.template": "74592589d723498fab746d6568df544845cffb82e45c1eea9616ac315e25b0ac",
+    "tools/room_gift_native_acceptance/local_assets_checks.dart.template": "a21137fff5daadad7b32caa27b3b91006a57c9269f66708a3d0f8ae939f3796f",
+    "tools/room_gift_native_acceptance/main_activity.kt.template": "67a6ee424d298a7a3789b0d3122ed419fc333b044cbc185af3fc17edfef36f61",
+    "tools/room_gift_native_acceptance/run.py": "53c34b9a06ea3381b2e6840c36d8da02029c69b29621122b24714d7ccb94b2ca",
+    "tools/room_gift_native_acceptance/driver.dart.template": "a81a256bcd0f0ce966b6a858772a981a885b3a3b43d844754a2d0e7bba579f78",
+    "test/room_pag_start_and_handover_test.dart": "1a2d081dd1de32aaecbabf502fc578b9be3566dbc1366107b02e563a9c68f82e",
+    "tools/room_gift_native_acceptance/README.md": "4f16cce6a528b56ff2f005b899e26122c78df9aeb4dfcd79b7a8075470b79735",
+    "packages/README.md": "4ceb359dd5f8add39587efe076a3e8f272a43f34f1837110a8073dc3198d36bd"
+  }
+}

@@ -1,0 +1,127 @@
+{
+  "date": "2026-11-15",
+  "roomId": "2113269920442130433",
+  "roomNo": "30317291",
+  "sender": {
+    "device": "emulator-5554",
+    "avd": "Pixel_9",
+    "uid": 30317291
+  },
+  "recipient": {
+    "device": "emulator-5556",
+    "avd": "Medium_Phone_API_35",
+    "uid": 12594212
+  },
+  "request": {
+    "targetUids": [
+      12594212
+    ],
+    "sendType": 1,
+    "giftId": 600,
+    "giftName": "1",
+    "giftCount": 1,
+    "giftSource": 1,
+    "comboId": "",
+    "comboCount": 1,
+    "price": 1,
+    "userBackpackId": null
+  },
+  "sendRequestCount": 1,
+  "sendResponseCount": 1,
+  "httpStatus": 200,
+  "businessCode": 200,
+  "orderId": "2026111519512139341714",
+  "traceId": "8716c863-1ffc-4d91-ba7b-3b4503818533",
+  "serverTimestamp": "2026-11-15T11:51:23.367+0000",
+  "balanceBefore": 49855111,
+  "balanceAfter": 49855110,
+  "primaryPublicMessageCount": 1,
+  "primaryPublicMessage": [
+    {
+      "key": "2026111519512139341714",
+      "count": "1",
+      "winAmount": "0",
+      "sendType": "1",
+      "multiplier": "0",
+      "targetLabel": "lihei",
+      "createdAt": {
+        "class": "DateTime",
+        "kind": "PlainInstance"
+      },
+      "isFinal": "true"
+    }
+  ],
+  "primarySocketEvents": [
+    {
+      "channel": "room:2113269920442130433",
+      "event": "roomScreenSendGiftComboEvent",
+      "msgId": "f41a8a65b0fe45a68087489a330c44f9",
+      "timestamp": "1794743482363"
+    },
+    {
+      "channel": "room:2113269920442130433",
+      "event": "RoomSendGiftPublicScreenEvent",
+      "msgId": "7a1515088c714f5f9a058219b191d41e",
+      "timestamp": "1794743483343"
+    },
+    {
+      "channel": "room:2113269920442130433",
+      "event": "RoomGiftStreamUpdateEvent",
+      "msgId": "67dd9c286a2649eab99ce3d5391afb98",
+      "timestamp": "1794743484499"
+    }
+  ],
+  "secondarySocketEvents": [
+    {
+      "channel": "room:2113269920442130433",
+      "event": "roomScreenSendGiftComboEvent",
+      "msgId": "f41a8a65b0fe45a68087489a330c44f9",
+      "timestamp": "1794743482363"
+    },
+    {
+      "channel": "room:2113269920442130433",
+      "event": "RoomSendGiftPublicScreenEvent",
+      "msgId": "7a1515088c714f5f9a058219b191d41e",
+      "timestamp": "1794743483343"
+    },
+    {
+      "channel": "room:2113269920442130433",
+      "event": "RoomGiftStreamUpdateEvent",
+      "msgId": "67dd9c286a2649eab99ce3d5391afb98",
+      "timestamp": "1794743484499"
+    }
+  ],
+  "matchingSocketEventIds": [
+    "67dd9c286a2649eab99ce3d5391afb98",
+    "7a1515088c714f5f9a058219b191d41e",
+    "f41a8a65b0fe45a68087489a330c44f9"
+  ],
+  "primaryStillInRoom": true,
+  "flutterErrorsInCapturedLogs": {
+    "primary": 0,
+    "secondary": 0
+  },
+  "visualConfirmation": {
+    "publicMessages": "confirmed_on_both_by_user",
+    "primaryBalance": "49855110_confirmed_after_reopening_panel_by_user",
+    "giftAnimation": "not_observed_by_user",
+    "noAdditionalSendRequested": true
+  },
+  "limitations": [
+    "Gift 600 does not support combo (isCombo=2).",
+    "Secondary app was kept running without updating its native APK.",
+    "Socket receipt and sender state do not by themselves prove rendered receiver animation."
+  ],
+  "finalCaptureCounts": {
+    "emulator-5554": {
+      "sendRequestCount": 1,
+      "sendResponseCount": 1,
+      "flutterErrors": 0
+    },
+    "emulator-5556": {
+      "sendRequestCount": 0,
+      "sendResponseCount": 0,
+      "flutterErrors": 0
+    }
+  }
+}

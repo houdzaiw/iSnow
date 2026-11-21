@@ -1,0 +1,81 @@
+{
+  "reviewDate": "2026-11-20",
+  "scope": "User-selected Pixel_9 room inspection; no paid or management submissions",
+  "target": {
+    "avd": "Pixel_9",
+    "serial": "emulator-5556",
+    "package": "com.nady.dev1",
+    "processId": 4575,
+    "installedLastUpdateTime": "2026-11-15 19:38:49",
+    "installedApkSha256": "230eb796e51c3a986eb215b6e60efafb181e0ff3192743b3a6672652a6abddfe",
+    "internalFreeSpace": "approximately 1.4 GiB",
+    "room": "hei",
+    "displayRoomNo": "30317291",
+    "internalRoomId": "2113269920442130433"
+  },
+  "initialObservation": {
+    "foreground": "iSnow room page",
+    "roomSocket": "ready",
+    "initialLogFatalExceptions": 0,
+    "initialLogFlutterExceptions": 0,
+    "barrageLibrariesLoaded": false,
+    "screenshot": "room_initial.png"
+  },
+  "hotReload": {
+    "debuggerAttached": true,
+    "initialReloadLibraries": 0,
+    "recompiledReloadLibraries": 74,
+    "dartFilesMarkedDirty": 83,
+    "sourceContentsChanged": false,
+    "originalSourceTimestampsRestored": true,
+    "newBarrageHostInstances": 1,
+    "newBarrageViewModelInstances": 1,
+    "barrageViewModelStarted": true,
+    "barrageViewModelAcceptingMessages": true,
+    "barrageNativeLaneBlocked": false,
+    "oldGiftManagerNewField": "barrageManaged reported as <not initialized> by read-only VM inspection",
+    "errors": [
+      "Hooks can only be called from the build method of a widget that mix-in Hooks: RoomGiftOverlay retained its pre-upgrade Consumer element",
+      "type Null is not a subtype of bool of function result after restoring the page",
+      "type Null is not a subtype of Map<int, RoomJackpotInfo> of function result in the terminal"
+    ],
+    "assessment": "In-place migration from the older installed program retained incompatible widget elements and uninitialized added fields. This mixed process cannot establish clean-build acceptance. No production code or golden baseline was altered to hide the errors.",
+    "errorScreenshot": "hot_reload_transition.png"
+  },
+  "keepRestoreAttempt": {
+    "keepSelected": true,
+    "exitSelected": false,
+    "restoredSameRoom": true,
+    "hooksElementIssueRemovedByRemount": true,
+    "oldControllerFieldErrorsRemain": true,
+    "screenshots": ["kept_room_ready.png", "room_restored.png"],
+    "finalKeepSelected": true,
+    "finalScreenConfirmation": "Returned to the home page with the minimized room entry visible; no Exit action selected",
+    "finalScreenshot": "final_screen_pending_approval.png"
+  },
+  "acceptanceResult": "not passed; requires clean startup of the verified new APK",
+  "deployment": {
+    "newApkReady": true,
+    "newApkSha256": "c9d1e1ef47ee606eda6290500ac8b700bfaa3fd16f3fa67413050cd5aa4a199d",
+    "installedOnPixel9ThisInspection": false,
+    "hotRestartPerformed": false,
+    "accountDataCleared": false,
+    "approvalRequested": "Cover-install and restart interrupt the current hei room; retain account data and re-enter afterward",
+    "approvalStatus": "approved on 2026-11-21; user allowed installation and restart followed by room re-entry"
+  },
+  "cleanStartFollowUp": {
+    "reviewDate": "2026-11-21",
+    "details": "../../pixel9_clean_2026_11_21/verification.json",
+    "result": "Clean new APK installed, login retained and hei re-entered; initial runtime errors not reproduced. User confirmed classification, reopen/balance and Keep/restore; live barrage visuals remain unverified."
+  },
+  "agentGiftSends": 0,
+  "agentTopUps": 0,
+  "agentChatSends": 0,
+  "agentMicOrManagementSubmissions": 0,
+  "remaining": [
+    "Clean-build room and account-channel verification",
+    "Read-only gift panel, barrage UI and typed click navigation",
+    "Real incoming barrage/native rendering; no synthetic event is counted as a live server event",
+    "Physical Android decoder compatibility and performance remain separate"
+  ]
+}

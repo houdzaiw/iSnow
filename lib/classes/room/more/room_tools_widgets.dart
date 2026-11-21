@@ -124,26 +124,33 @@ class ToolChoices<T> extends StatelessWidget {
 Future<bool> confirmRoomTool(
   BuildContext context,
   String title,
-  String content,
-) async =>
-    await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(title),
-        content: Text(content),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(context.l10n.t('app.cancel')),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(context.l10n.t('auth.confirm')),
-          ),
-        ],
-      ),
-    ) ==
-    true;
+  String content, {
+  ValueChanged<Route<dynamic>>? onRoute,
+}) async {
+  final route = DialogRoute<bool>(
+    context: context,
+    themes: InheritedTheme.capture(
+      from: context,
+      to: Navigator.of(context, rootNavigator: true).context,
+    ),
+    builder: (dialogContext) => AlertDialog(
+      title: Text(title),
+      content: Text(content),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, false),
+          child: Text(context.l10n.t('app.cancel')),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, true),
+          child: Text(context.l10n.t('auth.confirm')),
+        ),
+      ],
+    ),
+  );
+  onRoute?.call(route);
+  return await Navigator.of(context, rootNavigator: true).push(route) == true;
+}
 
 Future<T?> pushRoomTool<T>(BuildContext context, Widget page) {
   final router = GoRouter.maybeOf(context);

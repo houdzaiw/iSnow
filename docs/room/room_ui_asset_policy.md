@@ -75,6 +75,9 @@
 
 ## Gift Panel
 
+- 第二批幸运奖池背景复用Nady `assets/images/jackpot_gift_panel_bg.webp`，语义化保存为`assets/lanhu/room/room_gift_jackpot_panel_bg.webp`，使用`AppAssets.roomGiftJackpotPanelBackground`。火箭lv1～6、SUPER装饰VAP位于`assets/room_gift/`，分别在对应manifest记录原路径及SHA-256；不冒充蓝湖导出。
+- Game Big Win独立全屏素材尚未提供，保留需求，不用奖品弹框、游戏邀请横幅或其他礼物替代。填充VAP只使用素材声明的真实槽位，动态昵称、头像、礼物图来自事件和当前礼物数据。
+
 - 礼物面板以 `image_id=dd85e4a7-00f5-41c9-a75b-b28a25da69ad` 为资源上下文；下载脚本按该稿的区块和图层名称提取切图，不能使用其他页面的同名图层。
 - 金币、背包、数量/接收人箭头、麦位占位图和 NEW 徽章使用这张设计稿的 PNG 切图，不再使用旧版 Nady WebP 图标。
 - 礼物、头像、价格、库存、数量配置和分类来自接口/缓存；不得把设计稿示例礼物当作业务数据。NEW 仅在接口 `cornerMark` 指定时显示，不伪造 CP、VIP 等标识。
@@ -82,8 +85,18 @@
 
 ## Gift Effects
 
+- 2026-11-14 第一批接入用户指定“房间动效文件”中的两个真实动态WebP：房间底栏送礼按钮为 `room_gift_button_animation.webp`，用户卡Send Gift按钮为 `room_member_gift_animation.webp`。文件原样复制，通过AppAssets引用，manifest记录本地原路径；保持既有点击及定向对象逻辑。音乐目录中同名的用户卡礼物动画与后一份内容相同，不重复打包，也不能用作音乐loading。
+- 全屏礼物独立关闭控件复用已授权的Nady `room_mini_close.webp`，声明语义别名 `AppAssets.roomGiftEffectClose`；原图使用主题白色着色，避免在半透明黑底上不可见。该控件仅占用自身点击区域，关闭及自然结束等待播放器释放确认后再推进礼物队列；释放失败不强行起播下一项。
+- 本批新版动效/连击截图放入 `test/goldens/room_gift_feedback_v2/`，历史截图保留。布局截图在固定时点采样，另用真实codec验证多帧内容，不能把静态截图当作原生播放器验收。
+
 - 送礼动效允许复用 PRD 指定的 Nady SVGA/PAG/VAP 资源，放入 `assets/room_gift/`，在该目录 manifest 记录来源，并通过 `AppAssets` 声明；不能把动效资源当作蓝湖图标替代品。
 - 礼物图标优先使用本地 `AppAssets.roomGiftLocalImages` 映射，其次使用服务端图标及图片缓存；无法加载时继续显示红色缺省图。
 - 网格、轨迹和公屏复用 `RoomGiftImage` 分流图片：`assets/...` 必须使用资产解码，不能交给 `CachedNetworkImage` 或启动目录缓存；仅有效HTTP(S)地址走网络缓存，网格可提供自己的loading组件。
 - 动画资源类型、缓存、本地映射与降级统一由 `RoomGiftAssetResolver` 处理，不得在多个 UI 层分别猜测格式。
 - 麦位轨迹只使用 Flutter 原生动画；礼物面板、公屏、卡槽、横幅和动效层仍禁止使用 Flutter `Icon`/`Icons.*`。
+
+## Account Barrage
+
+- 2026-11-20起，账号飘屏由根`RoomBarrageHost`统一展示。背景、前景、头像及资源图标优先取Nady已确认的真实事件字段；`upperEffect`是横幅前景，不能擅自改作普通礼物全屏素材。
+- 沿用匿名、有界资源缓存和已声明的火箭/SUPER素材；本轮没有新增静态图标。缺图继续红色占位，禁止Flutter `Icon/Icons.*`。Game Big Win独立全屏仍等待用户素材，不用游戏顶部邀请横幅代替。
+- 新版飘屏截图单独维护在`test/goldens/room_barrage_v1/`。截图必须包含账号根叠层，不能只截底层页面；图标应完成加载后取样。历史基线不得覆盖。

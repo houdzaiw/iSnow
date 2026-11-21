@@ -4,10 +4,14 @@ import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../manager/api_error_message.dart';
+import '../../../../manager/room_gift_feedback_manager.dart';
 import '../models/room_gift_event_models.dart';
 import '../models/room_gift_models.dart';
 import '../room_gift_repository.dart';
 import 'room_gift_state.dart';
+import 'room_gift_send_state.dart';
+
+export 'room_gift_send_state.dart';
 
 final roomGiftSendControllerProvider = StateNotifierProvider.autoDispose
     .family<RoomGiftSendController, RoomGiftSendState, String>((ref, roomId) {
@@ -17,53 +21,6 @@ final roomGiftSendControllerProvider = StateNotifierProvider.autoDispose
       );
     });
 
-class RoomGiftSendState {
-  const RoomGiftSendState({
-    this.isSending = false,
-    this.awaitingEcho = false,
-    this.message,
-    this.gift,
-    this.confirmedComboId = '',
-    this.request,
-    this.catalog,
-    this.issue,
-    this.remainingMilliseconds = 0,
-  });
-  final bool isSending, awaitingEcho;
-  final RoomScreenGiftMsg? message;
-  final RoomGift? gift;
-  final String confirmedComboId;
-  String get comboId =>
-      confirmedComboId.isNotEmpty ? confirmedComboId : message?.comboId ?? '';
-  final SendRoomGiftRequest? request;
-  final RoomGiftCatalog? catalog;
-  final String? issue;
-  final int remainingMilliseconds;
-  bool get canContinue =>
-      !isSending &&
-      gift?.supportsCombo == true &&
-      comboId.isNotEmpty &&
-      request != null;
-
-  bool matches(RoomScreenGiftMsg other) =>
-      comboId.isNotEmpty &&
-      comboId == other.comboId &&
-      gift?.id == other.gift.id &&
-      request?.giftSource == other.giftSource;
-
-  RoomGiftSendState withCatalog(RoomGiftCatalog value) => RoomGiftSendState(
-    isSending: isSending,
-    awaitingEcho: awaitingEcho,
-    message: message,
-    gift: gift,
-    confirmedComboId: confirmedComboId,
-    request: request,
-    catalog: value,
-    issue: issue,
-    remainingMilliseconds: remainingMilliseconds,
-  );
-}
-
 class RoomGiftSendException implements Exception {
   const RoomGiftSendException(this.issue);
   final RoomGiftIssue issue;
@@ -71,13 +28,25 @@ class RoomGiftSendException implements Exception {
 
 /// HTTP confirms the combo button; only broadcasts supply visual gift events.
 class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
-  RoomGiftSendController(this._repository, this.roomId)
-    : super(const RoomGiftSendState());
+  RoomGiftSendController(
+    this._repository,
+    this.roomId, {
+    DateTime Function()? now,
+    Future<void> Function()? feedback,
+  }) : _now = now ?? DateTime.now,
+       _feedback = feedback ?? RoomGiftFeedbackManager.lightImpact,
+       super(const RoomGiftSendState());
+  final DateTime Function() _now;
+  final Future<void> Function() _feedback;
+  DateTime? _lastTap, _expiresAt;
+  int _tapCount = 0;
   final RoomGiftRepository _repository;
   final String roomId;
   RoomGiftSendState get snapshot => state;
   RoomGift? _gift;
   int _targetCount = 0;
+  Set<int>? _roomMembers;
+  bool? _canSendSelf;
   int _generation = 0;
   DateTime? _startedAt;
   RoomGiftAudience? audience;
@@ -123,10 +92,14 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
     required RoomGiftCatalog catalog,
   }) async {
     if (_inFlight) return null;
+    request = request.frozen();
     if (audience?.isInRoom == false) {
       throw const RoomGiftSendException(RoomGiftIssue.roomUnavailable);
     }
-    if (targetCount <= 0 || request.giftCount <= 0) {
+    if (request.giftCount < 1 || request.giftCount > 9999) {
+      throw const RoomGiftSendException(RoomGiftIssue.invalidCount);
+    }
+    if (targetCount <= 0) {
       throw const RoomGiftSendException(RoomGiftIssue.noRecipient);
     }
     final total = targetCount * request.giftCount;
@@ -144,10 +117,19 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
     _inFlight = true;
     _gift = gift;
     _targetCount = targetCount;
-    _startedAt = DateTime.now();
+    _startedAt = _now();
     final previousMessage = request.comboId.isEmpty ? null : state.message;
     final previousComboId = request.comboId;
-    _echoTimeout?.cancel();
+    if (request.comboId.isEmpty) {
+      _roomMembers = audience?.onlineUids == null
+          ? null
+          : Set.unmodifiable(audience!.onlineUids!);
+      _canSendSelf = catalog.canSendSelf;
+      _echoTimeout?.cancel();
+      _expiresAt = null;
+      _tapCount = 1;
+      _lastTap = null;
+    }
     state = RoomGiftSendState(
       isSending: true,
       request: request,
@@ -156,6 +138,7 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
       gift: gift,
       confirmedComboId: previousComboId,
       remainingMilliseconds: _remainingMilliseconds,
+      tapCount: _tapCount,
     );
     try {
       final result = await _repository.sendGift(request);
@@ -182,13 +165,17 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
         confirmedComboId: confirmedId,
         awaitingEcho:
             confirmedId.isEmpty && state.message == null && gift.supportsCombo,
+        tapCount: _tapCount,
       );
       _log(
         'confirmed giftId=${gift.id} comboId=${state.comboId} '
         'comboEnabled=${state.canContinue}',
       );
-      _echoTimeout?.cancel();
-      _restartCountdown();
+      if (previousComboId.isEmpty) {
+        _restartCountdown();
+      } else {
+        _publishCountdown();
+      }
       unawaited(refreshBalance());
       return updated;
     } catch (error) {
@@ -201,10 +188,8 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
           confirmedComboId: previousComboId,
           issue: userFacingErrorMessage(error),
           remainingMilliseconds: _remainingMilliseconds,
+          tapCount: _tapCount,
         );
-        if (previousComboId.isNotEmpty) {
-          _restartCountdown();
-        }
         unawaited(refreshBalance());
       }
       rethrow;
@@ -217,6 +202,7 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
   }
 
   void acknowledge(RoomScreenGiftMsg message, DateTime createdAt) {
+    if (_expireIfNeeded()) return;
     final request = state.request;
     if (request == null ||
         message.roomId.isNotEmpty && message.roomId != roomId ||
@@ -247,17 +233,28 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
       message: message,
       gift: state.gift,
       confirmedComboId: state.confirmedComboId,
+      tapCount: _tapCount,
     );
-    _echoTimeout?.cancel();
-    _restartCountdown();
+    if (_expiresAt == null) {
+      _restartCountdown();
+    } else {
+      _publishCountdown();
+    }
   }
 
   Future<bool> continueCombo() async {
+    if (_expireIfNeeded()) return false;
     if (!state.canContinue) return false;
+    final now = _now();
+    if (_lastTap != null &&
+        now.difference(_lastTap!) < const Duration(milliseconds: 200)) {
+      return false;
+    }
     final previous = state.request!;
     final comboId = state.comboId;
     final catalog = _repository.cachedCatalog ?? state.catalog;
     if (catalog == null || _gift == null) return false;
+    if (_canSendSelf != catalog.canSendSelf) return _endChangedCombo();
     final eligible = audience?.recipients
         .where((user) => catalog.canSendSelf || user.uid != currentUid)
         .map((user) => user.uid)
@@ -267,34 +264,38 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
         previous.targetUids != null &&
         (!eligible.containsAll(previous.targetUids!) ||
             eligible.length != previous.targetUids!.length)) {
-      resetCombo();
-      return false;
+      return _endChangedCombo();
     }
     if (previous.sendType == RoomGiftSendType.onRoom && audience != null) {
-      _targetCount = (audience!.onlineCount - (catalog.canSendSelf ? 0 : 1))
+      final count = (audience!.onlineCount - (catalog.canSendSelf ? 0 : 1))
           .clamp(0, audience!.onlineCount);
+      if (count != _targetCount ||
+          _roomMembers != null &&
+              !setEquals(_roomMembers, audience!.onlineUids)) {
+        return _endChangedCombo();
+      }
     }
-    final gift =
-        catalog.tabs
-            .expand((tab) => tab.gifts)
-            .where((gift) => gift.selectionKey == _gift!.selectionKey)
-            .firstOrNull ??
-        _gift!;
+    if ((previous.sendType == RoomGiftSendType.single ||
+            previous.sendType == RoomGiftSendType.multi) &&
+        audience?.onlineUids != null &&
+        !audience!.onlineUids!.containsAll(previous.targetUids ?? const [])) {
+      return _endChangedCombo();
+    }
+    final currentGift = catalog.tabs
+        .expand((tab) => tab.gifts)
+        .where((gift) => gift.selectionKey == _gift!.selectionKey)
+        .firstOrNull;
+    if (currentGift == null || currentGift.price != previous.price) {
+      return _endChangedCombo();
+    }
+    final gift = _gift!.copyWith(amount: currentGift.amount);
+    _lastTap = now;
+    _tapCount++;
+    _restartCountdown();
+    unawaited(_giveFeedback());
     try {
       final result = await send(
-        request: SendRoomGiftRequest(
-          targetUids: previous.targetUids,
-          sendType: previous.sendType,
-          roomId: roomId,
-          giftId: gift.id,
-          giftCount: previous.giftCount,
-          giftSource: previous.giftSource,
-          comboId: comboId,
-          // Nady sends the number of taps in this request, not a running total.
-          comboCount: 1,
-          price: gift.price,
-          userBackpackId: gift.userBackpackId,
-        ),
+        request: previous.frozen(confirmedComboId: comboId),
         gift: gift,
         targetCount: _targetCount,
         catalog: catalog,
@@ -302,6 +303,8 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
       return result != null;
     } catch (error) {
       if (mounted) {
+        final attempted = _tapCount;
+        resetCombo();
         state = RoomGiftSendState(
           request: state.request,
           catalog: state.catalog,
@@ -312,6 +315,7 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
               ? error.issue.name
               : userFacingErrorMessage(error),
           remainingMilliseconds: _remainingMilliseconds,
+          tapCount: attempted,
         );
       }
       return false;
@@ -322,25 +326,55 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
     _echoTimeout?.cancel();
     _generation++;
     _gift = null;
+    _roomMembers = null;
+    _canSendSelf = null;
     _startedAt = null;
     _remainingMilliseconds = 0;
+    _expiresAt = null;
+    _lastTap = null;
+    _tapCount = 0;
     if (mounted) {
       state = RoomGiftSendState(catalog: state.catalog, isSending: _inFlight);
     }
   }
 
+  bool _endChangedCombo() {
+    resetCombo();
+    state = RoomGiftSendState(catalog: state.catalog, issue: 'comboChanged');
+    return false;
+  }
+
   void _restartCountdown() {
     _echoTimeout?.cancel();
     _remainingMilliseconds = 5000;
+    _expiresAt = _now().add(const Duration(seconds: 5));
     _publishCountdown();
     _echoTimeout = Timer.periodic(const Duration(milliseconds: 250), (_) {
       _remainingMilliseconds -= 250;
+      final wallRemaining = _expiresAt?.difference(_now()).inMilliseconds ?? 0;
+      if (wallRemaining < _remainingMilliseconds) {
+        _remainingMilliseconds = wallRemaining;
+      }
       if (_remainingMilliseconds <= 0) {
         resetCombo();
       } else {
         _publishCountdown();
       }
     });
+  }
+
+  bool _expireIfNeeded() {
+    if (_expiresAt == null || _now().isBefore(_expiresAt!)) return false;
+    resetCombo();
+    return true;
+  }
+
+  Future<void> _giveFeedback() async {
+    try {
+      await _feedback();
+    } catch (error) {
+      _log('feedback failed: $error');
+    }
   }
 
   void _publishCountdown() {
@@ -355,6 +389,7 @@ class RoomGiftSendController extends StateNotifier<RoomGiftSendState> {
       catalog: state.catalog,
       issue: state.issue,
       remainingMilliseconds: _remainingMilliseconds,
+      tapCount: _tapCount,
     );
   }
 

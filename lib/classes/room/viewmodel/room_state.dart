@@ -23,6 +23,7 @@ class RoomSeatViewData {
     this.isMuted = false,
     this.volume = 0,
     this.raw = const {},
+    this.appearance = const RoomUserAppearance(),
   });
 
   final int position;
@@ -34,6 +35,7 @@ class RoomSeatViewData {
   final bool isMuted;
   final int volume;
   final Map<String, dynamic> raw;
+  final RoomUserAppearance appearance;
 
   bool get isOccupied => uid != null && uid! > 0;
   bool get isSpeaking => volume > 0;
@@ -73,6 +75,7 @@ class RoomSeatViewData {
       isMuted: mic.isMuted ?? false,
       volume: volume,
       raw: mic.raw,
+      appearance: RoomUserAppearance.fromJson(userInfo),
     );
   }
 }

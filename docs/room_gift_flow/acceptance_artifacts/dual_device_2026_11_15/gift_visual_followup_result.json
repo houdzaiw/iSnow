@@ -1,0 +1,114 @@
+{
+  "date": "2026-11-15",
+  "roomId": "2113269920442130433",
+  "roomNo": "30317291",
+  "previousOrderId": "2026111519512139341714",
+  "orderId": "2026111520235213465540",
+  "senderUid": 30317291,
+  "recipientUid": 12594212,
+  "execution": "user_repeated_manual_send_before_reporting_visual_confirmation; no_agent_send",
+  "request": {
+    "targetUids": [
+      12594212
+    ],
+    "sendType": 1,
+    "roomId": "2113269920442130433",
+    "giftId": 600,
+    "giftName": "1",
+    "giftCount": 1,
+    "giftSource": 1,
+    "comboId": "",
+    "comboCount": 1,
+    "price": 1,
+    "userBackpackId": null
+  },
+  "httpStatus": 200,
+  "businessCode": 200,
+  "traceId": "6992e585-4ff1-46ec-93de-93d31d4c2e1d",
+  "serverTimestamp": "2026-11-15T12:23:54.237+0000",
+  "chinaTime": "2026-11-15T20:23:54.237000+08:00",
+  "balanceBefore": 49855110,
+  "balanceBeforeSource": "last_confirmed_runtime_and_user_reopened_panel",
+  "balanceAfter": 49855109,
+  "requestCountInAvailableLogBuffer": 1,
+  "responseCountInAvailableLogBuffer": 1,
+  "primarySocketEvents": [
+    {
+      "channel": "room:2113269920442130433",
+      "event": "roomScreenSendGiftComboEvent",
+      "msgId": "e7cd1aed7a0c4104b1c8371b1269bc92",
+      "timestamp": "1794745433360"
+    },
+    {
+      "channel": "room:2113269920442130433",
+      "event": "RoomSendGiftPublicScreenEvent",
+      "msgId": "c2da58d11b5f48da880c8ca6f72b1809",
+      "timestamp": "1794745434176"
+    },
+    {
+      "channel": "room:2113269920442130433",
+      "event": "RoomGiftStreamUpdateEvent",
+      "msgId": "e0d3f6dc42e84a1c949551419e657d41",
+      "timestamp": "1794745435211"
+    }
+  ],
+  "secondarySocketEvents": [
+    {
+      "channel": "room:2113269920442130433",
+      "event": "roomScreenSendGiftComboEvent",
+      "msgId": "e7cd1aed7a0c4104b1c8371b1269bc92",
+      "timestamp": "1794745433360"
+    },
+    {
+      "channel": "room:2113269920442130433",
+      "event": "RoomSendGiftPublicScreenEvent",
+      "msgId": "c2da58d11b5f48da880c8ca6f72b1809",
+      "timestamp": "1794745434176"
+    },
+    {
+      "channel": "room:2113269920442130433",
+      "event": "RoomGiftStreamUpdateEvent",
+      "msgId": "e0d3f6dc42e84a1c949551419e657d41",
+      "timestamp": "1794745435211"
+    }
+  ],
+  "matchingSocketEventIds": [
+    "c2da58d11b5f48da880c8ca6f72b1809",
+    "e0d3f6dc42e84a1c949551419e657d41",
+    "e7cd1aed7a0c4104b1c8371b1269bc92"
+  ],
+  "primaryLatestOrderPublicRecordCount": 1,
+  "primaryPublicMessages": [
+    {
+      "key": "2026111519512139341714",
+      "count": "1",
+      "sendType": "1",
+      "targetLabel": "lihei",
+      "isFinal": "true"
+    },
+    {
+      "key": "2026111520235213465540",
+      "count": "1",
+      "sendType": "1",
+      "targetLabel": "lihei",
+      "isFinal": "true"
+    }
+  ],
+  "primaryStillInSameRoom": true,
+  "visualConfirmation": {
+    "giftAnimationBothDevices": "confirmed_by_user",
+    "evidenceKind": "user_observation_after_new_send",
+    "userStatement": "从新送礼已确认动效画面两端都显示;",
+    "capturedVideoOrScreenshot": false
+  },
+  "flutterErrorsInAvailableLogBuffers": {
+    "emulator-5554": 0,
+    "emulator-5556": 0
+  },
+  "limitations": [
+    "Log buffers are a later snapshot, not a continuous capture across the interval since the previous order.",
+    "Visual confirmation covers this ordinary gift; it does not identify every animation format or flight variant.",
+    "Gift 600 does not support combo (isCombo=2).",
+    "Secondary native APK was not updated."
+  ]
+}

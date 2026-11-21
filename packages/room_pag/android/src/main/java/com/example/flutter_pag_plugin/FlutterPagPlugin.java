@@ -168,8 +168,7 @@ public class FlutterPagPlugin implements FlutterPlugin, MethodCallHandler {
                 result.success("");
                 break;
             case _nativeRelease:
-                release(call);
-                result.success("");
+                release(call, result);
                 break;
             case _nativeGetPointLayer:
                 result.success(getLayersUnderPoint(call));
@@ -463,7 +462,7 @@ public class FlutterPagPlugin implements FlutterPlugin, MethodCallHandler {
         }
     }
 
-    void release(MethodCall call) {
+    void release(MethodCall call, MethodChannel.Result result) {
         final boolean reuse = call.argument(_argumentReuse);
         final String reuseKey = call.argument(_argumentReuseKey);
         final int viewId = call.argument(_argumentViewId);
@@ -481,12 +480,16 @@ public class FlutterPagPlugin implements FlutterPlugin, MethodCallHandler {
                     reuseMap.remove(reuseKey);
                 } else {
                     //当前texture仍有人使用，重用不清理
+                    result.success("");
                     return;
                 }
             }
         }
 
-        if (textureId < 0) return;
+        if (textureId < 0) {
+            result.success("");
+            return;
+        }
 
         if (useCache && preFreeEntryPool.size() < maxFreePoolSize && frameAvailable) {
             FlutterPagPlayer flutterPagPlayer = layerMap.get(getTextureId(call));
@@ -494,11 +497,18 @@ public class FlutterPagPlugin implements FlutterPlugin, MethodCallHandler {
             if (flutterPagPlayer != null) {
                 flutterPagPlayer.cancel();
                 WorkThreadExecutor.getInstance().post(() -> {
-                    flutterPagPlayer.clear();
-                    handler.post(() -> {
-                        freeEntryPool.add(textureId + "");
-                    });
+                    try {
+                        flutterPagPlayer.clear();
+                        handler.post(() -> {
+                            freeEntryPool.add(textureId + "");
+                            result.success("");
+                        });
+                    } catch (Exception error) {
+                        handler.post(() -> result.error("release_failed", error.toString(), null));
+                    }
                 });
+            } else {
+                result.success("");
             }
         } else {
             FlutterPagPlayer flutterPagPlayer = layerMap.remove(getTextureId(call));
@@ -511,6 +521,7 @@ public class FlutterPagPlugin implements FlutterPlugin, MethodCallHandler {
             if (entry != null) {
                 entry.release();
             }
+            result.success("");
         }
     }
 

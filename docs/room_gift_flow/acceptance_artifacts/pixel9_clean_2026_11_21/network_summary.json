@@ -1,0 +1,322 @@
+{
+  "scope": "Union of captured process-log snapshots before and after manual UI checks; overlapping lines deduplicated, not a continuous trace",
+  "requestCounts": [
+    {
+      "method": "GET",
+      "path": "/simi/api/gift/info/getBackpack",
+      "count": 1
+    },
+    {
+      "method": "GET",
+      "path": "/simi/api/gift/info/lucky/banner-snapshots",
+      "count": 2
+    },
+    {
+      "method": "GET",
+      "path": "/simi/api/gift/info/tabGiftList",
+      "count": 1
+    },
+    {
+      "method": "GET",
+      "path": "/simi/api/home/room/recommend",
+      "count": 2
+    },
+    {
+      "method": "GET",
+      "path": "/simi/api/lobby/lists",
+      "count": 5
+    },
+    {
+      "method": "GET",
+      "path": "/simi/api/redPacket/config",
+      "count": 5
+    },
+    {
+      "method": "GET",
+      "path": "/simi/api/redPacket/list",
+      "count": 5
+    },
+    {
+      "method": "GET",
+      "path": "/simi/api/resource/function2",
+      "count": 5
+    },
+    {
+      "method": "GET",
+      "path": "/simi/api/revenue/purse",
+      "count": 7
+    },
+    {
+      "method": "GET",
+      "path": "/simi/api/rocket/room/schedule/hasActiveRocket",
+      "count": 3
+    },
+    {
+      "method": "GET",
+      "path": "/simi/api/room/genGlobalToken",
+      "count": 5
+    },
+    {
+      "method": "GET",
+      "path": "/simi/api/room/get/info",
+      "count": 2
+    },
+    {
+      "method": "GET",
+      "path": "/simi/api/room/getHotScore",
+      "count": 14
+    },
+    {
+      "method": "GET",
+      "path": "/simi/api/room/inRoom/sendPropInfo",
+      "count": 1
+    },
+    {
+      "method": "GET",
+      "path": "/simi/api/room/list/audience",
+      "count": 1
+    },
+    {
+      "method": "GET",
+      "path": "/simi/api/room/mic/charm/isEnable",
+      "count": 5
+    },
+    {
+      "method": "GET",
+      "path": "/simi/api/room/mic/list/info",
+      "count": 1
+    },
+    {
+      "method": "GET",
+      "path": "/simi/api/room/party/list",
+      "count": 2
+    },
+    {
+      "method": "GET",
+      "path": "/simi/api/room/pk/info",
+      "count": 5
+    },
+    {
+      "method": "GET",
+      "path": "/simi/api/user/homepage/friends/play",
+      "count": 2
+    },
+    {
+      "method": "GET",
+      "path": "/simi/config/long-link-url",
+      "count": 2
+    },
+    {
+      "method": "GET",
+      "path": "/simi/country-list/home/default-country",
+      "count": 1
+    },
+    {
+      "method": "GET",
+      "path": "/simi/token/long-link",
+      "count": 1
+    },
+    {
+      "method": "GET",
+      "path": "/simi/token/tim",
+      "count": 1
+    },
+    {
+      "method": "POST",
+      "path": "/simi/api/resource/banner",
+      "count": 1
+    },
+    {
+      "method": "POST",
+      "path": "/simi/api/room/inRoom",
+      "count": 1
+    },
+    {
+      "method": "POST",
+      "path": "/simi/api/system/config/getConfigById",
+      "count": 1
+    },
+    {
+      "method": "POST",
+      "path": "/simi/api/system/config/sendByOneself",
+      "count": 1
+    }
+  ],
+  "resultCounts": [
+    {
+      "path": "/api/gift/info/getBackpack",
+      "http": "200",
+      "code": "200",
+      "count": 1
+    },
+    {
+      "path": "/api/gift/info/lucky/banner-snapshots",
+      "http": "200",
+      "code": "200",
+      "count": 2
+    },
+    {
+      "path": "/api/gift/info/tabGiftList",
+      "http": "200",
+      "code": "200",
+      "count": 1
+    },
+    {
+      "path": "/api/home/room/recommend",
+      "http": "200",
+      "code": "200",
+      "count": 2
+    },
+    {
+      "path": "/api/lobby/lists",
+      "http": "200",
+      "code": "200",
+      "count": 5
+    },
+    {
+      "path": "/api/redPacket/config",
+      "http": "200",
+      "code": "200",
+      "count": 5
+    },
+    {
+      "path": "/api/redPacket/list",
+      "http": "200",
+      "code": "200",
+      "count": 5
+    },
+    {
+      "path": "/api/resource/banner",
+      "http": "200",
+      "code": "200",
+      "count": 1
+    },
+    {
+      "path": "/api/resource/function2",
+      "http": "200",
+      "code": "200",
+      "count": 5
+    },
+    {
+      "path": "/api/revenue/purse",
+      "http": "200",
+      "code": "200",
+      "count": 7
+    },
+    {
+      "path": "/api/rocket/room/schedule/hasActiveRocket",
+      "http": "200",
+      "code": "200",
+      "count": 3
+    },
+    {
+      "path": "/api/room/genGlobalToken",
+      "http": "200",
+      "code": "200",
+      "count": 5
+    },
+    {
+      "path": "/api/room/get/info",
+      "http": "200",
+      "code": "200",
+      "count": 2
+    },
+    {
+      "path": "/api/room/getHotScore",
+      "http": "200",
+      "code": "200",
+      "count": 14
+    },
+    {
+      "path": "/api/room/inRoom",
+      "http": "200",
+      "code": "200",
+      "count": 1
+    },
+    {
+      "path": "/api/room/inRoom/sendPropInfo",
+      "http": "200",
+      "code": "200",
+      "count": 1
+    },
+    {
+      "path": "/api/room/list/audience",
+      "http": "200",
+      "code": "200",
+      "count": 1
+    },
+    {
+      "path": "/api/room/mic/charm/isEnable",
+      "http": "200",
+      "code": "200",
+      "count": 5
+    },
+    {
+      "path": "/api/room/mic/list/info",
+      "http": "200",
+      "code": "200",
+      "count": 1
+    },
+    {
+      "path": "/api/room/party/list",
+      "http": "200",
+      "code": "200",
+      "count": 2
+    },
+    {
+      "path": "/api/room/pk/info",
+      "http": "200",
+      "code": "200",
+      "count": 5
+    },
+    {
+      "path": "/api/system/config/getConfigById",
+      "http": "200",
+      "code": "200",
+      "count": 1
+    },
+    {
+      "path": "/api/system/config/sendByOneself",
+      "http": "200",
+      "code": "200",
+      "count": 1
+    },
+    {
+      "path": "/api/user/homepage/friends/play",
+      "http": "200",
+      "code": "200",
+      "count": 2
+    },
+    {
+      "path": "/config/long-link-url",
+      "http": "200",
+      "code": "200",
+      "count": 2
+    },
+    {
+      "path": "/country-list/home/default-country",
+      "http": "200",
+      "code": "200",
+      "count": 1
+    },
+    {
+      "path": "/token/long-link",
+      "http": "200",
+      "code": "200",
+      "count": 1
+    }
+  ],
+  "exceptions": [],
+  "socketStateTail": [
+    "[RoomSocket] state=subscribing roomId=2113269920442130433 channels=[]",
+    "[RoomSocket] state=subscribing roomId=2113269920442130433 channels=[]",
+    "[RoomSocket] state=ready roomId=2113269920442130433 channels=[global, global:<uid>, global_lobby, room, room:2113269920442130433]",
+    "[RoomSocket] state=subscribing roomId=2113269920442130433 channels=[global, global:<uid>, global_lobby, room]",
+    "[RoomSocket] state=connecting roomId=2113269920442130433 channels=[]",
+    "[RoomSocket] state=ready roomId=2113269920442130433 channels=[room:2113269920442130433]",
+    "[RoomSocket] state=subscribing roomId=2113269920442130433 channels=[]",
+    "[RoomSocket] state=subscribing roomId=2113269920442130433 channels=[]",
+    "[RoomSocket] state=ready roomId=2113269920442130433 channels=[global, global:<uid>, global_lobby, room, room:2113269920442130433]",
+    "[RoomSocket] state=subscribing roomId=2113269920442130433 channels=[global, global:<uid>, global_lobby, room]"
+  ]
+}

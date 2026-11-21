@@ -1,3 +1,5 @@
+import 'room_gift_panel_models.dart';
+
 enum RoomGiftTargetMode { allMic, allRoom, selected, room }
 
 class RoomGiftAudience {
@@ -5,10 +7,14 @@ class RoomGiftAudience {
     required this.isInRoom,
     required this.onlineCount,
     required this.recipients,
+    this.onlineUids,
   });
   final bool isInRoom;
   final int onlineCount;
   final List<RoomGiftRecipient> recipients;
+
+  /// Null means the online snapshot has not been loaded completely.
+  final Set<int>? onlineUids;
 }
 
 enum RoomGiftSendType {
@@ -46,6 +52,8 @@ class RoomGift {
     required this.isCombo,
     required this.tabId,
     this.cornerMark = '',
+    this.cornerMarks = const [],
+    this.smallIcons = const [],
     this.amount,
     this.userBackpackId,
     this.defaultGiftNum = 1,
@@ -58,6 +66,7 @@ class RoomGift {
     this.jumpLink,
     this.direction,
     this.videoMode,
+    this.jackpotInfo,
   });
 
   final int id;
@@ -67,6 +76,18 @@ class RoomGift {
   final int isCombo;
   final int tabId;
   final String cornerMark;
+  final List<String> cornerMarks;
+  final List<String> smallIcons;
+  List<String> get displayMarks =>
+      (cornerMarks.isEmpty
+              ? [...smallIcons, if (cornerMark.isNotEmpty) cornerMark]
+              : [...smallIcons, ...cornerMarks])
+          .take(4)
+          .toList(growable: false);
+  String get formattedPrice => '$price'.replaceAllMapped(
+    RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+    (match) => '${match[1]},',
+  );
   final int? amount;
   final int? userBackpackId;
   final int defaultGiftNum;
@@ -79,6 +100,7 @@ class RoomGift {
   final String? jumpLink;
   final int? direction;
   final int? videoMode;
+  final RoomJackpotInfo? jackpotInfo;
 
   bool get isBackpack => tabId == RoomGiftTab.backpackId;
   bool get supportsCombo => isBackpack ? isCombo > 0 : isCombo == 1;
@@ -107,7 +129,16 @@ class RoomGift {
       giftType == other.giftType &&
       itemType == other.itemType &&
       banner == other.banner &&
-      jumpLink == other.jumpLink;
+      jumpLink == other.jumpLink &&
+      cornerMarks.length == other.cornerMarks.length &&
+      cornerMarks.indexed.every(
+        (entry) => entry.$2 == other.cornerMarks[entry.$1],
+      ) &&
+      smallIcons.length == other.smallIcons.length &&
+      smallIcons.indexed.every(
+        (entry) => entry.$2 == other.smallIcons[entry.$1],
+      ) &&
+      jackpotInfo == other.jackpotInfo;
   @override
   int get hashCode => Object.hashAll([
     id,
@@ -123,12 +154,15 @@ class RoomGift {
     direction,
     videoMode,
     cornerMark,
+    Object.hashAll(cornerMarks),
+    Object.hashAll(smallIcons),
     defaultGiftNum,
     defaultGiftNumConfig,
     giftType,
     itemType,
     banner,
     jumpLink,
+    jackpotInfo,
   ]);
 
   /// Preserves campaign parameters while adding the current app language.
@@ -151,13 +185,17 @@ class RoomGift {
         .split(',')
         .map((value) => int.tryParse(value.trim()))
         .whereType<int>()
-        .where((value) => value > 0)
+        .where((value) => value > 0 && value <= 9999)
         .toSet()
         .toList(growable: false);
-    return configured.isEmpty ? const [1, 8, 18, 888] : configured;
+    return configured.isEmpty ? const [1, 8, 18, 188, 520, 1314] : configured;
   }
 
-  RoomGift copyWith({int? amount, String? animationUrl}) {
+  RoomGift copyWith({
+    int? amount,
+    String? animationUrl,
+    RoomJackpotInfo? jackpotInfo,
+  }) {
     return RoomGift(
       id: id,
       name: name,
@@ -166,6 +204,8 @@ class RoomGift {
       isCombo: isCombo,
       tabId: tabId,
       cornerMark: cornerMark,
+      cornerMarks: cornerMarks,
+      smallIcons: smallIcons,
       amount: amount ?? this.amount,
       userBackpackId: userBackpackId,
       defaultGiftNum: defaultGiftNum,
@@ -178,6 +218,7 @@ class RoomGift {
       jumpLink: jumpLink,
       direction: direction,
       videoMode: videoMode,
+      jackpotInfo: jackpotInfo ?? this.jackpotInfo,
     );
   }
 
@@ -193,10 +234,29 @@ class RoomGift {
       price: _intValue(json['price']),
       isCombo: _intValue(json['isCombo']),
       tabId: _nullableIntValue(json['tabId']) ?? fallbackTabId,
-      cornerMark: json['cornerMark']?.toString() ?? '',
+      cornerMark: json['cornerMark'] is String
+          ? json['cornerMark'] as String
+          : '',
+      cornerMarks: json['cornerMark'] is List
+          ? List.unmodifiable(
+              (json['cornerMark'] as List)
+                  .whereType<String>()
+                  .where((value) => value.isNotEmpty)
+                  .take(4),
+            )
+          : const [],
+      smallIcons: json['smallIcons'] is List
+          ? List.unmodifiable(
+              (json['smallIcons'] as List)
+                  .whereType<String>()
+                  .where((value) => value.isNotEmpty)
+                  .take(4),
+            )
+          : const [],
       amount: _nullableIntValue(json['amount']),
       userBackpackId: _nullableIntValue(json['userBackpackId']),
-      defaultGiftNum: defaultGiftNum != null && defaultGiftNum > 0
+      defaultGiftNum:
+          defaultGiftNum != null && defaultGiftNum > 0 && defaultGiftNum <= 9999
           ? defaultGiftNum
           : 1,
       defaultGiftNumConfig: json['defaultGiftNumConfig']?.toString(),
@@ -208,6 +268,11 @@ class RoomGift {
       jumpLink: json['jumpLink']?.toString(),
       direction: _nullableIntValue(json['direction']),
       videoMode: _nullableIntValue(json['videoMode']),
+      jackpotInfo: json['jackpotInfo'] is Map
+          ? RoomJackpotInfo.fromJson(
+              Map<String, dynamic>.from(json['jackpotInfo'] as Map),
+            )
+          : null,
     );
   }
 }
@@ -249,21 +314,25 @@ class RoomGiftCatalog {
     required this.balance,
     required this.canSendSelf,
     required this.tabs,
+    this.flightLimit = 8,
   });
 
   final int balance;
   final bool canSendSelf;
   final List<RoomGiftTab> tabs;
+  final int flightLimit;
 
   RoomGiftCatalog copyWith({
     int? balance,
     bool? canSendSelf,
     List<RoomGiftTab>? tabs,
+    int? flightLimit,
   }) {
     return RoomGiftCatalog(
       balance: balance ?? this.balance,
       canSendSelf: canSendSelf ?? this.canSendSelf,
       tabs: tabs ?? this.tabs,
+      flightLimit: flightLimit ?? this.flightLimit,
     );
   }
 }
@@ -292,6 +361,19 @@ class SendRoomGiftRequest {
   final int comboCount;
   final int price;
   final int? userBackpackId;
+
+  SendRoomGiftRequest frozen({String? confirmedComboId}) => SendRoomGiftRequest(
+    targetUids: targetUids == null ? null : List.unmodifiable(targetUids!),
+    sendType: sendType,
+    roomId: roomId,
+    giftId: giftId,
+    giftCount: giftCount,
+    giftSource: giftSource,
+    comboId: confirmedComboId ?? comboId,
+    comboCount: 1,
+    price: price,
+    userBackpackId: userBackpackId,
+  );
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{

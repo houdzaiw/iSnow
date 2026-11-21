@@ -362,7 +362,7 @@ class _MemberGiftButton extends StatelessWidget {
         children: [
           if (!own) ...[
             RoomProfileAsset(
-              asset: AppAssets.roomMemberGift,
+              asset: AppAssets.roomMemberGiftAnimation,
               size: RoomProfileTheme.giftIcon.r,
             ),
             SizedBox(width: RoomProfileTheme.mediumGap.w),

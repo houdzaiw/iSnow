@@ -54,6 +54,11 @@ class RoomRepository {
   RoomGiftAudience giftAudience(String roomId) => RoomGiftAudience(
     isInRoom: roomState.isInRoom && roomState.currentRoomId == roomId,
     onlineCount: roomState.onlineCount,
+    onlineUids:
+        roomState.audienceLoaded &&
+            roomState.audience.length == roomState.onlineCount
+        ? roomState.audience.map((user) => user.uid).toSet()
+        : null,
     recipients: [
       for (final mic in roomState.micList)
         if ((mic.uid ?? 0) > 0)

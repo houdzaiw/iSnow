@@ -1,0 +1,133 @@
+{
+  "checks": [
+    {
+      "name": "actual Android background and resume do not replay an old full-screen task",
+      "passed": false,
+      "error": "Expected: true\n  Actual: <false>\nNative condition not reached within 12s\n"
+    }
+  ],
+  "nativeTrace": [
+    "resolve:before-background",
+    "flutter_vap_controller_0:setVideoMode:request",
+    "flutter_vap_controller_0:setVideoMode:nativeReply",
+    "flutter_vap_controller_0:setVideoMode:delivered",
+    "flutter_vap_controller_0:setFetchResource:request",
+    "flutter_vap_controller_0:setFetchResource:nativeReply",
+    "flutter_vap_controller_0:setFetchResource:delivered",
+    "flutter_vap_controller_0:setLoop:request",
+    "flutter_vap_controller_0:setLoop:nativeReply",
+    "flutter_vap_controller_0:setLoop:delivered",
+    "flutter_vap_controller_0:playPath:request",
+    "flutter_vap_controller_0:playPath:nativeReply",
+    "flutter_vap_controller_0:playPath:delivered",
+    "flutter_vap_controller_0:event:onStart",
+    "started:before-background",
+    "os:inactive",
+    "flutter_vap_controller_0:stop:request",
+    "flutter_vap_controller_0:stop:nativeReply",
+    "flutter_vap_controller_0:stop:delivered",
+    "os:hidden",
+    "os:paused",
+    "os:hidden",
+    "os:inactive",
+    "os:resumed"
+  ],
+  "nativeTimeline": [
+    {
+      "at": "2026-11-21T01:15:44.138313Z",
+      "event": "resolve:before-background"
+    },
+    {
+      "at": "2026-11-21T01:15:45.273490Z",
+      "event": "flutter_vap_controller_0:setVideoMode:request"
+    },
+    {
+      "at": "2026-11-21T01:15:45.274162Z",
+      "event": "flutter_vap_controller_0:setVideoMode:nativeReply"
+    },
+    {
+      "at": "2026-11-21T01:15:45.274319Z",
+      "event": "flutter_vap_controller_0:setVideoMode:delivered"
+    },
+    {
+      "at": "2026-11-21T01:15:45.274937Z",
+      "event": "flutter_vap_controller_0:setFetchResource:request"
+    },
+    {
+      "at": "2026-11-21T01:15:45.275506Z",
+      "event": "flutter_vap_controller_0:setFetchResource:nativeReply"
+    },
+    {
+      "at": "2026-11-21T01:15:45.275529Z",
+      "event": "flutter_vap_controller_0:setFetchResource:delivered"
+    },
+    {
+      "at": "2026-11-21T01:15:45.275601Z",
+      "event": "flutter_vap_controller_0:setLoop:request"
+    },
+    {
+      "at": "2026-11-21T01:15:45.277439Z",
+      "event": "flutter_vap_controller_0:setLoop:nativeReply"
+    },
+    {
+      "at": "2026-11-21T01:15:45.277458Z",
+      "event": "flutter_vap_controller_0:setLoop:delivered"
+    },
+    {
+      "at": "2026-11-21T01:15:45.277522Z",
+      "event": "flutter_vap_controller_0:playPath:request"
+    },
+    {
+      "at": "2026-11-21T01:15:45.284308Z",
+      "event": "flutter_vap_controller_0:playPath:nativeReply"
+    },
+    {
+      "at": "2026-11-21T01:15:45.284475Z",
+      "event": "flutter_vap_controller_0:playPath:delivered"
+    },
+    {
+      "at": "2026-11-21T01:15:45.520769Z",
+      "event": "flutter_vap_controller_0:event:onStart"
+    },
+    {
+      "at": "2026-11-21T01:15:45.546855Z",
+      "event": "started:before-background"
+    },
+    {
+      "at": "2026-11-21T01:15:45.618144Z",
+      "event": "os:inactive"
+    },
+    {
+      "at": "2026-11-21T01:15:45.650490Z",
+      "event": "flutter_vap_controller_0:stop:request"
+    },
+    {
+      "at": "2026-11-21T01:15:45.867702Z",
+      "event": "flutter_vap_controller_0:stop:nativeReply"
+    },
+    {
+      "at": "2026-11-21T01:15:45.867936Z",
+      "event": "flutter_vap_controller_0:stop:delivered"
+    },
+    {
+      "at": "2026-11-21T01:15:46.503545Z",
+      "event": "os:hidden"
+    },
+    {
+      "at": "2026-11-21T01:15:46.503624Z",
+      "event": "os:paused"
+    },
+    {
+      "at": "2026-11-21T01:16:18.131338Z",
+      "event": "os:hidden"
+    },
+    {
+      "at": "2026-11-21T01:16:18.131776Z",
+      "event": "os:inactive"
+    },
+    {
+      "at": "2026-11-21T01:16:19.856486Z",
+      "event": "os:resumed"
+    }
+  ]
+}

@@ -1,0 +1,129 @@
+{
+  "reviewDate": "2026-11-21",
+  "timezone": "Asia/Shanghai",
+  "scope": "Authorized clean installation and read-only room acceptance on Pixel_9",
+  "authorization": {
+    "userReply": "允许安装重启，之后重新进房",
+    "allowed": ["Replace installed iSnow while retaining app data", "Restart and re-enter hei", "Read-only UI and runtime inspection"],
+    "excluded": ["Gift sending", "Recharge", "Chat sending", "Mic changes", "Room-management submissions"]
+  },
+  "target": {
+    "avd": "Pixel_9",
+    "serial": "emulator-5556",
+    "androidApi": 35,
+    "package": "com.nady.dev1",
+    "processId": 1756,
+    "physicalDevice": false
+  },
+  "deployment": {
+    "apk": "/Users/huili/project/iSnow/build/app/outputs/flutter-apk/app-debug.apk",
+    "mode": "debug",
+    "entry": "lib/lib_dev.dart",
+    "abi": "arm64-v8a",
+    "bytes": 224024251,
+    "sha256": "c9d1e1ef47ee606eda6290500ac8b700bfaa3fd16f3fa67413050cd5aa4a199d",
+    "installedApkSha256": "c9d1e1ef47ee606eda6290500ac8b700bfaa3fd16f3fa67413050cd5aa4a199d",
+    "method": "adb install -r",
+    "installResult": "Success",
+    "devicePackageLastUpdate": "2026-11-21 08:09:55",
+    "appDataCleared": false,
+    "uninstalled": false,
+    "loginStateRetained": true,
+    "rebuiltThisFollowUp": false
+  },
+  "roomEntry": {
+    "route": "Home -> Friends Activity / All -> hei",
+    "name": "hei",
+    "displayRoomNo": "30317291",
+    "internalRoomId": "2113269920442130433",
+    "normalRoomEntryFlowUsed": true,
+    "roomStatusAtRuntimeInspection": "ready",
+    "socketStatusAtRuntimeInspection": "ready",
+    "roomGeneration": 1,
+    "minimizedAtRuntimeInspection": false
+  },
+  "freshRuntime": {
+    "barrageHostInstances": 1,
+    "barrageViewModelInstances": 1,
+    "barrageStarted": true,
+    "barrageAcceptingMessages": true,
+    "barrageNativeLaneBlocked": false,
+    "giftManagerBarrageManaged": true,
+    "giftManagerNewFieldInitialized": true,
+    "barrageIssue": null,
+    "accountChannelsObserved": ["global", "global:<current UID>", "global_lobby", "room"],
+    "roomChannelObserved": "room:2113269920442130433",
+    "inspectionMethod": "Read-only VM object inspection; no synthetic event or gift submission injected",
+    "details": "runtime_state.json"
+  },
+  "giftPanel": {
+    "opened": true,
+    "catalogVisible": true,
+    "giftNamesAndPricesVisible": true,
+    "balanceVisible": 49855109,
+    "recipientCountVisible": 1,
+    "sendPressed": false,
+    "catalogRequestsInCapturedLogs": 1,
+    "backpackRequestsInCapturedLogs": 1,
+    "tabSwitch": "passed by user observation: Luck and Gifts both switch normally",
+    "closeReopenAndBalance": "passed by user observation: panel reopens and balance remains 49,855,109",
+    "keepRestore": "passed by user observation in the clean-start session; later runtime sample retained the same ready room and generation"
+  },
+  "logObservation": {
+    "scope": "Union of captured process-log snapshots; overlaps deduplicated, not a continuous trace",
+    "fatalOrFlutterUnhandledExceptions": 0,
+    "giftSendRequests": 0,
+    "observedNonSuccessBusinessResponses": [],
+    "details": "network_summary.json"
+  },
+  "priorHotReloadFailure": {
+    "evidence": "../barrage_2026_11_20/pixel9/inspection_result.json",
+    "freshStartResult": "The Hooks assertion and added-field Null/bool/Jackpot Map errors were not reproduced in the captured clean-start and room/panel observations",
+    "productionSourceChangedToHideError": false,
+    "goldenBaselinesChanged": false
+  },
+  "manualConfirmationRequested": {
+    "status": "passed by user confirmation",
+    "userReplies": ["两个分类能正常切换", "全部正常"],
+    "checks": [
+      "Click Luck then Gifts and verify the selected category and its contents",
+      "Close and reopen the gift panel; confirm balance remains 49,855,109",
+      "Keep the room and restore hei without selecting Exit"
+    ],
+    "reason": "Automated classification clicks did not reliably establish a visible category change. The manual result is the evidence for those UI actions, separate from runtime/log verification."
+  },
+  "screenshots": {
+    "afterCleanStart": "after_clean_start.png",
+    "friendRoomsEntry": "friends_activity_entry.png",
+    "roomReady": "room_ready.png",
+    "giftPanelReady": "gift_panel_ready.png",
+    "classificationAttemptOnly": "gift_luck_tab.png"
+  },
+  "acceptance": {
+    "cleanInstallLoginRoomAndPanel": "passed for the observed sample",
+    "manualTabAndKeepChecks": "passed by user observation",
+    "realBarrageVisualAndNavigation": "not verified; no accepted live barrage captured in the sample",
+    "barrageDedupeAndNavigationSimulation": "Previous automated tests remain the evidence; not counted as live server acceptance",
+    "physicalDecoderCompatibilityAndPerformance": "not verified by this emulator run"
+  },
+  "afterManualChecks": {
+    "runtime": "runtime_after_manual.json",
+    "navigation": "navigation_after_manual.json",
+    "roomStatus": "ready",
+    "socketStatus": "ready",
+    "internalRoomId": "2113269920442130433",
+    "roomGeneration": 1,
+    "lastObservedMinimized": true,
+    "lastObservedRoute": "/party",
+    "note": "Final sample is the home page with hei retained through Keep. User confirmation, rather than this final minimized snapshot, is the evidence for successful restore. The room ID and generation are unchanged.",
+    "exceptionsInCombinedLogSamples": 0,
+    "giftSendRequestsInCombinedLogSamples": 0,
+    "catalogRequestsInCombinedLogSamples": 1,
+    "backpackRequestsInCombinedLogSamples": 1
+  },
+  "agentGiftSends": 0,
+  "agentTopUps": 0,
+  "agentChatSends": 0,
+  "agentMicOrManagementSubmissions": 0,
+  "realComboRule": "Any future paid combo still requires a new concrete confirmation of gift, price, quantity, recipient UID, target mode, send count and total expense. This installation approval is not spending authorization."
+}

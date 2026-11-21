@@ -1,0 +1,10 @@
+{
+  "lib/classes/room/gift/effects/room_gift_effect_player.dart": "d0a5b6f3d463eb712abf97744ac2cdd22efc24b2576ce6641f83e2e8dd7a4278",
+  "lib/classes/room/barrage/room_barrage_banner.dart": "a75d019fb7368c1cedd26058101236f419cb959467d12e9dc2553c22fba7282e",
+  "packages/room_pag/lib/pag.dart": "ff076a142b1f77bf2315c17f1391398a979f0a1f751bd1e53312bc4eb2292f8f",
+  "tools/room_gift_native_acceptance/environment.dart.template": "adf2ed8235e1854737a883b2f7e5369c2bc4dfff6a18f8fee5acaf558028fa1c",
+  "tools/room_gift_native_acceptance/barrage_checks.dart.template": "56539dc2528f7d6fa55ba5a938bd98c3e00ef69dde41c0c48ded5406e1aa6a7a",
+  "tools/room_gift_native_acceptance/visibility_checks.dart.template": "8f2c7ff284bc2b97ccd2fe073db871adf099489d8c659ee7608d35736f280f75",
+  "tools/room_gift_native_acceptance/local_assets_checks.dart.template": "fda9d3f9de19a5e0ecafabdaafa72f31bc89fe236daa132be98b00bbd839939b",
+  "tools/room_gift_native_acceptance/main_activity.kt.template": "311a0418ad83a5f62be61e0d9d1e3cadb3ae1af8882cba56c38f1e64c89b0c87"
+}

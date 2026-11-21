@@ -2,6 +2,29 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:project/classes/room/gift/models/room_gift_models.dart';
 
 void main() {
+  test(
+    'panel parses real Jackpot, bounded small icons and formatted prices',
+    () {
+      final gift = RoomGift.fromJson({
+        'id': 3,
+        'price': 1234567,
+        'smallIcons': [
+          'https://cdn.test/1.png',
+          'https://cdn.test/2.png',
+          'https://cdn.test/3.png',
+          'https://cdn.test/4.png',
+          'https://cdn.test/5.png',
+        ],
+        'jackpotInfo': {'enabled': true, 'mode': 'SUPER', 'displayAmount': 123},
+        'defaultGiftNumConfig': '0,5,9999,10000',
+      }, fallbackTabId: 1);
+      expect(gift.smallIcons, hasLength(4));
+      expect(gift.formattedPrice, '1,234,567');
+      expect(gift.jackpotInfo!.isSuper, isTrue);
+      expect(gift.copyWith(amount: 2).jackpotInfo!.displayAmount, 123);
+      expect(gift.countOptions, [5, 9999]);
+    },
+  );
   test('successful send string data is the authoritative combo ID', () {
     expect(
       RoomGiftSendResult.fromJson('2026100822360620019602').comboId,
@@ -44,7 +67,7 @@ void main() {
       }, fallbackTabId: 9);
 
       expect(gift.defaultGiftNum, 1);
-      expect(gift.countOptions, [1, 8, 18, 888]);
+      expect(gift.countOptions, [1, 8, 18, 188, 520, 1314]);
     });
 
     test(

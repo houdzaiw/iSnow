@@ -9,10 +9,12 @@ class RoomGiftImage extends StatelessWidget {
     required this.source,
     required this.size,
     this.placeholderBuilder,
+    this.fit = BoxFit.contain,
   });
   final String source;
   final double size;
   final WidgetBuilder? placeholderBuilder;
+  final BoxFit fit;
   @override
   Widget build(BuildContext context) {
     final asset = AppAssets.roomGiftLocalImages[source] ?? source;
@@ -20,14 +22,14 @@ class RoomGiftImage extends StatelessWidget {
       AppAssets.lanhuRoomIconMissing,
       width: size,
       height: size,
-      fit: BoxFit.contain,
+      fit: fit,
     );
     if (asset.startsWith('assets/')) {
       return Image.asset(
         asset,
         width: size,
         height: size,
-        fit: BoxFit.contain,
+        fit: fit,
         errorBuilder: (_, __, ___) => missing(),
       );
     }
@@ -41,7 +43,7 @@ class RoomGiftImage extends StatelessWidget {
       imageUrl: asset,
       width: size,
       height: size,
-      fit: BoxFit.contain,
+      fit: fit,
       placeholder: (context, _) =>
           placeholderBuilder?.call(context) ??
           SizedBox(width: size, height: size),

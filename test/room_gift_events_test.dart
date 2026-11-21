@@ -69,20 +69,23 @@ void main() {
   });
 
   test(
-    'guest-only queue keeps the latest two even with identical timestamps',
+    'guest-only queue preserves active entries and waits in arrival order',
     () {
       manager.receive(socket(payload(uid: 90, combo: 'a'), id: 'a'));
       manager.receive(socket(payload(uid: 91, combo: 'b'), id: 'b'));
       manager.receive(socket(payload(uid: 92, combo: 'c'), id: 'c'));
       expect(manager.state.slots.map((slot) => slot!.message.uid).toSet(), {
+        90,
         91,
-        92,
       });
       manager.receive(socket(payload(uid: 93, combo: 'd'), id: 'd'));
       expect(manager.state.slots.map((slot) => slot!.message.uid).toSet(), {
-        92,
-        93,
+        90,
+        91,
       });
+      now = start.add(const Duration(seconds: 5));
+      manager.expire();
+      expect(manager.state.slots.map((slot) => slot!.message.uid), [92, 93]);
     },
   );
 
@@ -128,11 +131,15 @@ void main() {
       );
     }
     expect(manager.state.slots[1]!.message.uid, 10);
-    expect(manager.state.slots[0]!.message.uid, 189);
+    expect(manager.state.slots[0]!.message.uid, 90);
     expect(manager.state.publicMessages, hasLength(80));
-    expect(manager.state.effects, hasLength(12));
+    expect(manager.state.effects, hasLength(20));
     expect(manager.state.effects.first.key, '1');
     now = start.add(const Duration(seconds: 6));
+    manager.expire();
+    expect(manager.state.slots.whereType<Object>(), hasLength(2));
+    manager.reset();
+    now = now.add(const Duration(seconds: 10));
     manager.expire();
     expect(manager.state.slots, [null, null]);
     expect(manager.state.flights, isEmpty);
@@ -327,38 +334,43 @@ void main() {
     },
   );
 
-  test('lucky results use cumulative deltas and honor hidden effects', () {
-    manager.receive(
-      socket({
-        ...payload(),
-        'isLuckyGift': true,
-        'playWinGoldCount': true,
-        'totalCoinCount': 100,
-      }, id: 'lucky-1'),
-    );
-    expect(manager.state.lucky.single.amount, 100);
-    manager.completeLucky(manager.state.lucky.single.key);
-    manager.receive(
-      socket({
-        ...payload(count: 3),
-        'isLuckyGift': true,
-        'playWinGoldCount': true,
-        'totalCoinCount': 150,
-      }, id: 'lucky-2'),
-    );
-    expect(manager.state.lucky.single.amount, 50);
-    expect(manager.state.lucky.single.giftCount, 2);
-    manager.receive(
-      socket({
-        ...payload(combo: 'hidden'),
-        'isLuckyGift': true,
-        'isHideLuckyGift': true,
-        'totalCoinCount': 500,
-      }, id: 'hidden'),
-    );
-    expect(manager.state.lucky, hasLength(1));
-    expect(manager.state.slots.whereType<Object>(), hasLength(1));
-  });
+  test(
+    'lucky cumulative events only emit crossed number levels, not duplicate wins',
+    () {
+      manager.receive(
+        socket({
+          ...payload(),
+          'gift': {'id': 31},
+          'isLuckyGift': true,
+          'totalGiftCount': 10,
+          'totalCoinCount': 100,
+        }, id: 'lucky-1'),
+      );
+      expect(manager.state.lucky.single.numberLevel, 10);
+      expect(manager.state.lucky.single.amount, 0);
+      manager.completeLucky(manager.state.lucky.single.key);
+      manager.receive(
+        socket({
+          ...payload(count: 3),
+          'gift': {'id': 31},
+          'isLuckyGift': true,
+          'totalGiftCount': 35,
+          'totalCoinCount': 150,
+        }, id: 'lucky-2'),
+      );
+      expect(manager.state.lucky.single.numberLevel, 30);
+      expect(manager.state.lucky.single.giftCount, 35);
+      manager.receive(
+        socket({
+          ...payload(combo: 'hidden'),
+          'isLuckyGift': true,
+          'isHideLuckyGift': true,
+          'totalGiftCount': 500,
+        }, id: 'hidden'),
+      );
+      expect(manager.state.lucky, hasLength(1));
+    },
+  );
 
   test('banner, stream and jackpot are independent lanes', () {
     manager.receive(
@@ -398,7 +410,10 @@ void main() {
     expect(manager.state.roomWeekVal, 1234);
     expect(manager.state.banners, hasLength(1));
     expect(manager.state.effects, hasLength(2));
-    expect(manager.state.lucky.single.isJackpot, isTrue);
+    expect(
+      manager.state.lucky,
+      isEmpty,
+    ); // Jackpot uses only the full-screen lane.
     final active = manager.state.effects.first.key;
     manager.completeEffect(active);
     expect(manager.state.effects.single.key, 'special-jackpot');

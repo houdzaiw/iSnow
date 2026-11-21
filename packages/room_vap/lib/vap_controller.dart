@@ -16,6 +16,10 @@ class VapController {
   }
 
   Completer<void>? playCompleter;
+  Timer? _watchdog;
+  Future<void>? _stopTask;
+  int _playEpoch = 0;
+  bool _looping = false, _nativeActive = false, _disposed = false;
 
   Future<void> play(
       {required String source,
@@ -23,26 +27,53 @@ class VapController {
       required String playArg,
       bool loop = false,
       List<FetchResourceModel> fetchResources = const []}) async {
+    if (_disposed) throw StateError('VAP controller is disposed');
+    if (_stopTask != null) await _stopTask;
+    if (_nativeActive || playCompleter?.isCompleted == false) await stop();
+    if (_disposed) throw StateError('VAP controller is disposed');
+    _stopTask = null;
+    final epoch = ++_playEpoch;
     final completer = Completer<void>();
+    // Configuration can still be awaiting a platform reply when cancellation
+    // or the watchdog settles the future. Keep that error observed until the
+    // caller receives the same future below.
+    completer.future.ignore();
+    if (playCompleter?.isCompleted == false) playCompleter!.complete();
     playCompleter = completer;
+    _looping = loop;
+    _watchdog?.cancel();
+    _watchdog = Timer(const Duration(seconds: 20), () {
+      if (_disposed || epoch != _playEpoch || completer.isCompleted) return;
+      _playEpoch++;
+      _settle(TimeoutException('VAP playback timed out'));
+    });
     try {
       /// 先设置融合动画参数再播放，不然会出现融合动画不起作用的问题
       await setFetchResources(fetchResources);
+      if (!_isCurrent(epoch)) return completer.future;
 
       await setLoop(loop);
+      if (!_isCurrent(epoch)) return completer.future;
 
+      _nativeActive = true;
       await _methodChannel.invokeMethod(playMethod, {playArg: source});
-
-      return completer.future.timeout(const Duration(seconds: 20),
-          onTimeout: () {
-        if (completer.isCompleted) return;
-        completer.completeError(TimeoutException("wait play complete timeout"));
-      });
     } catch (e, s) {
-      if (!completer.isCompleted) {
-        completer.completeError(e, s);
-      }
-      return completer.future;
+      if (_isCurrent(epoch)) _settle(e, s);
+    }
+    return completer.future;
+  }
+
+  bool _isCurrent(int epoch) => !_disposed && epoch == _playEpoch;
+
+  void _settle([Object? error, StackTrace? stack]) {
+    _watchdog?.cancel();
+    _watchdog = null;
+    final current = playCompleter;
+    if (current == null || current.isCompleted) return;
+    if (error == null) {
+      current.complete();
+    } else {
+      current.completeError(error, stack);
     }
   }
 
@@ -66,8 +97,23 @@ class VapController {
         fetchResources: fetchResources);
   }
 
-  Future<void> stop() async {
-    await _methodChannel.invokeMethod('stop');
+  Future<void> stop() {
+    if (_stopTask != null) return _stopTask!;
+    _playEpoch++;
+    _watchdog?.cancel();
+    _watchdog = null;
+    return _stopTask = _stopNative(playCompleter);
+  }
+
+  Future<void> _stopNative(Completer<void>? playing) async {
+    try {
+      await _methodChannel.invokeMethod('stop');
+      _nativeActive = false;
+      if (playing?.isCompleted == false) playing!.complete();
+    } catch (error, stack) {
+      if (playing?.isCompleted == false) playing!.completeError(error, stack);
+      rethrow;
+    }
   }
 
   Future setFetchResources(List<FetchResourceModel> resources) {
@@ -84,24 +130,33 @@ class VapController {
   }
 
   void dispose() {
+    _disposed = true;
+    _playEpoch++;
+    _watchdog?.cancel();
     _methodChannel.setMethodCallHandler(null);
     if (playCompleter?.isCompleted == false) playCompleter?.complete();
   }
 
   Future _onMethodCallHandler(MethodCall call) async {
-    onEvent?.call(call.method, call.arguments);
+    if (_disposed) return;
     switch (call.method) {
+      case "onStart":
+        // A looping clip has no completion deadline after its native decoder
+        // actually starts. An unstarted clip still has the startup watchdog.
+        if (_looping) _watchdog?.cancel();
+        break;
       case "onComplete":
-        if (playCompleter?.isCompleted == false) {
-          playCompleter?.complete();
-        }
+        _settle();
         break;
       case "onFailed":
-        if (playCompleter?.isCompleted == false) {
-          playCompleter?.completeError(call.arguments);
-        }
+        _playEpoch++;
+        _settle(call.arguments ?? StateError('VAP playback failed'));
+        break;
+      case "onDestroy":
+        _nativeActive = false;
         break;
     }
+    onEvent?.call(call.method, call.arguments);
   }
 }
 

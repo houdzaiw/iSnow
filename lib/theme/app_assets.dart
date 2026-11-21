@@ -70,6 +70,53 @@ class AppAssets {
   static const roomGiftJackpotEffect =
       'assets/room_gift/jackpot_full_screen_anim.mp4';
   static const roomGiftLuckyEffect = 'assets/room_gift/luck_win_small.mp4';
+  static const roomGiftLuckyNumbers = <int, String>{
+    10: 'assets/room_gift/luck_num10.mp4',
+    20: 'assets/room_gift/luck_num20.mp4',
+    30: 'assets/room_gift/luck_num30.mp4',
+    50: 'assets/room_gift/luck_num50.mp4',
+    66: 'assets/room_gift/luck_num66.mp4',
+    88: 'assets/room_gift/luck_num88.mp4',
+    100: 'assets/room_gift/luck_num100.mp4',
+    200: 'assets/room_gift/luck_num200.mp4',
+    300: 'assets/room_gift/luck_num300.mp4',
+    400: 'assets/room_gift/luck_num400.mp4',
+    500: 'assets/room_gift/luck_num500.mp4',
+    1000: 'assets/room_gift/luck_num1000.mp4',
+    2000: 'assets/room_gift/luck_num2000.mp4',
+    5000: 'assets/room_gift/luck_num5000.mp4',
+    5555: 'assets/room_gift/luck_num5555.mp4',
+    6000: 'assets/room_gift/luck_num6000.mp4',
+    6666: 'assets/room_gift/luck_num6666.mp4',
+    7000: 'assets/room_gift/luck_num7000.mp4',
+    7777: 'assets/room_gift/luck_num7777.mp4',
+    8000: 'assets/room_gift/luck_num8000.mp4',
+    8888: 'assets/room_gift/luck_num8888.mp4',
+    9000: 'assets/room_gift/luck_num9000.mp4',
+    10000: 'assets/room_gift/luck_num10000.mp4',
+  };
+  static const roomGiftLuckyBubbles = <String, String>{
+    'small': 'assets/room_gift/luck_win_small.mp4',
+    'medium': 'assets/room_gift/luck_win_medium.mp4',
+    'big': 'assets/room_gift/luck_win_big.mp4',
+  };
+  static const roomGiftJackpotPanel =
+      'assets/room_gift/jackpot_gift_panel_anim.mp4';
+  static const roomGiftJackpotPanelBackground =
+      'assets/lanhu/room/room_gift_jackpot_panel_bg.webp';
+  static const roomGiftRocketEffects = [
+    'assets/room_gift/big_rocket_fly_lv1.mp4',
+    'assets/room_gift/big_rocket_fly_lv2.mp4',
+    'assets/room_gift/big_rocket_fly_lv3.mp4',
+    'assets/room_gift/big_rocket_fly_lv4.mp4',
+    'assets/room_gift/big_rocket_fly_lv5.mp4',
+    'assets/room_gift/big_rocket_fly_lv6.mp4',
+  ];
+  static const roomGiftButtonAnimation =
+      'assets/lanhu/room/room_gift_button_animation.webp';
+  static const roomMemberGiftAnimation =
+      'assets/lanhu/room/room_member_gift_animation.webp';
+  static const roomGiftEffectClose = roomMiniClose;
   const AppAssets._();
 
   static const String iconMissing = 'assets/lanhu/common/icon_missing.png';

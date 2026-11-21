@@ -223,6 +223,7 @@ class _GiftCountDialog extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final controller = useTextEditingController(text: '$currentCount');
+    final invalid = useState(false);
     return AlertDialog(
       backgroundColor: AppColors.roomGiftPopupSurface,
       shape: const RoundedRectangleBorder(
@@ -236,10 +237,19 @@ class _GiftCountDialog extends HookWidget {
         controller: controller,
         autofocus: true,
         keyboardType: TextInputType.number,
+        onChanged: (_) {
+          if (invalid.value) invalid.value = false;
+        },
         style: AppTextStyles.roomGiftCount,
         decoration: InputDecoration(
           hintText: context.l10n.t('room.gift.countHint'),
           hintStyle: AppTextStyles.roomGiftStatus,
+          errorText: invalid.value
+              ? context.l10n.t('room.gift.invalidCount')
+              : null,
+          errorStyle: AppTextStyles.roomGiftStatus.copyWith(
+            color: AppColors.danger,
+          ),
         ),
       ),
       actions: [
@@ -253,8 +263,13 @@ class _GiftCountDialog extends HookWidget {
         TextButton(
           onPressed: () {
             final value = int.tryParse(controller.text.trim());
-            if (value != null && value > 0) {
+            if (RegExp(r'^[0-9]{1,4}$').hasMatch(controller.text) &&
+                value != null &&
+                value > 0 &&
+                value <= 9999) {
               Navigator.pop(context, value);
+            } else {
+              invalid.value = true;
             }
           },
           child: Text(

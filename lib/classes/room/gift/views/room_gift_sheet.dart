@@ -12,6 +12,9 @@ import '../../../../theme/app_theme.dart';
 import '../models/room_gift_models.dart';
 import '../viewmodel/room_gift_state.dart';
 import '../viewmodel/room_gift_view_model.dart';
+import '../viewmodel/room_gift_panel_view_model.dart';
+import 'room_gift_panel_extras.dart';
+import 'room_gift_preview.dart';
 import 'room_gift_footer.dart';
 import 'room_gift_grid.dart';
 import 'room_gift_promotion_bar.dart';
@@ -91,7 +94,19 @@ class RoomGiftSheet extends HookConsumerWidget {
     final provider = roomGiftViewModelProvider(roomId);
     final state = ref.watch(provider);
     final viewModel = ref.read(provider.notifier);
+    final panelState = ref.watch(roomGiftPanelViewModelProvider(roomId));
+    final panelModel = ref.read(
+      roomGiftPanelViewModelProvider(roomId).notifier,
+    );
+    final routeCurrent = ModalRoute.of(context)?.isCurrent ?? true;
+    useEffect(() {
+      Future.microtask(() {
+        if (panelModel.mounted) panelModel.setVisible(routeCurrent);
+      });
+      return null;
+    }, [routeCurrent]);
     useOnAppLifecycleStateChange((previous, next) {
+      panelModel.setVisible(next == AppLifecycleState.resumed && routeCurrent);
       if (next == AppLifecycleState.resumed) {
         unawaited(viewModel.refreshBalance());
       }
@@ -116,20 +131,29 @@ class RoomGiftSheet extends HookConsumerWidget {
     }, [roomId]);
 
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
-    final preferredHeight = AppSpacing.roomGiftPanelHeight.h + bottomPadding;
+    final hasExtras =
+        panelState.snapshot != null ||
+        panelState.error != null ||
+        panelState.loading ||
+        panelState.jackpot?.enabled == true;
+    final preferredHeight =
+        AppSpacing.roomGiftPanelHeight.h +
+        bottomPadding +
+        (hasExtras ? AppSpacing.giftPanelExtrasHeight.h : 0);
     final maxHeight =
         MediaQuery.sizeOf(context).height *
         AppSpacing.roomGiftPanelMaxHeightRatio;
     final hasIssue = state.issue != null;
+    final panelHeight = math.min(preferredHeight, maxHeight);
     final summary = hasIssue
         ? _issueText(context, state)
         : state.selectedGift?.isBackpack == true
         ? '${state.targetCount} recipients · ${state.totalGiftCount} gifts'
         : '${state.targetCount} recipients · ${state.totalCoinCost} coins';
 
-    return SizedBox(
+    final panel = SizedBox(
       width: double.infinity,
-      height: math.min(preferredHeight, maxHeight),
+      height: panelHeight,
       child: Column(
         children: [
           RoomGiftPromotionBar(
@@ -147,6 +171,12 @@ class RoomGiftSheet extends HookConsumerWidget {
             onOpenWallet: () =>
                 Navigator.pop(context, RoomGiftSheetResult.openWallet),
           ),
+          if (hasExtras)
+            RoomGiftPanelExtras(
+              state: panelState,
+              onRetry: panelModel.retrySnapshots,
+              animate: panelModel.canAnimatePanel,
+            ),
           Expanded(
             child: DecoratedBox(
               decoration: const BoxDecoration(
@@ -164,7 +194,11 @@ class RoomGiftSheet extends HookConsumerWidget {
                   children: [
                     RoomGiftTargetBar(state: state, viewModel: viewModel),
                     Expanded(
-                      child: _GiftBody(state: state, viewModel: viewModel),
+                      child: _GiftBody(
+                        state: state,
+                        viewModel: viewModel,
+                        onReplayPreview: panelModel.replayPreview,
+                      ),
                     ),
                     SizedBox(
                       height: AppSpacing.giftPanelSummaryHeight.h,
@@ -203,14 +237,62 @@ class RoomGiftSheet extends HookConsumerWidget {
         ],
       ),
     );
+    final previewHeight = math.min(
+      AppSpacing.giftPreviewMaxHeight.h,
+      maxHeight - panelHeight,
+    );
+    final preview = panelState.preview;
+    final hasPreview =
+        preview != null &&
+        panelModel.isVisible &&
+        previewHeight >= AppSpacing.giftPreviewMinHeight.h;
+    return AbsorbPointer(
+      absorbing: state.isSending,
+      child: !hasPreview
+          ? panel
+          : SizedBox(
+              height: panelHeight + previewHeight,
+              child: Stack(
+                children: [
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: panelHeight,
+                    child: panel,
+                  ),
+                  PositionedDirectional(
+                    bottom: panelHeight + AppSpacing.sm.h,
+                    end: AppSpacing.lg.w,
+                    width: AppSpacing.giftPreviewMaxWidth.w,
+                    height: previewHeight - AppSpacing.sm.h,
+                    child: RoomGiftPreview(
+                      key: ValueKey(
+                        'gift-preview-${panelState.previewRevision}',
+                      ),
+                      gift: preview,
+                      onRetry: panelModel.retryPreview,
+                      onClose: () =>
+                          panelModel.closePreview(panelState.previewRevision),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+    );
   }
 }
 
 class _GiftBody extends StatelessWidget {
-  const _GiftBody({required this.state, required this.viewModel});
+  const _GiftBody({
+    required this.state,
+    required this.viewModel,
+    required this.onReplayPreview,
+  });
 
   final RoomGiftState state;
   final RoomGiftViewModel viewModel;
+  final VoidCallback onReplayPreview;
 
   @override
   Widget build(BuildContext context) {
@@ -231,8 +313,13 @@ class _GiftBody extends StatelessWidget {
                 tabs: state.tabs,
                 selectedTabId: state.selectedTabId,
                 selectedGiftKey: state.selectedGiftKey,
+                selectedCount: state.giftCount,
                 onTabSelected: viewModel.selectTab,
-                onGiftSelected: viewModel.selectGift,
+                onGiftSelected: (gift) {
+                  final repeated = state.selectedGiftKey == gift.selectionKey;
+                  viewModel.selectGift(gift);
+                  if (repeated) onReplayPreview();
+                },
               )
             : _GiftStatus(message: context.l10n.t('room.gift.empty')),
     };
@@ -281,6 +368,7 @@ String _issueText(BuildContext context, RoomGiftState state) {
     RoomGiftIssue.roomUnavailable => context.l10n.t(
       'room.gift.roomUnavailable',
     ),
+    RoomGiftIssue.invalidCount => context.l10n.t('room.gift.invalidCount'),
     RoomGiftIssue.requestFailed =>
       state.issueMessage?.isNotEmpty == true
           ? state.issueMessage!

@@ -1,0 +1,141 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:room_gift_native_acceptance/production/classes/room/barrage/room_barrage_banner.dart';
+import 'package:room_gift_native_acceptance/production/classes/room/barrage/room_barrage_models.dart';
+
+import 'environment.dart';
+
+void registerBarrageChecks() {
+  for (final format in [
+    RoomGiftAnimationFormat.pag,
+    RoomGiftAnimationFormat.vap,
+  ]) {
+    nativeCheck('barrage ${format.name} background and foreground release', (
+      tester,
+    ) async {
+      final back = await resource(format);
+      final front = await resource(RoomGiftAnimationFormat.svga);
+      var presented = 0, ended = 0, tapped = 0;
+      final start = trace.length;
+      await scene(
+        tester,
+        Center(
+          child: RoomBarrageBanner(
+            prepared: _prepared('local-${format.name}', back, front),
+            onPresented: () => presented++,
+            onEnd: () {
+              trace.add('barrage:end');
+              ended++;
+            },
+            onTap: () => tapped++,
+            onFailure: (error) => playerErrors.add('$error'),
+          ),
+        ),
+      );
+      await until(tester, () => presented == 1);
+      await capture(tester, 'native_barrage_${format.name}');
+      await tester.tap(find.byKey(const ValueKey('room-account-barrage')));
+      expect(
+        tapped,
+        1,
+      ); // A local callback only, never app navigation or an order.
+      await until(tester, () => ended == 1);
+      final records = trace.skip(start).toList();
+      final end = records.indexOf('barrage:end');
+      if (format == RoomGiftAnimationFormat.pag) {
+        expect(
+          records.indexWhere((x) => x.endsWith(':release:delivered')),
+          inInclusiveRange(0, end - 1),
+        );
+      } else {
+        expect(
+          records.indexWhere((x) => x.endsWith(':stop:delivered')),
+          inInclusiveRange(0, end - 1),
+        );
+      }
+      expect(presented, 1);
+    });
+  }
+
+  nativeCheck(
+    'barrage replacement waits for old real PAG initialization and release',
+    (tester) async {
+      final clip = await resource(RoomGiftAnimationFormat.pag);
+      final gate = Completer<void>();
+      holdPagInit = gate;
+      final selection = ValueNotifier(1);
+      addTearDown(selection.dispose);
+      final start = trace.length;
+      var presented = 0, ended = 0;
+      await scene(
+        tester,
+        Center(
+          child: ValueListenableBuilder<int>(
+            valueListenable: selection,
+            builder: (_, value, __) => RoomBarrageBanner(
+              key: ValueKey('local-$value'),
+              prepared: _prepared('local-$value', clip, null),
+              onPresented: () => presented++,
+              onEnd: () => ended++,
+              onTap: () {},
+              onFailure: (error) => playerErrors.add('$error'),
+            ),
+          ),
+        ),
+      );
+      await until(
+        tester,
+        () => trace.skip(start).any((x) => x.endsWith(':initPag:nativeReply')),
+      );
+      selection.value =
+          2; // Local key/session replacement, no account operation.
+      await tester.pump(const Duration(milliseconds: 150));
+      expect(
+        trace.skip(start).where((x) => x.endsWith(':initPag:request')),
+        hasLength(1),
+      );
+      expect(presented, 0);
+      holdPagInit = null;
+      gate.complete();
+      await until(
+        tester,
+        () =>
+            trace
+                .skip(start)
+                .where((x) => x.endsWith(':initPag:request'))
+                .length ==
+            2,
+      );
+      await until(tester, () => presented == 1);
+      final records = trace.skip(start).toList();
+      final firstRelease = records.indexWhere(
+        (x) => x.endsWith(':release:delivered'),
+      );
+      final secondInit = records.lastIndexWhere(
+        (x) => x.endsWith(':initPag:request'),
+      );
+      expect(firstRelease, greaterThanOrEqualTo(0));
+      expect(firstRelease, lessThan(secondInit));
+      await capture(tester, 'native_barrage_replacement');
+      await until(tester, () => ended == 1);
+    },
+  );
+}
+
+RoomBarragePrepared _prepared(
+  String key,
+  RoomGiftAnimationResource back,
+  RoomGiftAnimationResource? front,
+) => RoomBarragePrepared(
+  RoomBarrageTask(
+    key: key,
+    kind: RoomBarrageKind.resource,
+    createdAt: DateTime.now(),
+    texts: const {'en': 'LOCAL QA - no order'},
+  ),
+  background: back,
+  foreground: front,
+);

@@ -241,6 +241,8 @@ static BOOL NadyVapCGRectIsUsable(CGRect rect) {
     _wrapView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     _wrapView.contentMode = QGVAPWrapViewContentModeAspectFit;
     _wrapView.autoDestoryAfterFinish = YES;
+    // Room visuals must not play embedded audio or alter Agora's audio session.
+    [_wrapView setMute:YES];
     
     [_view addSubview:_wrapView];
     NSInteger repeatCount = _loop ? -1 : 0;

@@ -194,10 +194,11 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
 
   void selectGift(RoomGift gift) {
     if (state.isSending) return;
+    final same = state.selectedGiftKey == gift.selectionKey;
     state = state.copyWith(
       selectedTabId: gift.tabId,
       selectedGiftKey: gift.selectionKey,
-      giftCount: gift.defaultGiftNum,
+      giftCount: same ? state.giftCount : gift.defaultGiftNum.clamp(1, 9999),
       issue: null,
       issueMessage: null,
     );
@@ -244,7 +245,7 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
   }
 
   void setGiftCount(int count) {
-    if (!mounted || state.isSending || count <= 0) return;
+    if (!mounted || state.isSending || count <= 0 || count > 9999) return;
     state = state.copyWith(giftCount: count, issue: null, issueMessage: null);
   }
 

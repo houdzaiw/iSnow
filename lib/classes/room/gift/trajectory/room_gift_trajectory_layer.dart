@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../theme/app_theme.dart';
+import '../../../../manager/room_animation_performance_manager.dart';
 import '../event/room_gift_event_manager.dart';
 import '../views/room_gift_image.dart';
 import 'room_gift_seat_registry.dart';
@@ -13,10 +14,14 @@ class RoomGiftTrajectoryLayer extends StatefulWidget {
     required this.events,
     required this.registry,
     required this.onConsumed,
+    this.quality = RoomAnimationQuality.full,
+    this.maxPerTarget = 8,
   });
   final List<RoomGiftEffectTask> events;
   final RoomGiftSeatRegistry registry;
   final ValueChanged<String> onConsumed;
+  final RoomAnimationQuality quality;
+  final int maxPerTarget;
   @override
   State<RoomGiftTrajectoryLayer> createState() =>
       _RoomGiftTrajectoryLayerState();
@@ -47,19 +52,24 @@ class _RoomGiftTrajectoryLayerState extends State<RoomGiftTrajectoryLayer> {
       if (!mounted) return;
       final viewport = widget.registry.viewport;
       if (viewport == null || viewport.isEmpty) return;
-      for (final event in widget.events) {
+      final valid = widget.events.map((event) => event.key).toSet();
+      _bursts.removeWhere((key, _) => !valid.contains(key));
+      if (_bursts.isNotEmpty) {
+        setState(() {});
+        return;
+      }
+      for (final event in widget.events.take(1)) {
         if (!_seen.add(event.key)) continue;
         if (_seen.length > 300) _seen.remove(_seen.first);
-        final capacity =
-            32 -
-            _bursts.values.fold<int>(0, (count, tasks) => count + tasks.length);
         final tasks = RoomGiftTrajectoryTask.fromEvent(
           event,
           widget.registry.coordinate,
           viewport: viewport,
-        ).take(capacity).toList();
+          quality: widget.quality,
+          maxPerTarget: widget.maxPerTarget,
+        );
         if (tasks.isNotEmpty) _bursts[event.key] = tasks;
-        widget.onConsumed(event.key);
+        if (tasks.isEmpty) widget.onConsumed(event.key);
       }
       setState(() {});
     });
@@ -74,8 +84,16 @@ class _RoomGiftTrajectoryLayerState extends State<RoomGiftTrajectoryLayer> {
             key: ValueKey(burst.key),
             tasks: burst.value,
             registry: widget.registry,
+            maxCopies: switch (widget.quality) {
+              RoomAnimationQuality.full => widget.maxPerTarget.clamp(1, 9999),
+              RoomAnimationQuality.reduced => widget.maxPerTarget.clamp(1, 3),
+              RoomAnimationQuality.minimum => 1,
+            },
             onEnd: () {
-              if (mounted) setState(() => _bursts.remove(burst.key));
+              if (mounted) {
+                setState(() => _bursts.remove(burst.key));
+                widget.onConsumed(burst.key);
+              }
             },
           ),
       ],
@@ -89,10 +107,12 @@ class _GiftBurst extends StatefulWidget {
     required this.tasks,
     required this.registry,
     required this.onEnd,
+    required this.maxCopies,
   });
   final List<RoomGiftTrajectoryTask> tasks;
   final RoomGiftSeatRegistry registry;
   final VoidCallback onEnd;
+  final int maxCopies;
   @override
   State<_GiftBurst> createState() => _GiftBurstState();
 }
@@ -102,9 +122,12 @@ class _GiftBurstState extends State<_GiftBurst>
   // Match Nady's central elastic reveal and its delayed ~666ms flight.
   late final _controller = AnimationController(
     vsync: this,
-    duration: AppMotion.roomGiftBurst,
+    duration:
+        AppMotion.roomGiftBurst +
+        widget.tasks.map((task) => task.delay).reduce((a, b) => a > b ? a : b),
   );
   bool _ended = false;
+  final _paths = <String, _FlightPath>{};
 
   @override
   void initState() {
@@ -126,20 +149,26 @@ class _GiftBurstState extends State<_GiftBurst>
   bool _matches(RoomGiftTrajectoryTask task) {
     if (task.isScatter) return true;
     final current = widget.registry.coordinate(task.target.uid);
-    return current != null &&
-        current.position == task.target.position &&
-        (current.offset - task.target.offset).distance < AppSpacing.xs;
+    return current != null;
   }
 
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
     animation: _controller,
     builder: (context, _) {
-      final elapsed =
-          _controller.value * AppMotion.roomGiftBurst.inMilliseconds;
+      final elapsed = _controller.value * _controller.duration!.inMilliseconds;
       final first = widget.tasks.first;
-      final active = widget.tasks.where(_matches).toList();
+      final active = widget.tasks
+          .where((task) => task.copyIndex < widget.maxCopies && _matches(task))
+          .toList();
       if (active.isEmpty) {
+        _end();
+        return const SizedBox.shrink();
+      }
+      final lastDelay = active
+          .map((task) => task.delay.inMilliseconds)
+          .reduce((a, b) => a > b ? a : b);
+      if (elapsed >= AppMotion.roomGiftBurst.inMilliseconds + lastDelay) {
         _end();
         return const SizedBox.shrink();
       }
@@ -168,31 +197,43 @@ class _GiftBurstState extends State<_GiftBurst>
           ],
         );
       }
-      final t = AppMotion.roomGiftFlightCurve.transform(
-        ((elapsed - AppMotion.roomGiftReveal.inMilliseconds) /
-                AppMotion.roomGiftFlight.inMilliseconds)
-            .clamp(0.0, 1.0),
-      );
       final size = AppSpacing.giftTrajectoryIconSize.r;
+      final positions = <String, Offset>{};
+      final progress = <String, double>{};
+      for (final task in active) {
+        final raw =
+            (elapsed -
+                AppMotion.roomGiftReveal.inMilliseconds -
+                task.delay.inMilliseconds) /
+            AppMotion.roomGiftFlight.inMilliseconds;
+        if (raw < 0 || raw > 1) continue;
+        final t = AppMotion.roomGiftFlightCurve.transform(raw.clamp(0.0, 1.0));
+        final target = task.isScatter
+            ? task.target.offset
+            : widget.registry.coordinate(task.target.uid)!.offset;
+        final path = _paths.putIfAbsent(
+          task.key,
+          () => _FlightPath(task.source, target),
+        );
+        positions[task.key] = path.position(t, target);
+        progress[task.key] = t;
+      }
       return Stack(
         children: [
           for (final task in active)
-            Positioned(
-              left:
-                  Offset.lerp(task.source, task.target.offset, t)!.dx -
-                  size / 2,
-              top:
-                  Offset.lerp(task.source, task.target.offset, t)!.dy -
-                  size / 2,
-              child: Opacity(
-                opacity: task.isScatter ? 1 - t : 1,
-                child: RoomGiftImage(
-                  key: ValueKey('gift-flight-${task.key}'),
-                  source: task.event.message.gift.icon,
-                  size: size,
+            if (positions.containsKey(task.key))
+              Positioned(
+                left: positions[task.key]!.dx - size / 2,
+                top: positions[task.key]!.dy - size / 2,
+                child: Opacity(
+                  opacity: task.isScatter ? 1 - progress[task.key]! : 1,
+                  child: RoomGiftImage(
+                    key: ValueKey('gift-flight-${task.key}'),
+                    source: task.event.message.gift.icon,
+                    size: size,
+                  ),
                 ),
               ),
-            ),
         ],
       );
     },
@@ -202,5 +243,22 @@ class _GiftBurstState extends State<_GiftBurst>
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+}
+
+class _FlightPath {
+  _FlightPath(this.start, this.target) : last = start;
+  Offset start, target, last;
+  double changedAt = 0;
+  Offset position(double t, Offset destination) {
+    if (target != destination) {
+      start = last;
+      target = destination;
+      changedAt = t;
+    }
+    final local = changedAt >= 1
+        ? 1.0
+        : ((t - changedAt) / (1 - changedAt)).clamp(0.0, 1.0);
+    return last = Offset.lerp(start, target, local)!;
   }
 }

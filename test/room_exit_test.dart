@@ -615,7 +615,7 @@ void main() {
       await expectLater(
         find.byKey(const ValueKey('room-lifecycle-snapshot')),
         matchesGoldenFile(
-          'goldens/room_public_chat_lanhu_v1/regression/room_exit_choices.png',
+          'goldens/room_gift_feedback_v2/regression/room_exit_choices.png',
         ),
       );
       await tester.tap(find.byKey(const ValueKey('room-exit-keep')));
@@ -976,7 +976,7 @@ class _RoomRepository extends ChangeNotifier implements RoomRepository {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-class _GiftRepository implements RoomGiftRepository {
+class _GiftRepository extends RoomGiftRepository {
   @override
   RoomGiftCatalog? get cachedCatalog => null;
   @override

@@ -1,0 +1,49 @@
+{
+  "date": "2026-11-15",
+  "state": "dual_ordinary_gift_animation_confirmed_by_user",
+  "device": "emulator-5554",
+  "avd": "Pixel_9",
+  "accountUid": 30317291,
+  "secondaryDevice": "emulator-5556",
+  "secondaryAvd": "Medium_Phone_API_35",
+  "secondaryUid": 12594212,
+  "roomId": "2113269920442130433",
+  "apk": "/Users/huili/project/iSnow/build/app/outputs/flutter-apk/isnow-room-gift-fixed-arm64-debug.apk",
+  "sha256": "230eb796e51c3a986eb215b6e60efafb181e0ff3192743b3a6672652a6abddfe",
+  "bytes": 244717167,
+  "abis": [
+    "arm64-v8a"
+  ],
+  "authorizedRestart": true,
+  "primaryPid": 32338,
+  "secondaryPid": 20232,
+  "primaryBalance": 49855111,
+  "primaryAudience": [
+    {
+      "uid": "30317291",
+      "userNo": "30317291"
+    },
+    {
+      "uid": "12594212",
+      "userNo": "12594212"
+    }
+  ],
+  "newTransactions": 2,
+  "recordedAt": "2026-11-15T19:48:24.051447+08:00",
+  "readOnlyChecks": {
+    "primaryRoomInRuntime": "2113269920442130433",
+    "primarySocketRoomSubscribed": true,
+    "secondarySocketRoomSubscribedFromLog": true,
+    "primaryAudienceUids": [
+      "30317291",
+      "12594212"
+    ],
+    "primaryAudienceCount": 2,
+    "primaryBalanceBeforeNewGift": 49855111,
+    "primaryFlutterErrorsAfterRestart": 0,
+    "secondaryRestarted": false
+  },
+  "primaryBalanceAfter": 49855109,
+  "lastOrderId": "2026111520235213465540",
+  "visualFollowupEvidence": "gift_visual_followup_result.json"
+}

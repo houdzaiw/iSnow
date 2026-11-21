@@ -1,0 +1,76 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:integration_test/integration_test_driver_extended.dart';
+
+Future<void> main() async {
+  final stamp = DateTime.now().toUtc().toIso8601String().replaceAll(':', '-');
+  final directory = Directory('build/native_qa_evidence/$stamp')
+    ..createSync(recursive: true);
+  final adb = Platform.environment['NATIVE_QA_ADB']!;
+  final device = Platform.environment['NATIVE_QA_DEVICE']!;
+  final monitor = await Process.start(adb, [
+    '-s',
+    device,
+    'logcat',
+    '-T',
+    '1',
+    '-v',
+    'brief',
+    '-s',
+    'NativeLifecycleQA:I',
+    '*:S',
+  ]);
+  final returns = <Future<void>>[];
+  final lines = monitor.stdout
+      .transform(utf8.decoder)
+      .transform(const LineSplitter())
+      .listen((line) {
+        if (!line.contains('returnAfterStop')) return;
+        returns.add(() async {
+          await Future<void>.delayed(const Duration(milliseconds: 800));
+          final result = await Process.run(adb, [
+            '-s',
+            device,
+            'shell',
+            'am',
+            'start',
+            '-n',
+            'com.isnow.qa.room_gift_native_acceptance/.MainActivity',
+          ]);
+          if (result.exitCode != 0)
+            throw StateError('Cannot restore the QA task');
+          stdout.writeln('[NativeQAHost] Restored QA task after native onStop');
+        }());
+      });
+  var cleaned = false;
+  Future<void> cleanup() async {
+    if (cleaned) return;
+    cleaned = true;
+    await lines.cancel();
+    monitor.kill();
+    await Future.wait(returns);
+  }
+
+  try {
+    await integrationDriver(
+      writeResponseOnFailure: true,
+      onScreenshot: (name, bytes, [arguments]) async {
+        await File('${directory.path}/$name.png').writeAsBytes(bytes);
+        return true;
+      },
+      responseDataCallback: (data) async {
+        await writeResponseData(
+          data,
+          destinationDirectory: directory.path,
+          testOutputFilename: 'native_result',
+        );
+        // integrationDriver exits the process after this callback.
+        await cleanup();
+      },
+    );
+  } finally {
+    await cleanup();
+  }
+}

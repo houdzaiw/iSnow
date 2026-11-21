@@ -1,0 +1,13 @@
+{
+  "path": "/Users/huili/project/iSnow/build/app/outputs/flutter-apk/isnow-room-gift-second-batch-arm64-debug.apk",
+  "buildMode": "debug",
+  "target": "lib/lib_dev.dart",
+  "abis": [
+    "arm64-v8a"
+  ],
+  "sizeBytes": 244791910,
+  "sha256": "9ee6295b0cdb0dc7ad14f5f403997c29b16ab549d74a60619ebcffd39472939f",
+  "newResourcesBundled": 8,
+  "installedToUserApp": false,
+  "realGiftRequestsByAgent": 0
+}

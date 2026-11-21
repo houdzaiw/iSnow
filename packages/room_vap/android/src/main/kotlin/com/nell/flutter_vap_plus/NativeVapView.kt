@@ -5,6 +5,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
 import android.view.View
+import android.os.Handler
+import android.os.Looper
 import com.tencent.qgame.animplayer.AnimConfig
 import com.tencent.qgame.animplayer.AnimView
 import com.tencent.qgame.animplayer.inter.IAnimListener
@@ -15,11 +17,6 @@ import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformView
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.cancel
 import org.json.JSONArray
 import java.io.File
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -44,9 +41,12 @@ internal class NativeVapView(
     private var loop = false
 
 
-    // 创建一个 CoroutineScope
-    private var myScope: CoroutineScope? =
-        CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate) // 或者 Dispatchers.Default/I // O
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val stops = VapStopCoordinator(mainHandler)
+    private var disposed = false
+    private var stopRequested = false
+    private var videoStarted = false
+    private var restartWhenDestroyed = false
 
     init {
         channel.setMethodCallHandler(this)
@@ -55,19 +55,18 @@ internal class NativeVapView(
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
 //        Log.d("TAG", "onStart vapPath=$localPath  assetPath=$assetPath")
-        if (loop) {
-            if (localPath.isNotEmpty()) {
-                vapView.startPlay(File(localPath))
-            } else if (assetPath.isNotEmpty()) {
-                vapView.startPlay(mContext.assets, assetPath)
-            }
+        if (loop && !disposed) {
+            if (stops.playbackPending) restartWhenDestroyed = true
+            else startStoredPlayback()
         }
 
     }
     override fun onStop(owner: LifecycleOwner) {
         super.onStop(owner)
 //        Log.d("TAG", "onStop")
-        vapView.stopPlay()
+        stopRequested = true
+        restartWhenDestroyed = false
+        stops.stop(null) { vapView.stopPlay() }
     }
 
     override fun onFlutterViewAttached(flutterView: View) {
@@ -89,8 +88,9 @@ internal class NativeVapView(
                     "errorMsg" to (errorMsg ?: "unknown error")
                 )
                 Log.d("TAG", "Anim onFailed: $errorInfo")
-                myScope?.launch {
-                    channel.invokeMethod(
+                mainHandler.post {
+                    if (!videoStarted && !vapView.isRunning()) stops.destroyed()
+                    if (!disposed) channel.invokeMethod(
                         "onFailed",
                         errorInfo
                     )
@@ -102,8 +102,8 @@ internal class NativeVapView(
 //                myScope?.launch {
 //                    eventSink?.success(mapOf("status" to "complete"))
 //                }
-                myScope?.launch {
-                    channel.invokeMethod(
+                mainHandler.post {
+                    if (!disposed) channel.invokeMethod(
                         "onComplete",
                         mapOf("status" to "complete")
                     )
@@ -112,12 +112,17 @@ internal class NativeVapView(
             }
 
             override fun onVideoDestroy() {
-                // Handle video destroy if necessary
-                myScope?.launch {
-                    channel.invokeMethod(
+                mainHandler.post {
+                    videoStarted = false
+                    if (!disposed) channel.invokeMethod(
                         "onDestroy",
                         mapOf("status" to "destroy")
                     )
+                    stops.destroyed()
+                    if (restartWhenDestroyed && loop && !disposed) {
+                        restartWhenDestroyed = false
+                        startStoredPlayback()
+                    }
                 }
             }
 
@@ -136,9 +141,10 @@ internal class NativeVapView(
             }
 
             override fun onVideoStart() {
-                // Handle video start if necessary
-                myScope?.launch {
-                    channel.invokeMethod("onStart", mapOf("status" to "start"))
+                mainHandler.post {
+                    videoStarted = true
+                    if (stopRequested || disposed) vapView.stopPlay()
+                    else channel.invokeMethod("onStart", mapOf("status" to "start"))
                 }
             }
         })
@@ -150,9 +156,11 @@ internal class NativeVapView(
     }
 
     override fun dispose() {
-        vapView.stopPlay()
-        myScope?.cancel()
-        myScope = null
+        disposed = true
+        loop = false
+        stopRequested = true
+        restartWhenDestroyed = false
+        stops.stop(null) { vapView.stopPlay() }
         Log.d("TAG", "dispose")
         ProcessLifecycleOwner.get().lifecycle.removeObserver(this)
         channel.setMethodCallHandler(null)
@@ -170,9 +178,12 @@ internal class NativeVapView(
             }
             "playPath" -> {
                 val path = call.argument<String>("path")
-                if (path != null) {
+                if (stopRequested && stops.playbackPending) {
+                    result.error("VAP_STOP_PENDING", "Previous decoder is still stopping", null)
+                } else if (path != null) {
                     localPath = path
-                    vapView.startPlay(File(path))
+                    assetPath = ""
+                    startStoredPlayback()
                     result.success(null)
 
                 } else {
@@ -182,9 +193,12 @@ internal class NativeVapView(
 
             "playAsset" -> {
                 val asset = call.argument<String>("asset")
-                if (asset != null) {
+                if (stopRequested && stops.playbackPending) {
+                    result.error("VAP_STOP_PENDING", "Previous decoder is still stopping", null)
+                } else if (asset != null) {
                     assetPath = "flutter_assets/$asset"
-                    vapView.startPlay(mContext.assets, assetPath)
+                    localPath = ""
+                    startStoredPlayback()
                     result.success(null)
                 } else {
                     result.error("INVALID_ARGUMENT", "Asset is null", null)
@@ -192,8 +206,10 @@ internal class NativeVapView(
             }
 
             "stop" -> {
-                vapView.stopPlay()
-                result.success(null)
+                loop = false
+                stopRequested = true
+                restartWhenDestroyed = false
+                stops.stop(result) { vapView.stopPlay() }
             }
 
             "setFetchResource" -> {
@@ -222,6 +238,14 @@ internal class NativeVapView(
                 result.notImplemented()
             }
         }
+    }
+
+    private fun startStoredPlayback() {
+        stopRequested = false
+        videoStarted = false
+        stops.playing()
+        if (localPath.isNotEmpty()) vapView.startPlay(File(localPath))
+        else if (assetPath.isNotEmpty()) vapView.startPlay(mContext.assets, assetPath)
     }
 
 

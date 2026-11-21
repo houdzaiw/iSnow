@@ -53,6 +53,88 @@ void main() {
   });
 
   test(
+    'account channels share one connection and survive room Exit until logout',
+    () async {
+      await socket.bindBarrageAccount(10);
+      expect(endpoints.length, 1);
+      expect(
+        client.channels.keys,
+        containsAll(['global', 'global:10', 'global_lobby', 'room']),
+      );
+      await socket.joinRoom('123');
+      await socket.subscribeRoomTools(10);
+      expect(endpoints.length, 1);
+      expect(client.channels.keys, contains('room:123'));
+      await socket.leaveRoom('123');
+      await socket.disconnect();
+      expect(client.channels.keys, isNot(contains('room:123')));
+      expect(
+        client.channels.keys,
+        containsAll(['global', 'global:10', 'global_lobby', 'room']),
+      );
+      expect(socket.state.broadcastChannelSubscribed, isTrue);
+      await socket.bindBarrageAccount(null);
+      expect(client.channels, isEmpty);
+    },
+  );
+  test(
+    'parallel account connection and room join do not create competing clients',
+    () async {
+      await Future.wait([
+        socket.bindBarrageAccount(10),
+        socket.joinRoom('123'),
+      ]);
+      expect(endpoints.length, 1);
+      expect(socket.state.roomChannelSubscribed, isTrue);
+      expect(
+        client.channels.keys,
+        containsAll(['room:123', 'room', 'global:10']),
+      );
+    },
+  );
+  test(
+    'account change and same-account reauthentication remove old subscriptions',
+    () async {
+      await socket.bindBarrageAccount(10);
+      await socket.bindBarrageAccount(20);
+      expect(client.channels.keys, isNot(contains('global:10')));
+      expect(client.channels.keys, contains('global:20'));
+      await socket.bindBarrageAccount(20, reauthenticate: true);
+      expect(endpoints.length, 3);
+      expect(client.channels.keys, contains('global:20'));
+    },
+  );
+  test(
+    'logout during delayed endpoint lookup cannot resurrect account subscriptions',
+    () async {
+      final delayed = Completer<dynamic>();
+      final account = AppSocketManager.forTesting(
+        clientFactory: (_, __) => throw StateError('Must not connect'),
+        get: (_, {queryParameters}) => delayed.future,
+      );
+      final binding = account.bindBarrageAccount(10);
+      await Future<void>.delayed(Duration.zero);
+      final leaving = account.bindBarrageAccount(null);
+      delayed.complete({'code': 200, 'data': 'wss://room.test/socket'});
+      await Future.wait([binding, leaving]);
+      expect(account.state.subscribedChannels, isEmpty);
+      await account.close();
+      account.dispose();
+    },
+  );
+
+  test('logout during connection readiness closes the uncommitted account transport', () async {
+    client.readyBarrier = Completer<void>();
+    final binding = socket.bindBarrageAccount(10);
+    await Future<void>.delayed(Duration.zero);
+    final leaving = socket.bindBarrageAccount(null);
+    client.readyBarrier!.complete();
+    await Future.wait([binding, leaving]);
+    expect(client.channels, isEmpty);
+    expect(socket.state.status, AppSocketStatus.idle);
+  });
+
+  test(
     'uses the API environment endpoint instead of the website host',
     () async {
       await socket.joinRoom('123');
@@ -274,6 +356,7 @@ class _Client implements centrifuge.Client {
   final List<_Subscription> created = [];
   String? failedChannel;
   bool failDisconnect = false;
+  Completer<void>? readyBarrier;
   int closeCalls = 0;
   @override
   Stream<centrifuge.ConnectedEvent> get connected => connectedEvents.stream;
@@ -287,7 +370,7 @@ class _Client implements centrifuge.Client {
   @override
   Future<void> connect() async => markConnected();
   @override
-  Future<void> ready() async {}
+  Future<void> ready() async { await readyBarrier?.future; }
   @override
   Future<void> disconnect() async {
     if (failDisconnect) throw StateError('disconnect failed');
@@ -432,6 +515,8 @@ class _Publication implements centrifuge.PublicationEvent {
 }
 
 class _RoomRepository implements RoomRepository {
+  @override
+  int get roomGeneration => 0;
   _RoomRepository(this.socket);
   final AppSocketManager socket;
   @override

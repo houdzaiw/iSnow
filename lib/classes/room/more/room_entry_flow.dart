@@ -27,16 +27,37 @@ Future<void> enterSharedRoom(
   int followUid = 0,
   bool Function()? isCurrent,
 }) async {
+  await enterSharedRoomChecked(
+    context,
+    ref,
+    roomId,
+    followUid: followUid,
+    isCurrent: isCurrent,
+  );
+}
+
+Future<bool> enterSharedRoomChecked(
+  BuildContext context,
+  WidgetRef ref,
+  String roomId, {
+  int followUid = 0,
+  bool Function()? isCurrent,
+  ValueChanged<Route<dynamic>>? onOwnedRoute,
+}) async {
   bool valid() => isCurrent?.call() != false;
-  if (!context.mounted || !valid() || roomId.trim().isEmpty) return;
+  if (!context.mounted || !valid() || roomId.trim().isEmpty) return false;
   final repository = ref.read(roomRepositoryProvider);
   final existing = repository.roomState;
   final generation = repository.roomGeneration;
   if (existing.isInRoom && existing.currentRoomId == roomId) {
     repository.restoreRoom();
     context.go('/room/${Uri.encodeComponent(roomId)}');
-    return;
+    return true;
   }
+  final capturedThemes = InheritedTheme.capture(
+    from: context,
+    to: Navigator.of(context, rootNavigator: true).context,
+  );
   ToolJson info;
   try {
     info = await ref.read(roomEntryInfoProvider(roomId).future);
@@ -53,10 +74,10 @@ Future<void> enterSharedRoom(
         ),
       );
     }
-    return;
+    return false;
   }
   if (!context.mounted || !valid() || generation != repository.roomGeneration) {
-    return;
+    return false;
   }
   if (existing.isInRoom &&
       !await confirmRoomTool(
@@ -67,17 +88,19 @@ Future<void> enterSharedRoom(
           'Leave the current room and enter this room?',
           '退出当前房间并进入此房间？',
         ),
+        onRoute: onOwnedRoute,
       )) {
-    return;
+    return false;
   }
   if (!context.mounted || !valid() || generation != repository.roomGeneration) {
-    return;
+    return false;
   }
   String password = '';
   if (toolBool(info['roomLock'])) {
     final controller = TextEditingController();
-    final supplied = await showDialog<String>(
+    final passwordRoute = DialogRoute<String>(
       context: context,
+      themes: capturedThemes,
       builder: (dialogContext) => AlertDialog(
         title: Text(toolText(context, 'Room password', '房间密码')),
         content: TextField(
@@ -97,13 +120,18 @@ Future<void> enterSharedRoom(
         ],
       ),
     );
+    onOwnedRoute?.call(passwordRoute);
+    final supplied = await Navigator.of(
+      context,
+      rootNavigator: true,
+    ).push(passwordRoute);
     // Dialog exit animation may still reference the text controller.
     Future<void>.delayed(kThemeAnimationDuration, controller.dispose);
-    if (supplied == null || supplied.isEmpty) return;
+    if (supplied == null || supplied.isEmpty) return false;
     password = supplied;
   }
   if (!context.mounted || !valid() || generation != repository.roomGeneration) {
-    return;
+    return false;
   }
   context.push(
     Uri(
@@ -114,6 +142,7 @@ Future<void> enterSharedRoom(
       },
     ).toString(),
   );
+  return true;
 }
 
 ToolJson? decodeRoomInvitation(String? raw) {

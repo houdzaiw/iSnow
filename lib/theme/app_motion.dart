@@ -10,6 +10,8 @@ class AppMotion {
   static const roomGiftRevealScale = Duration(milliseconds: 1000);
   static const roomGiftFlight = Duration(milliseconds: 666);
   static const roomGiftBurst = Duration(milliseconds: 1166);
+  static const roomGiftPanelSwitch = Duration(milliseconds: 350);
+  static const roomGiftSelectionPulse = Duration(milliseconds: 1200);
   static const roomGiftRevealCurve = Curves.elasticOut;
   static const roomGiftFlightCurve = Curves.easeInSine;
 }

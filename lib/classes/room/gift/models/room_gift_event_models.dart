@@ -58,7 +58,11 @@ class RoomScreenGiftMsg {
   final bool isHideLuckyGift, isLuckyGift, playWinGoldCount, isJackpot;
   final int totalCoinCount, totalGiftCount;
 
-  String get comboKey => '$uid:${gift.id}:$giftSource:$comboId';
+  String get comboKey {
+    final targets = targetUids.toSet().toList()..sort();
+    return '$roomId:$uid:${gift.id}:$giftSource:$sendType:${targets.join(',')}:$comboId';
+  }
+
   int get displayCount => totalGiftCount > 0
       ? totalGiftCount
       : (count > 0 ? count : giftCount * comboCount);
@@ -177,6 +181,8 @@ class RoomLuckyGiftResult {
     this.isJackpot = false,
     this.giftCount = 0,
     this.showCoins = true,
+    this.numberLevel = 0,
+    this.comboId = '',
   });
 
   final String key;
@@ -184,6 +190,8 @@ class RoomLuckyGiftResult {
   final int amount, giftCount;
   final double multiplier;
   final bool isJackpot, showCoins;
+  final int numberLevel;
+  final String comboId;
 }
 
 int giftInt(Object? value, [int fallback = 0]) =>

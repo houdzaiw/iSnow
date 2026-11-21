@@ -1,0 +1,7 @@
+{
+  "lib/classes/room/gift/effects/room_gift_effect_player.dart": "036af828c2f917aa033a17a4ec22676bfefb0bc3a9d8c3964269aa6d171fb234",
+  "lib/classes/room/barrage/room_barrage_banner.dart": "a75d019fb7368c1cedd26058101236f419cb959467d12e9dc2553c22fba7282e",
+  "lib/classes/room/gift/effects/room_gift_playback_barrier.dart": "4835066099e75516ce8db3723b73c1c39b4176b21ed0dee4af80bc2487b12342",
+  "packages/room_pag/lib/pag.dart": "86e347f59db1a9be412bfd0dd23484fd81528fc9468a22c4ff750684955b6d66",
+  "packages/room_pag/android/src/main/java/com/example/flutter_pag_plugin/FlutterPagPlugin.java": "cea05c90976f4933bc009860d2fcd82172af32847904fee02ac349a9f98a4bb6"
+}

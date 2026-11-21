@@ -1,11 +1,13 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../manager/auth_session.dart';
+import '../../../configs/app_configs.dart';
 import '../../../manager/http_api.dart';
 import '../../../manager/http_dio_manager.dart';
 import '../../../manager/room_gift_manager.dart';
 import '../../../model/server_response.dart';
 import 'models/room_gift_models.dart';
+import 'models/room_gift_panel_models.dart';
 
 final roomGiftRepositoryProvider = Provider<RoomGiftRepository>((ref) {
   return NadyRoomGiftRepository(
@@ -23,6 +25,8 @@ abstract class RoomGiftRepository {
   Future<int> fetchBalance();
 
   Future<RoomGiftSendResult> sendGift(SendRoomGiftRequest request);
+  Future<List<RoomGiftBannerSnapshot>> fetchLuckySnapshots(int giftId) async =>
+      const [];
 
   void recordGiftSent({
     required RoomGift gift,
@@ -36,12 +40,17 @@ class NadyRoomGiftRepository implements RoomGiftRepository {
     this._httpManager, {
     AuthSession? authSession,
     RoomGiftManager? giftManager,
+    DateTime Function()? now,
   }) : _authSession = authSession ?? AuthSession.instance,
-       _giftManager = giftManager ?? RoomGiftManager.instance;
+       _giftManager = giftManager ?? RoomGiftManager.instance,
+       _now = now ?? DateTime.now;
 
   final HttpDioManager _httpManager;
   final AuthSession _authSession;
   final RoomGiftManager _giftManager;
+  final DateTime Function() _now;
+  final _snapshots =
+      <String, ({DateTime at, Future<List<RoomGiftBannerSnapshot>> data})>{};
 
   @override
   RoomGiftCatalog? get cachedCatalog => _giftManager.catalog;
@@ -60,6 +69,7 @@ class NadyRoomGiftRepository implements RoomGiftRepository {
     final backpackFuture = _fetchBackpackSafely();
     final balanceFuture = _fetchBalanceSafely();
     final canSendSelfFuture = _fetchCanSendSelfSafely();
+    final flightLimitFuture = _fetchFlightLimitSafely();
 
     final tabResult = await tabFuture;
     final backpack = await backpackFuture;
@@ -74,6 +84,7 @@ class NadyRoomGiftRepository implements RoomGiftRepository {
       balance: purseBalance ?? tabResult.balance,
       canSendSelf: canSendSelf,
       tabs: tabs,
+      flightLimit: await flightLimitFuture,
     );
   }
 
@@ -133,6 +144,69 @@ class NadyRoomGiftRepository implements RoomGiftRepository {
       throw const NadyApiException(message: 'Gift wallet session changed');
     }
     return server.data ?? const RoomGiftSendResult();
+  }
+
+  @override
+  Future<List<RoomGiftBannerSnapshot>> fetchLuckySnapshots(int giftId) async {
+    if (giftId <= 0) return const [];
+    final uid = await _authSession.uid();
+    final generation = _giftManager.balanceToken.generation;
+    final key = '${AppConfig.shared.appEnv.name}:$uid:$generation:$giftId';
+    final cached = _snapshots[key];
+    if (cached != null &&
+        _now().difference(cached.at) < const Duration(minutes: 1)) {
+      return cached.data;
+    }
+    final request = _readSnapshots(giftId, uid, generation);
+    _snapshots[key] = (at: _now(), data: request);
+    while (_snapshots.length > 20) {
+      _snapshots.remove(_snapshots.keys.first);
+    }
+    try {
+      final result = await request;
+      if (result.isEmpty && identical(_snapshots[key]?.data, request)) {
+        _snapshots.remove(key);
+      }
+      return result;
+    } catch (_) {
+      if (identical(_snapshots[key]?.data, request)) _snapshots.remove(key);
+      rethrow;
+    }
+  }
+
+  Future<List<RoomGiftBannerSnapshot>> _readSnapshots(
+    int giftId,
+    int? uid,
+    int generation,
+  ) async {
+    final response = await _httpManager.get(
+      HttpApi.giftLuckySnapshots,
+      queryParameters: {'giftId': giftId},
+    );
+    final result = NadyServerResponse<List<RoomGiftBannerSnapshot>>.fromJson(
+      _asMap(response),
+      (value) => _mapList(value)
+          .map(
+            (item) => RoomGiftBannerSnapshot.fromJson({
+              ...item,
+              if (_intValue(item['giftId']) <= 0) 'giftId': giftId,
+            }),
+          )
+          .where(
+            (item) =>
+                item.giftId == giftId &&
+                item.winAmount > 0 &&
+                (item.senderUid > 0 || item.senderName.isNotEmpty),
+          )
+          .take(3)
+          .toList(growable: false),
+    );
+    if (!result.isSuccess) throw result.toException();
+    if (await _authSession.uid() != uid ||
+        _giftManager.balanceToken.generation != generation) {
+      throw const NadyApiException(message: 'Gift session changed');
+    }
+    return result.data ?? const [];
   }
 
   Future<_GiftTabResult> _fetchGiftTabs() async {
@@ -204,6 +278,22 @@ class NadyRoomGiftRepository implements RoomGiftRepository {
       return server.isSuccess ? server.data ?? true : true;
     } catch (_) {
       return true;
+    }
+  }
+
+  Future<int> _fetchFlightLimitSafely() async {
+    try {
+      final response = await _httpManager.post(
+        HttpApi.systemConfigById,
+        data: const {'configId': 'send_gif_max_num'},
+      );
+      final result = NadyServerResponse<int>.fromJson(
+        _asMap(response),
+        (value) => int.tryParse('$value') ?? 8,
+      );
+      return result.isSuccess ? (result.data ?? 8).clamp(1, 9999) : 8;
+    } catch (_) {
+      return 8;
     }
   }
 

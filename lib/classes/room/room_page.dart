@@ -16,6 +16,8 @@ import 'gift/models/room_gift_models.dart';
 import 'gift/views/room_gift_sheet.dart';
 import 'gift/views/room_gift_overlay.dart';
 import 'gift/views/room_gift_slot_layer.dart';
+import 'gift/views/room_mic_decorations.dart';
+import 'gift/views/room_entrance_track.dart';
 import 'chat/room_public_message_item.dart';
 import 'gift/event/room_gift_event_provider.dart';
 import 'gift/trajectory/room_gift_seat_registry.dart';
@@ -46,7 +48,6 @@ import 'more/room_pk_page.dart';
 import 'more/room_lucky_box_page.dart';
 import 'more/room_game_page.dart';
 import 'more/room_mic_wave.dart';
-import 'more/room_vehicle_layer.dart';
 import '../message/message_view_model.dart';
 import 'message/room_message_sheet.dart';
 import 'message/room_message_view_model.dart';
@@ -574,6 +575,7 @@ class RoomPage extends HookConsumerWidget {
                             child: LayoutBuilder(
                               builder: (context, constraints) => Column(
                                 children: [
+                                  RoomEntranceTrack(roomId: giftRoomId),
                                   if (giftSlots.any((slot) => slot != null))
                                     SizedBox(
                                       height:
@@ -696,9 +698,6 @@ class RoomPage extends HookConsumerWidget {
                           roomId: giftRoomId,
                           registry: giftRegistry,
                         ),
-                      ),
-                      Positioned.fill(
-                        child: RoomVehicleLayer(roomId: giftRoomId),
                       ),
                       if (state.isLoading) const _RoomLoadingOverlay(),
                     ],

@@ -168,7 +168,7 @@ class _GiftButton extends StatelessWidget {
         onTap: onTap,
         child: Center(
           child: _RoomAssetIcon(
-            asset: AppAssets.lanhuRoomBottomGift,
+            asset: AppAssets.roomGiftButtonAnimation,
             size: 44.r,
           ),
         ),

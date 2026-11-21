@@ -112,6 +112,19 @@ class _RoomGiftSeatAnchorState extends State<RoomGiftSeatAnchor> {
   }
 
   @override
+  void deactivate() {
+    // Removal precedes dispose; never leave an inactive Element as a target.
+    _unregister(widget.uid);
+    super.deactivate();
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    _register();
+  }
+
+  @override
   Widget build(BuildContext context) =>
       SizedBox(key: _key, child: widget.child);
   @override

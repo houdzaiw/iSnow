@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'configs/app_routers.dart';
 import 'classes/room/views/room_mini_overlay.dart';
+import 'classes/room/barrage/room_barrage_host.dart';
 import 'localization/app_localizations.dart';
 import 'manager/locale_provider.dart';
 import 'theme/app_theme.dart';
@@ -24,9 +25,12 @@ class MyApp extends StatelessWidget {
             builder: (BuildContext context, Widget? child) =>
                 MaterialApp.router(
                   routerConfig: goRouter,
-                  builder: (context, child) => RoomMiniOverlay(
+                  builder: (context, child) => RoomBarrageHost(
                     router: goRouter,
-                    child: child ?? const SizedBox.shrink(),
+                    child: RoomMiniOverlay(
+                      router: goRouter,
+                      child: child ?? const SizedBox.shrink(),
+                    ),
                   ),
                   debugShowCheckedModeBanner: false,
                   // 状态栏字体黑色

@@ -20,6 +20,8 @@ import 'package:project/model/room_socket_message.dart';
 import 'package:project/theme/app_theme.dart';
 import 'package:svgaplayer_flutter/svgaplayer_flutter.dart';
 
+import 'support/precache_room_assets.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   test('animation resolver preserves query URL, type and orientation', () {
@@ -127,6 +129,7 @@ void main() {
                 ),
               ),
               Positioned.fill(
+                key: const ValueKey('flight-layer'),
                 child: RoomGiftTrajectoryLayer(
                   events: [sample()],
                   registry: registry,
@@ -143,7 +146,7 @@ void main() {
       expect(find.byType(RoomGiftImage), findsOneWidget);
       final reveal = find.byKey(const ValueKey('gift-reveal-event'));
       expect(tester.getCenter(reveal), tester.getRect(find.byKey(root)).center);
-      expect(consumed, 1);
+      expect(consumed, 0);
       await tester.pump(const Duration(milliseconds: 500));
       expect(reveal, findsNothing);
       final flight = find.byKey(const ValueKey('gift-flight-event:20:0'));
@@ -153,13 +156,14 @@ void main() {
       await tester.pump(const Duration(seconds: 2));
       await tester.pump();
       expect(find.byType(RoomGiftImage), findsNothing);
+      expect(consumed, 1);
       await tester.pumpWidget(const SizedBox());
       expect(tester.takeException(), isNull);
     },
   );
 
   testWidgets(
-    'trajectory completes and cancels after a seat moves or is removed',
+    'trajectory follows the same user after movement and cancels on departure',
     (tester) async {
       final root = GlobalKey();
       final registry = RoomGiftSeatRegistry(root);
@@ -188,6 +192,7 @@ void main() {
                 ),
               ),
             Positioned.fill(
+              key: const ValueKey('flight-layer'),
               child: RoomGiftTrajectoryLayer(
                 events: [sample()],
                 registry: registry,
@@ -200,12 +205,17 @@ void main() {
       );
       await tester.pumpWidget(scene());
       await tester.pump(const Duration(milliseconds: 200));
-      expect(consumed, 1);
+      expect(consumed, 0);
       expect(find.byType(RoomGiftImage), findsOneWidget);
       await tester.pumpWidget(scene(left: 220));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.pump();
+      expect(find.byType(RoomGiftImage), findsOneWidget);
+      await tester.pumpWidget(scene(target: false));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pump();
       expect(find.byType(RoomGiftImage), findsNothing);
+      expect(consumed, 1);
       await tester.pumpWidget(const SizedBox());
       expect(tester.takeException(), isNull);
     },
@@ -243,6 +253,15 @@ void main() {
       await tester.pump();
       expect(manager.state.effects, hasLength(1));
       expect(manager.state.effects.single.message.gift.id, 32);
+      for (
+        var frame = 0;
+        frame < 8 && find.byType(RoomGiftImage).evaluate().isEmpty;
+        frame++
+      ) {
+        await tester.pump();
+      }
+      expect(find.byType(RoomGiftImage), findsOneWidget);
+      await tester.pump();
       await tester.pump(const Duration(seconds: 3));
       await tester.pump();
       expect(manager.state.effects, isEmpty);
@@ -301,12 +320,22 @@ void main() {
           ),
         );
         await tester.pump();
+        // Wait for the exclusive native lease before sampling animation time.
+        for (var frame = 0; frame < 5; frame++) {
+          await tester.pump();
+        }
         await tester.pump(const Duration(milliseconds: 400));
+        await precacheRoomAssets(
+          tester,
+          tester.element(find.byKey(const ValueKey('gift-effects'))),
+        );
         expect(find.text('x1'), findsOneWidget);
         expect(tester.takeException(), isNull);
         await expectLater(
           find.byKey(const ValueKey('gift-effects')),
-          matchesGoldenFile('goldens/room_gift_effects_${width.toInt()}.png'),
+          matchesGoldenFile(
+            'goldens/room_gift_feedback_v2/effects_${width.toInt()}.png',
+          ),
         );
         manager.setVisible(false);
         await tester.pump();

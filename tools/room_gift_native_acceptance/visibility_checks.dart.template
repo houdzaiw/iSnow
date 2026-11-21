@@ -1,0 +1,262 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:room_gift_native_acceptance/production/classes/room/gift/effects/room_gift_effect_layer.dart';
+import 'package:room_gift_native_acceptance/production/classes/room/gift/event/room_gift_event_manager.dart';
+import 'package:room_gift_native_acceptance/production/classes/room/gift/models/room_gift_event_models.dart';
+import 'package:room_gift_native_acceptance/production/classes/room/gift/models/room_gift_models.dart';
+
+import 'environment.dart';
+
+void registerVisibilityChecks() {
+  nativeCheck(
+    'actual Android background and resume do not replay an old full-screen task',
+    (tester) async {
+      final clip = await resource(RoomGiftAnimationFormat.vap, longLoop: true);
+      final manager = RoomGiftEventManager(
+        roomId: 'local-qa',
+        startTimer: false,
+      );
+      addTearDown(manager.dispose);
+      final start = trace.length;
+      manager.enqueueFullscreen(_task('before-background'));
+      await scene(
+        tester,
+        _ManagerScene(manager, observeLifecycle: true),
+        overrides: [
+          roomGiftAssetResolverProvider.overrideWithValue(
+            _Resolver({'before-background': clip}),
+          ),
+        ],
+      );
+      await until(
+        tester,
+        () => trace.skip(start).any((x) => x.endsWith(':event:onStart')),
+        seconds: 25,
+      );
+      await const MethodChannel(
+        'isnow.native.qa/lifecycle',
+      ).invokeMethod<void>('backgroundAndReturn');
+      await until(
+        tester,
+        () =>
+            trace.skip(start).contains('os:paused') &&
+            trace.skip(start).contains('os:resumed'),
+        seconds: 12,
+      );
+      await until(
+        tester,
+        () => trace.skip(start).any((x) => x.endsWith(':stop:delivered')),
+      );
+      expect(manager.snapshot.isVisible, isTrue);
+      expect(manager.snapshot.effects, isEmpty);
+      expect(
+        trace.skip(start).where((x) => x.endsWith(':event:onStart')),
+        hasLength(1),
+      );
+      expect(
+        trace.skip(start).where((x) => x.endsWith(':playPath:request')),
+        hasLength(1),
+      );
+      await tester.pump(const Duration(milliseconds: 250));
+      expect(
+        trace.skip(start).where((x) => x.endsWith(':playPath:request')),
+        hasLength(1),
+      );
+    },
+  );
+  nativeCheck(
+    'local visibility clears VAP and restore does not replay old tasks',
+    (tester) async {
+      final clip = await resource(RoomGiftAnimationFormat.vap, longLoop: true);
+      final manager = RoomGiftEventManager(
+        roomId: 'local-qa',
+        startTimer: false,
+      );
+      addTearDown(manager.dispose);
+      final start = trace.length;
+      manager.enqueueFullscreen(_task('old'));
+      await scene(
+        tester,
+        _ManagerScene(manager),
+        overrides: [
+          roomGiftAssetResolverProvider.overrideWithValue(
+            _Resolver({'old': clip, 'new': clip}),
+          ),
+        ],
+      );
+      await until(
+        tester,
+        () => trace.skip(start).any((x) => x.endsWith(':event:onStart')),
+        seconds: 25,
+      );
+      manager.setVisible(
+        false,
+      ); // Controller visibility contract, not an OS Home press.
+      await tester.pump();
+      expect(manager.snapshot.effects, isEmpty);
+      await until(
+        tester,
+        () => trace.skip(start).any((x) => x.endsWith(':stop:delivered')),
+      );
+      final plays = trace
+          .skip(start)
+          .where((x) => x.endsWith(':playPath:request'))
+          .length;
+      manager.setVisible(true);
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(manager.snapshot.effects, isEmpty);
+      expect(
+        trace.skip(start).where((x) => x.endsWith(':playPath:request')),
+        hasLength(plays),
+      );
+      manager.enqueueFullscreen(_task('new'));
+      await until(
+        tester,
+        () =>
+            trace
+                .skip(start)
+                .where((x) => x.endsWith(':event:onStart'))
+                .length ==
+            2,
+        seconds: 25,
+      );
+      manager.setVisible(false);
+      await tester.pump();
+      await until(
+        tester,
+        () =>
+            trace
+                .skip(start)
+                .where((x) => x.endsWith(':stop:delivered'))
+                .length ==
+            2,
+      );
+    },
+  );
+
+  nativeCheck('prepared prize releases active PAG before resolving next VAP', (
+    tester,
+  ) async {
+    final first = await resource(RoomGiftAnimationFormat.pag);
+    final second = await resource(RoomGiftAnimationFormat.vap, longLoop: true);
+    final ready = Completer<void>();
+    final manager = RoomGiftEventManager(
+      roomId: 'local-qa',
+      startTimer: false,
+      preparePrize: (_) => ready.future,
+    );
+    addTearDown(manager.dispose);
+    final start = trace.length;
+    manager.enqueueFullscreen(_task('normal'));
+    await scene(
+      tester,
+      _ManagerScene(manager),
+      overrides: [
+        roomGiftAssetResolverProvider.overrideWithValue(
+          _Resolver({'normal': first, 'prize': second}),
+        ),
+      ],
+    );
+    await until(tester, () => trace.skip(start).contains('started:normal'));
+    manager.enqueueFullscreen(_task('prize', prize: true));
+    await tester.pump(const Duration(milliseconds: 80));
+    expect(manager.snapshot.stopEffectKey, isNull);
+    expect(trace.skip(start), isNot(contains('resolve:prize')));
+    ready.complete();
+    await until(
+      tester,
+      () => trace.skip(start).any((x) => x.endsWith(':event:onStart')),
+      seconds: 25,
+    );
+    final records = trace.skip(start).toList();
+    final release = records.indexWhere((x) => x.endsWith(':release:delivered'));
+    expect(release, greaterThanOrEqualTo(0));
+    expect(release, lessThan(records.indexOf('resolve:prize')));
+    manager.setVisible(false);
+    await tester.pump();
+    await until(
+      tester,
+      () => trace.skip(start).any((x) => x.endsWith(':stop:delivered')),
+    );
+  });
+}
+
+RoomGiftEffectTask _task(String key, {bool prize = false}) =>
+    RoomGiftEffectTask(
+      key: key,
+      kind: prize ? RoomGiftEffectKind.prize : RoomGiftEffectKind.gift,
+      createdAt: DateTime.now(),
+      message: RoomScreenGiftMsg(
+        gift: RoomGift(
+          id: 9001,
+          name: key,
+          icon: '',
+          price: 0,
+          isCombo: 0,
+          tabId: 1,
+        ),
+        uid: 1,
+        userInfo: const RoomGiftUser(uid: 1),
+      ),
+    );
+
+class _Resolver extends RoomGiftAssetResolver {
+  _Resolver(this.clips);
+  final Map<String, RoomGiftAnimationResource> clips;
+  @override
+  Future<RoomGiftAnimationResource> resolveTask(RoomGiftEffectTask task) async {
+    trace.add('resolve:${task.key}');
+    return clips[task.key]!;
+  }
+}
+
+class _ManagerScene extends StatefulWidget {
+  const _ManagerScene(this.manager, {this.observeLifecycle = false});
+  final RoomGiftEventManager manager;
+  final bool observeLifecycle;
+  @override
+  State<_ManagerScene> createState() => _ManagerSceneState();
+}
+
+class _ManagerSceneState extends State<_ManagerScene>
+    with WidgetsBindingObserver {
+  late final VoidCallback removeListener;
+  @override
+  void initState() {
+    super.initState();
+    if (widget.observeLifecycle) WidgetsBinding.instance.addObserver(this);
+    removeListener = widget.manager.addListener((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    trace.add('os:${state.name}');
+    widget.manager.setVisible(state == AppLifecycleState.resumed);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = widget.manager.snapshot;
+    return state.isVisible
+        ? RoomGiftFullScreenEffectLayer(
+            tasks: state.effects,
+            stopRequestedKey: state.stopEffectKey,
+            onStarted: (key) => trace.add('started:$key'),
+            onCompleted: widget.manager.completeEffect,
+          )
+        : const SizedBox.shrink();
+  }
+
+  @override
+  void dispose() {
+    if (widget.observeLifecycle) WidgetsBinding.instance.removeObserver(this);
+    removeListener();
+    super.dispose();
+  }
+}

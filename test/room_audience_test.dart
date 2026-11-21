@@ -230,7 +230,7 @@ RoomSocketMessage _event(String roomId, Object payload) => RoomSocketMessage(
   raw: const {},
 );
 
-class _GiftRepository implements RoomGiftRepository {
+class _GiftRepository extends RoomGiftRepository {
   @override
   RoomGiftCatalog? get cachedCatalog =>
       const RoomGiftCatalog(balance: 1000, canSendSelf: false, tabs: []);
