@@ -1,0 +1,103 @@
+{
+  "date": "2026-11-21",
+  "completedAtUtc": "2026-11-21T05:35:55.267644+00:00",
+  "head": "0fd1b7ebddf60ed95d63ba3f7acb11e0005d2997",
+  "worktreeDirty": true,
+  "result": "completed with documented user manual mic exception restored",
+  "device": "Pixel_9 / emulator-5556",
+  "changes": "tests, isolated QA harness and documentation only; no production code, new business API, plugin or asset",
+  "deviceUi": {
+    "groups": 6,
+    "passedByUserObservation": 6,
+    "automatedNativeUiControl": false,
+    "reason": "Native control still reported locked after unlock confirmation and reconnect; UI was manually checked by user",
+    "evidence": "ui_acceptance.json",
+    "scopeException": "scope_exception.json"
+  },
+  "automated": {
+    "newProductionWidgetCombinations": 12,
+    "newNativeCombinations": 5,
+    "nativePassCount": 5,
+    "nativeHostExitCode": 0,
+    "savedNativeFrames": 4,
+    "manualNativeContactSheetReviewed": true,
+    "nativeFixtureNotShippingArtwork": true,
+    "actualEntranceMicNumericWidgetsTestedAtWidgetLevel": true,
+    "nativeTrackObservedAsManagerState": true,
+    "numericNativeAdapterLoopIsTechnicalOnly": true,
+    "roomAndSocketRegressionPassed": 907,
+    "rootAnalyze": "No issues found",
+    "qaAnalyze": "No issues found",
+    "gitDiffCheck": "passed",
+    "historicalBaselinesAndPubspecUnchanged": true,
+    "guardedFiles": 259
+  },
+  "mainApp": {
+    "package": "com.nady.dev1",
+    "pidBefore": 1756,
+    "pidAfter": 1756,
+    "roomName": "hei",
+    "displayRoomId": "30317291",
+    "roomId": "2113269920442130433",
+    "barrageRoomGeneration": "1",
+    "roomReady": true,
+    "socketReady": true,
+    "keptMinimized": true,
+    "reinstalled": false,
+    "restarted": false,
+    "hotReloaded": false,
+    "noProductionChangeNeeded": true,
+    "finalOccupiedSeats": 0,
+    "finalSelfMicPositions": [],
+    "agoraRole": "clientRoleAudience",
+    "agoraPublishing": false,
+    "mutedMicrophonePreference": "false",
+    "qaAppStopped": true
+  },
+  "scopeException": {
+    "userConfirmedAccidentalMicUp": true,
+    "agentSubmittedMicOperations": false,
+    "userRestoredDownMic": true,
+    "upCountObserved": 1,
+    "downCountObserved": 1,
+    "initialMicRosterCaptured": false,
+    "evidence": "scope_exception.json"
+  },
+  "mainLogSample": {
+    "requestCount": 81,
+    "giftSendCount": 0,
+    "roomSaveCount": 0,
+    "followCount": 0,
+    "textAuditCount": 0,
+    "exceptionCount": 0,
+    "segmentedCapture": true,
+    "evidence": "main_log_summary.json",
+    "notAnImSendAudit": true
+  },
+  "qaBuild": {
+    "sha256": "635e11182dba03ba19ae2a41e2a9f8a56df5ccf8b921b90b2358c1fa0a8bcb47",
+    "installedSha256": "635e11182dba03ba19ae2a41e2a9f8a56df5ccf8b921b90b2358c1fa0a8bcb47",
+    "bytes": 121194732,
+    "package": "com.isnow.qa.room_gift_native_acceptance",
+    "nativeArchitectures": [
+      "arm64-v8a",
+      "armeabi-v7a",
+      "x86_64"
+    ],
+    "caseFilter": "combination",
+    "hostExitCode": 0,
+    "mainAppInstalledOrRestarted": false,
+    "qaStoppedAfterRun": true
+  },
+  "nativeReport": "native_run1/native_result.json",
+  "sourceHashesFile": "source_hashes.json",
+  "limitations": [
+    "Specific roles, absent-data UI paths and private content were not independently seen by native automation",
+    "No paid gift/combo, recharge, actual share or message send performed by agent; read receipts were authorized",
+    "Native fixtures do not prove live server broadcasts or all shipping decorations",
+    "No physical Android performance or subjective audio validation",
+    "No live cross-account, network interruption or room switching acceptance",
+    "Existing background state machine, cache leases and overall room-entry timeout gaps remain",
+    "Game Big Win independent full-screen asset pending; iOS deferred"
+  ]
+}

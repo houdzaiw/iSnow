@@ -1,0 +1,45 @@
+{
+  "RoomBarrageViewModel": {
+    "_roomGeneration": "9",
+    "_visible": "true",
+    "_started": "true",
+    "_nativeBlocked": "false",
+    "_acceptMessages": "true",
+    "state": {
+      "actionBusy": "false",
+      "visible": "true",
+      "issue": null
+    }
+  },
+  "RoomAgoraManager": {
+    "state": {
+      "joining": "false",
+      "joined": "true",
+      "publishing": "false",
+      "mutedMicrophone": "false",
+      "isTerminal": "false"
+    }
+  },
+  "AppSocketManager": {
+    "state": {
+      "status": "ready",
+      "isTerminal": "false"
+    }
+  },
+  "RoomManager": {
+    "state": {
+      "status": "ready",
+      "currentRoomId": "2113269920442130433",
+      "isMinimized": "false"
+    },
+    "recovery": null
+  },
+  "RoomRecoveryViewModel": {
+    "state": {
+      "notice": null,
+      "busy": "false",
+      "prompt": "false",
+      "issue": null
+    }
+  }
+}

@@ -1,0 +1,144 @@
+{
+  "status": "implemented; Pixel_9 manual recovery acceptance passed; mic actions confirmed by user",
+  "device": "Pixel_9 / emulator-5556",
+  "date": "2026-11-21",
+  "shortOffline": {
+    "seconds": 20,
+    "socketErrorObserved": true,
+    "sameRoomRetained": true,
+    "socketReadyAfterRestoreSecondsApproximately": 12
+  },
+  "actualHttpTimeout": {
+    "request": {
+      "epoch": 1795240437.436,
+      "kind": "->",
+      "path": "/api/room/getHotScore"
+    },
+    "error": {
+      "epoch": 1795240467.44,
+      "kind": "!!",
+      "path": "/api/room/getHotScore",
+      "http": "null",
+      "type": "DioExceptionType.connectionTimeout"
+    },
+    "elapsedSeconds": 30.004,
+    "scope": "actual Android production HTTP connection timeout; UI end-loading not yet confirmed"
+  },
+  "longWeakNetwork": {
+    "cellularLimitBitsPerSecond": 8,
+    "seconds": 64,
+    "socketConnectingAndRoomRetainedDuringLimit": true,
+    "roomExitedAfterRestore": true,
+    "outRoomRequestSucceeded": true,
+    "origin": "Socket server disconnect 3502 -> AppSocketManager terminal -> RoomManager dependency change -> leaveRoom",
+    "notPassed": true,
+    "userDeniedManualExit": true,
+    "agoraTriggered": false,
+    "serverCode": 3502,
+    "codeMeaning": "stale: connection did not authenticate within server configured interval",
+    "terminalByOfficialProtocol": true,
+    "source": "https://centrifugal.dev/docs/server/codes"
+  },
+  "automatedRelatedTestsPassed": 58,
+  "newTests": 2,
+  "newTestsScope": "audience connectionTimeout/receiveTimeout retain cached users, clear loading, preserve room and retry; mocks do not prove live UI",
+  "networkRestored": true,
+  "emulatorLimitsRestoredToUnlimited": true,
+  "mainRestarted": false,
+  "mainPid": "1756",
+  "agentSentGiftsOrMessages": false,
+  "agentSubmittedManagement": false,
+  "agentExplicitlyCalledLeaveRoom": false,
+  "deviceUiObservations": {
+    "wifiLimitedAudienceRefresh": "user observed normal refresh",
+    "cellularLimitedAudienceRefresh": "user observed normal refresh",
+    "actualTimedOutAudienceRequestProven": false
+  },
+  "diagnostics": {
+    "debugOnly": true,
+    "agoraStateAndReasonLogged": true,
+    "socketDisconnectCodeLogged": true,
+    "roomExitStackAndTerminalFlagsLogged": true,
+    "hotReloadedWithoutRestart": true,
+    "exitPolicyChanged": false,
+    "relatedTestsPassed": 38,
+    "pending": "none: origin confirmed; recovery UX implemented",
+    "analyze": "No issues found",
+    "gitDiffCheck": "passed",
+    "testCount": 38
+  },
+  "reproduction": {
+    "userKeptHandsOff": true,
+    "sameAutomaticExitReproduced": true,
+    "trace": "origin_trace.jsonl",
+    "roomGenerations": "5 -> 6",
+    "policyChanged": false
+  },
+  "rootCauseEvidence": {
+    "confirmed": true,
+    "socketDisconnect": 3502,
+    "intentional": false,
+    "terminalSocket": true,
+    "terminalAgora": false,
+    "caller": "RoomManager._onDependencyChanged -> leaveRoom",
+    "trace": "origin_trace.jsonl",
+    "officialProtocol": "https://centrifugal.dev/docs/server/codes",
+    "inference": "Extremely slow connection plausibly delayed authentication; exact server auth deadline not obtained"
+  },
+  "environmentFinal": "wifi/data enabled, unlimited speed, zero latency",
+  "nextStep": "No pending items for this manual recovery acceptance",
+  "recoveryUx": {
+    "automaticReentry": false,
+    "reason": "authenticationTimeout",
+    "memoryOnly": true,
+    "rootNoticeAfterCleanup": true,
+    "normalEntryFlow": "enterSharedRoomChecked -> room info/password -> RoomPage -> existing enter API",
+    "autoReconnectPolicyChanged": false,
+    "hotReloadedWithoutRestart": true,
+    "pid": "1756",
+    "roomRegression": {
+      "passed": 920,
+      "includesFirstRecoveryTests": 10
+    },
+    "focusedRecoveryTests": {
+      "passed": 12,
+      "additionalBeyondRegressionRun": 2
+    },
+    "analyze": "No issues found",
+    "diffCheck": "passed",
+    "build": "ARM64 debug APK succeeded; built only, not installed",
+    "visualAndButtonResult": "User confirmed button returned to hei",
+    "evidence": [
+      "recovery_trace.jsonl",
+      "recovery_runtime.jsonl"
+    ],
+    "afterRestoreObservationSeconds": 30,
+    "automaticEnterRequestsDuringObservation": 0,
+    "finalRoomId": "2113269920442130433",
+    "finalGeneration": 9,
+    "finalSocket": "ready",
+    "finalAgora": {
+      "joined": true,
+      "publishing": false,
+      "isTerminal": false
+    },
+    "noticeClearedAfterManualEntry": true,
+    "manualEntryRequests": 1,
+    "entryResponses": [
+      "200"
+    ],
+    "normalValidationObservedBeforeEntry": true,
+    "initialPartialReload": "New UI class initially absent from incremental reload; complete hot reload resolved it without restarting",
+    "errorsAfterCompleteReload": 0,
+    "micActions": {
+      "up": "2026-11-21 16:40:52 +08:00",
+      "down": "2026-11-21 16:41:28 +08:00",
+      "agentSubmitted": false,
+      "origin": "user confirmed manual mic up and down",
+      "finalPublishing": false,
+      "userConfirmedOffMic": true
+    },
+    "agentGiftRequests": 0,
+    "agentRoomChatRequests": 0
+  }
+}

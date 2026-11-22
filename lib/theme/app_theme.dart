@@ -10,6 +10,8 @@ export 'home_activity_theme.dart';
 export 'room_profile_theme.dart';
 export 'room_header_theme.dart';
 export 'room_public_chat_theme.dart';
+export 'room_first_recharge_theme.dart';
+export 'room_activity_theme.dart';
 export 'app_colors.dart';
 export 'room_barrage_theme.dart';
 export 'app_gradients.dart';

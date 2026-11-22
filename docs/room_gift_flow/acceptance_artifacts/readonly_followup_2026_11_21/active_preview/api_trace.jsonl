@@ -1,0 +1,20 @@
+{"kind": "->", "path": "/api/resource/function2", "at": "2026-11-21T13:47:59.832795+00:00"}
+{"kind": "->", "path": "/api/room/mic/charm/isEnable", "at": "2026-11-21T13:47:59.833535+00:00"}
+{"kind": "->", "path": "/api/room/pk/info", "at": "2026-11-21T13:47:59.833639+00:00"}
+{"kind": "->", "path": "/api/redPacket/config", "at": "2026-11-21T13:47:59.833689+00:00"}
+{"kind": "->", "path": "/api/redPacket/list", "at": "2026-11-21T13:47:59.833716+00:00"}
+{"kind": "->", "path": "/api/room/getHotScore", "at": "2026-11-21T13:47:59.833738+00:00"}
+{"kind": "->", "path": "/api/revenue/purse", "at": "2026-11-21T13:47:59.833772+00:00"}
+{"kind": "<-", "path": "/api/resource/function2", "code": "200", "http": "200", "at": "2026-11-21T13:48:01.316898+00:00"}
+{"kind": "<-", "path": "/api/room/pk/info", "code": "200", "http": "200", "at": "2026-11-21T13:48:01.530355+00:00"}
+{"kind": "<-", "path": "/api/room/getHotScore", "code": "200", "http": "200", "at": "2026-11-21T13:48:01.746599+00:00"}
+{"kind": "<-", "path": "/api/room/mic/charm/isEnable", "code": "200", "http": "200", "at": "2026-11-21T13:48:01.751214+00:00"}
+{"kind": "<-", "path": "/api/redPacket/config", "code": "200", "http": "200", "at": "2026-11-21T13:48:02.202800+00:00"}
+{"kind": "<-", "path": "/api/redPacket/list", "code": "200", "http": "200", "at": "2026-11-21T13:48:02.202897+00:00"}
+{"kind": "->", "path": "/api/lobby/lists", "at": "2026-11-21T13:48:02.202938+00:00"}
+{"kind": "<-", "path": "/api/lobby/lists", "code": "200", "http": "200", "at": "2026-11-21T13:48:02.679123+00:00"}
+{"kind": "<-", "path": "/api/revenue/purse", "code": "200", "http": "200", "at": "2026-11-21T13:48:02.885619+00:00"}
+{"kind": "->", "path": "/api/room/getHotScore", "at": "2026-11-21T13:48:54.333583+00:00"}
+{"kind": "<-", "path": "/api/room/getHotScore", "code": "200", "http": "200", "at": "2026-11-21T13:49:00.085936+00:00"}
+{"kind": "->", "path": "/api/room/getHotScore", "at": "2026-11-21T13:50:34.309464+00:00"}
+{"kind": "<-", "path": "/api/room/getHotScore", "code": "200", "http": "200", "at": "2026-11-21T13:50:35.773690+00:00"}

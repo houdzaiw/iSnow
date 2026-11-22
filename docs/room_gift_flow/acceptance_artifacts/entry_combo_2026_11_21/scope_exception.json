@@ -1,0 +1,33 @@
+{
+  "type": "manual mic operation during otherwise read-only device checks",
+  "requestPath": "/api/room/mic/up",
+  "observedAtUtc": "2026-11-21T05:17:43.399083+00:00",
+  "response": {
+    "http": 200,
+    "code": 200
+  },
+  "actor": "user-confirmed accidental manual tap",
+  "userReply": "是误点，我会下麦后再 Keep",
+  "replyRecordedAtUtc": "2026-11-21T05:30:51.665492+00:00",
+  "agentDidNotSubmitMicOperation": true,
+  "resolution": "resolved by user: successful down-mic response, no self mic, audience, not publishing and Keep confirmed",
+  "selfSeatAtDetection": {
+    "position": 1,
+    "displayPosition": 2
+  },
+  "finalSelfMicPositions": [],
+  "initialMicRosterNotCaptured": true,
+  "resolved": true,
+  "downMicResponse": {
+    "kind": "response",
+    "path": "/api/room/mic/down",
+    "http": "200",
+    "code": "200",
+    "at": "2026-11-21T05:30:41.991801+00:00"
+  },
+  "finalOccupiedSeatCount": 0,
+  "finalKeep": true,
+  "finalAgoraRole": "clientRoleAudience",
+  "finalAgoraPublishing": false,
+  "mutedMicrophonePreferencePreserved": "false"
+}

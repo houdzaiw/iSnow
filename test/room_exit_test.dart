@@ -26,6 +26,7 @@ import 'package:project/manager/app_socket_manager.dart';
 import 'package:project/manager/room_agora_manager.dart';
 import 'package:project/manager/room_manager.dart';
 import 'package:project/model/room_models.dart';
+import 'package:project/model/room_recovery_notice.dart';
 import 'package:project/model/room_user_info.dart';
 import 'package:project/model/room_socket_message.dart';
 import 'package:project/model/user_profile.dart';
@@ -822,6 +823,8 @@ Future<({ProviderContainer container, GoRouter router})> _openRoom(
 }
 
 class _RoomRepository extends ChangeNotifier implements RoomRepository {
+  @override
+  RoomRecoveryNotice? get recoveryNotice => null;
   @override
   int get roomGeneration => enterCalls;
   @override

@@ -1,0 +1,7 @@
+{
+  "lib/classes/room/gift/views/room_gift_preview.dart": "08342643d86d6000e90a19d5f2f07bc25e77ec86a3cf40fd73e0f092c2cb92ab",
+  "lib/classes/room/gift/effects/room_gift_effect_player.dart": "d0a5b6f3d463eb712abf97744ac2cdd22efc24b2576ce6641f83e2e8dd7a4278",
+  "lib/classes/room/gift/effects/room_gift_playback_barrier.dart": "4835066099e75516ce8db3723b73c1c39b4176b21ed0dee4af80bc2487b12342",
+  "lib/classes/room/gift/views/room_gift_sheet.dart": "9f5e4a66c20ccb71f6ddf79da527758da8b4ee12ef1064111362b8fa5f26865e",
+  "lib/classes/room/gift/viewmodel/room_gift_panel_view_model.dart": "819052fa463b8b059e6894b1853dc79d35e8124415ad62e96e080ca9e580745e"
+}

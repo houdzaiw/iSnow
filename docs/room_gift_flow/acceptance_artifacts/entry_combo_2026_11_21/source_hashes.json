@@ -1,0 +1,10 @@
+{
+  "test/support/room_visual_harness.dart": "3f765023473a9e07af87b78bd8c4e7fb30f9bc2d6e3b37c22daa4b449403c088",
+  "test/room_visual_combinations_test.dart": "ceb9687c515ac7450936c138ea7b20791b2d41b944523b9a049614f2659f36ac",
+  "tools/room_gift_native_acceptance/combination_checks.dart.template": "017f578d5de6976b174ef1524140a64d9d710f5a243fd6c9f425729580559f7b",
+  "tools/room_gift_native_acceptance/combination_scene.dart.template": "a572f90afafd5121b532bcac74905010f6866beed780477d92b9898fed29da6c",
+  "tools/room_gift_native_acceptance/environment.dart.template": "b5e589d46969881634f2e94213ad62e8c7deb02d607a397e0debf924ad982ab3",
+  "tools/room_gift_native_acceptance/players_test.dart.template": "57c09886cb3b119e521d6ed20011933ee661b97052a797f7806c163b1e42f643",
+  "tools/room_gift_native_acceptance/run.py": "eb1ded54f1b6addda45d4aac87d0ded56ce4370e05191119aeb5575e410efe53",
+  "tools/room_gift_native_acceptance/README.md": "9c58677277d1f42c766614345000112f8545fed72aa657c032a3923a9a085e47"
+}

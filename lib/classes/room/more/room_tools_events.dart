@@ -192,15 +192,21 @@ extension RoomToolsEvents on RoomToolsController {
   }
 
   void _applyPk(ToolJson value) {
-    if (value.isEmpty) return;
+    if (value.isEmpty || toolInt(value['eventType']) == 0) {
+      if (_value.pk.terminal) return;
+      _value = _value.copy(pk: const RoomPkSnapshot({}), pkVisible: false);
+      return;
+    }
     final pk = RoomPkSnapshot(value);
-    if (pk.eventType == 0 && _value.pk.terminal) return;
     if (pk.id.isNotEmpty && _terminalPks.contains(pk.id)) return;
     if (pk.terminal && pk.id.isNotEmpty) {
       _terminalPks.add(pk.id);
       if (_terminalPks.length > 100) _terminalPks.remove(_terminalPks.first);
     }
-    _value = _value.copy(pk: pk, pkVisible: true);
+    _value = _value.copy(
+      pk: pk,
+      pkVisible: pk.id == _value.pk.id ? _value.pkVisible : true,
+    );
   }
 
   bool _freshVisual(RoomSocketMessage message) {

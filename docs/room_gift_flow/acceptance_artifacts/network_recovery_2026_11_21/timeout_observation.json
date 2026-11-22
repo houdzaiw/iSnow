@@ -1,0 +1,16 @@
+{
+  "request": {
+    "epoch": 1795240437.436,
+    "kind": "->",
+    "path": "/api/room/getHotScore"
+  },
+  "error": {
+    "epoch": 1795240467.44,
+    "kind": "!!",
+    "path": "/api/room/getHotScore",
+    "http": "null",
+    "type": "DioExceptionType.connectionTimeout"
+  },
+  "elapsedSeconds": 30.004,
+  "scope": "actual Android production HTTP connection timeout; UI end-loading not yet confirmed"
+}

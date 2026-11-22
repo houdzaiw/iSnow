@@ -230,29 +230,33 @@ extension RoomToolsOperations on RoomToolsController {
         'micIndex': mic.position,
       });
     }
-    await repository.post(HttpApi.roomPkBegin, {
-      'roomId': roomId,
-      'duration': duration,
-      'pkUserList': participants,
-    });
+    await RoomPkRepository(repository).begin(roomId, duration, participants);
     if (!current()) return;
-    await _load(
-      'pk',
-      () => repository.get(HttpApi.roomPkInfo, {'roomId': roomId}),
-      (data) => _applyPk(toolMap(data)),
-    );
+    await refreshPk();
   }, manager: true);
 
   Future<bool> endPk() => perform('pk', (current) async {
-    await repository.post(HttpApi.roomPkOver, {'roomId': roomId});
+    await RoomPkRepository(repository).end(roomId);
     if (!current()) return;
     // The broadcast/snapshot owns the terminal score and result, not the button.
-    await _load(
-      'pk',
-      () => repository.get(HttpApi.roomPkInfo, {'roomId': roomId}),
-      (data) => _applyPk(toolMap(data)),
-    );
+    await refreshPk();
   }, manager: true);
+  Future<void> refreshPk() => _load(
+    'pk',
+    () async => (await RoomPkRepository(repository).fetch(roomId)).raw,
+    (data) => _applyPk(toolMap(data)),
+  );
+  Future<bool> refreshLuckyConfig() async {
+    if (!active || _value.busy.contains('load:luckyConfig')) return false;
+    _errorOperation = null;
+    await _load(
+      'luckyConfig',
+      () => repository.get(HttpApi.roomLuckyConfig, {'roomId': roomId}),
+      (data) => _value = _value.copy(luckyConfig: toolMap(data)),
+    );
+    return active && _errorOperation != 'load:luckyConfig';
+  }
+
   void showPk(bool show) {
     if (active) _value = _value.copy(pkVisible: show);
   }
@@ -308,16 +312,22 @@ extension RoomToolsOperations on RoomToolsController {
       await repository.confirmLucky(uid!);
     }
     if (!current() || !canSendLucky) return;
-    await repository.post(HttpApi.roomLuckyPush, {
-      'roomId': roomId,
-      'type': type,
-      'gold': gold,
-      'numberOfRecipients': recipients,
-      'countdown': countdown,
-    });
+    try {
+      await RoomLuckyBoxRepository(repository).send(
+        roomId,
+        type: type,
+        gold: gold,
+        people: recipients,
+        countdown: countdown,
+      );
+    } catch (_) {
+      if (current()) await Future.wait([refreshBalance(), refreshBags()]);
+      rethrow;
+    }
     if (!current()) return;
     await refreshBalance();
     await refreshBags();
+    if (current()) onWalletChanged?.call();
   });
 
   Future<ToolJson?> grabLucky(String id) async {
@@ -329,13 +339,10 @@ extension RoomToolsOperations on RoomToolsController {
           _claimedBags.contains(id)) {
         throw const NadyApiException(message: 'Lucky Box is not ready');
       }
-      final response = await repository.post(HttpApi.roomLuckyGrab, {
-        'luckyBagId': bag.raw['id'],
-      });
+      final response = (await RoomLuckyBoxRepository(
+        repository,
+      ).grab(bag.raw['id'] as Object)).raw;
       if (!current()) return;
-      if (response == null) {
-        throw const NadyApiException(message: 'No Lucky Box result received');
-      }
       result = toolMap(response);
       if (!result!.containsKey('count') ||
           int.tryParse('${result!['count']}') == null) {
@@ -348,6 +355,7 @@ extension RoomToolsOperations on RoomToolsController {
         );
       }
       await refreshBalance();
+      if (current()) onWalletChanged?.call();
     });
     return success ? result : null;
   }

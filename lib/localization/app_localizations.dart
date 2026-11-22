@@ -52,6 +52,28 @@ class _AppLocalizationsDelegate
 
 const Map<String, Map<String, String>> _localizedValues = {
   'en': {
+    'room.gift.firstRecharge': 'First Recharge',
+    'room.gift.firstRechargeUnavailable':
+        'First recharge is no longer available.',
+    'room.gift.firstRechargeEmpty': 'No first-recharge packages available.',
+    'room.gift.firstRechargePurchased': 'Purchase completed',
+    'room.gift.firstRechargeLoadFailed':
+        'Unable to load first-recharge packages.',
+    'room.gift.firstRechargeConfirming':
+        'Payment submitted. Refresh to check the latest status; do not pay again.',
+    'room.gift.rewardDays': '{days} days',
+    'room.gift.rewardPermanent': 'Permanent',
+    'room.recovery.title': 'Room connection lost',
+    'room.recovery.authTimeout':
+        'Room authentication did not finish in time. You have left the room. Check your network, then re-enter manually.',
+    'room.recovery.socketClosed':
+        'The room connection was closed and you have left the room. Re-enter to check room availability and permissions.',
+    'room.recovery.audioClosed':
+        'The voice connection ended and you have left the room. Re-enter to check room availability and permissions.',
+    'room.recovery.reenter': 'Re-enter previous room',
+    'room.recovery.checking': 'Checking room…',
+    'room.recovery.later': 'Later',
+    'room.recovery.failed': 'Unable to open room. Please try again.',
     ...membershipEnglish,
     'room.keep': 'Keep',
     'room.exit': 'Exit',
@@ -286,7 +308,8 @@ const Map<String, Map<String, String>> _localizedValues = {
     'room.gift.other': 'Other',
     'room.gift.customCount': 'Gift quantity',
     'room.gift.countHint': 'Enter quantity',
-    'room.gift.comboChanged': 'Gift or recipients changed. Please select again.',
+    'room.gift.comboChanged':
+        'Gift or recipients changed. Please select again.',
     'room.gift.invalidCount': 'Enter a whole number from 1 to 9999.',
     'room.gift.previewUnavailable': 'Gift preview unavailable',
     'room.gift.closePreview': 'Close gift preview',
@@ -498,6 +521,22 @@ const Map<String, Map<String, String>> _localizedValues = {
     'picker.cameraSelected': 'Camera selected',
   },
   'zh': {
+    'room.gift.firstRecharge': '首充礼包',
+    'room.gift.firstRechargeUnavailable': '当前已不符合首充资格。',
+    'room.gift.firstRechargeEmpty': '暂无可用首充礼包。',
+    'room.gift.firstRechargePurchased': '已购买',
+    'room.gift.firstRechargeLoadFailed': '首充礼包加载失败，请重试。',
+    'room.gift.firstRechargeConfirming': '支付已提交，请刷新核对最新状态，不要重复支付。',
+    'room.gift.rewardDays': '{days}天',
+    'room.gift.rewardPermanent': '永久',
+    'room.recovery.title': '房间连接已断开',
+    'room.recovery.authTimeout': '房间连接未能在规定时间内完成认证，已退出。请检查网络后手动重新进入。',
+    'room.recovery.socketClosed': '房间连接已关闭，已退出房间。重新进入时将再次校验房间状态和权限。',
+    'room.recovery.audioClosed': '语音连接已结束，已退出房间。重新进入时将再次校验房间状态和权限。',
+    'room.recovery.reenter': '重新进入原房间',
+    'room.recovery.checking': '正在校验房间…',
+    'room.recovery.later': '稍后',
+    'room.recovery.failed': '暂时无法进入房间，请重试。',
     ...membershipChinese,
     'room.keep': '保持',
     'room.exit': '退出',

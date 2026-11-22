@@ -123,16 +123,19 @@ void main() {
     },
   );
 
-  test('logout during connection readiness closes the uncommitted account transport', () async {
-    client.readyBarrier = Completer<void>();
-    final binding = socket.bindBarrageAccount(10);
-    await Future<void>.delayed(Duration.zero);
-    final leaving = socket.bindBarrageAccount(null);
-    client.readyBarrier!.complete();
-    await Future.wait([binding, leaving]);
-    expect(client.channels, isEmpty);
-    expect(socket.state.status, AppSocketStatus.idle);
-  });
+  test(
+    'logout during connection readiness closes the uncommitted account transport',
+    () async {
+      client.readyBarrier = Completer<void>();
+      final binding = socket.bindBarrageAccount(10);
+      await Future<void>.delayed(Duration.zero);
+      final leaving = socket.bindBarrageAccount(null);
+      client.readyBarrier!.complete();
+      await Future.wait([binding, leaving]);
+      expect(client.channels, isEmpty);
+      expect(socket.state.status, AppSocketStatus.idle);
+    },
+  );
 
   test(
     'uses the API environment endpoint instead of the website host',
@@ -339,6 +342,23 @@ void main() {
       expect(socket.state.isTerminal, isTrue);
     },
   );
+
+  test(
+    'real weak-network stale close 3502 remains terminal without silently reconnecting',
+    () async {
+      await socket.joinRoom('123');
+      final opened = endpoints.length;
+      client.state = centrifuge.State.disconnected;
+      client.disconnectedEvents.add(
+        centrifuge.DisconnectedEvent(3502, 'stale'),
+      );
+      await Future<void>.delayed(Duration.zero);
+      expect(socket.state.isTerminal, isTrue);
+      expect(socket.state.errorMessage, '3502: stale');
+      expect(socket.state.disconnectCode, 3502);
+      expect(endpoints, hasLength(opened));
+    },
+  );
 }
 
 class _Client implements centrifuge.Client {
@@ -370,7 +390,10 @@ class _Client implements centrifuge.Client {
   @override
   Future<void> connect() async => markConnected();
   @override
-  Future<void> ready() async { await readyBarrier?.future; }
+  Future<void> ready() async {
+    await readyBarrier?.future;
+  }
+
   @override
   Future<void> disconnect() async {
     if (failDisconnect) throw StateError('disconnect failed');

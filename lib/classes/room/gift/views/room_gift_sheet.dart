@@ -9,6 +9,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../localization/app_localizations.dart';
 import '../../../../theme/app_theme.dart';
+import '../../room_repository.dart';
 import '../models/room_gift_models.dart';
 import '../viewmodel/room_gift_state.dart';
 import '../viewmodel/room_gift_view_model.dart';
@@ -20,7 +21,7 @@ import 'room_gift_grid.dart';
 import 'room_gift_promotion_bar.dart';
 import 'room_gift_target_bar.dart';
 
-enum RoomGiftSheetResult { sent, openWallet }
+enum RoomGiftSheetResult { sent, openWallet, openFirstRecharge }
 
 Future<RoomGiftSheetResult?> showRoomGiftSheet({
   required BuildContext context,
@@ -32,6 +33,12 @@ Future<RoomGiftSheetResult?> showRoomGiftSheet({
   int? presetGiftId,
   bool backpack = false,
 }) {
+  final repository = ProviderScope.containerOf(
+    context,
+    listen: false,
+  ).read(roomRepositoryProvider);
+  final generation = repository.roomGeneration;
+  var openingCampaign = false;
   return showModalBottomSheet<RoomGiftSheetResult>(
     context: context,
     useRootNavigator: true,
@@ -47,10 +54,17 @@ Future<RoomGiftSheetResult?> showRoomGiftSheet({
       presetGiftId: presetGiftId,
       backpack: backpack,
       onOpenCampaign: (gift) {
+        if (openingCampaign ||
+            repository.roomGeneration != generation ||
+            !repository.roomState.isInRoom ||
+            repository.roomState.currentRoomId != roomId) {
+          return;
+        }
         final url = gift.resolvedCampaignUrl(
           Localizations.localeOf(context).languageCode,
         );
         if (url.isEmpty) return;
+        openingCampaign = true;
         Navigator.of(sheetContext).pop();
         if (!context.mounted) return;
         context.push(
@@ -95,6 +109,7 @@ class RoomGiftSheet extends HookConsumerWidget {
     final state = ref.watch(provider);
     final viewModel = ref.read(provider.notifier);
     final panelState = ref.watch(roomGiftPanelViewModelProvider(roomId));
+    final openingPromotion = useRef(false);
     final panelModel = ref.read(
       roomGiftPanelViewModelProvider(roomId).notifier,
     );
@@ -131,6 +146,9 @@ class RoomGiftSheet extends HookConsumerWidget {
     }, [roomId]);
 
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
+    final hasPromotion =
+        state.firstRechargeEligibility == true ||
+        state.selectedGift?.banner?.trim().isNotEmpty == true;
     final hasExtras =
         panelState.snapshot != null ||
         panelState.error != null ||
@@ -138,6 +156,7 @@ class RoomGiftSheet extends HookConsumerWidget {
         panelState.jackpot?.enabled == true;
     final preferredHeight =
         AppSpacing.roomGiftPanelHeight.h +
+        (hasPromotion ? 0 : -AppSpacing.roomGiftPromotionHeight.h) +
         bottomPadding +
         (hasExtras ? AppSpacing.giftPanelExtrasHeight.h : 0);
     final maxHeight =
@@ -157,9 +176,10 @@ class RoomGiftSheet extends HookConsumerWidget {
       child: Column(
         children: [
           RoomGiftPromotionBar(
+            showFirstRecharge: state.firstRechargeEligibility == true,
             bannerUrl: state.selectedGift?.banner,
             onOpenCampaign:
-                state.selectedGift?.banner?.isNotEmpty == true &&
+                state.selectedGift?.banner?.trim().isNotEmpty == true &&
                     state.selectedGift!
                         .resolvedCampaignUrl(
                           Localizations.localeOf(context).languageCode,
@@ -168,8 +188,11 @@ class RoomGiftSheet extends HookConsumerWidget {
                     onOpenCampaign != null
                 ? () => onOpenCampaign!(state.selectedGift!)
                 : null,
-            onOpenWallet: () =>
-                Navigator.pop(context, RoomGiftSheetResult.openWallet),
+            onOpenFirstRecharge: () {
+              if (openingPromotion.value) return;
+              openingPromotion.value = true;
+              Navigator.pop(context, RoomGiftSheetResult.openFirstRecharge);
+            },
           ),
           if (hasExtras)
             RoomGiftPanelExtras(

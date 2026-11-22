@@ -1,0 +1,14 @@
+{"kind": "->", "path": "/api/room/getHotScore", "at": "2026-11-21T12:18:54.318253+00:00"}
+{"kind": "<-", "path": "/api/room/getHotScore", "code": "200", "http": "200", "at": "2026-11-21T12:18:56.167376+00:00"}
+{"kind": "->", "path": "/api/resource/function2", "at": "2026-11-21T12:20:08.928606+00:00"}
+{"kind": "->", "path": "/api/room/mic/charm/isEnable", "at": "2026-11-21T12:20:08.929085+00:00"}
+{"kind": "->", "path": "/api/room/pk/info", "at": "2026-11-21T12:20:08.929745+00:00"}
+{"kind": "->", "path": "/api/redPacket/config", "at": "2026-11-21T12:20:08.930305+00:00"}
+{"kind": "->", "path": "/api/redPacket/list", "at": "2026-11-21T12:20:08.930854+00:00"}
+{"kind": "<-", "path": "/api/room/pk/info", "code": "200", "http": "200", "at": "2026-11-21T12:20:09.981259+00:00"}
+{"kind": "<-", "path": "/api/redPacket/list", "code": "200", "http": "200", "at": "2026-11-21T12:20:09.983068+00:00"}
+{"kind": "<-", "path": "/api/room/mic/charm/isEnable", "code": "200", "http": "200", "at": "2026-11-21T12:20:09.983208+00:00"}
+{"kind": "<-", "path": "/api/resource/function2", "code": "200", "http": "200", "at": "2026-11-21T12:20:09.984688+00:00"}
+{"kind": "<-", "path": "/api/redPacket/config", "code": "200", "http": "200", "at": "2026-11-21T12:20:10.591088+00:00"}
+{"kind": "->", "path": "/api/lobby/lists", "at": "2026-11-21T12:20:10.594495+00:00"}
+{"kind": "<-", "path": "/api/lobby/lists", "code": "200", "http": "200", "at": "2026-11-21T12:20:11.071880+00:00"}

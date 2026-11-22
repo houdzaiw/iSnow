@@ -1,0 +1,90 @@
+{
+  "RoomBarrageViewModel": [
+    {
+      "_mounted": "true",
+      "_roomGeneration": "9",
+      "_visible": "true",
+      "_started": "true",
+      "_state": {
+        "visible": "true",
+        "issue": null
+      }
+    }
+  ],
+  "RoomGiftManager": [
+    {
+      "_cacheKey": "user:30317291",
+      "_generation": "1",
+      "_catalog": {
+        "balance": "49855109",
+        "canSendSelf": "true"
+      }
+    }
+  ],
+  "RoomGiftEventManager": [
+    {
+      "_mounted": "true",
+      "_state": {}
+    }
+  ],
+  "RoomGiftPanelViewModel": [
+    {
+      "_mounted": "true",
+      "_visible": "true",
+      "_state": {
+        "preview": null,
+        "previewRevision": "1",
+        "snapshotIndex": "0",
+        "loading": "false"
+      }
+    }
+  ],
+  "RoomGiftViewModel": [
+    {
+      "_mounted": "true",
+      "_state": {
+        "status": "ready",
+        "balance": "49855109",
+        "canSendSelf": "true",
+        "onlineCount": "1",
+        "targetMode": "allRoom",
+        "selectedTabId": "1",
+        "selectedGiftKey": "1:600:0",
+        "giftCount": "1",
+        "isSending": "false",
+        "issue": null,
+        "recipientListLength": 0
+      }
+    }
+  ],
+  "RoomAgoraManager": [
+    {
+      "_generation": "10",
+      "_state": {
+        "joining": "false",
+        "joined": "true",
+        "publishing": "false",
+        "isTerminal": "false"
+      }
+    }
+  ],
+  "AppSocketManager": [
+    {
+      "_state": {
+        "status": "ready",
+        "isTerminal": "false"
+      }
+    }
+  ],
+  "RoomManager": [
+    {
+      "_generation": "9",
+      "_state": {
+        "status": "ready",
+        "currentRoomId": "2113269920442130433",
+        "isMinimized": "false"
+      }
+    }
+  ],
+  "at": "2026-11-21T14:23:01.363523+00:00"
+}

@@ -8,8 +8,10 @@ import '../interaction/room_mention.dart';
 import '../interaction/room_interaction_repository.dart';
 import '../interaction/room_moderation.dart';
 import '../interaction/room_public_media.dart';
+import '../interaction/room_public_notice.dart';
 import '../../../manager/app_socket_manager.dart';
 import '../../../manager/api_error_message.dart';
+import '../../../manager/locale_provider.dart';
 import '../../../manager/room_manager.dart';
 import '../../../model/room_models.dart';
 import '../../../model/room_socket_message.dart';
@@ -30,6 +32,7 @@ final roomViewModelProvider = StateNotifierProvider.autoDispose
       final model = RoomViewModel(
         repository: ref.read(roomRepositoryProvider),
         roomId: roomId,
+        languageCode: () => ref.read(appLocaleProvider).languageCode,
       );
       ProviderSubscription<RoomGiftEventManager>? gifts;
       ref.listen(roomGiftRoomIdProvider(roomId), (_, id) {
@@ -49,6 +52,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
     required RoomRepository repository,
     required String roomId,
     RoomGiftEventManager? giftManager,
+    this.languageCode,
   }) : _repository = repository,
        _giftManager = giftManager,
        _roomId = roomId,
@@ -63,6 +67,7 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
   }
 
   final RoomRepository _repository;
+  final String Function()? languageCode;
   RoomGiftEventManager? _giftManager;
   VoidCallback? _removeGiftListener;
   final String _roomId;
@@ -817,6 +822,11 @@ class RoomViewModel extends StateNotifier<RoomPageState> {
   }
 
   String? _messageText(Map<String, dynamic> payload, String event) {
+    if (event == 'CustomPublicScreenMsg') {
+      return RoomPublicNotice.fromJson(
+        payload,
+      ).text(languageCode?.call() ?? 'en');
+    }
     final raw = _stringValue(
       payload['msg'] ??
           payload['message'] ??

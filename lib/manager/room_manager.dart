@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import '../configs/app_configs.dart';
 import '../configs/app_device.dart';
 import '../model/room_models.dart';
+import '../model/room_recovery_notice.dart';
 import '../model/room_socket_message.dart';
 import '../model/room_user_info.dart';
 import '../model/room_music_state.dart';
@@ -172,6 +173,7 @@ class RoomManager extends ChangeNotifier {
   String? _requestedRoomId;
   String? _serverRoomId;
   int _generation = 0;
+  RoomRecoveryNotice? _recoveryNotice;
   int _roomMetricVersion = 0;
   Future<void>? _musicQueue;
   Future<void>? _musicStatusQueue;
@@ -182,6 +184,14 @@ class RoomManager extends ChangeNotifier {
   RoomMusicPlayback _lastMusicStatus = RoomMusicPlayback.stopped;
 
   RoomState get state => _state;
+  RoomRecoveryNotice? get recoveryNotice => _recoveryNotice;
+
+  void dismissRecovery(RoomRecoveryNotice notice) {
+    if (!identical(notice, _recoveryNotice)) return;
+    _recoveryNotice = null;
+    notifyListeners();
+  }
+
   AppSocketState get socketState => _socketManager.state;
   RoomAgoraState get agoraState => _agoraManager.state;
 
@@ -239,6 +249,8 @@ class RoomManager extends ChangeNotifier {
   }) async {
     final leaving = _leaveTask;
     if (leaving != null) await leaving;
+    final notice = _recoveryNotice;
+    if (notice != null) dismissRecovery(notice);
     if (_enterTask != null && _requestedRoomId == roomId) {
       return _enterTask;
     }
@@ -389,10 +401,22 @@ class RoomManager extends ChangeNotifier {
     return leaveRoom();
   }
 
-  Future<void> leaveRoom() {
+  Future<void> leaveRoom() => _leaveRoom();
+
+  Future<void> _leaveRoom({bool preserveRecovery = false}) {
+    if (!preserveRecovery && _recoveryNotice != null) {
+      dismissRecovery(_recoveryNotice!);
+    }
     if (_leaveTask != null) return _leaveTask!;
     if (_state.status == RoomStatus.idle && _enterTask == null) {
       return Future<void>.value();
+    }
+    if (kDebugMode) {
+      debugPrint(
+        '[RoomExit] requested roomId=${_state.currentRoomId} '
+        'socketTerminal=${_socketManager.state.isTerminal} '
+        'agoraTerminal=${_agoraManager.state.isTerminal}\n${StackTrace.current}',
+      );
     }
     final completion = Completer<void>();
     _leaveTask = completion.future;
@@ -476,7 +500,26 @@ class RoomManager extends ChangeNotifier {
     }
     if (_state.status == RoomStatus.ready &&
         (_socketManager.state.isTerminal || _agoraManager.state.isTerminal)) {
-      unawaited(leaveRoom());
+      if (kDebugMode) {
+        debugPrint(
+          '[RoomExit] dependency terminal '
+          'socket=${_socketManager.state.isTerminal} '
+          'agora=${_agoraManager.state.isTerminal}',
+        );
+      }
+      final roomId = _state.currentRoomId;
+      if (roomId != null && roomId.isNotEmpty) {
+        _recoveryNotice = RoomRecoveryNotice(
+          generation: _generation + 1,
+          roomId: roomId,
+          reason: _socketManager.state.isTerminal
+              ? (_socketManager.state.disconnectCode == 3502
+                    ? RoomDisconnectReason.authenticationTimeout
+                    : RoomDisconnectReason.socketClosed)
+              : RoomDisconnectReason.audioClosed,
+        );
+      }
+      unawaited(_leaveRoom(preserveRecovery: true));
     }
     if (_state.status == RoomStatus.ready &&
         (_agoraManager.state.joining || _agoraManager.state.joined)) {

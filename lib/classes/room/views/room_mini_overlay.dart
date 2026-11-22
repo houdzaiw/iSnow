@@ -11,6 +11,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../localization/app_localizations.dart';
 import '../../../theme/app_theme.dart';
 import '../viewmodel/room_session_view_model.dart';
+import '../recovery/room_recovery_host.dart';
 
 class RoomMiniOverlay extends HookConsumerWidget {
   const RoomMiniOverlay({super.key, required this.router, required this.child});
@@ -54,7 +55,7 @@ class RoomMiniOverlay extends HookConsumerWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        child,
+        RoomRecoveryHost(router: router, child: child),
         if (session.canShowMini && !publicPage && !path.startsWith('/room/'))
           _MiniRoom(
             key: ValueKey(session.room.currentRoomId),

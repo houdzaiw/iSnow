@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../gift/views/room_gift_sheet.dart';
+import '../gift/recharge/room_first_recharge_sheet.dart';
 import '../room_repository.dart';
 
 Future<void> openRoomToolGift(
@@ -35,5 +36,8 @@ Future<void> openRoomToolGift(
   );
   if (context.mounted && result == RoomGiftSheetResult.openWallet) {
     await context.push('/wallet');
+  } else if (context.mounted &&
+      result == RoomGiftSheetResult.openFirstRecharge) {
+    await showRoomFirstRechargeSheet(context, roomId);
   }
 }

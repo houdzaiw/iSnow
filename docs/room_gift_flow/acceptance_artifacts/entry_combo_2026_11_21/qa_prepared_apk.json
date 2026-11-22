@@ -1,0 +1,14 @@
+{
+  "stage": "prepared-only; not yet installed or executed for this round",
+  "path": "/tmp/isnow_room_gift_native_acceptance/build/app/outputs/flutter-apk/app-debug.apk",
+  "bytes": 121194791,
+  "sha256": "ccc0df44dbcaa1f8865ee4a13ed1bffcd4eee1bc9f7d7143879ffdfe47946a8a",
+  "nativeArchitectures": [
+    "arm64-v8a",
+    "armeabi-v7a",
+    "x86_64"
+  ],
+  "target": "integration_test/players_test.dart",
+  "caseFilter": "combination",
+  "mainAppUnchanged": true
+}

@@ -1,0 +1,37 @@
+{
+  "roomId": "2113281922745016322",
+  "balance": "49855109",
+  "currentUid": "30317291",
+  "selectedGiftKey": "1:600:0",
+  "selectedTabId": "1",
+  "giftCount": "1",
+  "targetMode": "selected",
+  "isSending": "false",
+  "selectedRecipientUids": [
+    "12594212"
+  ],
+  "recipients": [
+    {
+      "uid": "30317291",
+      "nickname": "lihei2",
+      "seatPosition": "0"
+    },
+    {
+      "uid": "12594212",
+      "nickname": "lihei",
+      "seatPosition": "1"
+    }
+  ],
+  "matchingGifts": [
+    {
+      "id": "600",
+      "name": "1",
+      "price": "1",
+      "tabId": "1",
+      "userBackpackId": null,
+      "isCombo": "2",
+      "animationType": "0",
+      "giftType": "1"
+    }
+  ]
+}

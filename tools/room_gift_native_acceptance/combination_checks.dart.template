@@ -1,0 +1,269 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:room_gift_native_acceptance/production/classes/room/gift/event/room_gift_event_manager.dart';
+
+import 'environment.dart';
+import 'combination_scene.dart';
+
+void registerCombinationChecks() {
+  for (final trackFirst in [false, true]) {
+    nativeCheck(
+      'combination vehicle start gates linked track, ${trackFirst ? "track" : "vehicle"} ends first',
+      (tester) async {
+        final clip = await resource(
+          RoomGiftAnimationFormat.vap,
+          longLoop: true,
+        );
+        final manager = RoomGiftEventManager(
+          roomId: 'local-combination',
+          startTimer: false,
+        );
+        addTearDown(manager.dispose);
+        final gate = Completer<void>();
+        holdVapConfiguration = gate;
+        final start = trace.length;
+        manager.receive(qaEntrance('car'));
+        manager.receive(qaEntrance('next', car: false, uid: 30));
+        await scene(
+          tester,
+          NativeCombinationScene(manager: manager),
+          overrides: [
+            roomGiftAssetResolverProvider.overrideWithValue(
+              CombinationResolver({'entrance:car:vehicle': clip}),
+            ),
+          ],
+        );
+        await until(
+          tester,
+          () => trace
+              .skip(start)
+              .any((x) => x.endsWith(':setFetchResource:nativeReply')),
+          seconds: 25,
+        );
+        expect(manager.snapshot.entrance, isNull);
+        expect(trace.skip(start), isNot(contains('linked-track:entrance:car')));
+        holdVapConfiguration = null;
+        gate.complete();
+        await until(
+          tester,
+          () => manager.snapshot.entrance?.key == 'entrance:car',
+          seconds: 25,
+        );
+        final records = trace.skip(start).toList();
+        expect(
+          records.indexOf('effect-start:entrance:car:vehicle'),
+          lessThan(records.indexOf('linked-track:entrance:car')),
+        );
+        if (trackFirst) manager.completeEntranceTrack('entrance:car');
+        expect(manager.snapshot.entrance!.key, 'entrance:car');
+        await capture(
+          tester,
+          'combination_vehicle_${trackFirst ? "track_first" : "vehicle_first"}',
+        );
+        await tester.tap(find.byKey(const ValueKey('room-gift-effect-close')));
+        await until(
+          tester,
+          () => trace.skip(start).any((x) => x.endsWith(':stop:delivered')),
+        );
+        await until(tester, () => manager.snapshot.effects.isEmpty);
+        if (!trackFirst) {
+          expect(manager.snapshot.entrance!.key, 'entrance:car');
+          manager.completeEntranceTrack('entrance:car');
+        }
+        expect(manager.snapshot.entrance!.key, 'entrance:next');
+        manager.setVisible(false);
+      },
+    );
+  }
+
+  nativeCheck(
+    'combination full-screen PAG releases before numeric VAP starts',
+    (tester) async {
+      final manager = RoomGiftEventManager(
+        roomId: 'local-combination',
+        startTimer: false,
+      );
+      addTearDown(manager.dispose);
+      final pag = await resource(RoomGiftAnimationFormat.pag);
+      final vap = await resource(RoomGiftAnimationFormat.vap, longLoop: true);
+      final gate = Completer<void>();
+      final start = trace.length;
+      manager.receive(qaGift('full'));
+      manager.receive(qaGift('number', lucky: true));
+      await scene(
+        tester,
+        NativeCombinationScene(manager: manager, numeric: vap),
+        overrides: [
+          roomGiftAssetResolverProvider.overrideWithValue(
+            CombinationResolver({'full': pag}),
+          ),
+        ],
+      );
+      await until(
+        tester,
+        () => trace.skip(start).contains('effect-start:full'),
+      );
+      expect(trace.skip(start), isNot(contains('numeric:mount')));
+      holdPagRelease = gate;
+      await tester.tap(find.byKey(const ValueKey('room-gift-effect-close')));
+      await until(
+        tester,
+        () => trace.skip(start).any((x) => x.endsWith(':release:nativeReply')),
+      );
+      expect(manager.snapshot.canPlayLucky, isFalse);
+      expect(trace.skip(start), isNot(contains('numeric:mount')));
+      holdPagRelease = null;
+      gate.complete();
+      await until(
+        tester,
+        () => trace.skip(start).contains('numeric:start'),
+        seconds: 25,
+      );
+      final records = trace.skip(start).toList();
+      expect(
+        records.indexWhere((x) => x.endsWith(':release:delivered')),
+        inInclusiveRange(0, records.indexOf('numeric:mount') - 1),
+      );
+      await capture(tester, 'combination_pag_to_numeric');
+      manager.setVisible(false);
+      await tester.pump();
+      await until(
+        tester,
+        () => trace.skip(start).any((x) => x.endsWith(':stop:delivered')),
+      );
+      manager.setVisible(true);
+      await tester.pump();
+      expect(manager.snapshot.lucky, isEmpty);
+      expect(
+        trace.skip(start).where((x) => x == 'numeric:mount'),
+        hasLength(1),
+      );
+    },
+  );
+
+  nativeCheck(
+    'combination numeric VAP releases before incoming full-screen PAG resolves',
+    (tester) async {
+      final manager = RoomGiftEventManager(
+        roomId: 'local-combination',
+        startTimer: false,
+      );
+      addTearDown(manager.dispose);
+      final vap = await resource(RoomGiftAnimationFormat.vap, longLoop: true);
+      final pag = await resource(RoomGiftAnimationFormat.pag);
+      final start = trace.length;
+      manager.receive(qaGift('number', lucky: true));
+      await scene(
+        tester,
+        NativeCombinationScene(manager: manager, numeric: vap),
+        overrides: [
+          roomGiftAssetResolverProvider.overrideWithValue(
+            CombinationResolver({'full': pag}),
+          ),
+        ],
+      );
+      await until(
+        tester,
+        () => trace.skip(start).contains('numeric:start'),
+        seconds: 25,
+      );
+      final gate = Completer<void>();
+      holdVapStop = gate;
+      manager.receive(qaGift('full'));
+      await until(
+        tester,
+        () => trace.skip(start).any((x) => x.endsWith(':stop:nativeReply')),
+      );
+      expect(manager.snapshot.canPlayFullscreen, isFalse);
+      expect(trace.skip(start), isNot(contains('resolve:full')));
+      holdVapStop = null;
+      gate.complete();
+      await until(
+        tester,
+        () => trace.skip(start).contains('effect-start:full'),
+      );
+      final records = trace.skip(start).toList();
+      expect(
+        records.indexWhere((x) => x.endsWith(':stop:delivered')),
+        inInclusiveRange(0, records.indexOf('resolve:full') - 1),
+      );
+      await capture(tester, 'combination_numeric_to_pag');
+      manager.setVisible(false);
+      await tester.pump();
+      await until(
+        tester,
+        () => trace.skip(start).any((x) => x.endsWith(':release:delivered')),
+      );
+    },
+  );
+
+  nativeCheck(
+    'combination Keep during PAG initialization releases old task before fresh task',
+    (tester) async {
+      final manager = RoomGiftEventManager(
+        roomId: 'local-combination',
+        startTimer: false,
+      );
+      addTearDown(manager.dispose);
+      final pag = await resource(RoomGiftAnimationFormat.pag);
+      final gate = Completer<void>();
+      holdPagInit = gate;
+      final start = trace.length;
+      manager.receive(qaGift('old'));
+      await scene(
+        tester,
+        NativeCombinationScene(manager: manager),
+        overrides: [
+          roomGiftAssetResolverProvider.overrideWithValue(
+            CombinationResolver({'old': pag, 'fresh': pag}),
+          ),
+        ],
+      );
+      await until(
+        tester,
+        () => trace.skip(start).any((x) => x.endsWith(':initPag:nativeReply')),
+      );
+      manager.setVisible(false);
+      await tester.pump();
+      manager.setVisible(true);
+      manager.receive(qaGift('fresh'));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(
+        trace.skip(start).where((x) => x.endsWith(':initPag:request')),
+        hasLength(1),
+      );
+      holdPagInit = null;
+      gate.complete();
+      await until(
+        tester,
+        () => trace.skip(start).contains('effect-start:fresh'),
+      );
+      final records = trace.skip(start).toList();
+      expect(records, isNot(contains('effect-start:old')));
+      final firstRelease = records.indexWhere(
+        (x) => x.endsWith(':release:delivered'),
+      );
+      final inits = records
+          .asMap()
+          .entries
+          .where((e) => e.value.endsWith(':initPag:request'))
+          .toList();
+      expect(inits, hasLength(2));
+      expect(firstRelease, inInclusiveRange(0, inits.last.key - 1));
+      manager.setVisible(false);
+      await tester.pump();
+      await until(
+        tester,
+        () =>
+            trace
+                .skip(start)
+                .where((x) => x.endsWith(':release:delivered'))
+                .length ==
+            2,
+      );
+    },
+  );
+}

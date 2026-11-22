@@ -1,0 +1,684 @@
+{
+  "checks": [
+    {
+      "name": "combination vehicle start gates linked track, vehicle ends first",
+      "passed": true
+    },
+    {
+      "name": "combination vehicle start gates linked track, track ends first",
+      "passed": true
+    },
+    {
+      "name": "combination full-screen PAG releases before numeric VAP starts",
+      "passed": true
+    },
+    {
+      "name": "combination numeric VAP releases before incoming full-screen PAG resolves",
+      "passed": true
+    },
+    {
+      "name": "combination Keep during PAG initialization releases old task before fresh task",
+      "passed": true
+    }
+  ],
+  "nativeTrace": [
+    "resolve:entrance:car:vehicle",
+    "flutter_vap_controller_0:setVideoMode:request",
+    "flutter_vap_controller_0:setVideoMode:nativeReply",
+    "flutter_vap_controller_0:setVideoMode:delivered",
+    "flutter_vap_controller_0:setFetchResource:request",
+    "flutter_vap_controller_0:setFetchResource:nativeReply",
+    "flutter_vap_controller_0:setFetchResource:delivered",
+    "flutter_vap_controller_0:setLoop:request",
+    "flutter_vap_controller_0:setLoop:nativeReply",
+    "flutter_vap_controller_0:setLoop:delivered",
+    "flutter_vap_controller_0:playPath:request",
+    "flutter_vap_controller_0:playPath:nativeReply",
+    "flutter_vap_controller_0:playPath:delivered",
+    "flutter_vap_controller_0:event:onStart",
+    "effect-start:entrance:car:vehicle",
+    "linked-track:entrance:car",
+    "frame:combination_vehicle_vehicle_first:foregroundSamples=31255",
+    "flutter_vap_controller_0:stop:request",
+    "flutter_vap_controller_0:stop:nativeReply",
+    "flutter_vap_controller_0:stop:delivered",
+    "effect-complete:entrance:car:vehicle",
+    "linked-track:entrance:next",
+    "linked-track:null",
+    "resolve:entrance:car:vehicle",
+    "flutter_vap_controller_1:setVideoMode:request",
+    "flutter_vap_controller_1:setVideoMode:nativeReply",
+    "flutter_vap_controller_1:setVideoMode:delivered",
+    "flutter_vap_controller_1:setFetchResource:request",
+    "flutter_vap_controller_1:setFetchResource:nativeReply",
+    "flutter_vap_controller_1:setFetchResource:delivered",
+    "flutter_vap_controller_1:setLoop:request",
+    "flutter_vap_controller_1:setLoop:nativeReply",
+    "flutter_vap_controller_1:setLoop:delivered",
+    "flutter_vap_controller_1:playPath:request",
+    "flutter_vap_controller_1:playPath:nativeReply",
+    "flutter_vap_controller_1:playPath:delivered",
+    "flutter_vap_controller_1:event:onStart",
+    "effect-start:entrance:car:vehicle",
+    "linked-track:entrance:car",
+    "frame:combination_vehicle_track_first:foregroundSamples=31255",
+    "flutter_vap_controller_1:stop:request",
+    "flutter_vap_controller_1:stop:nativeReply",
+    "flutter_vap_controller_1:stop:delivered",
+    "effect-complete:entrance:car:vehicle",
+    "linked-track:entrance:next",
+    "linked-track:null",
+    "resolve:full",
+    "flutter_pag_plugin:initPag:request",
+    "flutter_pag_plugin:initPag:nativeReply",
+    "flutter_pag_plugin:initPag:delivered",
+    "flutter_pag_plugin:start:request",
+    "flutter_pag_plugin:start:nativeReply",
+    "flutter_pag_plugin:start:delivered",
+    "effect-start:full",
+    "flutter_pag_plugin:release:request",
+    "flutter_pag_plugin:release:nativeReply",
+    "flutter_pag_plugin:release:delivered",
+    "effect-complete:full",
+    "numeric:mount",
+    "flutter_vap_controller_2:setVideoMode:request",
+    "flutter_vap_controller_2:setVideoMode:nativeReply",
+    "flutter_vap_controller_2:setVideoMode:delivered",
+    "flutter_vap_controller_2:setFetchResource:request",
+    "flutter_vap_controller_2:setFetchResource:nativeReply",
+    "flutter_vap_controller_2:setFetchResource:delivered",
+    "flutter_vap_controller_2:setLoop:request",
+    "flutter_vap_controller_2:setLoop:nativeReply",
+    "flutter_vap_controller_2:setLoop:delivered",
+    "flutter_vap_controller_2:playPath:request",
+    "flutter_vap_controller_2:playPath:nativeReply",
+    "flutter_vap_controller_2:playPath:delivered",
+    "flutter_vap_controller_2:event:onStart",
+    "numeric:start",
+    "frame:combination_pag_to_numeric:foregroundSamples=31255",
+    "flutter_vap_controller_2:stop:request",
+    "flutter_vap_controller_2:stop:nativeReply",
+    "flutter_vap_controller_2:stop:delivered",
+    "numeric:mount",
+    "flutter_vap_controller_3:setVideoMode:request",
+    "flutter_vap_controller_3:setVideoMode:nativeReply",
+    "flutter_vap_controller_3:setVideoMode:delivered",
+    "flutter_vap_controller_3:setFetchResource:request",
+    "flutter_vap_controller_3:setFetchResource:nativeReply",
+    "flutter_vap_controller_3:setFetchResource:delivered",
+    "flutter_vap_controller_3:setLoop:request",
+    "flutter_vap_controller_3:setLoop:nativeReply",
+    "flutter_vap_controller_3:setLoop:delivered",
+    "flutter_vap_controller_3:playPath:request",
+    "flutter_vap_controller_3:playPath:nativeReply",
+    "flutter_vap_controller_3:playPath:delivered",
+    "flutter_vap_controller_3:event:onStart",
+    "numeric:start",
+    "flutter_vap_controller_3:stop:request",
+    "flutter_vap_controller_3:stop:nativeReply",
+    "flutter_vap_controller_3:stop:delivered",
+    "resolve:full",
+    "flutter_pag_plugin:initPag:request",
+    "flutter_pag_plugin:initPag:nativeReply",
+    "flutter_pag_plugin:initPag:delivered",
+    "flutter_pag_plugin:start:request",
+    "flutter_pag_plugin:start:nativeReply",
+    "flutter_pag_plugin:start:delivered",
+    "effect-start:full",
+    "frame:combination_numeric_to_pag:foregroundSamples=11096",
+    "flutter_pag_plugin:release:request",
+    "flutter_pag_plugin:release:nativeReply",
+    "flutter_pag_plugin:release:delivered",
+    "resolve:old",
+    "flutter_pag_plugin:initPag:request",
+    "flutter_pag_plugin:initPag:nativeReply",
+    "resolve:fresh",
+    "flutter_pag_plugin:initPag:delivered",
+    "flutter_pag_plugin:release:request",
+    "flutter_pag_plugin:release:nativeReply",
+    "flutter_pag_plugin:release:delivered",
+    "flutter_pag_plugin:initPag:request",
+    "flutter_pag_plugin:initPag:nativeReply",
+    "flutter_pag_plugin:initPag:delivered",
+    "flutter_pag_plugin:start:request",
+    "flutter_pag_plugin:start:nativeReply",
+    "flutter_pag_plugin:start:delivered",
+    "effect-start:fresh",
+    "flutter_pag_plugin:release:request",
+    "flutter_pag_plugin:release:nativeReply",
+    "flutter_pag_plugin:release:delivered"
+  ],
+  "nativeTimeline": [
+    {
+      "at": "2026-11-21T05:22:02.771339Z",
+      "event": "resolve:entrance:car:vehicle"
+    },
+    {
+      "at": "2026-11-21T05:22:03.954232Z",
+      "event": "flutter_vap_controller_0:setVideoMode:request"
+    },
+    {
+      "at": "2026-11-21T05:22:03.955078Z",
+      "event": "flutter_vap_controller_0:setVideoMode:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:03.955108Z",
+      "event": "flutter_vap_controller_0:setVideoMode:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:03.955640Z",
+      "event": "flutter_vap_controller_0:setFetchResource:request"
+    },
+    {
+      "at": "2026-11-21T05:22:03.956242Z",
+      "event": "flutter_vap_controller_0:setFetchResource:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:03.959164Z",
+      "event": "flutter_vap_controller_0:setFetchResource:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:03.959263Z",
+      "event": "flutter_vap_controller_0:setLoop:request"
+    },
+    {
+      "at": "2026-11-21T05:22:03.959837Z",
+      "event": "flutter_vap_controller_0:setLoop:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:03.959855Z",
+      "event": "flutter_vap_controller_0:setLoop:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:03.959921Z",
+      "event": "flutter_vap_controller_0:playPath:request"
+    },
+    {
+      "at": "2026-11-21T05:22:03.961275Z",
+      "event": "flutter_vap_controller_0:playPath:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:03.961292Z",
+      "event": "flutter_vap_controller_0:playPath:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:04.309627Z",
+      "event": "flutter_vap_controller_0:event:onStart"
+    },
+    {
+      "at": "2026-11-21T05:22:04.335291Z",
+      "event": "effect-start:entrance:car:vehicle"
+    },
+    {
+      "at": "2026-11-21T05:22:04.335877Z",
+      "event": "linked-track:entrance:car"
+    },
+    {
+      "at": "2026-11-21T05:22:05.558185Z",
+      "event": "frame:combination_vehicle_vehicle_first:foregroundSamples=31255"
+    },
+    {
+      "at": "2026-11-21T05:22:05.588574Z",
+      "event": "flutter_vap_controller_0:stop:request"
+    },
+    {
+      "at": "2026-11-21T05:22:05.737166Z",
+      "event": "flutter_vap_controller_0:stop:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:05.737235Z",
+      "event": "flutter_vap_controller_0:stop:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:05.737755Z",
+      "event": "effect-complete:entrance:car:vehicle"
+    },
+    {
+      "at": "2026-11-21T05:22:05.747563Z",
+      "event": "linked-track:entrance:next"
+    },
+    {
+      "at": "2026-11-21T05:22:05.748096Z",
+      "event": "linked-track:null"
+    },
+    {
+      "at": "2026-11-21T05:22:06.208066Z",
+      "event": "resolve:entrance:car:vehicle"
+    },
+    {
+      "at": "2026-11-21T05:22:07.252376Z",
+      "event": "flutter_vap_controller_1:setVideoMode:request"
+    },
+    {
+      "at": "2026-11-21T05:22:07.253127Z",
+      "event": "flutter_vap_controller_1:setVideoMode:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:07.253151Z",
+      "event": "flutter_vap_controller_1:setVideoMode:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:07.253269Z",
+      "event": "flutter_vap_controller_1:setFetchResource:request"
+    },
+    {
+      "at": "2026-11-21T05:22:07.253732Z",
+      "event": "flutter_vap_controller_1:setFetchResource:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:07.258456Z",
+      "event": "flutter_vap_controller_1:setFetchResource:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:07.258528Z",
+      "event": "flutter_vap_controller_1:setLoop:request"
+    },
+    {
+      "at": "2026-11-21T05:22:07.259090Z",
+      "event": "flutter_vap_controller_1:setLoop:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:07.259112Z",
+      "event": "flutter_vap_controller_1:setLoop:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:07.259159Z",
+      "event": "flutter_vap_controller_1:playPath:request"
+    },
+    {
+      "at": "2026-11-21T05:22:07.260364Z",
+      "event": "flutter_vap_controller_1:playPath:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:07.260383Z",
+      "event": "flutter_vap_controller_1:playPath:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:07.427542Z",
+      "event": "flutter_vap_controller_1:event:onStart"
+    },
+    {
+      "at": "2026-11-21T05:22:07.448891Z",
+      "event": "effect-start:entrance:car:vehicle"
+    },
+    {
+      "at": "2026-11-21T05:22:07.449013Z",
+      "event": "linked-track:entrance:car"
+    },
+    {
+      "at": "2026-11-21T05:22:08.351711Z",
+      "event": "frame:combination_vehicle_track_first:foregroundSamples=31255"
+    },
+    {
+      "at": "2026-11-21T05:22:08.353915Z",
+      "event": "flutter_vap_controller_1:stop:request"
+    },
+    {
+      "at": "2026-11-21T05:22:08.480777Z",
+      "event": "flutter_vap_controller_1:stop:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:08.480828Z",
+      "event": "flutter_vap_controller_1:stop:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:08.480988Z",
+      "event": "effect-complete:entrance:car:vehicle"
+    },
+    {
+      "at": "2026-11-21T05:22:08.481224Z",
+      "event": "linked-track:entrance:next"
+    },
+    {
+      "at": "2026-11-21T05:22:08.524454Z",
+      "event": "linked-track:null"
+    },
+    {
+      "at": "2026-11-21T05:22:08.995717Z",
+      "event": "resolve:full"
+    },
+    {
+      "at": "2026-11-21T05:22:09.026049Z",
+      "event": "flutter_pag_plugin:initPag:request"
+    },
+    {
+      "at": "2026-11-21T05:22:09.221083Z",
+      "event": "flutter_pag_plugin:initPag:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:09.221165Z",
+      "event": "flutter_pag_plugin:initPag:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:09.223458Z",
+      "event": "flutter_pag_plugin:start:request"
+    },
+    {
+      "at": "2026-11-21T05:22:09.229408Z",
+      "event": "flutter_pag_plugin:start:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:09.229446Z",
+      "event": "flutter_pag_plugin:start:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:09.242592Z",
+      "event": "effect-start:full"
+    },
+    {
+      "at": "2026-11-21T05:22:09.278645Z",
+      "event": "flutter_pag_plugin:release:request"
+    },
+    {
+      "at": "2026-11-21T05:22:09.287843Z",
+      "event": "flutter_pag_plugin:release:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:09.325425Z",
+      "event": "flutter_pag_plugin:release:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:09.325546Z",
+      "event": "effect-complete:full"
+    },
+    {
+      "at": "2026-11-21T05:22:09.341521Z",
+      "event": "numeric:mount"
+    },
+    {
+      "at": "2026-11-21T05:22:10.369335Z",
+      "event": "flutter_vap_controller_2:setVideoMode:request"
+    },
+    {
+      "at": "2026-11-21T05:22:10.370269Z",
+      "event": "flutter_vap_controller_2:setVideoMode:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:10.370295Z",
+      "event": "flutter_vap_controller_2:setVideoMode:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:10.370473Z",
+      "event": "flutter_vap_controller_2:setFetchResource:request"
+    },
+    {
+      "at": "2026-11-21T05:22:10.370800Z",
+      "event": "flutter_vap_controller_2:setFetchResource:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:10.370819Z",
+      "event": "flutter_vap_controller_2:setFetchResource:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:10.370867Z",
+      "event": "flutter_vap_controller_2:setLoop:request"
+    },
+    {
+      "at": "2026-11-21T05:22:10.371153Z",
+      "event": "flutter_vap_controller_2:setLoop:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:10.371170Z",
+      "event": "flutter_vap_controller_2:setLoop:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:10.371228Z",
+      "event": "flutter_vap_controller_2:playPath:request"
+    },
+    {
+      "at": "2026-11-21T05:22:10.372361Z",
+      "event": "flutter_vap_controller_2:playPath:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:10.372380Z",
+      "event": "flutter_vap_controller_2:playPath:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:10.531383Z",
+      "event": "flutter_vap_controller_2:event:onStart"
+    },
+    {
+      "at": "2026-11-21T05:22:10.559183Z",
+      "event": "numeric:start"
+    },
+    {
+      "at": "2026-11-21T05:22:11.405996Z",
+      "event": "frame:combination_pag_to_numeric:foregroundSamples=31255"
+    },
+    {
+      "at": "2026-11-21T05:22:11.412234Z",
+      "event": "flutter_vap_controller_2:stop:request"
+    },
+    {
+      "at": "2026-11-21T05:22:11.464922Z",
+      "event": "flutter_vap_controller_2:stop:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:11.464951Z",
+      "event": "flutter_vap_controller_2:stop:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:11.949858Z",
+      "event": "numeric:mount"
+    },
+    {
+      "at": "2026-11-21T05:22:12.981352Z",
+      "event": "flutter_vap_controller_3:setVideoMode:request"
+    },
+    {
+      "at": "2026-11-21T05:22:12.982189Z",
+      "event": "flutter_vap_controller_3:setVideoMode:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:12.982211Z",
+      "event": "flutter_vap_controller_3:setVideoMode:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:12.982315Z",
+      "event": "flutter_vap_controller_3:setFetchResource:request"
+    },
+    {
+      "at": "2026-11-21T05:22:12.982723Z",
+      "event": "flutter_vap_controller_3:setFetchResource:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:12.982736Z",
+      "event": "flutter_vap_controller_3:setFetchResource:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:12.982766Z",
+      "event": "flutter_vap_controller_3:setLoop:request"
+    },
+    {
+      "at": "2026-11-21T05:22:12.983249Z",
+      "event": "flutter_vap_controller_3:setLoop:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:12.983269Z",
+      "event": "flutter_vap_controller_3:setLoop:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:12.983311Z",
+      "event": "flutter_vap_controller_3:playPath:request"
+    },
+    {
+      "at": "2026-11-21T05:22:12.984538Z",
+      "event": "flutter_vap_controller_3:playPath:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:12.984558Z",
+      "event": "flutter_vap_controller_3:playPath:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:13.205869Z",
+      "event": "flutter_vap_controller_3:event:onStart"
+    },
+    {
+      "at": "2026-11-21T05:22:13.215480Z",
+      "event": "numeric:start"
+    },
+    {
+      "at": "2026-11-21T05:22:13.239288Z",
+      "event": "flutter_vap_controller_3:stop:request"
+    },
+    {
+      "at": "2026-11-21T05:22:13.310166Z",
+      "event": "flutter_vap_controller_3:stop:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:13.341946Z",
+      "event": "flutter_vap_controller_3:stop:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:13.359380Z",
+      "event": "resolve:full"
+    },
+    {
+      "at": "2026-11-21T05:22:13.391122Z",
+      "event": "flutter_pag_plugin:initPag:request"
+    },
+    {
+      "at": "2026-11-21T05:22:13.410122Z",
+      "event": "flutter_pag_plugin:initPag:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:13.410176Z",
+      "event": "flutter_pag_plugin:initPag:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:13.410325Z",
+      "event": "flutter_pag_plugin:start:request"
+    },
+    {
+      "at": "2026-11-21T05:22:13.412623Z",
+      "event": "flutter_pag_plugin:start:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:13.412638Z",
+      "event": "flutter_pag_plugin:start:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:13.424441Z",
+      "event": "effect-start:full"
+    },
+    {
+      "at": "2026-11-21T05:22:14.218369Z",
+      "event": "frame:combination_numeric_to_pag:foregroundSamples=11096"
+    },
+    {
+      "at": "2026-11-21T05:22:14.226742Z",
+      "event": "flutter_pag_plugin:release:request"
+    },
+    {
+      "at": "2026-11-21T05:22:14.232445Z",
+      "event": "flutter_pag_plugin:release:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:14.232472Z",
+      "event": "flutter_pag_plugin:release:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:14.713333Z",
+      "event": "resolve:old"
+    },
+    {
+      "at": "2026-11-21T05:22:14.741720Z",
+      "event": "flutter_pag_plugin:initPag:request"
+    },
+    {
+      "at": "2026-11-21T05:22:14.771017Z",
+      "event": "flutter_pag_plugin:initPag:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:14.807724Z",
+      "event": "resolve:fresh"
+    },
+    {
+      "at": "2026-11-21T05:22:14.907917Z",
+      "event": "flutter_pag_plugin:initPag:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:14.908069Z",
+      "event": "flutter_pag_plugin:release:request"
+    },
+    {
+      "at": "2026-11-21T05:22:14.913298Z",
+      "event": "flutter_pag_plugin:release:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:14.913317Z",
+      "event": "flutter_pag_plugin:release:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:14.924544Z",
+      "event": "flutter_pag_plugin:initPag:request"
+    },
+    {
+      "at": "2026-11-21T05:22:14.952932Z",
+      "event": "flutter_pag_plugin:initPag:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:14.952996Z",
+      "event": "flutter_pag_plugin:initPag:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:14.953199Z",
+      "event": "flutter_pag_plugin:start:request"
+    },
+    {
+      "at": "2026-11-21T05:22:14.954051Z",
+      "event": "flutter_pag_plugin:start:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:14.954063Z",
+      "event": "flutter_pag_plugin:start:delivered"
+    },
+    {
+      "at": "2026-11-21T05:22:14.959941Z",
+      "event": "effect-start:fresh"
+    },
+    {
+      "at": "2026-11-21T05:22:14.977490Z",
+      "event": "flutter_pag_plugin:release:request"
+    },
+    {
+      "at": "2026-11-21T05:22:14.982796Z",
+      "event": "flutter_pag_plugin:release:nativeReply"
+    },
+    {
+      "at": "2026-11-21T05:22:14.982821Z",
+      "event": "flutter_pag_plugin:release:delivered"
+    }
+  ],
+  "screenshots": [
+    {
+      "screenshotName": "combination_vehicle_vehicle_first",
+      "file": "combination_vehicle_vehicle_first.png",
+      "bytes": 437434,
+      "sha256": "1ca68b9abe54854a08c967aca1c07129f9e260578a1839bd02baea809666803c"
+    },
+    {
+      "screenshotName": "combination_vehicle_track_first",
+      "file": "combination_vehicle_track_first.png",
+      "bytes": 441185,
+      "sha256": "00b2e72a1248d1686edd655892dad7b7c965120ab44dac680d50df0404c6101e"
+    },
+    {
+      "screenshotName": "combination_pag_to_numeric",
+      "file": "combination_pag_to_numeric.png",
+      "bytes": 439459,
+      "sha256": "c6ad804c008b3802d69066560f3cdd81d8659b4f7650476e08ba9f5a37115789"
+    },
+    {
+      "screenshotName": "combination_numeric_to_pag",
+      "file": "combination_numeric_to_pag.png",
+      "bytes": 520136,
+      "sha256": "1bd8ac8b450cc24b5f3d4a43a6ad43c53fb64349b1a1ad95b3397afce74efbe6"
+    }
+  ],
+  "originalReport": {
+    "file": "native_result.original.json.gz",
+    "sha256": "8cf938a7851ab92e79189c692e9e640b619eb1d2a99fe8b7b5df99c0d299dc4d",
+    "format": "Unmodified host JSON, gzip-compressed; duplicate PNG byte arrays indexed above"
+  }
+}

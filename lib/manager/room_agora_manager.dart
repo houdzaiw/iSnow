@@ -547,6 +547,12 @@ class RoomAgoraManager extends ChangeNotifier {
       },
       onConnectionStateChanged: (connection, state, reason) {
         if (!_accepts(connection)) return;
+        if (kDebugMode) {
+          debugPrint(
+            '[RoomAgora] connection roomId=$_expectedRoomId '
+            'state=${state.name} reason=${reason.name}',
+          );
+        }
         if (state == ConnectionStateType.connectionStateFailed ||
             reason ==
                 ConnectionChangedReasonType.connectionChangedBannedByServer) {

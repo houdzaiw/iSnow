@@ -1,0 +1,15 @@
+{
+  "sha256": "635e11182dba03ba19ae2a41e2a9f8a56df5ccf8b921b90b2358c1fa0a8bcb47",
+  "installedSha256": "635e11182dba03ba19ae2a41e2a9f8a56df5ccf8b921b90b2358c1fa0a8bcb47",
+  "bytes": 121194732,
+  "package": "com.isnow.qa.room_gift_native_acceptance",
+  "nativeArchitectures": [
+    "arm64-v8a",
+    "armeabi-v7a",
+    "x86_64"
+  ],
+  "caseFilter": "combination",
+  "hostExitCode": 0,
+  "mainAppInstalledOrRestarted": false,
+  "qaStoppedAfterRun": true
+}

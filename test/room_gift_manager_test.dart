@@ -74,6 +74,101 @@ void main() {
     expect(manager.catalog?.balance, 80);
     expect(manager.catalog?.tabs.last.gifts.single.amount, 1);
   });
+
+  test(
+    'late old-account catalog cannot replace the new account or its balance',
+    () async {
+      final old = Completer<RoomGiftCatalog>();
+      final first = manager.getOrLoad(
+        cacheKey: 'env-a:user:10',
+        loader: () => old.future,
+      );
+      final oldToken = manager.balanceToken;
+      final second = _catalog().copyWith(balance: 250);
+      await manager.getOrLoad(
+        cacheKey: 'env-a:user:20',
+        loader: () async => second,
+      );
+      old.complete(_catalog());
+      await first;
+      expect(manager.catalog, same(second));
+      expect(manager.updateBalance(999, token: oldToken), isFalse);
+      expect(manager.catalog?.balance, 250);
+    },
+  );
+
+  test(
+    'clear during load isolates a same-UID relogin and keeps its coalesced request',
+    () async {
+      final old = Completer<RoomGiftCatalog>();
+      final fresh = Completer<RoomGiftCatalog>();
+      final first = manager.getOrLoad(
+        cacheKey: 'user:10',
+        loader: () => old.future,
+      );
+      manager.clear();
+      var freshLoads = 0;
+      Future<RoomGiftCatalog> loadFresh() {
+        freshLoads++;
+        return fresh.future;
+      }
+
+      final second = manager.getOrLoad(cacheKey: 'user:10', loader: loadFresh);
+      old.complete(_catalog());
+      await first;
+      expect(manager.catalog, isNull);
+      final third = manager.getOrLoad(cacheKey: 'user:10', loader: loadFresh);
+      expect(freshLoads, 1);
+      final catalog = _catalog().copyWith(balance: 700);
+      fresh.complete(catalog);
+      expect(await second, same(catalog));
+      expect(await third, same(catalog));
+      expect(manager.catalog, same(catalog));
+    },
+  );
+
+  test('failed load is not cached or automatically retried', () async {
+    var loads = 0;
+    Future<RoomGiftCatalog> failing() async {
+      loads++;
+      throw StateError('offline fixture');
+    }
+
+    await expectLater(
+      manager.getOrLoad(cacheKey: 'user:10', loader: failing),
+      throwsStateError,
+    );
+    await Future<void>.delayed(Duration.zero);
+    expect(loads, 1);
+    expect(manager.catalog, isNull);
+    final catalog = await manager.getOrLoad(
+      cacheKey: 'user:10',
+      loader: () async => _catalog(),
+    );
+    expect(manager.catalog, same(catalog));
+  });
+
+  test(
+    'same UID in a distinct caller scope loads a separate catalog',
+    () async {
+      final first = await manager.getOrLoad(
+        cacheKey: 'env-a:user:10',
+        loader: () async => _catalog(),
+      );
+      final second = _catalog().copyWith(balance: 450);
+      var loads = 0;
+      await manager.getOrLoad(
+        cacheKey: 'env-b:user:10',
+        loader: () async {
+          loads++;
+          return second;
+        },
+      );
+      expect(loads, 1);
+      expect(manager.catalog, same(second));
+      expect(manager.catalog, isNot(same(first)));
+    },
+  );
 }
 
 RoomGiftCatalog _catalog() {

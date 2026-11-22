@@ -1,0 +1,29 @@
+{
+  "RoomManager": {
+    "state": {
+      "status": "ready",
+      "currentRoomId": "2113269920442130433",
+      "isMinimized": "true"
+    }
+  },
+  "RoomBarrageViewModel": {
+    "_roomGeneration": "1",
+    "_visible": "true",
+    "_started": "true",
+    "_nativeBlocked": "false",
+    "_acceptMessages": "true",
+    "state": {
+      "actionBusy": "false",
+      "visible": "true",
+      "issue": null
+    }
+  },
+  "AppSocketManager": {
+    "state": {
+      "status": "ready"
+    }
+  },
+  "capturedAtUtc": "2026-11-21T05:05:43.138772+00:00",
+  "pid": "1756",
+  "head": "0fd1b7ebddf60ed95d63ba3f7acb11e0005d2997"
+}

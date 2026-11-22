@@ -1,0 +1,212 @@
+{
+  "scope": "explicit retained log-buffer backfill, not a continuous observer; headers/body/query removed",
+  "startEpoch": 1795263784.153822,
+  "endEpoch": 1795264787.495382,
+  "oldestRetainedEpoch": 1795222361.4,
+  "rows": [
+    {
+      "epoch": 1795264257.049,
+      "kind": "->",
+      "path": "/api/resource/function2"
+    },
+    {
+      "epoch": 1795264257.05,
+      "kind": "->",
+      "path": "/api/room/mic/charm/isEnable"
+    },
+    {
+      "epoch": 1795264257.051,
+      "kind": "->",
+      "path": "/api/room/pk/info"
+    },
+    {
+      "epoch": 1795264257.051,
+      "kind": "->",
+      "path": "/api/redPacket/config"
+    },
+    {
+      "epoch": 1795264257.052,
+      "kind": "->",
+      "path": "/api/redPacket/list"
+    },
+    {
+      "epoch": 1795264258.458,
+      "kind": "<-",
+      "path": "/api/resource/function2",
+      "code": "200",
+      "http": "200"
+    },
+    {
+      "epoch": 1795264258.502,
+      "kind": "<-",
+      "path": "/api/redPacket/list",
+      "code": "200",
+      "http": "200"
+    },
+    {
+      "epoch": 1795264258.607,
+      "kind": "<-",
+      "path": "/api/room/mic/charm/isEnable",
+      "code": "200",
+      "http": "200"
+    },
+    {
+      "epoch": 1795264258.608,
+      "kind": "<-",
+      "path": "/api/room/pk/info",
+      "code": "200",
+      "http": "200"
+    },
+    {
+      "epoch": 1795264259.036,
+      "kind": "<-",
+      "path": "/api/redPacket/config",
+      "code": "200",
+      "http": "200"
+    },
+    {
+      "epoch": 1795264259.04,
+      "kind": "->",
+      "path": "/api/lobby/lists"
+    },
+    {
+      "epoch": 1795264259.535,
+      "kind": "<-",
+      "path": "/api/lobby/lists",
+      "code": "200",
+      "http": "200"
+    },
+    {
+      "epoch": 1795264631.789,
+      "kind": "->",
+      "path": "/api/resource/function2"
+    },
+    {
+      "epoch": 1795264631.79,
+      "kind": "->",
+      "path": "/api/room/mic/charm/isEnable"
+    },
+    {
+      "epoch": 1795264631.791,
+      "kind": "->",
+      "path": "/api/room/pk/info"
+    },
+    {
+      "epoch": 1795264631.792,
+      "kind": "->",
+      "path": "/api/redPacket/config"
+    },
+    {
+      "epoch": 1795264631.793,
+      "kind": "->",
+      "path": "/api/redPacket/list"
+    },
+    {
+      "epoch": 1795264631.794,
+      "kind": "->",
+      "path": "/api/room/getHotScore"
+    },
+    {
+      "epoch": 1795264632.988,
+      "kind": "<-",
+      "path": "/api/room/getHotScore",
+      "code": "200",
+      "http": "200"
+    },
+    {
+      "epoch": 1795264632.996,
+      "kind": "<-",
+      "path": "/api/room/mic/charm/isEnable",
+      "code": "200",
+      "http": "200"
+    },
+    {
+      "epoch": 1795264633.031,
+      "kind": "<-",
+      "path": "/api/resource/function2",
+      "code": "200",
+      "http": "200"
+    },
+    {
+      "epoch": 1795264633.035,
+      "kind": "<-",
+      "path": "/api/redPacket/list",
+      "code": "200",
+      "http": "200"
+    },
+    {
+      "epoch": 1795264633.1,
+      "kind": "<-",
+      "path": "/api/room/pk/info",
+      "code": "200",
+      "http": "200"
+    },
+    {
+      "epoch": 1795264633.344,
+      "kind": "->",
+      "path": "/api/room/getHotScore"
+    },
+    {
+      "epoch": 1795264633.485,
+      "kind": "<-",
+      "path": "/api/redPacket/config",
+      "code": "200",
+      "http": "200"
+    },
+    {
+      "epoch": 1795264633.487,
+      "kind": "->",
+      "path": "/api/lobby/lists"
+    },
+    {
+      "epoch": 1795264633.799,
+      "kind": "<-",
+      "path": "/api/room/getHotScore",
+      "code": "200",
+      "http": "200"
+    },
+    {
+      "epoch": 1795264634.009,
+      "kind": "<-",
+      "path": "/api/lobby/lists",
+      "code": "200",
+      "http": "200"
+    },
+    {
+      "epoch": 1795264635.862,
+      "kind": "->",
+      "path": "/api/revenue/purse"
+    },
+    {
+      "epoch": 1795264636.383,
+      "kind": "<-",
+      "path": "/api/revenue/purse",
+      "code": "200",
+      "http": "200"
+    },
+    {
+      "epoch": 1795264667.26,
+      "kind": "->",
+      "path": "/api/revenue/purse"
+    },
+    {
+      "epoch": 1795264668.75,
+      "kind": "<-",
+      "path": "/api/revenue/purse",
+      "code": "200",
+      "http": "200"
+    },
+    {
+      "epoch": 1795264733.377,
+      "kind": "->",
+      "path": "/api/room/getHotScore"
+    },
+    {
+      "epoch": 1795264734.464,
+      "kind": "<-",
+      "path": "/api/room/getHotScore",
+      "code": "200",
+      "http": "200"
+    }
+  ]
+}

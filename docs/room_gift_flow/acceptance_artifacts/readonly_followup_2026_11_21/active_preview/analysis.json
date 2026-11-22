@@ -1,0 +1,42 @@
+{
+  "result": "passed for observed Turkey active-preview/background/return/replay/close scope",
+  "giftId": 166,
+  "giftName": "Turkey",
+  "userConfirmedPlayingBeforeHome": true,
+  "playerStartedBeforeBackground": true,
+  "actualPaused": true,
+  "hiddenPreviewCleared": true,
+  "barrierReleasedInPaused": true,
+  "actualResumed": true,
+  "newPreviewStartedAfterReturn": true,
+  "userConfirmedNoAutomaticReplayAndNormalExplicitReplayAndClose": true,
+  "lastNoPreviewOrPlayerOrLease": true,
+  "observedReplayRevisions": [
+    "5",
+    "6",
+    "7"
+  ],
+  "apiRequests": {
+    "/api/resource/function2": 1,
+    "/api/room/mic/charm/isEnable": 1,
+    "/api/room/pk/info": 1,
+    "/api/redPacket/config": 1,
+    "/api/redPacket/list": 1,
+    "/api/room/getHotScore": 3,
+    "/api/revenue/purse": 1,
+    "/api/lobby/lists": 1
+  },
+  "giftSendCount": 0,
+  "chatSendCount": 0,
+  "micUpCount": 0,
+  "micDownCount": 0,
+  "roomEnterCount": 0,
+  "roomExitCount": 0,
+  "scopeNotes": [
+    "No-auto-replay visual judgment comes from user confirmation; first sampled resumed state already contains new preview, so VM samples alone do not prove blank foreground interval.",
+    "Preview revisions 5/6/7 were observed. Click counts were not instrumented; do not infer automatic looping from revision count.",
+    "Generated return summary lastActiveToFirstPausedSeconds is not applicable to a return phase (paused preceded playback); raw negative metric is retained and excluded from acceptance.",
+    "The script label native start flag refers to RoomGiftEffectPlayer _didStart; no direct frame/FPS/native trace measurement was made.",
+    "VM sampling can affect timing; not a performance benchmark."
+  ]
+}

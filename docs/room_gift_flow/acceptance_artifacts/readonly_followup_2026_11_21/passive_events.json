@@ -1,0 +1,9 @@
+{
+  "scope": "bounded retained log buffer after segment2 start; metadata only, no publication body",
+  "observedSocketEventTypes": {
+    "RoomLobbyBigWinStatusEvent": 2
+  },
+  "flutterErrorMarkers": [],
+  "completeContinuousCapture": false,
+  "at": "2026-11-21T12:20:51.675584+00:00"
+}

@@ -1,0 +1,13 @@
+{
+  "lib/model/room_recovery_notice.dart": "59c279090145cfa955fb6c8d94a94ae6a9963c1c6571eb66e1fbac2cf2e340f4",
+  "lib/manager/app_socket_manager.dart": "618c9df51049f4cde76efe5492baa5bd67fffdb3622957ed8db8f30cd558075e",
+  "lib/manager/room_manager.dart": "4c45be7c040e355bae66819ce4650343c5c63ee25fa2a45afcbc8858aeb34c45",
+  "lib/classes/room/room_repository.dart": "f1b21cd6fc8337d97081de21e74d536e20bfad0cf5642412b2c84affe611788f",
+  "lib/classes/room/views/room_mini_overlay.dart": "339b2e08ea957b2b0accaec572908008a4fa263aba2a91434ef2d378316ccafc",
+  "lib/localization/app_localizations.dart": "96bbd964c0733504d038fcb68c9168de7742ac5f60ec269639fe8e1b90916731",
+  "lib/theme/room_recovery_theme.dart": "4e60f1566b5a4c2c2a26800bd48e61dbe0b33927003a10de5afbdecd8f0717a5",
+  "test/room_recovery_test.dart": "956ff965cf6ec96977035f46edc6f7e46b3ab4c17bd345bb8600aeee9a8dd9ed",
+  "lib/classes/room/recovery/room_recovery_host.dart": "ceee19ca4ef67351b7843a05de2b695a05e1b51b4cb40a8ccbbdb8972234be92",
+  "lib/classes/room/recovery/room_recovery_navigation.dart": "0fddfc39b51205ae5c6baeb63e8c0f241751460379159fa94b5523e22fbe07f3",
+  "lib/classes/room/recovery/room_recovery_view_model.dart": "b923b3b11f9c0525cfff66f49b31324df5e061901edb31dc2d5482197045b806"
+}

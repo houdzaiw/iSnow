@@ -1,0 +1,339 @@
+{
+  "date": "2026-11-21",
+  "device": "Pixel_9 / emulator-5556",
+  "scope": "no spending, gift sending, chat sending, logout, room switching or management submissions",
+  "status": "closed: scoped Pixel_9 read-only UI batch passed; remaining development/live cases and controller-lifecycle verification tracked",
+  "baseline": {
+    "pid": 1756,
+    "roomId": "2113269920442130433",
+    "roomGeneration": 9,
+    "catalogBalance": 49855109,
+    "socket": "ready",
+    "agoraJoined": true,
+    "publishing": false
+  },
+  "tests": {
+    "passed": 115,
+    "new": 4,
+    "overlapsEarlierFullRoomRegression": true,
+    "noLiveAccountsOrHttpUsed": true,
+    "newScopes": [
+      "late account catalog vs new balance",
+      "same UID relogin while old load pending",
+      "failed catalog no auto retry",
+      "distinct caller cache keys"
+    ]
+  },
+  "limitations": [
+    "Distinct cache-key test is Manager only. Repository catalog key remains user UID; not proof of runtime API environment switching.",
+    "Widget or mocked HTTP results do not prove live UI or paid combos.",
+    "Only Pixel_9 connected; physical Android follow-up pending."
+  ],
+  "deviceChecks": {
+    "preview": {
+      "passed": true,
+      "evidence": "user confirmed preview, replay and close normal",
+      "observedBy": "user",
+      "agentObservedFrames": false,
+      "captureGapAcknowledged": true
+    },
+    "backgroundRestore": {
+      "stage": "passed for tested main-app scope",
+      "actualPaused": true,
+      "samePid": true,
+      "sameRoomGeneration": true,
+      "socketReady": true,
+      "agoraJoined": true,
+      "publishing": false,
+      "barrageVisible": false,
+      "roomAudioServicePresent": true,
+      "foregroundServiceFlagPresent": true,
+      "notEquivalentToAudioListeningProof": true,
+      "pausedSamplesUtc": [
+        "2026-11-21T12:19:43.872525+00:00",
+        "2026-11-21T12:20:21.942811+00:00"
+      ],
+      "backgroundAudioListeningVerified": false,
+      "activePreviewAtBackground": false,
+      "activePreviewCancellationVerified": false,
+      "next": "Completed for the documented scope; active-preview follow-up recorded separately",
+      "actualResumed": true,
+      "userConfirmedSameHei": true,
+      "userConfirmedNoOldPreviewReplay": true,
+      "userConfirmedListAndBalanceNormal": true,
+      "userConfirmedPanelClosed": true,
+      "finalBalance": 49855109,
+      "samePidAfterReturn": true,
+      "sameGenerationAfterReturn": true,
+      "finalPanelDisposed": true,
+      "retainedBufferBackfill": "return_retained_api.json"
+    },
+    "activePreviewBackground": {
+      "result": "passed for observed Turkey active-preview/background/return/replay/close scope",
+      "giftId": 166,
+      "giftName": "Turkey",
+      "userConfirmedPlayingBeforeHome": true,
+      "playerStartedBeforeBackground": true,
+      "actualPaused": true,
+      "hiddenPreviewCleared": true,
+      "barrierReleasedInPaused": true,
+      "actualResumed": true,
+      "newPreviewStartedAfterReturn": true,
+      "userConfirmedNoAutomaticReplayAndNormalExplicitReplayAndClose": true,
+      "lastNoPreviewOrPlayerOrLease": true,
+      "observedReplayRevisions": [
+        "5",
+        "6",
+        "7"
+      ],
+      "apiRequests": {
+        "/api/resource/function2": 1,
+        "/api/room/mic/charm/isEnable": 1,
+        "/api/room/pk/info": 1,
+        "/api/redPacket/config": 1,
+        "/api/redPacket/list": 1,
+        "/api/room/getHotScore": 3,
+        "/api/revenue/purse": 1,
+        "/api/lobby/lists": 1
+      },
+      "giftSendCount": 0,
+      "chatSendCount": 0,
+      "micUpCount": 0,
+      "micDownCount": 0,
+      "roomEnterCount": 0,
+      "roomExitCount": 0,
+      "scopeNotes": [
+        "No-auto-replay visual judgment comes from user confirmation; first sampled resumed state already contains new preview, so VM samples alone do not prove blank foreground interval.",
+        "Preview revisions 5/6/7 were observed. Click counts were not instrumented; do not infer automatic looping from revision count.",
+        "Generated return summary lastActiveToFirstPausedSeconds is not applicable to a return phase (paused preceded playback); raw negative metric is retained and excluded from acceptance.",
+        "The script label native start flag refers to RoomGiftEffectPlayer _didStart; no direct frame/FPS/native trace measurement was made.",
+        "VM sampling can affect timing; not a performance benchmark."
+      ]
+    },
+    "customQuantity": {
+      "stage": "passed on Pixel_9 per user confirmation",
+      "allowedRange": "1..9999",
+      "invalidCases": [
+        "0",
+        "10000"
+      ],
+      "cancelPreservesOriginal": true,
+      "validCase": "2 then restore 1",
+      "tests": {
+        "newKeyboardWidths": [
+          320,
+          375,
+          430
+        ],
+        "newTestsPassed": 3,
+        "wholeGiftSheetFilePassed": 20,
+        "overlapsPriorTests": true,
+        "initialFailure": "test locator matched quick count 18 and popup count 18; changed test target, no product code change"
+      },
+      "analyze": "No issues found",
+      "goldensUpdated": false,
+      "apiCapture": {
+        "scope": "bounded segmented PID1756 HTTP metadata only; not independent IM audit",
+        "requests": {
+          "/api/room/getHotScore": 4,
+          "/api/resource/function2": 1,
+          "/api/room/mic/charm/isEnable": 1,
+          "/api/room/pk/info": 1,
+          "/api/redPacket/config": 1,
+          "/api/redPacket/list": 1,
+          "/api/lobby/lists": 1
+        },
+        "giftSendCount": 0,
+        "chatSendCount": 0,
+        "micUpCount": 0,
+        "micDownCount": 0,
+        "roomEnterCount": 0,
+        "roomExitCount": 0,
+        "endedUtc": "2026-11-21T13:56:08.232372+00:00",
+        "deviceUi": "awaiting user reply"
+      },
+      "captureEndedWhileUiResponsePending": true,
+      "userConfirmed": {
+        "zeroInvalid": true,
+        "overLimitInvalid": true,
+        "cancelPreservesOriginal": true,
+        "validTwoConfirmed": true,
+        "restoredOne": true,
+        "keyboardActionsVisible": true,
+        "sendNotTapped": true,
+        "panelClosed": true
+      }
+    },
+    "targetSelection": {
+      "stage": "passed per user confirmation for empty-mic All Room menu and reopen",
+      "onlineCount": 1,
+      "occupiedSeats": 0,
+      "multiUserLiveCovered": false,
+      "existingTests": "gift sheet file 20 passed includes empty-mic menu, off-mic preset and reopen reset; these are mocks",
+      "runtimeBefore": {
+        "targetMode": "allRoom",
+        "onlineCount": 1,
+        "recipientListLength": 0,
+        "giftCount": 1,
+        "balance": 49855109,
+        "isSending": false
+      },
+      "sampledApiSummary": {
+        "scope": "segmented PID1756 HTTP metadata; not independent IM audit",
+        "requests": {
+          "/api/room/getHotScore": 1
+        },
+        "giftSendCount": 0,
+        "chatSendCount": 0,
+        "micUpCount": 0,
+        "micDownCount": 0,
+        "roomEnterCount": 0,
+        "roomExitCount": 0,
+        "endedUtc": "2026-11-21T14:13:14.122380+00:00",
+        "uiCheck": "pending user menu/cancel/reopen confirmation"
+      },
+      "captureEndedWhileUserReplyPending": true,
+      "userConfirmed": {
+        "onlyAllRoomOne": true,
+        "noAllOnMic": true,
+        "noSelect": true,
+        "reopenNormal": true,
+        "giftCountOne": true,
+        "listAndBalanceNormal": true,
+        "sendNotTapped": true,
+        "panelClosed": true
+      }
+    }
+  },
+  "noProductionCodeChanged": true,
+  "analyze": "No issues found",
+  "diffCheck": "passed",
+  "sampledApiSummary": {
+    "scope": "PID1756 HTTP log sample only; no raw headers/body/query exported; not independent Tencent IM send audit",
+    "requests": {
+      "/api/room/getHotScore": 4
+    },
+    "giftSendCount": 0,
+    "micUpCount": 0,
+    "micDownCount": 0,
+    "roomEnterCount": 0,
+    "roomExitCount": 0,
+    "roomChatSendCount": 0,
+    "captureSegment": 1,
+    "uiObservation": "awaiting user reply"
+  },
+  "captureSegmentEndedUtc": "2026-11-21T11:36:11.592932+00:00",
+  "nextStep": "Batch closed with no more manual scenarios. First independently verify Q01 controller disposal, then prioritize R01 and other listed gaps.",
+  "captureSegment2StartedUtc": "2026-11-21T12:17:45.538569+00:00",
+  "passiveBarrage": {
+    "status": "not covered: no eligible live tasks or visual/click evidence",
+    "liveObservation": {
+      "startedUtc": "2026-11-21T12:39:46.374809+00:00",
+      "endedUtc": "2026-11-21T12:41:16.745996+00:00",
+      "plannedSeconds": 90,
+      "socketEventTypes": {
+        "RoomLobbyBigWinStatusEvent": 3
+      },
+      "apiRequests": {
+        "/api/room/getHotScore": 1
+      },
+      "errorMarkers": [],
+      "sampleCount": 6,
+      "activeAtSampleCount": 0,
+      "maxAcceptedTaskWatermark": 0,
+      "visualObservation": "not performed by agent",
+      "giftSendRequests": 0,
+      "roomChatRequests": 0
+    },
+    "conditions": {
+      "accountChannelsSubscribed": true,
+      "globalAndLobbySubscribed": true,
+      "roomSubscribed": true,
+      "localEffectsEnabled": true,
+      "nativePlaybackBlocked": false,
+      "occupiedSeats": 0,
+      "sameRoomGeneration": 9
+    },
+    "limits": [
+      "Periodic VM samples are not visual frames.",
+      "Observed status broadcasts do not establish showScreen or prize eligibility.",
+      "No occupied seats or real decoration events available.",
+      "No event injection, paid triggers or account submissions."
+    ]
+  },
+  "backgroundSampledApiSummary": {
+    "scope": "second segmented HTTP log capture; payload, queries and credentials omitted; not independent IM send audit",
+    "requests": {
+      "/api/room/getHotScore": 1,
+      "/api/resource/function2": 1,
+      "/api/room/mic/charm/isEnable": 1,
+      "/api/room/pk/info": 1,
+      "/api/redPacket/config": 1,
+      "/api/redPacket/list": 1,
+      "/api/lobby/lists": 1
+    },
+    "giftSendCount": 0,
+    "roomChatSendCount": 0,
+    "micUpCount": 0,
+    "micDownCount": 0,
+    "roomEnterCount": 0,
+    "roomExitCount": 0,
+    "returnUiCheck": "awaiting user; last inspected lifecycle paused",
+    "endedUtc": "2026-11-21T12:23:04.153822+00:00"
+  },
+  "physicalAndroid": {
+    "connected": false,
+    "requestedDevice": "PLL110",
+    "nextStep": "Deferred at user request; emulator acceptance continues",
+    "additionalDiscoverySeconds": 20,
+    "additionalDiscoveryResult": "no physical Android detected",
+    "deferredByUser": true
+  },
+  "lastUpdatedUtc": "2026-11-21T12:43:10.873154+00:00",
+  "currentBatchScopeFrozen": true,
+  "remainingManualCheckOnly": null,
+  "batchClosed": true,
+  "closedUtc": "2026-11-21T14:25:36.819407+00:00",
+  "remaining": [
+    {
+      "id": "Q01",
+      "status": "needs verification, not confirmed defect",
+      "description": "User reports closed panel; final VM sample still has mounted gift and panel ViewModels. Determine route/subscription ownership before asserting leak."
+    },
+    {
+      "id": "R01",
+      "status": "development gap"
+    },
+    {
+      "id": "E16",
+      "status": "file-lease development and cache strategy pending"
+    },
+    {
+      "id": "E13",
+      "status": "room animated-background state machine development gap"
+    },
+    {
+      "id": "E09",
+      "status": "backend contract pending"
+    },
+    {
+      "id": "liveEvents",
+      "status": "no eligible live barrage/decoration/multiuser data"
+    },
+    {
+      "id": "GameBigWin",
+      "status": "independent fullscreen asset pending"
+    },
+    {
+      "id": "physicalAndroid",
+      "status": "deferred by user"
+    },
+    {
+      "id": "paidAndAccountIntegration",
+      "status": "not executed; future submissions require specific scope and cost confirmation"
+    }
+  ],
+  "finalSnapshot": "targets/final_runtime.json",
+  "finalLifecycleSnapshot": "final_lifecycle.json",
+  "controllerDisposalIndependentlyProven": false
+}

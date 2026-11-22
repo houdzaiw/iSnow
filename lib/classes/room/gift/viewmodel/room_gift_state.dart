@@ -28,6 +28,7 @@ class RoomGiftState {
     this.selectedGiftKey,
     this.giftCount = 1,
     this.isSending = false,
+    this.firstRechargeEligibility,
     this.loadErrorMessage,
     this.issue,
     this.issueMessage,
@@ -47,6 +48,7 @@ class RoomGiftState {
   final String? selectedGiftKey;
   final int giftCount;
   final bool isSending;
+  final bool? firstRechargeEligibility;
   final String? loadErrorMessage;
   final RoomGiftIssue? issue;
   final String? issueMessage;
@@ -99,6 +101,7 @@ class RoomGiftState {
     Object? selectedGiftKey = _sentinel,
     int? giftCount,
     bool? isSending,
+    Object? firstRechargeEligibility = _sentinel,
     Object? loadErrorMessage = _sentinel,
     Object? issue = _sentinel,
     Object? issueMessage = _sentinel,
@@ -125,6 +128,9 @@ class RoomGiftState {
           : selectedGiftKey as String?,
       giftCount: giftCount ?? this.giftCount,
       isSending: isSending ?? this.isSending,
+      firstRechargeEligibility: identical(firstRechargeEligibility, _sentinel)
+          ? this.firstRechargeEligibility
+          : firstRechargeEligibility as bool?,
       loadErrorMessage: identical(loadErrorMessage, _sentinel)
           ? this.loadErrorMessage
           : loadErrorMessage as String?,

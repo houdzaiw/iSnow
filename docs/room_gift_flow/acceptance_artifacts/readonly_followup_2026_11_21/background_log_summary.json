@@ -1,0 +1,20 @@
+{
+  "scope": "second segmented HTTP log capture; payload, queries and credentials omitted; not independent IM send audit",
+  "requests": {
+    "/api/room/getHotScore": 1,
+    "/api/resource/function2": 1,
+    "/api/room/mic/charm/isEnable": 1,
+    "/api/room/pk/info": 1,
+    "/api/redPacket/config": 1,
+    "/api/redPacket/list": 1,
+    "/api/lobby/lists": 1
+  },
+  "giftSendCount": 0,
+  "roomChatSendCount": 0,
+  "micUpCount": 0,
+  "micDownCount": 0,
+  "roomEnterCount": 0,
+  "roomExitCount": 0,
+  "returnUiCheck": "awaiting user; last inspected lifecycle paused",
+  "endedUtc": "2026-11-21T12:23:04.153822+00:00"
+}

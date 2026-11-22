@@ -166,6 +166,7 @@ class ToolsApiFake extends RoomToolsRepository {
     HttpApi.roomLobbyRecords: <Object>[],
     HttpApi.roomTreasureRecords: {'giftIocs': [], 'playTos': []},
     HttpApi.roomLuckyList: <Object>[],
+    HttpApi.roomLuckyPush: {'id': 'sent-box', 'remainingTime': 30},
     HttpApi.walletPurse: {'coin': 1000},
     HttpApi.roomLuckyConfig: {
       'visible': false,

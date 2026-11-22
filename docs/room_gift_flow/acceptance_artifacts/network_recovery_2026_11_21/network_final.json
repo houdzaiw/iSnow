@@ -1,0 +1,7 @@
+{
+  "at": "2026-11-21T05:59:50.859239+00:00",
+  "wifi": "1",
+  "mobile": "1",
+  "emulatorStatus": "Current network status:\n  download speed:          0 bits/s (0.0 KB/s)\n  upload speed:            0 bits/s (0.0 KB/s)\n  minimum latency:  0 ms\n  maximum latency:  0 ms\nOK\n",
+  "mainPid": "1756"
+}

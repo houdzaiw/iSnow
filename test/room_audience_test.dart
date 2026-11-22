@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:project/classes/room/gift/models/room_gift_models.dart';
@@ -10,6 +11,7 @@ import 'package:project/classes/room/room_repository.dart';
 import 'package:project/classes/room/viewmodel/room_state.dart';
 import 'package:project/classes/room/viewmodel/room_view_model.dart';
 import 'package:project/manager/room_manager.dart';
+import 'package:project/manager/http_api.dart';
 import 'package:project/model/room_models.dart';
 import 'package:project/model/room_socket_message.dart';
 import 'package:project/model/room_user_info.dart';
@@ -93,6 +95,40 @@ void main() {
     expect(fixture.manager.state.onlineCount, 1);
     expect(fixture.manager.state.audienceError, isNull);
   });
+
+  for (final type in [
+    DioExceptionType.connectionTimeout,
+    DioExceptionType.receiveTimeout,
+  ]) {
+    test(
+      '$type clears loading, retains room and cached users, then retries',
+      () async {
+        fixture.http.audience = [_user(10), _user(20)];
+        await fixture.enter();
+        final gate = Completer<void>();
+        fixture.http.audienceGate = gate;
+        final pending = repository.refreshAudience();
+        await Future<void>.delayed(Duration.zero);
+        expect(fixture.manager.state.loadingAudience, isTrue);
+        gate.completeError(
+          DioException(
+            requestOptions: RequestOptions(path: HttpApi.roomAudienceList),
+            type: type,
+          ),
+        );
+        await pending;
+        expect(fixture.manager.state.loadingAudience, isFalse);
+        expect(fixture.manager.state.onlineCount, 2);
+        expect(fixture.manager.state.audienceError, isNotNull);
+        expect(fixture.manager.state.status, RoomStatus.ready);
+        fixture.http.audienceGate = null;
+        fixture.http.audience = [_user(10)];
+        await repository.refreshAudience();
+        expect(fixture.manager.state.onlineCount, 1);
+        expect(fixture.manager.state.audienceError, isNull);
+      },
+    );
+  }
 
   test(
     'top-three socket event triggers a full refresh, not a three-user count',

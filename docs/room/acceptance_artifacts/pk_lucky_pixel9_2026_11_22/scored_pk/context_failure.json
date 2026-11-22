@@ -1,0 +1,12 @@
+[
+  [
+    "Looking up a deactivated widget's ancestor is unsafe.",
+    "#6      toolText (package:project/classes/room/more/room_tools_widgets.dart:11:13)",
+    "#7      showRoomPkContributors.<anonymous closure> (package:project/classes/room/pk/room_pk_result_card.dart:196:17)"
+  ],
+  [
+    "Looking up a deactivated widget's ancestor is unsafe.",
+    "#6      toolText (package:project/classes/room/more/room_tools_widgets.dart:11:13)",
+    "#7      showRoomPkContributors.<anonymous closure> (package:project/classes/room/pk/room_pk_result_card.dart:196:17)"
+  ]
+]

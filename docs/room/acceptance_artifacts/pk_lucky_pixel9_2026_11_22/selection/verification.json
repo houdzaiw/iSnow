@@ -1,0 +1,479 @@
+{
+  "date": "2026-11-22",
+  "room": "hei2",
+  "displayRoomId": "12594212",
+  "accounts": {
+    "Pixel_9": 30317291,
+    "Medium_Phone_API_35": 12594212
+  },
+  "authorizedMicSeats": {
+    "30317291": 1,
+    "12594212": 2
+  },
+  "snapshots": {
+    "oneSelected": {
+      "pid": 6804,
+      "main": "isolates/878134234179271",
+      "room": {
+        "status": "ready",
+        "currentRoomId": "2113281922745016322",
+        "isInRoom": "true",
+        "isMinimized": "false",
+        "generation": "1",
+        "onMic": 2
+      },
+      "pk": {
+        "active": "true",
+        "manager": "true",
+        "doubleMode": "true",
+        "duration": "3",
+        "busy": "false",
+        "mini": "true",
+        "error": null,
+        "selectedCount": 1,
+        "pkId": "",
+        "event": "0"
+      },
+      "lucky": {
+        "active": "true",
+        "canSend": "false",
+        "loading": "false",
+        "sending": "false",
+        "reviewRequired": "false",
+        "type": "0",
+        "gold": "5000",
+        "people": "2",
+        "countdown": "60",
+        "balance": "0",
+        "error": null,
+        "bagCount": 0,
+        "currentBox": null,
+        "result": null
+      },
+      "socket": {
+        "status": "ready",
+        "isTerminal": "false"
+      }
+    },
+    "twoSelected": {
+      "pid": 6804,
+      "main": "isolates/878134234179271",
+      "room": {
+        "status": "ready",
+        "currentRoomId": "2113281922745016322",
+        "isInRoom": "true",
+        "isMinimized": "false",
+        "generation": "1",
+        "onMic": 2
+      },
+      "pk": {
+        "active": "true",
+        "manager": "true",
+        "doubleMode": "true",
+        "duration": "3",
+        "busy": "false",
+        "mini": "true",
+        "error": null,
+        "selectedCount": 2,
+        "pkId": "",
+        "event": "0"
+      },
+      "lucky": {
+        "active": "true",
+        "canSend": "false",
+        "loading": "false",
+        "sending": "false",
+        "reviewRequired": "false",
+        "type": "0",
+        "gold": "5000",
+        "people": "2",
+        "countdown": "60",
+        "balance": "0",
+        "error": null,
+        "bagCount": 0,
+        "currentBox": null,
+        "result": null
+      },
+      "socket": {
+        "status": "ready",
+        "isTerminal": "false"
+      }
+    },
+    "oneCancelled": {
+      "pid": 6804,
+      "main": "isolates/878134234179271",
+      "room": {
+        "status": "ready",
+        "currentRoomId": "2113281922745016322",
+        "isInRoom": "true",
+        "isMinimized": "false",
+        "generation": "1",
+        "onMic": 2
+      },
+      "pk": {
+        "active": "true",
+        "manager": "true",
+        "doubleMode": "true",
+        "duration": "3",
+        "busy": "false",
+        "mini": "true",
+        "error": null,
+        "selectedCount": 1,
+        "pkId": "",
+        "event": "0"
+      },
+      "lucky": {
+        "active": "true",
+        "canSend": "false",
+        "loading": "false",
+        "sending": "false",
+        "reviewRequired": "false",
+        "type": "0",
+        "gold": "5000",
+        "people": "2",
+        "countdown": "60",
+        "balance": "0",
+        "error": null,
+        "bagCount": 0,
+        "currentBox": null,
+        "result": null
+      },
+      "socket": {
+        "status": "ready",
+        "isTerminal": "false"
+      }
+    },
+    "allCancelled": {
+      "pid": 6804,
+      "main": "isolates/878134234179271",
+      "room": {
+        "status": "ready",
+        "currentRoomId": "2113281922745016322",
+        "isInRoom": "true",
+        "isMinimized": "false",
+        "generation": "1",
+        "onMic": 2
+      },
+      "pk": {
+        "active": "true",
+        "manager": "true",
+        "doubleMode": "true",
+        "duration": "3",
+        "busy": "false",
+        "mini": "true",
+        "error": null,
+        "selectedCount": 0,
+        "pkId": "",
+        "event": "0"
+      },
+      "lucky": {
+        "active": "true",
+        "canSend": "false",
+        "loading": "false",
+        "sending": "false",
+        "reviewRequired": "false",
+        "type": "0",
+        "gold": "5000",
+        "people": "2",
+        "countdown": "60",
+        "balance": "0",
+        "error": null,
+        "bagCount": 0,
+        "currentBox": null,
+        "result": null
+      },
+      "socket": {
+        "status": "ready",
+        "isTerminal": "false"
+      }
+    },
+    "switchMulti": {
+      "pid": 6804,
+      "main": "isolates/878134234179271",
+      "room": {
+        "status": "ready",
+        "currentRoomId": "2113281922745016322",
+        "isInRoom": "true",
+        "isMinimized": "false",
+        "generation": "1",
+        "onMic": 2
+      },
+      "pk": {
+        "active": "true",
+        "manager": "true",
+        "doubleMode": "false",
+        "duration": "3",
+        "busy": "false",
+        "mini": "true",
+        "error": null,
+        "selectedCount": 0,
+        "pkId": "",
+        "event": "0"
+      },
+      "lucky": {
+        "active": "true",
+        "canSend": "false",
+        "loading": "false",
+        "sending": "false",
+        "reviewRequired": "false",
+        "type": "0",
+        "gold": "5000",
+        "people": "2",
+        "countdown": "60",
+        "balance": "0",
+        "error": null,
+        "bagCount": 0,
+        "currentBox": null,
+        "result": null
+      },
+      "socket": {
+        "status": "ready",
+        "isTerminal": "false"
+      }
+    },
+    "chooseAll": {
+      "pid": 6804,
+      "main": "isolates/878134234179271",
+      "room": {
+        "status": "ready",
+        "currentRoomId": "2113281922745016322",
+        "isInRoom": "true",
+        "isMinimized": "false",
+        "generation": "1",
+        "onMic": 2
+      },
+      "pk": {
+        "active": "true",
+        "manager": "true",
+        "doubleMode": "false",
+        "duration": "3",
+        "busy": "false",
+        "mini": "true",
+        "error": null,
+        "selectedCount": 2,
+        "pkId": "",
+        "event": "0"
+      },
+      "lucky": {
+        "active": "true",
+        "canSend": "false",
+        "loading": "false",
+        "sending": "false",
+        "reviewRequired": "false",
+        "type": "0",
+        "gold": "5000",
+        "people": "2",
+        "countdown": "60",
+        "balance": "0",
+        "error": null,
+        "bagCount": 0,
+        "currentBox": null,
+        "result": null
+      },
+      "socket": {
+        "status": "ready",
+        "isTerminal": "false"
+      }
+    },
+    "cancelAll": {
+      "pid": 6804,
+      "main": "isolates/878134234179271",
+      "room": {
+        "status": "ready",
+        "currentRoomId": "2113281922745016322",
+        "isInRoom": "true",
+        "isMinimized": "false",
+        "generation": "1",
+        "onMic": 2
+      },
+      "pk": {
+        "active": "true",
+        "manager": "true",
+        "doubleMode": "false",
+        "duration": "3",
+        "busy": "false",
+        "mini": "true",
+        "error": null,
+        "selectedCount": 0,
+        "pkId": "",
+        "event": "0"
+      },
+      "lucky": {
+        "active": "true",
+        "canSend": "false",
+        "loading": "false",
+        "sending": "false",
+        "reviewRequired": "false",
+        "type": "0",
+        "gold": "5000",
+        "people": "2",
+        "countdown": "60",
+        "balance": "0",
+        "error": null,
+        "bagCount": 0,
+        "currentBox": null,
+        "result": null
+      },
+      "socket": {
+        "status": "ready",
+        "isTerminal": "false"
+      }
+    },
+    "reopenedSettled": {
+      "pid": 6804,
+      "main": "isolates/878134234179271",
+      "room": {
+        "status": "ready",
+        "currentRoomId": "2113281922745016322",
+        "isInRoom": "true",
+        "isMinimized": "false",
+        "generation": "1",
+        "onMic": 2
+      },
+      "pk": {
+        "active": "true",
+        "manager": "true",
+        "doubleMode": "true",
+        "duration": "3",
+        "busy": "false",
+        "mini": "true",
+        "error": null,
+        "selectedCount": 0,
+        "pkId": "",
+        "event": "0"
+      },
+      "lucky": {
+        "active": "true",
+        "canSend": "false",
+        "loading": "false",
+        "sending": "false",
+        "reviewRequired": "false",
+        "type": "0",
+        "gold": "5000",
+        "people": "2",
+        "countdown": "60",
+        "balance": "0",
+        "error": null,
+        "bagCount": 0,
+        "currentBox": null,
+        "result": null
+      },
+      "socket": {
+        "status": "ready",
+        "isTerminal": "false"
+      }
+    },
+    "primaryFinal": {
+      "pid": 14794,
+      "main": "isolates/8742731411918447",
+      "room": {
+        "status": "ready",
+        "currentRoomId": "2113281922745016322",
+        "isInRoom": "true",
+        "isMinimized": "false",
+        "generation": "1",
+        "onMic": 2
+      },
+      "pk": {
+        "active": "true",
+        "manager": "false",
+        "doubleMode": "true",
+        "duration": "3",
+        "busy": "false",
+        "mini": "true",
+        "error": null,
+        "selectedCount": 0,
+        "pkId": "",
+        "event": "0"
+      },
+      "lucky": {
+        "active": "true",
+        "canSend": "false",
+        "loading": "false",
+        "sending": "false",
+        "reviewRequired": "false",
+        "type": "0",
+        "gold": "5000",
+        "people": "2",
+        "countdown": "60",
+        "balance": "0",
+        "error": null,
+        "bagCount": 0,
+        "currentBox": null,
+        "result": null
+      },
+      "socket": {
+        "status": "ready",
+        "isTerminal": "false"
+      }
+    },
+    "secondFinal": {
+      "pid": 6804,
+      "main": "isolates/878134234179271",
+      "room": {
+        "status": "ready",
+        "currentRoomId": "2113281922745016322",
+        "isInRoom": "true",
+        "isMinimized": "false",
+        "generation": "1",
+        "onMic": 2
+      },
+      "pk": {
+        "active": "true",
+        "manager": "true",
+        "doubleMode": "true",
+        "duration": "3",
+        "busy": "false",
+        "mini": "true",
+        "error": null,
+        "selectedCount": 0,
+        "pkId": "",
+        "event": "0"
+      },
+      "lucky": {
+        "active": "true",
+        "canSend": "false",
+        "loading": "false",
+        "sending": "false",
+        "reviewRequired": "false",
+        "type": "0",
+        "gold": "5000",
+        "people": "2",
+        "countdown": "60",
+        "balance": "0",
+        "error": null,
+        "bagCount": 0,
+        "currentBox": null,
+        "result": null
+      },
+      "socket": {
+        "status": "ready",
+        "isTerminal": "false"
+      }
+    }
+  },
+  "logs": {
+    "primary": {
+      "prohibitedRequests": {
+        "/api/room/pk/begin": 0,
+        "/api/room/pk/over": 0,
+        "/api/redPacket/push": 0,
+        "/api/redPacket/grab": 0,
+        "/api/gift/send": 0
+      },
+      "micUpRequests": 1,
+      "uiErrorCount": 0
+    },
+    "second": {
+      "prohibitedRequests": {
+        "/api/room/pk/begin": 0,
+        "/api/room/pk/over": 0,
+        "/api/redPacket/push": 0,
+        "/api/redPacket/grab": 0,
+        "/api/gift/send": 0
+      },
+      "micUpRequests": 1,
+      "uiErrorCount": 0
+    }
+  }
+}

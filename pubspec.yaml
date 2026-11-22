@@ -54,6 +54,7 @@ dependencies:
   volume_controller:
     path: packages/room_volume_controller
   intl: ^0.20.2
+  html: 0.15.7
   flutter_hooks: ^0.21.3+1
   record: ^6.1.2
   just_audio: ^0.9.34

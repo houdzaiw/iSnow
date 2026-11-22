@@ -10,6 +10,7 @@ import '../../manager/http_dio_manager.dart';
 import '../../manager/room_agora_manager.dart';
 import '../../manager/room_manager.dart';
 import '../../model/room_models.dart';
+import '../../model/room_recovery_notice.dart';
 import '../../model/room_socket_message.dart';
 import '../../model/server_response.dart';
 import '../../model/user_profile.dart';
@@ -40,6 +41,9 @@ class RoomRepository {
   final AuthSession _authSession;
 
   RoomState get roomState => _roomManager.state;
+  RoomRecoveryNotice? get recoveryNotice => _roomManager.recoveryNotice;
+  void dismissRecovery(RoomRecoveryNotice notice) =>
+      _roomManager.dismissRecovery(notice);
   int get roomGeneration => _roomManager.sessionGeneration;
   AppSocketState get socketState => _roomManager.socketState;
   RoomAgoraState get agoraState => _roomManager.agoraState;

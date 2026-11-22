@@ -110,6 +110,8 @@ def prepare(workspace):
                            ('barrage_checks.dart.template', 'integration_test/barrage_checks.dart'),
                            ('visibility_checks.dart.template', 'integration_test/visibility_checks.dart'),
                            ('local_assets_checks.dart.template', 'integration_test/local_assets_checks.dart'),
+                           ('combination_checks.dart.template', 'integration_test/combination_checks.dart'),
+                           ('combination_scene.dart.template', 'integration_test/combination_scene.dart'),
                            ('main_activity.kt.template', 'android/app/src/main/kotlin/com/isnow/qa/room_gift_native_acceptance/MainActivity.kt'),
                            ('driver.dart.template', 'test_driver/native_driver.dart')]:
         destination = workspace / target

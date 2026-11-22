@@ -1,0 +1,56 @@
+{
+  "capturedAtUtc": "2026-11-21T05:12:53.957678+00:00",
+  "nativeControlAvailable": false,
+  "blocker": "Native app control reports locked after user confirmed unlock and automation runtime reset; no alternative click technology used",
+  "cases": [
+    {
+      "id": "profile",
+      "name": "Room Profile / Party / Edit info / keyboard",
+      "status": "passed-user-observation",
+      "evidence": "User: 均正常，已回房间",
+      "confirmedAtUtc": "2026-11-21T05:14:19.848271+00:00"
+    },
+    {
+      "id": "users",
+      "name": "Public/mic/online avatar user cards and recipient preselection",
+      "status": "passed-user-observation",
+      "evidence": "User: 用户卡和榜单均正常",
+      "confirmedAtUtc": "2026-11-21T05:21:45.372231+00:00",
+      "scopeException": "scope_exception.json"
+    },
+    {
+      "id": "ranks",
+      "name": "Contribution / Profit / six periods / centered rules",
+      "status": "passed-user-observation",
+      "evidence": "User: 用户卡和榜单均正常",
+      "confirmedAtUtc": "2026-11-21T05:21:45.372352+00:00"
+    },
+    {
+      "id": "more",
+      "name": "Basic Tools / Setting / shortcut / reopen",
+      "status": "passed-user-observation",
+      "evidence": "User: More、Share、复制和取消均正常",
+      "confirmedAtUtc": "2026-11-21T05:21:45.372354+00:00"
+    },
+    {
+      "id": "share",
+      "name": "Posters / text / links / copy / cancel system share",
+      "status": "passed-user-observation",
+      "evidence": "User: More、Share、复制和取消均正常",
+      "confirmedAtUtc": "2026-11-21T05:21:45.372355+00:00"
+    },
+    {
+      "id": "message",
+      "name": "Conversation list / read-only system cards / private chat keyboard and return",
+      "status": "passed-user-observation",
+      "evidence": "User: 消息及返回正常，已 Keep",
+      "confirmedAtUtc": "2026-11-21T05:21:45.372356+00:00"
+    }
+  ],
+  "notes": [
+    "Device UI pass is user-observed; native UI automation remained unavailable.",
+    "Specific absence/role and unread-count variants were not independently observed by automation.",
+    "User was instructed not to click empty seats, submit, send, follow or change settings.",
+    "User confirmed accidental manual mic-up and restored down-mic/Keep; not a clean no-account-action run."
+  ]
+}

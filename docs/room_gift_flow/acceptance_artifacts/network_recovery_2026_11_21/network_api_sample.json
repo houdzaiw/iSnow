@@ -1,0 +1,122 @@
+[
+  {
+    "epoch": 1795240319.364,
+    "kind": "->",
+    "path": "/api/room/getHotScore"
+  },
+  {
+    "epoch": 1795240319.365,
+    "kind": "->",
+    "path": "/api/resource/function2"
+  },
+  {
+    "epoch": 1795240319.365,
+    "kind": "->",
+    "path": "/api/room/mic/charm/isEnable"
+  },
+  {
+    "epoch": 1795240319.366,
+    "kind": "->",
+    "path": "/api/room/pk/info"
+  },
+  {
+    "epoch": 1795240319.367,
+    "kind": "->",
+    "path": "/api/redPacket/config"
+  },
+  {
+    "epoch": 1795240319.367,
+    "kind": "->",
+    "path": "/api/redPacket/list"
+  },
+  {
+    "epoch": 1795240319.935,
+    "kind": "<-",
+    "path": "/api/room/mic/charm/isEnable",
+    "http": "200",
+    "code": "200"
+  },
+  {
+    "epoch": 1795240319.936,
+    "kind": "<-",
+    "path": "/api/room/getHotScore",
+    "http": "200",
+    "code": "200"
+  },
+  {
+    "epoch": 1795240319.936,
+    "kind": "<-",
+    "path": "/api/redPacket/list",
+    "http": "200",
+    "code": "200"
+  },
+  {
+    "epoch": 1795240319.939,
+    "kind": "<-",
+    "path": "/api/room/pk/info",
+    "http": "200",
+    "code": "200"
+  },
+  {
+    "epoch": 1795240319.969,
+    "kind": "<-",
+    "path": "/api/resource/function2",
+    "http": "200",
+    "code": "200"
+  },
+  {
+    "epoch": 1795240320.246,
+    "kind": "<-",
+    "path": "/api/redPacket/config",
+    "http": "200",
+    "code": "200"
+  },
+  {
+    "epoch": 1795240320.247,
+    "kind": "->",
+    "path": "/api/lobby/lists"
+  },
+  {
+    "epoch": 1795240320.776,
+    "kind": "<-",
+    "path": "/api/lobby/lists",
+    "http": "200",
+    "code": "200"
+  },
+  {
+    "epoch": 1795240337.441,
+    "kind": "->",
+    "path": "/api/room/getHotScore"
+  },
+  {
+    "epoch": 1795240338.092,
+    "kind": "<-",
+    "path": "/api/room/getHotScore",
+    "http": "200",
+    "code": "200"
+  },
+  {
+    "epoch": 1795240437.436,
+    "kind": "->",
+    "path": "/api/room/getHotScore"
+  },
+  {
+    "epoch": 1795240467.44,
+    "kind": "!!",
+    "path": "/api/room/getHotScore",
+    "http": "null",
+    "type": "DioExceptionType.connectionTimeout"
+  },
+  {
+    "epoch": 1795240512.418,
+    "kind": "->",
+    "path": "/api/room/outRoom"
+  },
+  {
+    "epoch": 1795240513.896,
+    "kind": "<-",
+    "path": "/api/room/outRoom",
+    "http": "200",
+    "code": "200"
+  }
+]

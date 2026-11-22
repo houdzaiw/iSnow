@@ -298,15 +298,35 @@ void main() {
     },
   );
 
-  testWidgets('recharge artwork uses the existing wallet navigation result', (
+  testWidgets('eligible first recharge artwork opens the dedicated pack flow', (
     tester,
   ) async {
     RoomGiftSheetResult? result;
-    await _openPanel(tester, onResult: (value) => result = value);
-    await tester.tap(find.bySemanticsLabel('Recharge'));
+    await _openPanel(
+      tester,
+      repository: _SheetGiftRepository()..firstRecharge = true,
+      onResult: (value) => result = value,
+    );
+    await tester.tap(find.bySemanticsLabel('First Recharge'));
     await tester.pumpAndSettle();
-    expect(result, RoomGiftSheetResult.openWallet);
+    expect(result, RoomGiftSheetResult.openFirstRecharge);
   });
+
+  testWidgets(
+    'non-first user keeps ordinary balance recharge without first artwork',
+    (tester) async {
+      RoomGiftSheetResult? result;
+      await _openPanel(
+        tester,
+        repository: _SheetGiftRepository()..firstRecharge = false,
+        onResult: (value) => result = value,
+      );
+      expect(find.bySemanticsLabel('First Recharge'), findsNothing);
+      await tester.tap(find.text('1000'));
+      await tester.pumpAndSettle();
+      expect(result, RoomGiftSheetResult.openWallet);
+    },
+  );
 
   testWidgets('Send uses onlineNum from the live room for all-room gifting', (
     tester,
@@ -446,6 +466,73 @@ void main() {
     },
   );
 
+  for (final width in [320.0, 375.0, 430.0]) {
+    testWidgets(
+      'custom count keyboard keeps actions reachable and cancel preserves count at $width',
+      (tester) async {
+        final repository = _SheetGiftRepository();
+        await _openPanel(
+          tester,
+          repository: repository,
+          size: Size(width, 640),
+        );
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(RoomGiftSheet)),
+        );
+        await tester.tap(find.byKey(const ValueKey('room-gift-count-18')));
+        await tester.pumpAndSettle();
+        expect(
+          container.read(roomGiftViewModelProvider('room-1')).giftCount,
+          18,
+        );
+        await tester.tap(find.byType(PopupMenuButton<int>));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Other'));
+        await tester.pumpAndSettle();
+        tester.view.viewInsets = const FakeViewPadding(bottom: 280);
+        addTearDown(tester.view.resetViewInsets);
+        await tester.pumpAndSettle();
+        for (final value in ['0', '10000']) {
+          await tester.enterText(find.byType(TextField), value);
+          await tester.tap(find.text('Confirm'));
+          await tester.pumpAndSettle();
+          expect(find.byType(AlertDialog), findsOneWidget);
+          expect(
+            tester.getRect(find.text('Confirm')).bottom,
+            lessThanOrEqualTo(360),
+          );
+          expect(
+            tester.getRect(find.text('Cancel')).bottom,
+            lessThanOrEqualTo(360),
+          );
+          expect(tester.takeException(), isNull);
+        }
+        await tester.tap(find.text('Cancel'));
+        await tester.pumpAndSettle();
+        expect(
+          container.read(roomGiftViewModelProvider('room-1')).giftCount,
+          18,
+        );
+        expect(repository.lastRequest, isNull);
+        tester.view.resetViewInsets();
+        await tester.pumpAndSettle();
+        await tester.tap(find.byType(PopupMenuButton<int>));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Other'));
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextField), '2');
+        await tester.tap(find.text('Confirm'));
+        await tester.pumpAndSettle();
+        expect(
+          container.read(roomGiftViewModelProvider('room-1')).giftCount,
+          2,
+        );
+        expect(repository.lastRequest, isNull);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   for (final size in [
     const Size(320, 568),
     const Size(375, 812),
@@ -489,6 +576,7 @@ void main() {
           size: size,
           bottomPadding: 34,
           repository: _SheetGiftRepository(catalog: catalog),
+          precacheAssets: true,
         );
         expect(tester.takeException(), isNull);
         final sendRect = tester.getRect(find.text('Send'));
@@ -502,7 +590,7 @@ void main() {
           await expectLater(
             find.byKey(const ValueKey('gift-test-screen')),
             matchesGoldenFile(
-              'goldens/room_gift_panel_v3/room_gift_panel_${size.width.toInt()}.png',
+              'goldens/room_gift_panel_v4/room_gift_panel_${size.width.toInt()}.png',
             ),
           );
         }
@@ -521,6 +609,7 @@ Future<void> _openPanel(
   int onlineCount = 2,
   List<RoomGiftRecipient>? recipients,
   int? targetUid,
+  bool precacheAssets = false,
 }) async {
   final giftRepository = repository ?? _SheetGiftRepository();
   tester.platformDispatcher.accessibilityFeaturesTestValue =
@@ -573,6 +662,27 @@ Future<void> _openPanel(
     ),
   );
   await tester.pumpAndSettle();
+
+  if (precacheAssets) {
+    // Decode before the route transition can snapshot a cold, empty image frame.
+    final context = tester.element(find.text('Open gift panel'));
+    await tester.runAsync(
+      () => Future.wait([
+        for (final asset in [
+          AppAssets.roomGiftRecipient,
+          AppAssets.lanhuRoomGiftTargetArrow,
+          AppAssets.lanhuRoomGiftBackpack,
+          AppAssets.lanhuRoomIconMissing,
+          AppAssets.lanhuRoomGiftCoin,
+          AppAssets.roomGiftNewBadge,
+          AppAssets.lanhuRoomGiftBalanceArrow,
+          AppAssets.lanhuRoomGiftCountArrow,
+        ])
+          precacheImage(AssetImage(asset), context),
+      ]),
+    );
+    await tester.pumpAndSettle();
+  }
 
   await tester.tap(find.text('Open gift panel'));
   await tester.pumpAndSettle();
@@ -629,6 +739,9 @@ class _GiftSheetHarness extends StatelessWidget {
 }
 
 class _SheetGiftRepository extends RoomGiftRepository {
+  bool? firstRecharge;
+  @override
+  bool? get firstRechargeEligibility => firstRecharge;
   _SheetGiftRepository({this.catalog = _catalog, this.sendError});
 
   final RoomGiftCatalog catalog;

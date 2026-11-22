@@ -1,0 +1,164 @@
+{"kind": "capture-start", "at": "2026-11-21T05:05:43.284972+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/resource/function2", "at": "2026-11-21T05:08:14.976887+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/mic/charm/isEnable", "at": "2026-11-21T05:08:14.977529+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/pk/info", "at": "2026-11-21T05:08:14.979003+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/redPacket/config", "at": "2026-11-21T05:08:14.979053+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/redPacket/list", "at": "2026-11-21T05:08:14.979465+00:00"}
+{"kind": "response", "path": "/api/room/pk/info", "http": "200", "code": "200", "at": "2026-11-21T05:08:15.700454+00:00"}
+{"kind": "response", "path": "/api/redPacket/list", "http": "200", "code": "200", "at": "2026-11-21T05:08:15.724915+00:00"}
+{"kind": "response", "path": "/api/room/mic/charm/isEnable", "http": "200", "code": "200", "at": "2026-11-21T05:08:15.765275+00:00"}
+{"kind": "response", "path": "/api/resource/function2", "http": "200", "code": "200", "at": "2026-11-21T05:08:15.927194+00:00"}
+{"kind": "response", "path": "/api/redPacket/config", "http": "200", "code": "200", "at": "2026-11-21T05:08:16.207426+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/lobby/lists", "at": "2026-11-21T05:08:16.210123+00:00"}
+{"kind": "response", "path": "/api/lobby/lists", "http": "200", "code": "200", "at": "2026-11-21T05:08:16.566589+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/resource/function2", "at": "2026-11-21T05:08:45.004337+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/mic/charm/isEnable", "at": "2026-11-21T05:08:45.004879+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/pk/info", "at": "2026-11-21T05:08:45.005830+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/redPacket/config", "at": "2026-11-21T05:08:45.006985+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/redPacket/list", "at": "2026-11-21T05:08:45.007638+00:00"}
+{"kind": "response", "path": "/api/room/mic/charm/isEnable", "http": "200", "code": "200", "at": "2026-11-21T05:08:45.958869+00:00"}
+{"kind": "response", "path": "/api/redPacket/list", "http": "200", "code": "200", "at": "2026-11-21T05:08:45.958944+00:00"}
+{"kind": "response", "path": "/api/resource/function2", "http": "200", "code": "200", "at": "2026-11-21T05:08:45.960901+00:00"}
+{"kind": "response", "path": "/api/room/pk/info", "http": "200", "code": "200", "at": "2026-11-21T05:08:45.961778+00:00"}
+{"kind": "response", "path": "/api/redPacket/config", "http": "200", "code": "200", "at": "2026-11-21T05:08:46.275757+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/lobby/lists", "at": "2026-11-21T05:08:46.275824+00:00"}
+{"kind": "response", "path": "/api/lobby/lists", "http": "200", "code": "200", "at": "2026-11-21T05:08:46.705882+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/getHotScore", "at": "2026-11-21T05:11:51.158458+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/rocket/room/schedule/hasActiveRocket", "at": "2026-11-21T05:11:51.158921+00:00"}
+{"kind": "response", "path": "/api/room/getHotScore", "http": "200", "code": "200", "at": "2026-11-21T05:11:52.419961+00:00"}
+{"kind": "response", "path": "/api/rocket/room/schedule/hasActiveRocket", "http": "200", "code": "200", "at": "2026-11-21T05:11:52.533971+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/manager/get/info", "at": "2026-11-21T05:11:56.555723+00:00"}
+{"kind": "response", "path": "/api/room/manager/get/info", "http": "200", "code": "200", "at": "2026-11-21T05:11:57.244090+00:00"}
+{"kind": "request", "method": "POST", "path": "/api/room/party/getPartyListByRoomId", "at": "2026-11-21T05:12:03.004426+00:00"}
+{"kind": "response", "path": "/api/room/party/getPartyListByRoomId", "http": "200", "code": "200", "at": "2026-11-21T05:12:03.674299+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/manager/get/info", "at": "2026-11-21T05:12:04.405114+00:00"}
+{"kind": "response", "path": "/api/room/manager/get/info", "http": "200", "code": "200", "at": "2026-11-21T05:12:04.852001+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/getHotScore", "at": "2026-11-21T05:13:31.061076+00:00"}
+{"kind": "response", "path": "/api/room/getHotScore", "http": "200", "code": "200", "at": "2026-11-21T05:13:32.975446+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/getHotScore", "at": "2026-11-21T05:15:11.063196+00:00"}
+{"kind": "response", "path": "/api/room/getHotScore", "http": "200", "code": "200", "at": "2026-11-21T05:15:12.138052+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/list/audience", "at": "2026-11-21T05:16:47.491603+00:00"}
+{"kind": "response", "path": "/api/room/list/audience", "http": "200", "code": "200", "at": "2026-11-21T05:16:49.131844+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/getHotScore", "at": "2026-11-21T05:16:51.059727+00:00"}
+{"kind": "response", "path": "/api/room/getHotScore", "http": "200", "code": "200", "at": "2026-11-21T05:16:51.626808+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/user/get", "at": "2026-11-21T05:16:55.750358+00:00"}
+{"kind": "response", "path": "/api/room/user/get", "http": "200", "code": "200", "at": "2026-11-21T05:16:57.025460+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/list/audience", "at": "2026-11-21T05:17:01.634215+00:00"}
+{"kind": "response", "path": "/api/room/list/audience", "http": "200", "code": "200", "at": "2026-11-21T05:17:02.294113+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/user/get", "at": "2026-11-21T05:17:03.720590+00:00"}
+{"kind": "response", "path": "/api/room/user/get", "http": "200", "code": "200", "at": "2026-11-21T05:17:04.623449+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/rank/commonly", "at": "2026-11-21T05:17:14.758640+00:00"}
+{"kind": "response", "path": "/api/rank/commonly", "http": "200", "code": "200", "at": "2026-11-21T05:17:15.922940+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/rank/val", "at": "2026-11-21T05:17:15.926237+00:00"}
+{"kind": "response", "path": "/api/room/rank/val", "http": "200", "code": "200", "at": "2026-11-21T05:17:16.319278+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/rank/commonly", "at": "2026-11-21T05:17:21.416146+00:00"}
+{"kind": "response", "path": "/api/rank/commonly", "http": "200", "code": "200", "at": "2026-11-21T05:17:22.651211+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/rank/val", "at": "2026-11-21T05:17:22.653411+00:00"}
+{"kind": "response", "path": "/api/room/rank/val", "http": "200", "code": "200", "at": "2026-11-21T05:17:23.079167+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/rank/income/commonly", "at": "2026-11-21T05:17:27.339274+00:00"}
+{"kind": "response", "path": "/api/rank/income/commonly", "http": "200", "code": "200", "at": "2026-11-21T05:17:28.969744+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/rank/val", "at": "2026-11-21T05:17:28.971817+00:00"}
+{"kind": "response", "path": "/api/room/rank/val", "http": "200", "code": "200", "at": "2026-11-21T05:17:29.401887+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/rank/income/commonly", "at": "2026-11-21T05:17:29.647652+00:00"}
+{"kind": "response", "path": "/api/rank/income/commonly", "http": "200", "code": "200", "at": "2026-11-21T05:17:30.535137+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/rank/val", "at": "2026-11-21T05:17:30.535964+00:00"}
+{"kind": "response", "path": "/api/room/rank/val", "http": "200", "code": "200", "at": "2026-11-21T05:17:30.996612+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/rank/commonly", "at": "2026-11-21T05:17:31.835310+00:00"}
+{"kind": "response", "path": "/api/rank/commonly", "http": "200", "code": "200", "at": "2026-11-21T05:17:33.050247+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/rank/val", "at": "2026-11-21T05:17:33.053752+00:00"}
+{"kind": "response", "path": "/api/room/rank/val", "http": "200", "code": "200", "at": "2026-11-21T05:17:33.562440+00:00"}
+{"kind": "request", "method": "POST", "path": "/api/room/mic/up", "at": "2026-11-21T05:17:43.399083+00:00"}
+{"kind": "response", "path": "/api/room/mic/up", "http": "200", "code": "200", "at": "2026-11-21T05:17:44.710851+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/mic/list/info", "at": "2026-11-21T05:17:44.873080+00:00"}
+{"kind": "response", "path": "/api/room/mic/list/info", "http": "200", "code": "200", "at": "2026-11-21T05:17:45.305370+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/user/get", "at": "2026-11-21T05:17:48.968385+00:00"}
+{"kind": "response", "path": "/api/room/user/get", "http": "200", "code": "200", "at": "2026-11-21T05:17:50.026920+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/user/get", "at": "2026-11-21T05:17:55.091269+00:00"}
+{"kind": "response", "path": "/api/room/user/get", "http": "200", "code": "200", "at": "2026-11-21T05:17:55.839521+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/user/homepage/get", "at": "2026-11-21T05:17:57.213051+00:00"}
+{"kind": "response", "path": "/api/user/homepage/get", "http": "200", "code": "200", "at": "2026-11-21T05:17:59.251291+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/gift/wall/list", "at": "2026-11-21T05:17:59.253771+00:00"}
+{"kind": "response", "path": "/api/gift/wall/list", "http": "200", "code": "200", "at": "2026-11-21T05:17:59.835416+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/medal/achieved", "at": "2026-11-21T05:17:59.836294+00:00"}
+{"kind": "response", "path": "/api/medal/achieved", "http": "200", "code": "200", "at": "2026-11-21T05:18:00.350118+00:00"}
+{"kind": "request", "method": "POST", "path": "/api/resource/banner", "at": "2026-11-21T05:18:27.410291+00:00"}
+{"kind": "request", "method": "POST", "path": "/api/resource/banner", "at": "2026-11-21T05:18:27.410371+00:00"}
+{"kind": "response", "path": "/api/resource/banner", "http": "200", "code": "200", "at": "2026-11-21T05:18:28.318178+00:00"}
+{"kind": "response", "path": "/api/resource/banner", "http": "200", "code": "200", "at": "2026-11-21T05:18:29.416832+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/getHotScore", "at": "2026-11-21T05:18:31.086024+00:00"}
+{"kind": "response", "path": "/api/room/getHotScore", "http": "200", "code": "200", "at": "2026-11-21T05:18:31.633902+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/invite/materials", "at": "2026-11-21T05:18:33.914816+00:00"}
+{"kind": "request", "method": "POST", "path": "/api/user/follow/friends", "at": "2026-11-21T05:18:33.914898+00:00"}
+{"kind": "response", "path": "/api/invite/materials", "http": "200", "code": "200", "at": "2026-11-21T05:18:34.448352+00:00"}
+{"kind": "response", "path": "/api/user/follow/friends", "http": "200", "code": "200", "at": "2026-11-21T05:18:34.574737+00:00"}
+{"kind": "request", "method": "POST", "path": "/api/resource/banner", "at": "2026-11-21T05:18:52.088740+00:00"}
+{"kind": "request", "method": "POST", "path": "/api/resource/banner", "at": "2026-11-21T05:18:52.089509+00:00"}
+{"kind": "response", "path": "/api/resource/banner", "http": "200", "code": "200", "at": "2026-11-21T05:18:52.752502+00:00"}
+{"kind": "response", "path": "/api/resource/banner", "http": "200", "code": "200", "at": "2026-11-21T05:18:53.118150+00:00"}
+{"kind": "request", "method": "POST", "path": "/api/user/follow/friends", "at": "2026-11-21T05:19:02.852583+00:00"}
+{"kind": "response", "path": "/api/user/follow/friends", "http": "200", "code": "200", "at": "2026-11-21T05:19:03.790994+00:00"}
+{"kind": "request", "method": "POST", "path": "/api/resource/banner", "at": "2026-11-21T05:19:12.710748+00:00"}
+{"kind": "request", "method": "POST", "path": "/api/resource/banner", "at": "2026-11-21T05:19:12.711002+00:00"}
+{"kind": "response", "path": "/api/resource/banner", "http": "200", "code": "200", "at": "2026-11-21T05:19:13.783622+00:00"}
+{"kind": "response", "path": "/api/resource/banner", "http": "200", "code": "200", "at": "2026-11-21T05:19:15.075258+00:00"}
+{"kind": "request", "method": "POST", "path": "/api/user/follow/friends", "at": "2026-11-21T05:19:15.075335+00:00"}
+{"kind": "response", "path": "/api/user/follow/friends", "http": "200", "code": "200", "at": "2026-11-21T05:19:15.177240+00:00"}
+{"kind": "request", "method": "POST", "path": "/api/share/short-links/batch", "at": "2026-11-21T05:19:19.488894+00:00"}
+{"kind": "response", "path": "/api/share/short-links/batch", "http": "200", "code": "200", "at": "2026-11-21T05:19:20.169292+00:00"}
+{"kind": "request", "method": "POST", "path": "/api/share/short-links/batch", "at": "2026-11-21T05:19:35.472780+00:00"}
+{"kind": "response", "path": "/api/share/short-links/batch", "http": "200", "code": "200", "at": "2026-11-21T05:19:36.899397+00:00"}
+{"kind": "request", "method": "POST", "path": "/api/activity/component/share-report", "at": "2026-11-21T05:19:37.064047+00:00"}
+{"kind": "response", "path": "/api/activity/component/share-report", "http": "200", "code": "200", "at": "2026-11-21T05:19:37.857611+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/resource/function2", "at": "2026-11-21T05:19:41.553012+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/mic/charm/isEnable", "at": "2026-11-21T05:19:41.553754+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/pk/info", "at": "2026-11-21T05:19:41.553841+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/redPacket/config", "at": "2026-11-21T05:19:41.553895+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/redPacket/list", "at": "2026-11-21T05:19:41.555355+00:00"}
+{"kind": "response", "path": "/api/redPacket/list", "http": "200", "code": "200", "at": "2026-11-21T05:19:42.270174+00:00"}
+{"kind": "response", "path": "/api/room/pk/info", "http": "200", "code": "200", "at": "2026-11-21T05:19:42.298304+00:00"}
+{"kind": "response", "path": "/api/resource/function2", "http": "200", "code": "200", "at": "2026-11-21T05:19:42.407137+00:00"}
+{"kind": "response", "path": "/api/redPacket/config", "http": "200", "code": "200", "at": "2026-11-21T05:19:42.671564+00:00"}
+{"kind": "response", "path": "/api/room/mic/charm/isEnable", "http": "200", "code": "200", "at": "2026-11-21T05:19:42.845461+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/lobby/lists", "at": "2026-11-21T05:19:42.847960+00:00"}
+{"kind": "response", "path": "/api/lobby/lists", "http": "200", "code": "200", "at": "2026-11-21T05:19:43.411908+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/resource/function2", "at": "2026-11-21T05:19:43.989138+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/mic/charm/isEnable", "at": "2026-11-21T05:19:44.017789+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/pk/info", "at": "2026-11-21T05:19:44.019924+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/redPacket/config", "at": "2026-11-21T05:19:44.021695+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/redPacket/list", "at": "2026-11-21T05:19:44.022662+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/getHotScore", "at": "2026-11-21T05:19:44.023889+00:00"}
+{"kind": "response", "path": "/api/room/pk/info", "http": "200", "code": "200", "at": "2026-11-21T05:19:44.638284+00:00"}
+{"kind": "response", "path": "/api/redPacket/list", "http": "200", "code": "200", "at": "2026-11-21T05:19:44.638379+00:00"}
+{"kind": "response", "path": "/api/resource/function2", "http": "200", "code": "200", "at": "2026-11-21T05:19:44.675759+00:00"}
+{"kind": "response", "path": "/api/redPacket/config", "http": "200", "code": "200", "at": "2026-11-21T05:19:44.929360+00:00"}
+{"kind": "response", "path": "/api/room/getHotScore", "http": "200", "code": "200", "at": "2026-11-21T05:19:45.009116+00:00"}
+{"kind": "response", "path": "/api/room/mic/charm/isEnable", "http": "200", "code": "200", "at": "2026-11-21T05:19:45.154434+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/lobby/lists", "at": "2026-11-21T05:19:45.155463+00:00"}
+{"kind": "response", "path": "/api/lobby/lists", "http": "200", "code": "200", "at": "2026-11-21T05:19:45.686208+00:00"}
+{"kind": "request", "method": "POST", "path": "/api/resource/banner", "at": "2026-11-21T05:20:01.545641+00:00"}
+{"kind": "request", "method": "POST", "path": "/api/resource/banner", "at": "2026-11-21T05:20:01.562738+00:00"}
+{"kind": "response", "path": "/api/resource/banner", "http": "200", "code": "200", "at": "2026-11-21T05:20:02.460405+00:00"}
+{"kind": "response", "path": "/api/resource/banner", "http": "200", "code": "200", "at": "2026-11-21T05:20:02.687299+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/getHotScore", "at": "2026-11-21T05:20:11.060340+00:00"}
+{"kind": "response", "path": "/api/room/getHotScore", "http": "200", "code": "200", "at": "2026-11-21T05:20:11.896028+00:00"}
+{"kind": "capture-start", "at": "2026-11-21T05:28:16.701283+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/resource/function2", "at": "2026-11-21T05:30:08.550531+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/mic/charm/isEnable", "at": "2026-11-21T05:30:08.550939+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/pk/info", "at": "2026-11-21T05:30:08.563225+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/redPacket/config", "at": "2026-11-21T05:30:08.564899+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/redPacket/list", "at": "2026-11-21T05:30:08.564987+00:00"}
+{"kind": "response", "path": "/api/room/mic/charm/isEnable", "http": "200", "code": "200", "at": "2026-11-21T05:30:09.100872+00:00"}
+{"kind": "response", "path": "/api/redPacket/list", "http": "200", "code": "200", "at": "2026-11-21T05:30:09.110425+00:00"}
+{"kind": "response", "path": "/api/room/pk/info", "http": "200", "code": "200", "at": "2026-11-21T05:30:09.227632+00:00"}
+{"kind": "response", "path": "/api/resource/function2", "http": "200", "code": "200", "at": "2026-11-21T05:30:09.342688+00:00"}
+{"kind": "response", "path": "/api/redPacket/config", "http": "200", "code": "200", "at": "2026-11-21T05:30:09.596239+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/lobby/lists", "at": "2026-11-21T05:30:09.596615+00:00"}
+{"kind": "response", "path": "/api/lobby/lists", "http": "200", "code": "200", "at": "2026-11-21T05:30:10.017889+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/getHotScore", "at": "2026-11-21T05:30:37.011207+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/rocket/room/schedule/hasActiveRocket", "at": "2026-11-21T05:30:37.011544+00:00"}
+{"kind": "response", "path": "/api/room/getHotScore", "http": "200", "code": "200", "at": "2026-11-21T05:30:37.631558+00:00"}
+{"kind": "response", "path": "/api/rocket/room/schedule/hasActiveRocket", "http": "200", "code": "200", "at": "2026-11-21T05:30:37.913308+00:00"}
+{"kind": "request", "method": "POST", "path": "/api/room/mic/down", "at": "2026-11-21T05:30:41.360979+00:00"}
+{"kind": "response", "path": "/api/room/mic/down", "http": "200", "code": "200", "at": "2026-11-21T05:30:41.991801+00:00"}
+{"kind": "request", "method": "GET", "path": "/api/room/mic/list/info", "at": "2026-11-21T05:30:42.168023+00:00"}
+{"kind": "response", "path": "/api/room/mic/list/info", "http": "200", "code": "200", "at": "2026-11-21T05:30:42.619694+00:00"}

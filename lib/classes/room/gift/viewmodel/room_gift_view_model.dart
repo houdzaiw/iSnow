@@ -59,8 +59,14 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
           state.status == RoomGiftLoadStatus.ready &&
           catalog != null &&
           (state.balance != catalog.balance ||
+              state.firstRechargeEligibility !=
+                  _repository.firstRechargeEligibility ||
               !identical(state.tabs, catalog.tabs))) {
-        state = state.copyWith(balance: catalog.balance, tabs: catalog.tabs);
+        state = state.copyWith(
+          balance: catalog.balance,
+          tabs: catalog.tabs,
+          firstRechargeEligibility: _repository.firstRechargeEligibility,
+        );
       }
     }, fireImmediately: false);
   }
@@ -96,6 +102,7 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
     final cachedCatalog = _repository.cachedCatalog;
     if (cachedCatalog != null) {
       _applyCatalog(cachedCatalog);
+      state = state.copyWith(firstRechargeEligibility: null);
       unawaited(refreshBalance());
       return;
     }
@@ -120,11 +127,15 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
 
   Future<void> refreshBalance() async {
     if (!mounted || state.status != RoomGiftLoadStatus.ready) return;
+    state = state.copyWith(firstRechargeEligibility: null);
     final balance = await _sender.refreshBalance();
     if (mounted &&
         state.status == RoomGiftLoadStatus.ready &&
         balance != null) {
-      state = state.copyWith(balance: balance);
+      state = state.copyWith(
+        balance: balance,
+        firstRechargeEligibility: _repository.firstRechargeEligibility,
+      );
     }
   }
 
@@ -419,6 +430,7 @@ class RoomGiftViewModel extends StateNotifier<RoomGiftState> {
         .toSet();
     state = state.copyWith(
       status: RoomGiftLoadStatus.ready,
+      firstRechargeEligibility: _repository.firstRechargeEligibility,
       balance: catalog.balance,
       canSendSelf: catalog.canSendSelf,
       tabs: catalog.tabs,

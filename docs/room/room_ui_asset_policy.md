@@ -16,6 +16,8 @@
 
 ## Lanhu Asset Download
 
+PK／Lucky Box 本轮采用用户确认的 Nady 完整体验，实际复用的25个图片／PAG／VAP／SVGA以 `room_activity_*` 放入现有房间资源目录，AppAssets 与 manifest 同步记录源文件，不称作蓝湖导出。详情见 `room_pk_lucky_box_completion.md`；缺失头像保持红色占位，不能使用示例头像或 Flutter Icon 替代。
+
 - 蓝湖 MCP 设计稿中的房间图标、切图、徽章等图片资源，必须自动下载到 `assets/lanhu/room/`。
 - 自动下载使用 `tools/download_lanhu_room_assets.py`：
   ```bash

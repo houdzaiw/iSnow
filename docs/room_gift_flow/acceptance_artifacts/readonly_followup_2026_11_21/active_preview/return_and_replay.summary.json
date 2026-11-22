@@ -1,0 +1,16 @@
+{
+  "samples": 63,
+  "startedPreviewObserved": true,
+  "actualPausedObserved": true,
+  "releaseObservedWhilePaused": true,
+  "last": {
+    "at": "2026-11-21T13:48:57.069138+00:00",
+    "previews": [],
+    "players": [],
+    "panels": [],
+    "barriersActive": 0,
+    "lifecycle": "resumed"
+  },
+  "scope": "read-only VM state; native start flag and shared release barrier; not frame/performance measurement",
+  "lastActiveToFirstPausedSeconds": -76.941001
+}

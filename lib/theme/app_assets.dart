@@ -1,4 +1,55 @@
 class AppAssets {
+  static const roomActivityDoublePeoplePkBackground =
+      'assets/lanhu/room/room_activity_double_people_pk_background.webp';
+  static const roomActivityPkStartBtnBg =
+      'assets/lanhu/room/room_activity_pk_start_btn_bg.webp';
+  static const roomActivityPkMinimizeBtnIcon =
+      'assets/lanhu/room/room_activity_pk_minimize_btn_icon.webp';
+  static const roomActivityPkTitleIcon =
+      'assets/lanhu/room/room_activity_pk_title_icon.webp';
+  static const roomActivityPkOnBtnPick =
+      'assets/lanhu/room/room_activity_pk_on_btn_pick.webp';
+  static const roomActivityDoublePkResultBg =
+      'assets/lanhu/room/room_activity_double_pk_result_bg.webp';
+  static const roomActivityPkMultiplayerMaxBg =
+      'assets/lanhu/room/room_activity_pk_multiplayer_max_bg.webp';
+  static const roomActivityIcPkResultClose =
+      'assets/lanhu/room/room_activity_ic_pk_result_close.webp';
+  static const roomActivityBtnLuckyBagSend =
+      'assets/lanhu/room/room_activity_btn_lucky_bag_send.webp';
+  static const roomActivityBtnLuckyOpen =
+      'assets/lanhu/room/room_activity_btn_lucky_open.webp';
+  static const roomActivityIcLuckyBag =
+      'assets/lanhu/room/room_activity_ic_lucky_bag.webp';
+  static const roomActivityIcLuckyBagLosing =
+      'assets/lanhu/room/room_activity_ic_lucky_bag_losing.webp';
+  static const roomActivityIcLuckyBagWinningGold =
+      'assets/lanhu/room/room_activity_ic_lucky_bag_winning_gold.webp';
+  static const roomActivityIcLuckyBagGold1 =
+      'assets/lanhu/room/room_activity_ic_lucky_bag_gold1.webp';
+  static const roomActivityIcLuckyBagGold2 =
+      'assets/lanhu/room/room_activity_ic_lucky_bag_gold2.webp';
+  static const roomActivityIcLuckyBagGold3 =
+      'assets/lanhu/room/room_activity_ic_lucky_bag_gold3.webp';
+  static const roomActivityIcLuckyBagGold4 =
+      'assets/lanhu/room/room_activity_ic_lucky_bag_gold4.webp';
+  static const roomActivityDoublePkBg =
+      'assets/lanhu/room/room_activity_double_pk_bg.pag';
+  static const roomActivityMultiPkBg =
+      'assets/lanhu/room/room_activity_multi_pk_bg.pag';
+  static const roomActivityMultiPkMinBg =
+      'assets/lanhu/room/room_activity_multi_pk_min_bg.pag';
+  static const roomActivityPkWin =
+      'assets/lanhu/room/room_activity_pk_win.svga';
+  static const roomActivityBgLuckyBagOpen =
+      'assets/lanhu/room/room_activity_bg_lucky_bag_open.mp4';
+  static const roomActivityLuckyBagChest =
+      'assets/lanhu/room/room_activity_lucky_bag_chest.mp4';
+  static const roomActivityLuckyBagLosing =
+      'assets/lanhu/room/room_activity_lucky_bag_losing.mp4';
+  static const roomActivityLuckyBagWinning =
+      'assets/lanhu/room/room_activity_lucky_bag_winning.mp4';
+
   static const roomEditCamera = 'assets/lanhu/room/room_edit_camera.png';
   static const roomProfileEdit = 'assets/lanhu/room/room_profile_edit.png';
   static const roomProfileChevron =

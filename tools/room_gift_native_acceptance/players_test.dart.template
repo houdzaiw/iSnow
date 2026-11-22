@@ -15,12 +15,14 @@ import 'environment.dart';
 import 'barrage_checks.dart';
 import 'visibility_checks.dart';
 import 'local_assets_checks.dart';
+import 'combination_checks.dart';
 
 void main() {
   configureRecording();
   registerBarrageChecks();
   registerVisibilityChecks();
   registerLocalAssetChecks();
+  registerCombinationChecks();
   for (final format in [
     RoomGiftAnimationFormat.svga,
     RoomGiftAnimationFormat.pag,

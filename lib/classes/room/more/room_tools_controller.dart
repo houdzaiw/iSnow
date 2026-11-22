@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../manager/api_error_message.dart';
+import '../../../manager/account_balance_revision.dart';
 import '../../../manager/app_socket_manager.dart';
 import '../../../manager/http_api.dart';
 import '../../../manager/room_manager.dart';
@@ -11,6 +12,8 @@ import '../../../model/room_models.dart';
 import '../../../model/room_socket_message.dart';
 import '../../../model/server_response.dart';
 import '../room_repository.dart';
+import '../pk/room_pk_repository.dart';
+import '../lucky_box/room_lucky_box_repository.dart';
 import 'room_tools_models.dart';
 import 'room_tools_repository.dart';
 
@@ -24,6 +27,8 @@ final roomToolsControllerProvider = StateNotifierProvider.autoDispose
         repository: ref.watch(roomToolsRepositoryProvider),
         room: ref.watch(roomRepositoryProvider),
         retain: ref.keepAlive,
+        onWalletChanged: () =>
+            ref.read(accountBalanceRevisionProvider.notifier).state++,
       );
       Future.microtask(controller.start);
       return controller;
@@ -36,11 +41,13 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
     required this.repository,
     required this.room,
     this.retain,
+    this.onWalletChanged,
   }) : super(const RoomToolsState());
   final String roomId;
   final RoomToolsRepository repository;
   final RoomRepository room;
   final KeepAliveLink Function()? retain;
+  final void Function()? onWalletChanged;
   KeepAliveLink? _keepAlive;
   StreamSubscription<RoomSocketMessage>? _messages;
   Timer? _ticker, _prizeDelay, _lobbyInsert, _awardRemoval;
@@ -220,16 +227,8 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
         (data) => state = state.copy(config: data as RoomFunctionConfig),
       ),
       refreshCharmStatus(),
-      _load(
-        'pk',
-        () => repository.get(HttpApi.roomPkInfo, {'roomId': roomId}),
-        (data) => _applyPk(toolMap(data)),
-      ),
-      _load(
-        'luckyConfig',
-        () => repository.get(HttpApi.roomLuckyConfig, {'roomId': roomId}),
-        (data) => state = state.copy(luckyConfig: toolMap(data)),
-      ),
+      refreshPk(),
+      refreshLuckyConfig(),
       refreshBags(),
     ]);
     if (!active) return;

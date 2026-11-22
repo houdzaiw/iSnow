@@ -252,8 +252,15 @@ void main() {
           expect(find.byType(type), findsOneWidget);
           await precacheRoomAssets(tester, tester.element(find.byType(type)));
           expect(room.leaves, 0);
-          expect(router.state.uri.path, '/room-tool');
-          router.pop();
+          expect(
+            router.state.uri.path,
+            label == 'Report' ? '/room-tool' : '/room/123',
+          );
+          if (label == 'Report') {
+            router.pop();
+          } else {
+            Navigator.of(tester.element(find.byType(type))).pop();
+          }
           await tester.pumpAndSettle();
           expect(find.byType(RoomPage), findsOneWidget);
           expect(tester.takeException(), isNull);

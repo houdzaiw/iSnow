@@ -1,0 +1,20 @@
+{
+  "scope": "bounded segmented PID1756 HTTP metadata only; not independent IM audit",
+  "requests": {
+    "/api/room/getHotScore": 4,
+    "/api/resource/function2": 1,
+    "/api/room/mic/charm/isEnable": 1,
+    "/api/room/pk/info": 1,
+    "/api/redPacket/config": 1,
+    "/api/redPacket/list": 1,
+    "/api/lobby/lists": 1
+  },
+  "giftSendCount": 0,
+  "chatSendCount": 0,
+  "micUpCount": 0,
+  "micDownCount": 0,
+  "roomEnterCount": 0,
+  "roomExitCount": 0,
+  "endedUtc": "2026-11-21T13:56:08.232372+00:00",
+  "deviceUi": "awaiting user reply"
+}

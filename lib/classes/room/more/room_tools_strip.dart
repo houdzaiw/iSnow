@@ -7,7 +7,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../theme/app_theme.dart';
 import 'room_lobby_navigation.dart';
 import 'room_lucky_box_page.dart';
-import 'room_pk_page.dart';
 import 'room_tools_controller.dart';
 import 'room_tools_models.dart';
 import 'room_tools_widgets.dart';
@@ -68,27 +67,6 @@ class RoomToolsStrip extends HookConsumerWidget {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  if (state.pk.active || state.pk.terminal)
-                    TextButton(
-                      onPressed: () {
-                        vm.showPk(true);
-                        pushRoomTool(context, RoomPkPage(roomId: roomId));
-                      },
-                      child: Text(
-                        state.pk.active
-                            ? 'PK ${state.pk.secondsLeft(DateTime.now())}s'
-                            : 'PK',
-                        style: AppTextStyles.roomGiftStatus,
-                      ),
-                    ),
-                  if (state.pk.active &&
-                      state.pk.secondsLeft(DateTime.now()) <= 30)
-                    Text(
-                      toolText(context, 'Final 30s', '最后 30 秒'),
-                      style: AppTextStyles.roomGiftStatus.copyWith(
-                        color: AppColors.danger,
-                      ),
-                    ),
                   if (state.musicStatus == 'PLAYING' ||
                       state.musicStatus == 'PAUSED')
                     Text(
@@ -97,10 +75,7 @@ class RoomToolsStrip extends HookConsumerWidget {
                     ),
                   if (state.bags.isNotEmpty)
                     TextButton(
-                      onPressed: () => pushRoomTool(
-                        context,
-                        RoomLuckyBoxPage(roomId: roomId),
-                      ),
+                      onPressed: () => showRoomLuckyBoxList(context, roomId),
                       child: Image.asset(
                         AppAssets.lanhuRoomMoreLuckyBox,
                         width: AppSpacing.iconSizeLg,

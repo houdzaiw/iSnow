@@ -31,6 +31,7 @@ class AppSocketState {
     this.subscribedChannels = const [],
     this.errorMessage,
     this.isTerminal = false,
+    this.disconnectCode,
   });
 
   final AppSocketStatus status;
@@ -40,6 +41,7 @@ class AppSocketState {
   final List<String> subscribedChannels;
   final String? errorMessage;
   final bool isTerminal;
+  final int? disconnectCode;
 
   bool get isConnected =>
       status == AppSocketStatus.connected ||
@@ -54,6 +56,7 @@ class AppSocketState {
     bool? broadcastChannelSubscribed,
     List<String>? subscribedChannels,
     bool? isTerminal,
+    Object? disconnectCode = _sentinel,
     Object? errorMessage = _sentinel,
   }) {
     return AppSocketState(
@@ -65,6 +68,9 @@ class AppSocketState {
           broadcastChannelSubscribed ?? this.broadcastChannelSubscribed,
       subscribedChannels: subscribedChannels ?? this.subscribedChannels,
       isTerminal: isTerminal ?? this.isTerminal,
+      disconnectCode: identical(disconnectCode, _sentinel)
+          ? this.disconnectCode
+          : disconnectCode as int?,
       errorMessage: identical(errorMessage, _sentinel)
           ? this.errorMessage
           : errorMessage as String?,
@@ -451,6 +457,7 @@ class AppSocketManager extends ChangeNotifier {
           _setState(
             _state.copyWith(
               status: AppSocketStatus.connecting,
+              disconnectCode: null,
               roomChannelSubscribed: false,
               broadcastChannelSubscribed: false,
               subscribedChannels: const [],
@@ -461,6 +468,9 @@ class AppSocketManager extends ChangeNotifier {
       ..add(
         client.disconnected.listen((event) {
           if (!identical(client, _client)) return;
+          _log(
+            'client disconnected code=${event.code} intentional=$_intentionalDisconnect',
+          );
           _setState(
             _state.copyWith(
               status: AppSocketStatus.disconnected,
@@ -471,6 +481,7 @@ class AppSocketManager extends ChangeNotifier {
                   !_intentionalDisconnect &&
                   (_state.roomId != null || _joiningRoomId != null),
               errorMessage: '${event.code}: ${event.reason}',
+              disconnectCode: event.code,
             ),
           );
         }),
@@ -519,6 +530,7 @@ class AppSocketManager extends ChangeNotifier {
             _state.copyWith(
               isTerminal: true,
               errorMessage: '${event.code}: ${event.reason}',
+              disconnectCode: event.code,
             ),
           );
         }

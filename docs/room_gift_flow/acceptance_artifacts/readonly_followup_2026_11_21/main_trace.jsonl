@@ -1,0 +1,8 @@
+{"kind": "->", "path": "/api/room/getHotScore", "at": "2026-11-21T11:30:34.329741+00:00"}
+{"kind": "<-", "path": "/api/room/getHotScore", "code": "200", "http": "200", "at": "2026-11-21T11:30:35.435010+00:00"}
+{"kind": "->", "path": "/api/room/getHotScore", "at": "2026-11-21T11:32:14.329019+00:00"}
+{"kind": "<-", "path": "/api/room/getHotScore", "code": "200", "http": "200", "at": "2026-11-21T11:32:15.455654+00:00"}
+{"kind": "->", "path": "/api/room/getHotScore", "at": "2026-11-21T11:33:54.316681+00:00"}
+{"kind": "<-", "path": "/api/room/getHotScore", "code": "200", "http": "200", "at": "2026-11-21T11:33:55.855827+00:00"}
+{"kind": "->", "path": "/api/room/getHotScore", "at": "2026-11-21T11:35:34.316450+00:00"}
+{"kind": "<-", "path": "/api/room/getHotScore", "code": "200", "http": "200", "at": "2026-11-21T11:35:35.793958+00:00"}

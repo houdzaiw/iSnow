@@ -18,6 +18,7 @@ final roomGiftRepositoryProvider = Provider<RoomGiftRepository>((ref) {
 });
 
 abstract class RoomGiftRepository {
+  bool? get firstRechargeEligibility => null;
   RoomGiftCatalog? get cachedCatalog => null;
 
   Future<RoomGiftCatalog> fetchCatalog();
@@ -36,6 +37,8 @@ abstract class RoomGiftRepository {
 }
 
 class NadyRoomGiftRepository implements RoomGiftRepository {
+  @override
+  bool? get firstRechargeEligibility => _giftManager.firstRechargeEligibility;
   NadyRoomGiftRepository(
     this._httpManager, {
     AuthSession? authSession,
@@ -106,7 +109,10 @@ class NadyRoomGiftRepository implements RoomGiftRepository {
     final uid = await _authSession.uid();
     final token = _giftManager.balanceToken;
     final response = await _httpManager.get(HttpApi.walletPurse);
+    bool? first;
     final server = NadyServerResponse<int>.fromJson(_asMap(response), (json) {
+      final rawFirst = _asMap(json)['isFirst'];
+      first = rawFirst == null ? null : _boolValue(rawFirst);
       final value = _asMap(json)['coin'];
       final coin = value is num ? value.toInt() : int.tryParse('$value');
       if (coin == null) {
@@ -120,7 +126,7 @@ class NadyRoomGiftRepository implements RoomGiftRepository {
       throw const NadyApiException(message: 'Gift wallet session changed');
     }
     final balance = server.data!;
-    if (!_giftManager.updateBalance(balance, token: token)) {
+    if (!_giftManager.updateWallet(balance, first, token: token)) {
       return _giftManager.catalog?.balance ?? balance;
     }
     return balance;

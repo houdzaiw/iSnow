@@ -1,0 +1,29 @@
+{
+  "scope": "segmented PID1756 Nady API log sample; credentials, body and query omitted; not an independent Tencent IM send audit",
+  "captureStartsUtc": [
+    "2026-11-21T05:05:43.284972+00:00",
+    "2026-11-21T05:28:16.701283+00:00"
+  ],
+  "captureGapPresent": true,
+  "lastObservedEventUtc": "2026-11-21T05:30:42.619694+00:00",
+  "requestCount": 81,
+  "postPaths": {
+    "/api/room/party/getPartyListByRoomId": 1,
+    "/api/room/mic/up": 1,
+    "/api/resource/banner": 8,
+    "/api/user/follow/friends": 3,
+    "/api/share/short-links/batch": 2,
+    "/api/activity/component/share-report": 1,
+    "/api/room/mic/down": 1
+  },
+  "giftSendCount": 0,
+  "roomSaveCount": 0,
+  "followRoomCount": 0,
+  "textAuditCount": 0,
+  "userManualMicUpCount": 1,
+  "userManualMicDownCount": 1,
+  "scopeException": "scope_exception.json",
+  "observedBusinessErrorResponses": [],
+  "flutterPlayerExceptionCount": 0,
+  "transportErrorLogsNotComprehensivelyCaptured": true
+}

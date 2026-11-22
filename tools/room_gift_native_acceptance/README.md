@@ -25,6 +25,21 @@ Use `--case 'repository SVGA'` to run only that check.
 Multiple literal name fragments can be separated with semicolons, for example
 `--case 'actual Android;local visibility;prepared prize;local asset'`.
 
+Use `--case combination` for the five scheduling-combination checks: vehicle
+start gating with each completion order, PAG-to-numeric and numeric-to-PAG
+handover, and Keep during pending PAG initialization followed by a fresh task.
+They use the production event manager, full-screen layer, players and shared
+playback barrier. The numeric adapter deliberately holds a looping decoder
+fixture for handover inspection; it is not a replacement for the shipping
+numeric widget or proof that shipping numbers should loop. The entrance track
+is observed as manager state in this native adapter, not rendered as a fake
+production track. The actual entrance, avatar-frame/mic and numeric widgets are
+covered in `test/room_visual_combinations_test.dart`, including 320/375/430 widths,
+temporary expiry, failed resources and late results after a seat change.
+The new gates delay delivery of authentic native release/stop replies; trace
+entries distinguish native destruction acknowledgement from delivery to Dart.
+No successful platform reply is fabricated.
+
 The expanded suite additionally mounts the production barrage background and
 foreground together, replaces a PAG view while native initialization is pending,
 checks prepared-prize handover and clears full-screen tasks through the production

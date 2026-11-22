@@ -1,0 +1,23 @@
+{
+  "scope": "retained PID1756 log sample; no request URLs, tokens or body exported",
+  "events": [
+    {
+      "direction": "request"
+    },
+    {
+      "direction": "response",
+      "http": "200",
+      "code": "200",
+      "durationMs": "685"
+    },
+    {
+      "direction": "request"
+    },
+    {
+      "direction": "response",
+      "http": "200",
+      "code": "200",
+      "durationMs": "1427"
+    }
+  ]
+}

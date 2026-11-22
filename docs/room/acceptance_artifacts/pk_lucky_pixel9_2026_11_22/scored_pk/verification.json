@@ -1,0 +1,1490 @@
+{
+  "date": "2026-11-22",
+  "authorization": {
+    "room": "hei2",
+    "roomId": "2113281922745016322",
+    "durationMinutes": 3,
+    "senderUid": 30317291,
+    "recipientUid": 12594212,
+    "giftId": 600,
+    "giftName": "1",
+    "giftCount": 1,
+    "totalCoinsLimit": 1,
+    "sendAttemptsAllowed": 1,
+    "retryAllowed": false
+  },
+  "pkId": "cbabac7e8c48c64955ce7d573a05f138",
+  "giftReceipt": "2026112212034649316551",
+  "giftTraceId": "2ee0c3e3-9971-400a-94c3-f3a651cefb15",
+  "balanceBefore": 49855109,
+  "balanceAfter": 49855108,
+  "balanceSource": "Verified HTTP200/code200 /api/revenue/purse responses before and after gift",
+  "preflight": {
+    "roomId": "2113281922745016322",
+    "balance": "49855109",
+    "currentUid": "30317291",
+    "selectedGiftKey": "1:600:0",
+    "selectedTabId": "1",
+    "giftCount": "1",
+    "targetMode": "selected",
+    "isSending": "false",
+    "selectedRecipientUids": [
+      "12594212"
+    ],
+    "gift": {
+      "id": "600",
+      "name": "1",
+      "price": "1",
+      "tabId": "1",
+      "userBackpackId": null,
+      "isCombo": "2"
+    },
+    "totalCoins": 1,
+    "matchesAuthorization": true
+  },
+  "history": [
+    {
+      "observedAtMs": 1795320266391,
+      "devices": {
+        "primary": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "2",
+          "endsAt": "1795320369056",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": false,
+          "remaining": 103
+        },
+        "second": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "2",
+          "endsAt": "1795320369056",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": false,
+          "remaining": 103
+        }
+      }
+    },
+    {
+      "observedAtMs": 1795320283141,
+      "devices": {
+        "primary": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "2",
+          "endsAt": "1795320369056",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": false,
+          "remaining": 86
+        },
+        "second": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "2",
+          "endsAt": "1795320369056",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": false,
+          "remaining": 86
+        }
+      }
+    },
+    {
+      "observedAtMs": 1795320300387,
+      "devices": {
+        "primary": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "2",
+          "endsAt": "1795320369056",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": false,
+          "remaining": 69
+        },
+        "second": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "2",
+          "endsAt": "1795320369056",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": false,
+          "remaining": 69
+        }
+      }
+    },
+    {
+      "observedAtMs": 1795320317501,
+      "devices": {
+        "primary": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "2",
+          "endsAt": "1795320369056",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": false,
+          "remaining": 52
+        },
+        "second": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "2",
+          "endsAt": "1795320369056",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": false,
+          "remaining": 52
+        }
+      }
+    },
+    {
+      "observedAtMs": 1795320334593,
+      "devices": {
+        "primary": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "2",
+          "endsAt": "1795320369056",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": false,
+          "remaining": 35
+        },
+        "second": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "2",
+          "endsAt": "1795320369056",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": false,
+          "remaining": 35
+        }
+      }
+    },
+    {
+      "observedAtMs": 1795320344741,
+      "devices": {
+        "primary": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "2",
+          "endsAt": "1795320369056",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": false,
+          "remaining": 25
+        },
+        "second": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "2",
+          "endsAt": "1795320369056",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": false,
+          "remaining": 25
+        }
+      }
+    },
+    {
+      "observedAtMs": 1795320357910,
+      "devices": {
+        "primary": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "2",
+          "endsAt": "1795320369056",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": false,
+          "remaining": 12
+        },
+        "second": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "2",
+          "endsAt": "1795320369056",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": false,
+          "remaining": 12
+        }
+      }
+    },
+    {
+      "observedAtMs": 1795320369032,
+      "devices": {
+        "primary": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "4",
+          "endsAt": "0",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "true",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": true,
+          "remaining": 0,
+          "result": {
+            "id": "cbabac7e8c48c64955ce7d573a05f138",
+            "event": "4",
+            "endsAt": "0",
+            "users": [
+              {
+                "uid": "12594212",
+                "score": "1",
+                "identity": "2"
+              },
+              {
+                "uid": "30317291",
+                "score": "0",
+                "identity": "1"
+              }
+            ]
+          }
+        },
+        "second": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "4",
+          "endsAt": "0",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "true",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": true,
+          "remaining": 0,
+          "result": {
+            "id": "cbabac7e8c48c64955ce7d573a05f138",
+            "event": "4",
+            "endsAt": "0",
+            "users": [
+              {
+                "uid": "12594212",
+                "score": "1",
+                "identity": "2"
+              },
+              {
+                "uid": "30317291",
+                "score": "0",
+                "identity": "1"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "observedAtMs": 1795320376376,
+      "devices": {
+        "primary": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "4",
+          "endsAt": "0",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "true",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": true,
+          "remaining": 0,
+          "result": {
+            "id": "cbabac7e8c48c64955ce7d573a05f138",
+            "event": "4",
+            "endsAt": "0",
+            "users": [
+              {
+                "uid": "12594212",
+                "score": "1",
+                "identity": "2"
+              },
+              {
+                "uid": "30317291",
+                "score": "0",
+                "identity": "1"
+              }
+            ]
+          }
+        },
+        "second": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "4",
+          "endsAt": "0",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": true,
+          "remaining": 0,
+          "result": {
+            "id": "cbabac7e8c48c64955ce7d573a05f138",
+            "event": "4",
+            "endsAt": "0",
+            "users": [
+              {
+                "uid": "12594212",
+                "score": "1",
+                "identity": "2"
+              },
+              {
+                "uid": "30317291",
+                "score": "0",
+                "identity": "1"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "observedAtMs": 1795320382282,
+      "devices": {
+        "primary": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "4",
+          "endsAt": "0",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": true,
+          "remaining": 0,
+          "result": {
+            "id": "cbabac7e8c48c64955ce7d573a05f138",
+            "event": "4",
+            "endsAt": "0",
+            "users": [
+              {
+                "uid": "12594212",
+                "score": "1",
+                "identity": "2"
+              },
+              {
+                "uid": "30317291",
+                "score": "0",
+                "identity": "1"
+              }
+            ]
+          }
+        },
+        "second": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "4",
+          "endsAt": "0",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": true,
+          "remaining": 0,
+          "result": {
+            "id": "cbabac7e8c48c64955ce7d573a05f138",
+            "event": "4",
+            "endsAt": "0",
+            "users": [
+              {
+                "uid": "12594212",
+                "score": "1",
+                "identity": "2"
+              },
+              {
+                "uid": "30317291",
+                "score": "0",
+                "identity": "1"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "observedAtMs": 1795320387977,
+      "devices": {
+        "primary": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "4",
+          "endsAt": "0",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": true,
+          "remaining": 0,
+          "result": {
+            "id": "cbabac7e8c48c64955ce7d573a05f138",
+            "event": "4",
+            "endsAt": "0",
+            "users": [
+              {
+                "uid": "12594212",
+                "score": "1",
+                "identity": "2"
+              },
+              {
+                "uid": "30317291",
+                "score": "0",
+                "identity": "1"
+              }
+            ]
+          }
+        },
+        "second": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "4",
+          "endsAt": "0",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": true,
+          "remaining": 0,
+          "result": {
+            "id": "cbabac7e8c48c64955ce7d573a05f138",
+            "event": "4",
+            "endsAt": "0",
+            "users": [
+              {
+                "uid": "12594212",
+                "score": "1",
+                "identity": "2"
+              },
+              {
+                "uid": "30317291",
+                "score": "0",
+                "identity": "1"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "observedAtMs": 1795320393561,
+      "devices": {
+        "primary": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "4",
+          "endsAt": "0",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": true,
+          "remaining": 0,
+          "result": {
+            "id": "cbabac7e8c48c64955ce7d573a05f138",
+            "event": "4",
+            "endsAt": "0",
+            "users": [
+              {
+                "uid": "12594212",
+                "score": "1",
+                "identity": "2"
+              },
+              {
+                "uid": "30317291",
+                "score": "0",
+                "identity": "1"
+              }
+            ]
+          }
+        },
+        "second": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "4",
+          "endsAt": "0",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": true,
+          "remaining": 0,
+          "result": {
+            "id": "cbabac7e8c48c64955ce7d573a05f138",
+            "event": "4",
+            "endsAt": "0",
+            "users": [
+              {
+                "uid": "12594212",
+                "score": "1",
+                "identity": "2"
+              },
+              {
+                "uid": "30317291",
+                "score": "0",
+                "identity": "1"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "observedAtMs": 1795320399150,
+      "devices": {
+        "primary": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "4",
+          "endsAt": "0",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": true,
+          "remaining": 0,
+          "result": {
+            "id": "cbabac7e8c48c64955ce7d573a05f138",
+            "event": "4",
+            "endsAt": "0",
+            "users": [
+              {
+                "uid": "12594212",
+                "score": "1",
+                "identity": "2"
+              },
+              {
+                "uid": "30317291",
+                "score": "0",
+                "identity": "1"
+              }
+            ]
+          }
+        },
+        "second": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "4",
+          "endsAt": "0",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": true,
+          "remaining": 0,
+          "result": {
+            "id": "cbabac7e8c48c64955ce7d573a05f138",
+            "event": "4",
+            "endsAt": "0",
+            "users": [
+              {
+                "uid": "12594212",
+                "score": "1",
+                "identity": "2"
+              },
+              {
+                "uid": "30317291",
+                "score": "0",
+                "identity": "1"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "observedAtMs": 1795320405468,
+      "devices": {
+        "primary": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "4",
+          "endsAt": "0",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": true,
+          "remaining": 0,
+          "result": {
+            "id": "cbabac7e8c48c64955ce7d573a05f138",
+            "event": "4",
+            "endsAt": "0",
+            "users": [
+              {
+                "uid": "12594212",
+                "score": "1",
+                "identity": "2"
+              },
+              {
+                "uid": "30317291",
+                "score": "0",
+                "identity": "1"
+              }
+            ]
+          }
+        },
+        "second": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "4",
+          "endsAt": "0",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": true,
+          "remaining": 0,
+          "result": {
+            "id": "cbabac7e8c48c64955ce7d573a05f138",
+            "event": "4",
+            "endsAt": "0",
+            "users": [
+              {
+                "uid": "12594212",
+                "score": "1",
+                "identity": "2"
+              },
+              {
+                "uid": "30317291",
+                "score": "0",
+                "identity": "1"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "observedAtMs": 1795320410761,
+      "devices": {
+        "primary": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "4",
+          "endsAt": "0",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": true,
+          "remaining": 0,
+          "result": {
+            "id": "cbabac7e8c48c64955ce7d573a05f138",
+            "event": "4",
+            "endsAt": "0",
+            "users": [
+              {
+                "uid": "12594212",
+                "score": "1",
+                "identity": "2"
+              },
+              {
+                "uid": "30317291",
+                "score": "0",
+                "identity": "1"
+              }
+            ]
+          }
+        },
+        "second": {
+          "id": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "4",
+          "endsAt": "0",
+          "users": [
+            {
+              "uid": "12594212",
+              "name": "lihei",
+              "score": "1",
+              "identity": "2"
+            },
+            {
+              "uid": "30317291",
+              "name": "lihei2",
+              "score": "0",
+              "identity": "1"
+            }
+          ],
+          "winnerPending": "false",
+          "contributors": {
+            "12594212": [
+              {
+                "uid": "30317291",
+                "name": "lihei2",
+                "score": "0"
+              }
+            ],
+            "30317291": []
+          },
+          "resultPresent": true,
+          "remaining": 0,
+          "result": {
+            "id": "cbabac7e8c48c64955ce7d573a05f138",
+            "event": "4",
+            "endsAt": "0",
+            "users": [
+              {
+                "uid": "12594212",
+                "score": "1",
+                "identity": "2"
+              },
+              {
+                "uid": "30317291",
+                "score": "0",
+                "identity": "1"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "requestAudit": {
+    "primary": {
+      "/api/room/pk/begin": 0,
+      "/api/room/pk/over": 0,
+      "/api/gift/send": 1,
+      "/api/redPacket/push": 0,
+      "/api/redPacket/grab": 0,
+      "/api/room/mic/up": 0,
+      "/api/room/mic/down": 0
+    },
+    "second": {
+      "/api/room/pk/begin": 1,
+      "/api/room/pk/over": 0,
+      "/api/gift/send": 0,
+      "/api/redPacket/push": 0,
+      "/api/redPacket/grab": 0,
+      "/api/room/mic/up": 0,
+      "/api/room/mic/down": 0
+    }
+  },
+  "finalRoomStates": {
+    "primary": {
+      "pid": 14794,
+      "main": "isolates/8742731411918447",
+      "room": {
+        "status": "ready",
+        "currentRoomId": "2113281922745016322",
+        "isInRoom": "true",
+        "isMinimized": "false",
+        "generation": "1",
+        "onMic": 2
+      },
+      "pk": {
+        "active": "true",
+        "manager": "false",
+        "doubleMode": "true",
+        "duration": "3",
+        "busy": "false",
+        "mini": "true",
+        "error": null,
+        "selectedCount": 0,
+        "pkId": "cbabac7e8c48c64955ce7d573a05f138",
+        "event": "4"
+      },
+      "lucky": {
+        "active": "true",
+        "canSend": "false",
+        "loading": "false",
+        "sending": "false",
+        "reviewRequired": "false",
+        "type": "0",
+        "gold": "5000",
+        "people": "2",
+        "countdown": "60",
+        "balance": "0",
+        "error": null,
+        "bagCount": 0,
+        "currentBox": null,
+        "result": null
+      },
+      "socket": {
+        "status": "ready",
+        "isTerminal": "false"
+      }
+    },
+    "second": {
+      "pid": 6804,
+      "main": "isolates/878134234179271",
+      "room": {
+        "status": "ready",
+        "currentRoomId": "2113281922745016322",
+        "isInRoom": "true",
+        "isMinimized": "false",
+        "generation": "1",
+        "onMic": 2
+      },
+      "pk": {
+        "active": "true",
+        "manager": "true",
+        "doubleMode": "true",
+        "duration": "3",
+        "busy": "false",
+        "mini": "false",
+        "error": null,
+        "selectedCount": 2,
+        "pkId": "cbabac7e8c48c64955ce7d573a05f138",
+        "event": "4"
+      },
+      "lucky": {
+        "active": "true",
+        "canSend": "false",
+        "loading": "false",
+        "sending": "false",
+        "reviewRequired": "false",
+        "type": "0",
+        "gold": "5000",
+        "people": "2",
+        "countdown": "60",
+        "balance": "0",
+        "error": null,
+        "bagCount": 0,
+        "currentBox": null,
+        "result": null
+      },
+      "socket": {
+        "status": "ready",
+        "isTerminal": "false"
+      }
+    }
+  },
+  "finalVisualState": {
+    "primary": {
+      "resultCleared": true,
+      "winnerPending": "false",
+      "balance": "49855108"
+    },
+    "second": {
+      "resultCleared": true,
+      "winnerPending": "false"
+    }
+  },
+  "manualVideoReview": {
+    "primary": "Winner portrait with wings/VICTORY transitions to lihei 1 WIN result",
+    "second": "Winner portrait with wings/VICTORY transitions to lihei 1 WIN result",
+    "devices": "Android emulators only; not physical-device performance acceptance"
+  },
+  "tests": {
+    "finalFocusedRegression": 125,
+    "analyze": "No issues found",
+    "historicalGoldensOverwritten": false
+  },
+  "remainingBoundary": [
+    "Previous zero-PK raw pkId rows remain cached; not cleared.",
+    "Existing old APK still requires future package update to persist newly synced assets outside debug session.",
+    "No additional PK, combo, box send/claim, recharge, mic change or room switch authorized."
+  ]
+}

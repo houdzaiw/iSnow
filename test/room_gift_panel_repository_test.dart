@@ -28,6 +28,29 @@ void main() {
   tearDown(RoomGiftManager.instance.clear);
 
   test(
+    'existing purse response supplies first eligibility without an extra read',
+    () async {
+      http.first = true;
+      await repository.fetchCatalog();
+      expect(repository.firstRechargeEligibility, isTrue);
+      expect(http.purseCalls, 1);
+      http.first = false;
+      await repository.fetchBalance();
+      expect(repository.firstRechargeEligibility, isFalse);
+      http.first = null;
+      await repository.fetchBalance();
+      expect(repository.firstRechargeEligibility, isNull);
+    },
+  );
+
+  test('account clear removes first-recharge eligibility', () async {
+    http.first = true;
+    await repository.fetchCatalog();
+    RoomGiftManager.instance.clear();
+    expect(repository.firstRechargeEligibility, isNull);
+  });
+
+  test(
     'catalog uses Nady POST config contract and clamps zero flight limit to one',
     () async {
       final catalog = await repository.fetchCatalog();
@@ -109,6 +132,8 @@ class _Session implements AuthSession {
 }
 
 class _Http implements HttpDioManager {
+  bool? first;
+  int purseCalls = 0;
   int snapshotCalls = 0;
   bool failure = false;
   Completer<Object?>? pending;
@@ -135,7 +160,10 @@ class _Http implements HttpDioManager {
       }
       return pending == null ? success(records) : pending!.future;
     }
-    if (path == HttpApi.walletPurse) return success({'coin': 100});
+    if (path == HttpApi.walletPurse) {
+      purseCalls++;
+      return success({'coin': 100, if (first != null) 'isFirst': first});
+    }
     if (path == HttpApi.giftBackpack) return success({'giftInfoDTOS': []});
     if (path == HttpApi.giftTabList) {
       return success({

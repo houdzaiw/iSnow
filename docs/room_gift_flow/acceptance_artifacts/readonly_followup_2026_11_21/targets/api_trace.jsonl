@@ -1,0 +1,2 @@
+{"kind": "->", "path": "/api/room/getHotScore", "at": "2026-11-21T14:12:14.326083+00:00"}
+{"kind": "<-", "path": "/api/room/getHotScore", "code": "200", "http": "200", "at": "2026-11-21T14:12:15.912942+00:00"}

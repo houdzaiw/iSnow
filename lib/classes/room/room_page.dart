@@ -14,6 +14,7 @@ import '../../manager/room_manager.dart';
 import '../../theme/app_theme.dart';
 import 'gift/models/room_gift_models.dart';
 import 'gift/views/room_gift_sheet.dart';
+import 'gift/recharge/room_first_recharge_sheet.dart';
 import 'gift/views/room_gift_overlay.dart';
 import 'gift/views/room_gift_slot_layer.dart';
 import 'gift/views/room_mic_decorations.dart';
@@ -46,6 +47,8 @@ import 'more/room_report_page.dart';
 import 'more/room_share_page.dart';
 import 'more/room_pk_page.dart';
 import 'more/room_lucky_box_page.dart';
+import 'pk/room_pk_board.dart';
+import 'activities/room_activity_host.dart';
 import 'more/room_game_page.dart';
 import 'more/room_mic_wave.dart';
 import '../message/message_view_model.dart';
@@ -451,7 +454,9 @@ class RoomPage extends HookConsumerWidget {
       child: PopScope<void>(
         canPop: false,
         onPopInvokedWithResult: (didPop, _) {
-          if (!didPop) showExitChoices();
+          if (!didPop && !dismissRoomActivity(ref, giftRoomId)) {
+            showExitChoices();
+          }
         },
         child: Scaffold(
           // The composer/list routes handle their own keyboard insets. Keep the
@@ -513,6 +518,7 @@ class RoomPage extends HookConsumerWidget {
                                   )
                                 : null,
                           ),
+                          RoomPkBoard(roomId: giftRoomId, onUser: showUser),
                           _RoomMicGrid(
                             seats: state.seats,
                             wavesEnabled: moreFeatures.effects.sound,
@@ -697,6 +703,12 @@ class RoomPage extends HookConsumerWidget {
                         child: RoomGiftOverlay(
                           roomId: giftRoomId,
                           registry: giftRegistry,
+                        ),
+                      ),
+                      Positioned.fill(
+                        child: RoomActivityHost(
+                          roomId: giftRoomId,
+                          onUser: showUser,
                         ),
                       ),
                       if (state.isLoading) const _RoomLoadingOverlay(),
@@ -916,6 +928,8 @@ Future<void> _showRoomGiftPanel(
   if (!context.mounted || result == null) return;
   if (result == RoomGiftSheetResult.openWallet) {
     context.push('/wallet');
+  } else if (result == RoomGiftSheetResult.openFirstRecharge) {
+    await showRoomFirstRechargeSheet(context, roomId);
   }
 }
 

@@ -1,0 +1,14 @@
+{
+  "scope": "PID1756 HTTP log sample only; no raw headers/body/query exported; not independent Tencent IM send audit",
+  "requests": {
+    "/api/room/getHotScore": 4
+  },
+  "giftSendCount": 0,
+  "micUpCount": 0,
+  "micDownCount": 0,
+  "roomEnterCount": 0,
+  "roomExitCount": 0,
+  "roomChatSendCount": 0,
+  "captureSegment": 1,
+  "uiObservation": "awaiting user reply"
+}

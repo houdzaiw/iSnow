@@ -26,28 +26,40 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
   bool? _iapAvailable;
   int _purseRevision = 0;
+  bool _alive = false;
+  void Function()? _releasePurchaseHold;
+  final Map<String, WalletRechargeProduct> _checkoutProducts = {};
+  Future<void>? _initialization;
+  bool _checkoutStarting = false;
+  bool get hasPendingCheckout => _checkoutStarting || state.isPurchasing;
 
   @override
   WalletState build() {
+    _alive = true;
     ref.listen(accountBalanceRevisionProvider, (_, _) => refreshPurse());
     _purchaseSubscription = _paymentService.purchaseStream.listen(
       _handlePurchaseUpdates,
       onError: _handlePurchaseStreamError,
     );
     ref.onDispose(() {
+      _alive = false;
+      _releasePurchaseHold = null;
       _purseRevision++;
       unawaited(_purchaseSubscription?.cancel());
     });
-    Future.microtask(_initialize);
+    _initialization = Future.microtask(_initialize);
     return const WalletState(isLoading: true);
   }
 
   /// Refresh only the balance after a membership debit; do not restart billing.
   Future<void> refreshPurse() async {
+    if (!_alive) return;
     final revision = ++_purseRevision;
     try {
       final purse = await _repository.fetchPurse();
-      if (revision == _purseRevision) state = state.copyWith(purse: purse);
+      if (_alive && revision == _purseRevision) {
+        state = state.copyWith(purse: purse);
+      }
     } catch (_) {
       /* Existing balance remains visible until a manual refresh. */
     }
@@ -56,6 +68,7 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
   Future<void> _initialize() async {
     try {
       _iapAvailable = await _paymentService.isAvailable();
+      if (!_alive) return;
       if (_iapAvailable ?? false) {
         await _paymentService.recoverUnfinishedPurchases();
       }
@@ -65,10 +78,11 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
         '$error\n$stackTrace',
       );
     }
-    await load();
+    if (_alive) await load();
   }
 
   Future<void> load({bool refresh = false}) async {
+    if (!_alive) return;
     state = state.copyWith(
       isLoading: true,
       isRefreshing: refresh,
@@ -79,14 +93,18 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
     Object? firstError;
     try {
       final purse = await _repository.fetchPurse();
+      if (!_alive) return;
       state = state.copyWith(purse: purse);
     } catch (error) {
       firstError = error;
     }
 
     try {
+      if (!_alive) return;
       final serverProducts = await _repository.fetchRechargePackages();
+      if (!_alive) return;
       final products = await _loadIapProducts(serverProducts);
+      if (!_alive) return;
       final currentSelection = state.selectedProductId;
       final selectedProductId =
           products.any((product) => product.id == currentSelection)
@@ -100,6 +118,7 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
       firstError ??= error;
     }
 
+    if (!_alive) return;
     state = state.copyWith(
       isLoading: false,
       isRefreshing: false,
@@ -114,16 +133,40 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
     state = state.copyWith(selectedProductId: productId);
   }
 
-  Future<void> purchase(WalletRechargeProduct product) async {
-    if (state.isPurchasing) return;
-    state = state.copyWith(purchaseProductId: product.id, noticeKey: null);
+  Future<void> purchase(
+    WalletRechargeProduct product, {
+    bool Function()? isCurrent,
+  }) async {
+    bool valid() => _alive && isCurrent?.call() != false;
+    if (!valid() || hasPendingCheckout) return;
+    _checkoutStarting = true;
+    _releasePurchaseHold ??= ref.keepAlive().close;
+    _checkoutProducts[product.id] = product;
+    void cancelStart() {
+      if (_alive) state = state.copyWith(purchaseProductId: null);
+      _finishPurchaseHold();
+    }
 
     try {
+      await _initialization;
+      if (!valid()) {
+        cancelStart();
+        return;
+      }
+      state = state.copyWith(purchaseProductId: product.id, noticeKey: null);
       final available = _iapAvailable ??= await _paymentService.isAvailable();
+      if (!valid()) {
+        cancelStart();
+        return;
+      }
       if (!available) throw const _WalletPaymentException('unavailable');
 
       var productDetails = _iapProducts[product.id];
       productDetails ??= await _queryIapProduct(product.id);
+      if (!valid()) {
+        cancelStart();
+        return;
+      }
       if (productDetails == null) {
         throw const _WalletPaymentException('unavailable');
       }
@@ -133,6 +176,10 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
         applicationUserName = await _repository.createGoogleRechargeOrder(
           product,
         );
+        if (!valid()) {
+          cancelStart();
+          return;
+        }
       }
 
       final started = await _paymentService.buyConsumable(
@@ -141,6 +188,10 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
       );
       if (!started) throw const _WalletPaymentException('failed');
     } catch (error) {
+      if (!valid()) {
+        cancelStart();
+        return;
+      }
       final message = serverErrorMessage(error);
       state = state.copyWith(
         purchaseProductId: null,
@@ -151,7 +202,16 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
             ? 'wallet.paymentUnavailable'
             : 'wallet.paymentFailed',
       );
+      _finishPurchaseHold();
+    } finally {
+      _checkoutStarting = false;
     }
+  }
+
+  void _finishPurchaseHold() {
+    final close = _releasePurchaseHold;
+    _releasePurchaseHold = null;
+    close?.call();
   }
 
   Future<List<WalletRechargeProduct>> _loadIapProducts(
@@ -219,6 +279,7 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
 
   Future<void> _handlePurchaseUpdates(List<PurchaseDetails> purchases) async {
     for (final purchase in purchases) {
+      if (!_alive) return;
       switch (purchase.status) {
         case PurchaseStatus.pending:
           state = state.copyWith(noticeKey: 'wallet.purchasePending');
@@ -227,15 +288,18 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
             purchaseProductId: null,
             noticeKey: 'wallet.paymentFailed',
           );
+          _finishPurchaseHold();
         case PurchaseStatus.canceled:
           state = state.copyWith(
             purchaseProductId: null,
             noticeKey: 'wallet.paymentCanceled',
           );
           await _completePurchaseSafely(purchase, force: true);
+          _finishPurchaseHold();
         case PurchaseStatus.purchased:
           await _handlePurchased(purchase);
           await _completePurchaseSafely(purchase);
+          _finishPurchaseHold();
         case PurchaseStatus.restored:
           break;
       }
@@ -275,6 +339,7 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
       }
 
       await load(refresh: true);
+      if (!_alive) return;
       state = state.copyWith(
         purchaseProductId: null,
         noticeKey: 'wallet.paymentSuccess',
@@ -289,6 +354,7 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
       debugPrint(
         '[WalletPayment] purchase callback failed: $error\n$stackTrace',
       );
+      if (!_alive) return;
       state = state.copyWith(
         purchaseProductId: null,
         noticeMessage: serverErrorMessage(error),
@@ -301,6 +367,7 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
 
   void _handlePurchaseStreamError(Object error, StackTrace stackTrace) {
     debugPrint('[WalletPayment] purchase stream failed: $error\n$stackTrace');
+    if (!_alive) return;
     state = state.copyWith(
       purchaseProductId: null,
       noticeMessage: serverErrorMessage(error),
@@ -308,13 +375,14 @@ class WalletViewModel extends AutoDisposeNotifier<WalletState> {
           ? 'wallet.paymentFailed'
           : null,
     );
+    _finishPurchaseHold();
   }
 
   WalletRechargeProduct? _productForId(String id) {
     for (final product in state.products) {
       if (product.id == id) return product;
     }
-    return null;
+    return _checkoutProducts[id];
   }
 }
 

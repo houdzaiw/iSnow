@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../theme/app_theme.dart';
 import '../interaction/room_mention.dart';
+import '../interaction/room_public_notice.dart';
 
 class RoomPublicMessageText extends HookWidget {
   const RoomPublicMessageText({
@@ -19,7 +20,10 @@ class RoomPublicMessageText extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final parts = useMemoized(() => decodeRoomMentions(text), [text]);
+    final parts = useMemoized(
+      () => system ? decodeRoomPublicNotice(text) : decodeRoomMentions(text),
+      [text, system],
+    );
     final currentTap = useRef(onUserTap)..value = onUserTap;
     final recognizers = useMemoized(
       () => [

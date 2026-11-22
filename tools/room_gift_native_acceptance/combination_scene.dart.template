@@ -1,0 +1,201 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+import 'package:room_gift_native_acceptance/production/classes/room/gift/effects/room_gift_effect_layer.dart';
+import 'package:room_gift_native_acceptance/production/classes/room/gift/effects/room_gift_playback_barrier.dart';
+import 'package:room_gift_native_acceptance/production/classes/room/gift/event/room_gift_event_manager.dart';
+import 'package:room_gift_native_acceptance/production/model/room_socket_message.dart';
+
+import 'environment.dart';
+
+// This adapter checks native scheduling. The actual entrance/mic widgets are
+// covered separately in the root project's room_visual_combinations_test.dart.
+class NativeCombinationScene extends ConsumerStatefulWidget {
+  const NativeCombinationScene({
+    super.key,
+    required this.manager,
+    this.numeric,
+  });
+  final RoomGiftEventManager manager;
+  final RoomGiftAnimationResource? numeric;
+  @override
+  ConsumerState<NativeCombinationScene> createState() => _SceneState();
+}
+
+class _SceneState extends ConsumerState<NativeCombinationScene> {
+  late final VoidCallback _remove;
+  String? _lastTrack;
+  @override
+  void initState() {
+    super.initState();
+    _remove = widget.manager.addListener((state) {
+      final track = state.entrance?.key;
+      if (track != _lastTrack) {
+        _lastTrack = track;
+        trace.add('linked-track:$track');
+      }
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = widget.manager.snapshot;
+    if (!state.isVisible) return const SizedBox.shrink();
+    return Stack(
+      children: [
+        if (state.canPlayFullscreen)
+          Positioned.fill(
+            child: RoomGiftFullScreenEffectLayer(
+              tasks: state.effects,
+              stopRequestedKey: state.stopEffectKey,
+              onCompleted: (key) {
+                trace.add('effect-complete:$key');
+                widget.manager.completeEffect(key);
+              },
+              onStarted: (key) {
+                trace.add('effect-start:$key');
+                widget.manager.startEntranceVehicle(key);
+              },
+            ),
+          ),
+        if (state.canPlayLucky && state.lucky.isNotEmpty)
+          Positioned.fill(
+            child: _NumericLane(
+              key: ValueKey(state.lucky.first.key),
+              resource: widget.numeric!,
+              barrier: ref.read(roomGiftPlaybackBarrierProvider),
+              stopRequested: state.stopLuckyKey == state.lucky.first.key,
+              onEnd: () => widget.manager.completeLucky(state.lucky.first.key),
+            ),
+          ),
+      ],
+    );
+  }
+
+  @override
+  void dispose() {
+    _remove();
+    super.dispose();
+  }
+}
+
+class _NumericLane extends StatefulWidget {
+  const _NumericLane({
+    required super.key,
+    required this.resource,
+    required this.barrier,
+    required this.stopRequested,
+    required this.onEnd,
+  });
+  final RoomGiftAnimationResource resource;
+  final RoomGiftPlaybackBarrier barrier;
+  final bool stopRequested;
+  final VoidCallback onEnd;
+  @override
+  State<_NumericLane> createState() => _NumericLaneState();
+}
+
+class _NumericLaneState extends State<_NumericLane> {
+  final _player = GlobalKey<RoomGiftEffectPlayerState>();
+  bool _finishing = false, _scheduled = false;
+  @override
+  void initState() {
+    super.initState();
+    trace.add('numeric:mount');
+    if (widget.stopRequested) _scheduleStop();
+  }
+
+  @override
+  void didUpdateWidget(_NumericLane oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.stopRequested) _scheduleStop();
+  }
+
+  void _scheduleStop() {
+    if (_scheduled) return;
+    _scheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) unawaited(_finish());
+    });
+  }
+
+  Future<void> _finish() async {
+    if (_finishing || !mounted) return;
+    _finishing = true;
+    try {
+      await _player.currentState?.stop();
+      if (mounted) widget.onEnd();
+    } catch (error) {
+      playerErrors.add('numeric release: $error');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => RoomGiftEffectPlayer(
+    key: _player,
+    resource: widget.resource,
+    playbackBarrier: widget.barrier,
+    // Keep the decoder fixture alive while the handover is inspected. This does
+    // not claim the shipping numeric layer loops; its real widget is unit-tested.
+    repeat: true,
+    onEnd: _finish,
+    onStarted: () => trace.add('numeric:start'),
+    onPlaybackFailed: (error) => playerErrors.add('$error'),
+    onReleaseFailed: (error) => playerErrors.add('$error'),
+  );
+}
+
+class CombinationResolver extends RoomGiftAssetResolver {
+  CombinationResolver(this.resources);
+  final Map<String, RoomGiftAnimationResource> resources;
+  @override
+  Future<RoomGiftAnimationResource> resolveTask(RoomGiftEffectTask task) async {
+    trace.add('resolve:${task.key}');
+    return resources[task.key]!;
+  }
+}
+
+RoomSocketMessage qaEntrance(String key, {bool car = true, int uid = 20}) =>
+    RoomSocketMessage(
+      channel: 'global',
+      event: 'RoomUserPropInfoEvent',
+      msgId: key,
+      receivedAt: DateTime.now(),
+      raw: const {},
+      payload: {
+        'roomId': 'local-combination',
+        'userBaseInfo': {
+          'uid': uid,
+          'nick': 'LOCAL QA',
+          'specialEffects': {'animationUrl': 'https://qa.invalid/track.svga'},
+          if (car) 'vehicle': {'animationUrl': 'https://qa.invalid/car.mp4'},
+        },
+      },
+    );
+
+RoomSocketMessage qaGift(String key, {bool lucky = false}) => RoomSocketMessage(
+  channel: 'room:local-combination',
+  event: 'roomScreenSendGiftComboEvent',
+  msgId: key,
+  receivedAt: DateTime.now(),
+  raw: const {},
+  payload: {
+    'roomId': 'local-combination',
+    'uid': 10,
+    'userInfo': {'uid': 10, 'nick': 'LOCAL QA'},
+    'gift': {
+      'id': lucky ? 31 : 30,
+      'name': 'LOCAL QA',
+      if (!lucky) 'animationUrl': 'https://qa.invalid/gift.pag',
+    },
+    'uids': [20],
+    'sendType': 1,
+    'giftCount': 1,
+    'comboId': key,
+    'isLuckyGift': lucky,
+    if (lucky) 'totalGiftCount': 10,
+  },
+);

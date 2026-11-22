@@ -1,0 +1,7 @@
+{
+  "lib/manager/room_manager.dart": "489d956967dc8be51e04ec0890f4c196906c5b73a0eb597a854d02e2cfac9188",
+  "lib/manager/app_socket_manager.dart": "fb803e0afbfa96e48f3b79a3f52afbada749ab589921805f6fe04e0c241b6bca",
+  "lib/manager/room_agora_manager.dart": "3fbb67981a4d02a47b10928b82558551408098e577e11958ee5e5c4757c4c346",
+  "test/app_socket_manager_test.dart": "ba4547d1364612d81dcdb1a2fd3768b04b639feab8687056949dc9bbf8bf9a93",
+  "test/room_audience_test.dart": "eb31747e873262cda8ef88f61b74ef671af13e7ca474fcf3611b77a08c3f02b4"
+}

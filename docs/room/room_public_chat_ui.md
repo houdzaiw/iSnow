@@ -49,3 +49,9 @@
 - 人工核对候选图后新增 `test/goldens/room_public_chat_compact_v2/` 的三张概览及四张礼物场景截图。测试仅将这些场景切换至 v2；v1 和其他历史图片保留，原有 217 张基线通过 SHA-256 一致性检查。
 - 字体、头像、气泡、装饰数据、右侧挂件避让、系统提示、接口和消息去重不变；本轮没有进行设备或真实账户操作。
 - 最终完整回归使用 `flutter test --no-pub --concurrency=1 --reporter=expanded test/room*_test.dart`，730 项全部通过；`flutter analyze --no-pub` 和 `git diff --check HEAD` 通过。首轮并行测试加载停滞后仅重新启动本次测试，没有清理源码、安装包或其他项目。
+
+## 通用通知与PK实测补充（2026-11-22）
+
+CustomPublicScreenMsg沿Nady契约使用textMap作为文案，data只作业务数据，不转成字符串显示。RoomPublicNotice负责当前语言／英文回退与HTML片段解析；复用依赖树中已有html 0.15.7，显式声明直接依赖。系统通知的p/div/br等转换为文字与换行；已确认nady action=1且UID有效的链接复用现有用户卡回调。脚本、样式及嵌入内容不显示，HTML图片不加载，其他协议不执行。普通聊天及原有@消息继续使用原解码路径，不把用户普通文字作为HTML解释；颜色继续由RoomPublicChatTheme管理。
+
+本轮经用户明确确认，只进行一次3分钟PK和一次1金币礼物，两端真实通知原先显示HTML源码，修复后直接在本场缓存通知中核对正常文案。既有零分场已生成的两条pkId文字没有清理，避免清屏掩盖问题。相关125项回归及静态分析通过，未覆盖历史基线；本轮也没有发送文本消息。完整业务边界和画面见[计分与赢家验收](acceptance_artifacts/pk_lucky_pixel9_2026_11_22/scored_pk/README.md)。

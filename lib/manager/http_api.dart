@@ -185,6 +185,7 @@ class HttpApi {
   /// 房间送礼
   static const giftSend = '/api/gift/send';
   static const giftLuckySnapshots = '/api/gift/info/lucky/banner-snapshots';
+  static const walletFirstRechargePacks = '/api/recharge/package/giftBag';
   static const systemConfigById = '/api/system/config/getConfigById';
 
   /// 首页 Banner

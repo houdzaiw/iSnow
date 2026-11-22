@@ -1,0 +1,14 @@
+{
+  "scope": "segmented PID1756 HTTP metadata; not independent IM audit",
+  "requests": {
+    "/api/room/getHotScore": 1
+  },
+  "giftSendCount": 0,
+  "chatSendCount": 0,
+  "micUpCount": 0,
+  "micDownCount": 0,
+  "roomEnterCount": 0,
+  "roomExitCount": 0,
+  "endedUtc": "2026-11-21T14:13:14.122380+00:00",
+  "uiCheck": "pending user menu/cancel/reopen confirmation"
+}

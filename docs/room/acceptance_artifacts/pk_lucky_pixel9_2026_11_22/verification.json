@@ -1,0 +1,177 @@
+{
+  "date": "2026-11-22",
+  "timezone": "Asia/Shanghai",
+  "device": "Pixel_9",
+  "serial": "emulator-5554",
+  "app": "com.nady.dev1",
+  "hot_reload": {
+    "method": "s0.reloadSources",
+    "fullRestart": false,
+    "result": {
+      "type": "Success"
+    },
+    "events": [
+      {
+        "kind": "IsolateReload",
+        "timestamp": 1795313689674
+      },
+      {
+        "kind": "IsolateReload",
+        "timestamp": 1795313689959
+      }
+    ]
+  },
+  "before": {
+    "pid": 26357,
+    "main_isolate": "isolates/2431458762001307",
+    "room_id": "2113269920442130433",
+    "room_generation": "1"
+  },
+  "final_state": {
+    "pid": 26357,
+    "main": "isolates/2431458762001307",
+    "room": {
+      "status": "ready",
+      "currentRoomId": "2113269920442130433",
+      "isInRoom": "true",
+      "isMinimized": "false",
+      "generation": "1",
+      "onMic": 0
+    },
+    "pk": {
+      "active": "true",
+      "manager": "true",
+      "doubleMode": "true",
+      "duration": "3",
+      "busy": "false",
+      "mini": "true",
+      "error": null,
+      "selectedCount": 0,
+      "pkId": "",
+      "event": "0"
+    },
+    "lucky": {
+      "active": "true",
+      "canSend": "true",
+      "loading": "false",
+      "sending": "false",
+      "reviewRequired": "false",
+      "type": "0",
+      "gold": "5000",
+      "people": "2",
+      "countdown": "60",
+      "balance": "49855109",
+      "error": null,
+      "bagCount": 0,
+      "currentBox": null,
+      "result": null
+    },
+    "socket": {
+      "status": "ready",
+      "isTerminal": "false"
+    }
+  },
+  "log_audit": {
+    "log_since_hot_reload": "11-22 10:14:49.674",
+    "requests": [
+      {
+        "method": "POST",
+        "path": "/simi/api/resource/banner",
+        "count": 4
+      },
+      {
+        "method": "GET",
+        "path": "/simi/api/room/getHotScore",
+        "count": 5
+      },
+      {
+        "method": "GET",
+        "path": "/simi/api/resource/function2",
+        "count": 1
+      },
+      {
+        "method": "GET",
+        "path": "/simi/api/room/mic/charm/isEnable",
+        "count": 1
+      },
+      {
+        "method": "GET",
+        "path": "/simi/api/room/pk/info",
+        "count": 1
+      },
+      {
+        "method": "GET",
+        "path": "/simi/api/redPacket/config",
+        "count": 3
+      },
+      {
+        "method": "GET",
+        "path": "/simi/api/redPacket/list",
+        "count": 4
+      },
+      {
+        "method": "GET",
+        "path": "/simi/api/lobby/playTo/lists",
+        "count": 1
+      },
+      {
+        "method": "GET",
+        "path": "/simi/api/revenue/purse",
+        "count": 2
+      }
+    ],
+    "target_response_codes": {
+      "/api/redPacket/list": {
+        "http=200 code=200": 4
+      },
+      "/api/room/pk/info": {
+        "http=200 code=200": 1
+      },
+      "/api/redPacket/config": {
+        "http=200 code=200": 3
+      },
+      "/api/revenue/purse": {
+        "http=200 code=200": 2
+      }
+    },
+    "forbidden_request_count": 0,
+    "forbidden_requests": [],
+    "runtime_error_count": 0,
+    "runtime_errors": []
+  },
+  "checked": [
+    "More to PK",
+    "PK tap Multi-player",
+    "PK swipe back to 1V1",
+    "PK duration 5 then 60 then restored 3",
+    "PK close returns to same room",
+    "More to Lucky Box",
+    "Room/World with real per-mode amounts",
+    "World amount selection",
+    "Room amount/people/countdown selection",
+    "restored Room 5000/2/60",
+    "empty box list, refresh, Android Back to editor",
+    "editor close returns to same room"
+  ],
+  "not_executed": [
+    "App restart or reinstall",
+    "PK begin/over",
+    "box push/grab",
+    "gift send",
+    "mic up/down"
+  ],
+  "not_verified": [
+    "PK participant selection with occupied seats",
+    "live PK scoring, drag or winner/results on device",
+    "real box countdown and opening/results animations"
+  ],
+  "screenshots": [
+    "pk_1v1.png",
+    "pk_multi.png",
+    "lucky_room.png",
+    "lucky_world.png",
+    "lucky_options.png",
+    "lucky_empty_list.png",
+    "final_room.png"
+  ]
+}

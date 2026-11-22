@@ -126,6 +126,8 @@ class RoomLuckyBag {
   final ToolJson raw;
   final DateTime readyAt;
   String get id => '${raw['id'] ?? ''}';
+  String get avatar => '${raw['avatar'] ?? ''}';
+  String get name => '${raw['nickName'] ?? ''}';
   int remaining(DateTime now) =>
       (readyAt.difference(now).inMilliseconds / 1000).ceil().clamp(0, 86400);
   factory RoomLuckyBag.parse(ToolJson json, DateTime now) => RoomLuckyBag(

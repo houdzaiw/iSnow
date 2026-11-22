@@ -1,0 +1,20 @@
+{"kind": "->", "path": "/api/room/getHotScore", "at": "2026-11-21T13:52:14.315553+00:00"}
+{"kind": "<-", "path": "/api/room/getHotScore", "code": "200", "http": "200", "at": "2026-11-21T13:52:16.152985+00:00"}
+{"kind": "->", "path": "/api/room/getHotScore", "at": "2026-11-21T13:53:54.319026+00:00"}
+{"kind": "<-", "path": "/api/room/getHotScore", "code": "200", "http": "200", "at": "2026-11-21T13:53:55.921439+00:00"}
+{"kind": "->", "path": "/api/room/getHotScore", "at": "2026-11-21T13:55:34.302645+00:00"}
+{"kind": "<-", "path": "/api/room/getHotScore", "code": "200", "http": "200", "at": "2026-11-21T13:55:35.155421+00:00"}
+{"kind": "->", "path": "/api/resource/function2", "at": "2026-11-21T13:55:57.152680+00:00"}
+{"kind": "->", "path": "/api/room/mic/charm/isEnable", "at": "2026-11-21T13:55:57.155275+00:00"}
+{"kind": "->", "path": "/api/room/pk/info", "at": "2026-11-21T13:55:57.155463+00:00"}
+{"kind": "->", "path": "/api/redPacket/config", "at": "2026-11-21T13:55:57.158072+00:00"}
+{"kind": "->", "path": "/api/redPacket/list", "at": "2026-11-21T13:55:57.158244+00:00"}
+{"kind": "->", "path": "/api/room/getHotScore", "at": "2026-11-21T13:55:57.159066+00:00"}
+{"kind": "<-", "path": "/api/room/getHotScore", "code": "200", "http": "200", "at": "2026-11-21T13:55:58.570623+00:00"}
+{"kind": "<-", "path": "/api/room/mic/charm/isEnable", "code": "200", "http": "200", "at": "2026-11-21T13:55:58.575249+00:00"}
+{"kind": "<-", "path": "/api/redPacket/list", "code": "200", "http": "200", "at": "2026-11-21T13:55:58.689729+00:00"}
+{"kind": "<-", "path": "/api/room/pk/info", "code": "200", "http": "200", "at": "2026-11-21T13:55:58.691529+00:00"}
+{"kind": "<-", "path": "/api/resource/function2", "code": "200", "http": "200", "at": "2026-11-21T13:55:58.808831+00:00"}
+{"kind": "<-", "path": "/api/redPacket/config", "code": "200", "http": "200", "at": "2026-11-21T13:55:59.031823+00:00"}
+{"kind": "->", "path": "/api/lobby/lists", "at": "2026-11-21T13:55:59.031909+00:00"}
+{"kind": "<-", "path": "/api/lobby/lists", "code": "200", "http": "200", "at": "2026-11-21T13:55:59.508441+00:00"}

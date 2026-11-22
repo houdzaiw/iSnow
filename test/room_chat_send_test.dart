@@ -15,12 +15,15 @@ void main() {
   late RoomLifecycleFixture fixture;
   late RoomViewModel model;
   late RoomPageState state;
+  var languageCode = 'en';
   setUp(() async {
+    languageCode = 'en';
     fixture = RoomLifecycleFixture();
     fixture.http.canonicalRoomId = 'canonical';
     fixture.http.roomOwnerUid = 10;
     model = RoomViewModel(
       roomId: 'alias',
+      languageCode: () => languageCode,
       repository: RoomRepository(
         roomManager: fixture.manager,
         socketManager: fixture.socket,
@@ -40,6 +43,44 @@ void main() {
 
   List<RoomChatEntry> chats() =>
       state.messages.where((e) => e.kind == RoomChatEntryKind.chat).toList();
+
+  test('custom notices use current language with English fallback', () {
+    void notice(String id, Object payload) {
+      fixture.socket.controller.add(
+        RoomSocketMessage(
+          channel: 'room:canonical',
+          event: 'CustomPublicScreenMsg',
+          msgId: id,
+          payload: payload,
+          raw: const {},
+        ),
+      );
+    }
+
+    languageCode = 'zh';
+    notice('notice-zh', {
+      'event': 1,
+      'textMap': {'en': 'PK started', 'zh': 'PK开始'},
+      'data': {'pkId': 'business-id'},
+    });
+    expect(state.messages.last.text, 'PK开始');
+    notice(
+      'notice-fallback',
+      jsonEncode({
+        'event': 1,
+        'textMap': {'en': 'PK finished'},
+        'data': {'pkId': 'business-id'},
+      }),
+    );
+    expect(state.messages.last.text, 'PK finished');
+    final count = state.messages.length;
+    notice('notice-invalid', {
+      'event': 1,
+      'data': {'pkId': 'business-id'},
+    });
+    expect(state.messages, hasLength(count));
+    expect(state.messages.any((e) => e.text.contains('business-id')), isFalse);
+  });
   void receive(
     String text, {
     String? id = 'server-1',

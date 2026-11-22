@@ -22,6 +22,18 @@ class RoomGiftManager {
   String? _loadingKey;
   int _generation = 0;
   int _balanceRevision = 0;
+  bool? _firstRechargeEligibility;
+  bool? get firstRechargeEligibility => _firstRechargeEligibility;
+
+  bool updateWallet(
+    int balance,
+    bool? isFirst, {
+    required RoomGiftBalanceToken token,
+  }) {
+    if (!updateBalance(balance, token: token)) return false;
+    _firstRechargeEligibility = isFirst;
+    return true;
+  }
 
   RoomGiftCatalog? get catalog => hasCatalog ? _catalog : null;
   bool get hasCatalog => _hasData(_catalog);
@@ -52,6 +64,7 @@ class RoomGiftManager {
     if (_loadingKey == cacheKey && _loading != null) return _loading!;
 
     if (_cacheKey != cacheKey) {
+      _firstRechargeEligibility = null;
       _generation++;
       _cacheKey = cacheKey;
       _catalog = null;
@@ -117,6 +130,7 @@ class RoomGiftManager {
   }
 
   void clear() {
+    _firstRechargeEligibility = null;
     _generation += 1;
     _catalog = null;
     _cacheKey = null;

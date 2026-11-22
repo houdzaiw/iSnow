@@ -24,7 +24,9 @@ final trace = _NativeTrace();
 final checks = <Map<String, Object?>>[];
 final playerErrors = <String>[];
 Completer<void>? holdPagInit;
+Completer<void>? holdPagRelease;
 Completer<void>? holdVapConfiguration;
+Completer<void>? holdVapStop;
 bool _surfaceConvertedForTest = false;
 
 void nativeCheck(String name, Future<void> Function(WidgetTester) body) {
@@ -93,9 +95,17 @@ void configureRecording() {
           final gate = holdPagInit;
           if (gate != null) await gate.future;
         }
+        if (channel == 'flutter_pag_plugin' && method == 'release') {
+          final gate = holdPagRelease;
+          if (gate != null) await gate.future;
+        }
         if (channel.startsWith('flutter_vap_controller_') &&
             method == 'setFetchResource') {
           final gate = holdVapConfiguration;
+          if (gate != null) await gate.future;
+        }
+        if (channel.startsWith('flutter_vap_controller_') && method == 'stop') {
+          final gate = holdVapStop;
           if (gate != null) await gate.future;
         }
         trace.add('$channel:$method:delivered');
@@ -107,9 +117,13 @@ void configureRecording() {
   tearDown(() {
     if (holdPagInit?.isCompleted == false) holdPagInit!.complete();
     holdPagInit = null;
+    if (holdPagRelease?.isCompleted == false) holdPagRelease!.complete();
+    holdPagRelease = null;
     if (holdVapConfiguration?.isCompleted == false)
       holdVapConfiguration!.complete();
     holdVapConfiguration = null;
+    if (holdVapStop?.isCompleted == false) holdVapStop!.complete();
+    holdVapStop = null;
   });
   tearDownAll(() async {
     // Retain a local report even if ADB disconnects before the host receives it.

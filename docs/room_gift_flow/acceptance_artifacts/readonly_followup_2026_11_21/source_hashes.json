@@ -1,0 +1,7 @@
+{
+  "test/room_gift_manager_test.dart": "baec3945c2454aa5622901f5d2fa25f988fd0631924e77dfda279006041cab1c",
+  "lib/manager/room_gift_manager.dart": "2c40a20803d9a79add3cc7b461e0129a08aedf6a3142a5aad317b5f7870f646c",
+  "lib/classes/room/gift/room_gift_repository.dart": "74c105f0aa03dec50ebfab75cb0a54b4e6c38a13b8384a099c1c39d469e66e71",
+  "lib/classes/room/gift/views/room_gift_sheet.dart": "9f5e4a66c20ccb71f6ddf79da527758da8b4ee12ef1064111362b8fa5f26865e",
+  "lib/classes/room/gift/viewmodel/room_gift_panel_view_model.dart": "819052fa463b8b059e6894b1853dc79d35e8124415ad62e96e080ca9e580745e"
+}

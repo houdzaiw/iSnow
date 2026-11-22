@@ -19,7 +19,7 @@ void _showRoomMoreToolsSheet(
         roomProvider: provider,
         onOpenTool: (action) async {
           final roomId = _roomMoreRoomId(ref.read(provider));
-          if (action == 'share' || action == 'currency' || action == 'lobby') {
+          if (['share', 'currency', 'lobby', 'pk', 'lucky'].contains(action)) {
             if (openingStandaloneSheet ||
                 !(ModalRoute.of(sheetContext)?.isCurrent ?? false)) {
               return;
@@ -39,6 +39,10 @@ void _showRoomMoreToolsSheet(
                 await showRoomShareSheet(context, roomId);
               } else if (action == 'lobby') {
                 await openRoomLobby(context, ref, roomId);
+              } else if (action == 'pk') {
+                await showRoomPkSheet(context, roomId);
+              } else if (action == 'lucky') {
+                await showRoomLuckyBoxSheet(context, roomId);
               } else if (ref
                   .read(roomToolsControllerProvider(roomId).notifier)
                   .canManage) {
@@ -57,8 +61,6 @@ void _showRoomMoreToolsSheet(
               roomId: roomId,
               section: RoomSettingSection.charmCounter,
             ),
-            'pk' => RoomPkPage(roomId: roomId),
-            'lucky' => RoomLuckyBoxPage(roomId: roomId),
             _ => null,
           };
           if (page == null) return;

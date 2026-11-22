@@ -413,6 +413,17 @@ Future<void> exitMinimizedRoom();
 
 设备验收仍须按 10.3 节执行，特别是 Android 14+ 的后台收听/上麦、iOS 后台音频、真实 Socket 踢出及退出后的通知消失。本次自动化验证不操作真实收费礼物，也不安装 APK 覆盖已有 Nady 应用。
 
+### 12.7 终止连接后的手动恢复（2026-11-21）
+
+- 保留既有终止清理策略。可恢复的 connecting/subscribing 不退出；Socket 最终断开或 Agora 终止仍清理房间、音乐、订阅和后台服务。
+- Socket `3502` 按认证未及时完成提示，其余 Socket 终止及 Agora 终止分别显示连接、语音连接结束原因。仅展示确定的原因，不将未知服务端原因解释为封禁。
+- 清理完成回到 `idle` 后，根级 `RoomRecoveryHost` 显示原因及“重新进入原房间 / 稍后”。它不依赖已释放的 RoomPage，不启动自动重进定时器。
+- RoomManager 只在内存保存真实房间 ID、退出后的会话代次和类型化原因。密码、Token 不保存。主动 Exit、被踢和退出登录不生成恢复通知。
+- 用户点击后，`RoomRecoveryViewModel` 调用导航适配器，复用 `enterSharedRoomChecked()`：读取房间资料，按正常流程检查房间锁、请求密码，再导航由 RoomPage 正常请求进房接口；不直接重用旧密码或绕过进房权限校验。
+- 重复点击合并；房间资料请求失败显示原服务端信息（优先 msg），保留提示；密码取消回到提示。选择“稍后”废弃当前请求，迟到响应不能继续导航。
+- 新进房、会话代次变化、账号通知或退出登录清除旧通知，关闭本功能拥有的密码弹框；过期回包不得打开旧房间。恢复成功后如再次遇到终止连接，仍需用户再次手动操作，不循环重进。
+- 新测试见 `test/room_recovery_test.dart`；Pixel_9 网络复现、自动化及只读验收结果分别记录在 [网络验收记录](../room_gift_flow/acceptance_artifacts/network_recovery_2026_11_21/README.md)。本轮不验收 iOS，不发送消息或礼物。
+
 ### 12.6 本次验证结果
 
 - `flutter test --no-pub`：165 项通过，1 项既有失败。失败位于 `test/login_detail_page_test.dart:32`，仍断言默认区号为 `+996`，与当前登录页不符；本次未改动该页面或该测试。

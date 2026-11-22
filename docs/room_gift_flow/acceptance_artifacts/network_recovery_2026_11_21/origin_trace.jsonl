@@ -1,0 +1,93 @@
+{"kind": "->", "path": "/api/room/inRoom", "at": "2026-11-21T06:08:35.852602+00:00"}
+{"kind": "<-", "path": "/api/room/inRoom", "code": "200", "http": "200", "at": "2026-11-21T06:08:37.768338+00:00"}
+{"kind": "->", "path": "/api/room/get/info", "at": "2026-11-21T06:08:37.993393+00:00"}
+{"kind": "->", "path": "/api/room/mic/list/info", "at": "2026-11-21T06:08:37.993568+00:00"}
+{"kind": "->", "path": "/api/room/list/audience", "at": "2026-11-21T06:08:37.997234+00:00"}
+{"kind": "->", "path": "/api/room/getHotScore", "at": "2026-11-21T06:08:38.157063+00:00"}
+{"kind": "->", "path": "/api/rocket/room/schedule/hasActiveRocket", "at": "2026-11-21T06:08:38.163869+00:00"}
+{"kind": "->", "path": "/api/resource/function2", "at": "2026-11-21T06:08:38.184474+00:00"}
+{"kind": "->", "path": "/api/room/mic/charm/isEnable", "at": "2026-11-21T06:08:38.185402+00:00"}
+{"kind": "->", "path": "/api/room/pk/info", "at": "2026-11-21T06:08:38.185436+00:00"}
+{"kind": "->", "path": "/api/redPacket/config", "at": "2026-11-21T06:08:38.185451+00:00"}
+{"kind": "->", "path": "/api/redPacket/list", "at": "2026-11-21T06:08:38.185462+00:00"}
+{"kind": "->", "path": "/api/room/inRoom/sendPropInfo", "at": "2026-11-21T06:08:38.185472+00:00"}
+{"kind": "<-", "path": "/api/room/mic/list/info", "code": "200", "http": "200", "at": "2026-11-21T06:08:39.008319+00:00"}
+{"kind": "<-", "path": "/api/room/get/info", "code": "200", "http": "200", "at": "2026-11-21T06:08:39.130912+00:00"}
+{"kind": "<-", "path": "/api/rocket/room/schedule/hasActiveRocket", "code": "200", "http": "200", "at": "2026-11-21T06:08:39.365963+00:00"}
+{"kind": "<-", "path": "/api/room/mic/charm/isEnable", "code": "200", "http": "200", "at": "2026-11-21T06:08:39.531482+00:00"}
+{"kind": "<-", "path": "/api/room/list/audience", "code": "200", "http": "200", "at": "2026-11-21T06:08:39.535084+00:00"}
+{"kind": "<-", "path": "/api/room/pk/info", "code": "200", "http": "200", "at": "2026-11-21T06:08:39.570179+00:00"}
+{"kind": "<-", "path": "/api/redPacket/list", "code": "200", "http": "200", "at": "2026-11-21T06:08:39.570231+00:00"}
+{"kind": "<-", "path": "/api/room/getHotScore", "code": "200", "http": "200", "at": "2026-11-21T06:08:39.744741+00:00"}
+{"kind": "<-", "path": "/api/resource/function2", "code": "200", "http": "200", "at": "2026-11-21T06:08:39.745256+00:00"}
+{"kind": "<-", "path": "/api/room/inRoom/sendPropInfo", "code": "200", "http": "200", "at": "2026-11-21T06:08:40.045093+00:00"}
+{"kind": "<-", "path": "/api/redPacket/config", "code": "200", "http": "200", "at": "2026-11-21T06:08:40.170401+00:00"}
+{"kind": "->", "path": "/api/lobby/lists", "at": "2026-11-21T06:08:40.170458+00:00"}
+{"kind": "->", "path": "/api/room/genGlobalToken", "at": "2026-11-21T06:08:40.575339+00:00"}
+{"kind": "<-", "path": "/api/lobby/lists", "code": "200", "http": "200", "at": "2026-11-21T06:08:40.632253+00:00"}
+{"kind": "<-", "path": "/api/room/genGlobalToken", "code": "200", "http": "200", "at": "2026-11-21T06:08:41.212637+00:00"}
+{"kind": "->", "path": "/api/room/genGlobalToken", "at": "2026-11-21T06:08:41.676894+00:00"}
+{"kind": "<-", "path": "/api/room/genGlobalToken", "code": "200", "http": "200", "at": "2026-11-21T06:08:42.138170+00:00"}
+{"kind": "->", "path": "/api/room/genGlobalToken", "at": "2026-11-21T06:08:42.664162+00:00"}
+{"kind": "<-", "path": "/api/room/genGlobalToken", "code": "200", "http": "200", "at": "2026-11-21T06:08:43.253195+00:00"}
+{"kind": "->", "path": "/api/room/genGlobalToken", "at": "2026-11-21T06:08:43.746222+00:00"}
+{"kind": "<-", "path": "/api/room/genGlobalToken", "code": "200", "http": "200", "at": "2026-11-21T06:08:44.318699+00:00"}
+{"kind": "->", "path": "/api/room/genGlobalToken", "at": "2026-11-21T06:08:44.824364+00:00"}
+{"kind": "<-", "path": "/api/room/genGlobalToken", "code": "200", "http": "200", "at": "2026-11-21T06:08:45.346882+00:00"}
+{"kind": "->", "path": "/api/room/getHotScore", "at": "2026-11-21T06:08:46.171405+00:00"}
+{"kind": "->", "path": "/api/resource/function2", "at": "2026-11-21T06:08:46.194576+00:00"}
+{"kind": "->", "path": "/api/room/mic/charm/isEnable", "at": "2026-11-21T06:08:46.198241+00:00"}
+{"kind": "->", "path": "/api/room/pk/info", "at": "2026-11-21T06:08:46.200134+00:00"}
+{"kind": "->", "path": "/api/redPacket/config", "at": "2026-11-21T06:08:46.215591+00:00"}
+{"kind": "->", "path": "/api/redPacket/list", "at": "2026-11-21T06:08:46.219937+00:00"}
+{"kind": "<-", "path": "/api/room/getHotScore", "code": "200", "http": "200", "at": "2026-11-21T06:08:47.174901+00:00"}
+{"kind": "<-", "path": "/api/room/mic/charm/isEnable", "code": "200", "http": "200", "at": "2026-11-21T06:08:47.512632+00:00"}
+{"kind": "<-", "path": "/api/room/pk/info", "code": "200", "http": "200", "at": "2026-11-21T06:08:47.770415+00:00"}
+{"kind": "<-", "path": "/api/redPacket/list", "code": "200", "http": "200", "at": "2026-11-21T06:08:47.783736+00:00"}
+{"kind": "<-", "path": "/api/resource/function2", "code": "200", "http": "200", "at": "2026-11-21T06:08:47.786519+00:00"}
+{"kind": "<-", "path": "/api/redPacket/config", "code": "200", "http": "200", "at": "2026-11-21T06:08:48.527620+00:00"}
+{"kind": "->", "path": "/api/lobby/lists", "at": "2026-11-21T06:08:48.738708+00:00"}
+{"kind": "<-", "path": "/api/lobby/lists", "code": "200", "http": "200", "at": "2026-11-21T06:08:49.497428+00:00"}
+{"kind": "origin", "text": "[RoomSocket] client disconnected code=3502 intentional=false", "at": "2026-11-21T06:09:56.370748+00:00"}
+{"kind": "origin", "text": "[RoomExit] dependency terminal socket=true agora=false", "at": "2026-11-21T06:09:56.372209+00:00"}
+{"kind": "origin", "text": "[RoomExit] requested roomId=2113269920442130433 socketTerminal=true agoraTerminal=false", "at": "2026-11-21T06:09:56.372331+00:00"}
+{"kind": "stack", "text": "#0      RoomManager.leaveRoom (package:project/manager/room_manager.dart:401:72)", "at": "2026-11-21T06:09:56.372412+00:00"}
+{"kind": "stack", "text": "#1      RoomManager._onDependencyChanged (package:project/manager/room_manager.dart:493:17)", "at": "2026-11-21T06:09:56.372439+00:00"}
+{"kind": "stack", "text": "#2      ChangeNotifier.notifyListeners (package:flutter/src/foundation/change_notifier.dart:435:24)", "at": "2026-11-21T06:09:56.372465+00:00"}
+{"kind": "stack", "text": "#3      AppSocketManager._setState (package:project/manager/app_socket_manager.dart:711:5)", "at": "2026-11-21T06:09:56.372482+00:00"}
+{"kind": "stack", "text": "#4      AppSocketManager._bindClient.<anonymous closure> (package:project/manager/app_socket_manager.dart:467:11)", "at": "2026-11-21T06:09:56.372498+00:00"}
+{"kind": "stack", "text": "#5      _RootZone.runUnaryGuarded (dart:async/zone.dart:1778:10)", "at": "2026-11-21T06:09:56.372530+00:00"}
+{"kind": "stack", "text": "#6      _BufferingStreamSubscription._sendData (dart:async/stream_impl.dart:381:11)", "at": "2026-11-21T06:09:56.372545+00:00"}
+{"kind": "stack", "text": "#7      _BufferingStreamSubscription._add (dart:async/stream_impl.dart:312:7)", "at": "2026-11-21T06:09:56.372560+00:00"}
+{"kind": "stack", "text": "#8      _SyncBroadcastStreamController._sendData (dart:async/broadcast_stream_controller.dart:385:25)", "at": "2026-11-21T06:09:56.372576+00:00"}
+{"kind": "stack", "text": "#9      _BroadcastStreamController.add (dart:async/broadcast_stream_controller.dart:257:5)", "at": "2026-11-21T06:09:56.372591+00:00"}
+{"kind": "stack", "text": "#10     ClientImpl._processDisconnect (package:centrifuge/src/client.dart:436:33)", "at": "2026-11-21T06:09:56.372606+00:00"}
+{"kind": "stack", "text": "#11     ClientImpl._connectInner.<anonymous closure> (package:centrifuge/src/client.dart:531:9)", "at": "2026-11-21T06:09:56.372621+00:00"}
+{"kind": "stack", "text": "#12     Transport._onDone.<anonymous closure> (package:centrifuge/src/transport.dart:253:14)", "at": "2026-11-21T06:09:56.372635+00:00"}
+{"kind": "stack", "text": "#13     _RootZone.runGuarded (dart:async/zone.dart:1766:10)", "at": "2026-11-21T06:09:56.372650+00:00"}
+{"kind": "stack", "text": "#14     _BufferingStreamSubscription._sendDone.sendDone (dart:async/stream_impl.dart:434:13)", "at": "2026-11-21T06:09:56.372665+00:00"}
+{"kind": "stack", "text": "#15     _BufferingStreamSubscription._sendDone (dart:async/stream_impl.dart:444:7)", "at": "2026-11-21T06:09:56.372681+00:00"}
+{"kind": "stack", "text": "#16     _BufferingStreamSubscription._close (dart:async/stream_impl.dart:333:7)", "at": "2026-11-21T06:09:56.372710+00:00"}
+{"kind": "stack", "text": "#17     _SyncStreamControllerDispatch._sendDone (dart:async/stream_controller.dart:806:19)", "at": "2026-11-21T06:09:56.372724+00:00"}
+{"kind": "stack", "text": "#18     _StreamController._closeUnchecked (dart:async/stream_controller.dart:652:7)", "at": "2026-11-21T06:09:56.372737+00:00"}
+{"kind": "stack", "text": "#19     _StreamController.close (dart:async/stream_controller.dart:645:5)", "at": "2026-11-21T06:09:56.372760+00:00"}
+{"kind": "stack", "text": "#20     new GuaranteeChannel.<anonymous closure>.<anonymous closure> (package:stream_channel/src/guarantee_channel.dart:55:31)", "at": "2026-11-21T06:09:56.372773+00:00"}
+{"kind": "stack", "text": "#21     _RootZone.runGuarded (dart:async/zone.dart:1766:10)", "at": "2026-11-21T06:09:56.372794+00:00"}
+{"kind": "stack", "text": "#22     _BufferingStreamSubscription._sendDone.sendDone (dart:async/stream_impl.dart:434:13)", "at": "2026-11-21T06:09:56.372807+00:00"}
+{"kind": "stack", "text": "#23     _BufferingStreamSubscription._sendDone (dart:async/stream_impl.dart:444:7)", "at": "2026-11-21T06:09:56.372821+00:00"}
+{"kind": "stack", "text": "#24     _BufferingStreamSubscription._close (dart:async/stream_impl.dart:333:7)", "at": "2026-11-21T06:09:56.372834+00:00"}
+{"kind": "stack", "text": "#25     _SyncStreamControllerDispatch._sendDone (dart:async/stream_controller.dart:806:19)", "at": "2026-11-21T06:09:56.372847+00:00"}
+{"kind": "stack", "text": "#26     _StreamController._closeUnchecked (dart:async/stream_controller.dart:652:7)", "at": "2026-11-21T06:09:56.372860+00:00"}
+{"kind": "stack", "text": "#27     _StreamController.close (dart:async/stream_controller.dart:645:5)", "at": "2026-11-21T06:09:56.372873+00:00"}
+{"kind": "stack", "text": "#28     _StreamSinkWrapper.close (dart:async/stream_controller.dart:905:29)", "at": "2026-11-21T06:09:56.372892+00:00"}
+{"kind": "stack", "text": "#29     _GuaranteeSink.close (package:stream_channel/src/guarantee_channel.dart:188:38)", "at": "2026-11-21T06:09:56.372905+00:00"}
+{"kind": "stack", "text": "#30     new AdapterWebSocketChannel.<anonymous closure>.<anonymous closure> (package:web_socket_channel/adapter_web_socket_channel.dart:91:36)", "at": "2026-11-21T06:09:56.372918+00:00"}
+{"kind": "stack", "text": "#31     _RootZone.runUnaryGuarded (dart:async/zone.dart:1778:10)", "at": "2026-11-21T06:09:56.372940+00:00"}
+{"kind": "stack", "text": "#32     _BufferingStreamSubscription._sendData (dart:async/stream_impl.dart:381:11)", "at": "2026-11-21T06:09:56.372954+00:00"}
+{"kind": "stack", "text": "#33     _DelayedData.perform (dart:async/stream_impl.dart:573:14)", "at": "2026-11-21T06:09:56.372966+00:00"}
+{"kind": "stack", "text": "#34     _PendingEvents.handleNext (dart:async/stream_impl.dart:678:11)", "at": "2026-11-21T06:09:56.372979+00:00"}
+{"kind": "stack", "text": "#35     _PendingEvents.schedule.<anonymous closure> (dart:async/stream_impl.dart:649:7)", "at": "2026-11-21T06:09:56.372992+00:00"}
+{"kind": "stack", "text": "#36     _microtaskLoop (dart:async/schedule_microtask.dart:40:35)", "at": "2026-11-21T06:09:56.373005+00:00"}
+{"kind": "stack", "text": "#37     _startMicrotaskLoop (dart:async/schedule_microtask.dart:49:5)", "at": "2026-11-21T06:09:56.373018+00:00"}
+{"kind": "->", "path": "/api/room/outRoom", "at": "2026-11-21T06:09:56.393445+00:00"}
+{"kind": "<-", "path": "/api/room/outRoom", "code": "200", "http": "200", "at": "2026-11-21T06:10:11.638227+00:00"}

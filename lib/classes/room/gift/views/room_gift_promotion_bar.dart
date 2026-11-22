@@ -8,21 +8,22 @@ import '../../../../theme/app_theme.dart';
 class RoomGiftPromotionBar extends StatelessWidget {
   const RoomGiftPromotionBar({
     super.key,
-    required this.onOpenWallet,
+    this.onOpenFirstRecharge,
+    this.showFirstRecharge = false,
     this.onOpenCampaign,
     this.bannerUrl,
   });
 
-  final VoidCallback onOpenWallet;
+  final VoidCallback? onOpenFirstRecharge;
+  final bool showFirstRecharge;
   final VoidCallback? onOpenCampaign;
   final String? bannerUrl;
 
   @override
   Widget build(BuildContext context) {
-    final campaign = Image.asset(
-      AppAssets.roomGiftCampaign,
-      fit: BoxFit.contain,
-    );
+    final first = showFirstRecharge && onOpenFirstRecharge != null;
+    final banner = bannerUrl?.trim() ?? '';
+    if (!first && banner.isEmpty) return const SizedBox.shrink();
     return SizedBox(
       height: AppSpacing.roomGiftPromotionHeight.h,
       child: Padding(
@@ -31,40 +32,40 @@ class RoomGiftPromotionBar extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Semantics(
-              label: context.l10n.t('profile.recharge'),
-              button: true,
-              child: InkWell(
-                onTap: onOpenWallet,
-                child: Image.asset(
-                  AppAssets.roomGiftFirstRecharge,
-                  width: AppSpacing.roomGiftRechargeWidth.w,
-                  height: AppSpacing.roomGiftRechargeHeight.h,
-                  fit: BoxFit.contain,
+            if (first)
+              Semantics(
+                label: context.l10n.t('room.gift.firstRecharge'),
+                button: true,
+                child: InkWell(
+                  onTap: onOpenFirstRecharge,
+                  child: Image.asset(
+                    AppAssets.roomGiftFirstRecharge,
+                    width: AppSpacing.roomGiftRechargeWidth.w,
+                    height: AppSpacing.roomGiftRechargeHeight.h,
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
-            ),
-            SizedBox(width: AppSpacing.xxs.w),
-            Expanded(
-              child: SizedBox(
-                height: AppSpacing.roomGiftCampaignHeight.h,
-                child: bannerUrl?.isNotEmpty == true
-                    ? CachedNetworkImage(
-                        imageUrl: bannerUrl!,
-                        fit: BoxFit.contain,
-                        imageBuilder: (_, image) => GestureDetector(
-                          onTap: onOpenCampaign,
-                          child: Image(image: image, fit: BoxFit.contain),
-                        ),
-                        placeholder: (_, __) => const SizedBox.shrink(),
-                        errorWidget: (_, __, ___) => Image.asset(
-                          AppAssets.lanhuRoomIconMissing,
-                          fit: BoxFit.contain,
-                        ),
-                      )
-                    : campaign,
+            if (first && banner.isNotEmpty) SizedBox(width: AppSpacing.xxs.w),
+            if (banner.isNotEmpty)
+              Expanded(
+                child: SizedBox(
+                  height: AppSpacing.roomGiftCampaignHeight.h,
+                  child: CachedNetworkImage(
+                    imageUrl: banner,
+                    fit: BoxFit.contain,
+                    imageBuilder: (_, image) => GestureDetector(
+                      onTap: onOpenCampaign,
+                      child: Image(image: image, fit: BoxFit.contain),
+                    ),
+                    placeholder: (_, __) => const SizedBox.shrink(),
+                    errorWidget: (_, __, ___) => Image.asset(
+                      AppAssets.lanhuRoomIconMissing,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
               ),
-            ),
           ],
         ),
       ),
