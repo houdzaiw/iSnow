@@ -7,6 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../theme/app_theme.dart';
 import '../activities/room_activity_widgets.dart';
 import '../more/room_tools_widgets.dart';
+import 'room_lucky_box_rules_sheet.dart';
 import 'room_lucky_box_view_model.dart';
 
 Future<void> showRoomLuckyBoxSheet(BuildContext context, String id) =>
@@ -26,8 +27,8 @@ class RoomLuckyBoxPage extends HookConsumerWidget {
       Future.microtask(vm.load);
       return null;
     }, [vm]);
-    final rules =
-        state.config?.rules(Localizations.localeOf(context).languageCode) ?? '';
+    final language = Localizations.localeOf(context).languageCode;
+    final rules = state.config?.rules(language) ?? '';
     final busy = state.sending || state.loading || preparing.value;
     Future<void> send() async {
       if (preparing.value || !state.canSubmit) return;
@@ -107,12 +108,17 @@ class RoomLuckyBoxPage extends HookConsumerWidget {
                 ),
                 if (rules.isNotEmpty)
                   TextButton(
-                    onPressed: () => context.push(
-                      Uri(
-                        path: '/web-view',
-                        queryParameters: {'title': 'Lucky Box', 'uri': rules},
-                      ).toString(),
-                    ),
+                    onPressed: () => state.config!.rulesAreImage(language)
+                        ? showRoomLuckyBoxImageRules(context, roomId, rules)
+                        : context.push(
+                            Uri(
+                              path: '/web-view',
+                              queryParameters: {
+                                'title': 'Lucky Box',
+                                'uri': rules,
+                              },
+                            ).toString(),
+                          ),
                     child: Text(toolText(context, 'Rules', '规则')),
                   ),
               ],

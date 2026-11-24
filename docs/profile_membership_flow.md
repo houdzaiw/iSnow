@@ -76,3 +76,13 @@ VIP `endTime` 为毫秒；贵族 `userInfo.remainTime` 沿用 Nady，实际是�
 ## 维护边界
 
 本次仅整理 Profile 的会员区域及新增模块的 theme token。原 Profile 其他区域仍有历史裸视觉值，本次没有扩展为全页重构。此前移除 Recharge 的菜单及点击分支继续保留。
+
+## MY VIP 图片尺寸异常修复（2026-11-23）
+
+- 基于源码 `f4b8222` 的当前工作区排查。MY VIP 实际进入原生 `/vip` 页面；本次异常来自网络预览图片，并非 Rules 网页或 WebView 插件。
+- 触发路径：接口 `vipInfos[].showIconUrl` 返回静态网络图片 → `MembershipMedia` → `MembershipImage(width: double.infinity)` → `AppNetworkImage`。原缓存尺寸直接执行 `(width * 2).toInt()`，因此产生 `Unsupported operation: Infinity or NaN toInt`。权益详情图片在受约束的 `AspectRatio` 内将宽高设为 infinity，也存在同一问题。
+- 公共图片组件保留原布局宽高，仅对缓存提示做校验：null、非有限数、非正值、两倍计算溢出、取整后为零时不设置该轴的缓存尺寸；正常尺寸继续按两倍取整。未修改路由、会员接口、支付操作、图片布局或动画播放器。
+- 新增 `test/app_network_image_test.dart` 与 `test/membership_network_images_test.dart`，共18项。先在旧实现上复现 infinity 和 VIP 真实网络图片分支的相同异常，再验证修复。覆盖无穷值、NaN、零、负数、亚像素、缩放溢出、有限轴独立缓存、320/375/430 宽度、预览加载与解码成功、失败占位、权益详情及贵族静态网络预览。图片使用缓存替身提供可解码文件，会员请求使用接口替身。
+- 图片、会员 Repository/ViewModel/页面和主消息页共72项通过，会员历史截图基线未改动。系统消息回归另有16项通过，包含整页图文、图片重试/预览和生命周期。
+- 系统消息半屏320/375/430三张历史截图仍有差异：分别17,451、20,783、23,607像素。使用修改前的 `AppNetworkImage` 单独复跑后三项仍以完全相同像素数量失败；人工查看差异位于弹框后方的房间布局。已确认不是本次缓存修复引入，保留原基线，不在本次改动中重写无关房间布局。
+- `flutter analyze --no-pub`、`git diff --check HEAD` 通过。当前 ADB 无连接设备，未进行 Pixel_9 热重载或真实 CDN 加载验收；测试未执行真实购买、赠送、领取或其他账户提交。

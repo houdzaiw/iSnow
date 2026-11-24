@@ -1,0 +1,134 @@
+{
+  "date": "2026-11-22",
+  "scope": "read-only; no Send/Open; no account or room submissions",
+  "roomId": "2113281922745016322",
+  "displayRoomId": "12594212",
+  "devices": {
+    "pixel": {
+      "requests": {
+        "POST /simi/api/resource/banner": 2,
+        "GET /simi/api/redPacket/config": 3,
+        "GET /simi/api/revenue/purse": 2,
+        "GET /simi/api/redPacket/list": 4,
+        "GET /simi/api/room/getHotScore": 6,
+        "GET /simi/api/resource/function2": 1,
+        "GET /simi/api/room/mic/charm/isEnable": 1,
+        "GET /simi/api/room/pk/info": 1
+      },
+      "finalState": {
+        "pid": 14794,
+        "main": "isolates/8742731411918447",
+        "room": {
+          "status": "ready",
+          "currentRoomId": "2113281922745016322",
+          "isInRoom": "true",
+          "isMinimized": "false",
+          "generation": "1",
+          "onMic": 2
+        },
+        "pk": {
+          "active": "true",
+          "manager": "false",
+          "doubleMode": "true",
+          "duration": "3",
+          "busy": "false",
+          "mini": "true",
+          "error": null,
+          "selectedCount": 0,
+          "pkId": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "4"
+        },
+        "lucky": {
+          "active": "true",
+          "canSend": "true",
+          "loading": "false",
+          "sending": "false",
+          "reviewRequired": "false",
+          "type": "0",
+          "gold": "5000",
+          "people": "2",
+          "countdown": "60",
+          "balance": "49855108",
+          "error": null,
+          "bagCount": 0,
+          "currentBox": null,
+          "result": null
+        },
+        "socket": {
+          "status": "ready",
+          "isTerminal": "false"
+        }
+      },
+      "unhandledFlutterErrors": 0
+    },
+    "owner": {
+      "requests": {
+        "POST /simi/api/resource/banner": 4,
+        "GET /simi/api/redPacket/config": 4,
+        "GET /simi/api/revenue/purse": 3,
+        "GET /simi/api/redPacket/list": 5,
+        "GET /simi/api/room/getHotScore": 6,
+        "GET /simi/api/resource/function2": 1,
+        "GET /simi/api/room/mic/charm/isEnable": 1,
+        "GET /simi/api/room/pk/info": 1
+      },
+      "finalState": {
+        "pid": 6804,
+        "main": "isolates/878134234179271",
+        "room": {
+          "status": "ready",
+          "currentRoomId": "2113281922745016322",
+          "isInRoom": "true",
+          "isMinimized": "false",
+          "generation": "1",
+          "onMic": 2
+        },
+        "pk": {
+          "active": "true",
+          "manager": "true",
+          "doubleMode": "true",
+          "duration": "3",
+          "busy": "false",
+          "mini": "false",
+          "error": null,
+          "selectedCount": 2,
+          "pkId": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "4"
+        },
+        "lucky": {
+          "active": "true",
+          "canSend": "true",
+          "loading": "false",
+          "sending": "false",
+          "reviewRequired": "false",
+          "type": "0",
+          "gold": "5000",
+          "people": "2",
+          "countdown": "60",
+          "balance": "4",
+          "error": null,
+          "bagCount": 0,
+          "currentBox": null,
+          "result": null
+        },
+        "socket": {
+          "status": "ready",
+          "isTerminal": "false"
+        }
+      },
+      "unhandledFlutterErrors": 0
+    }
+  },
+  "rulesFix": {
+    "responseContentType": "image/jpeg",
+    "responseDisposition": "attachment",
+    "newImageViewer": true
+  },
+  "remaining": [
+    "send once after separate confirmation",
+    "countdown and dual-device box receipt",
+    "claim only after separate confirmation",
+    "real prize and native effect",
+    "server rule image says diamonds while editor says Coins"
+  ]
+}

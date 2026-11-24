@@ -66,8 +66,8 @@ class AppNetworkImage extends StatelessWidget {
             errorWidget ?? _defaultErrorWidget(),
 
         /// 关键：降低内存占用
-        memCacheWidth: _memCacheWidth(),
-        memCacheHeight: _memCacheHeight(),
+        memCacheWidth: _memoryCacheExtent(width),
+        memCacheHeight: _memoryCacheExtent(height),
 
         /// 淡入效果
         fadeInDuration: const Duration(milliseconds: 200),
@@ -84,15 +84,13 @@ class AppNetworkImage extends StatelessWidget {
     return "$url?x-oss-process=image/resize,w_200";
   }
 
-  /// 根据组件尺寸控制缓存大小（关键优化🔥）
-  int? _memCacheWidth() {
-    if (width == null) return null;
-    return (width! * 2).toInt(); // 适配2x屏幕
-  }
-
-  int? _memCacheHeight() {
-    if (height == null) return null;
-    return (height! * 2).toInt();
+  /// Layout may expand to infinity; decode hints require positive pixel counts.
+  int? _memoryCacheExtent(double? extent) {
+    if (extent == null || !extent.isFinite || extent <= 0) return null;
+    final scaled = extent * 2; // Preserve the existing 2x decode size.
+    if (!scaled.isFinite) return null;
+    final pixels = scaled.toInt();
+    return pixels > 0 ? pixels : null;
   }
 
   Widget _defaultPlaceholder() {

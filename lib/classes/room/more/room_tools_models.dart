@@ -151,6 +151,8 @@ class RoomToolsState {
     this.lobbyType = 0,
     // Actual local page presentation; server mode snapshots never open a page.
     this.lobbyVisible = false,
+    bool lobbyLoaded = false,
+    this.lobbyError,
     this.lobbyRecords = const [],
     this.lobbyAwards = const [],
     this.vehicleEffects = const [],
@@ -167,7 +169,7 @@ class RoomToolsState {
     this.balance = 0,
     this.revision = 0,
     this.sessionActive = false,
-  });
+  }) : _lobbyLoaded = lobbyLoaded;
   final bool loading,
       preferencesReady,
       charmEnabled,
@@ -186,6 +188,10 @@ class RoomToolsState {
   final List<RoomLuckyBag> bags;
   final RoomPkSnapshot pk;
   final ToolJson luckyConfig, bigWin, prize;
+  final String? lobbyError;
+  final bool? _lobbyLoaded;
+  bool get lobbyLoaded => _lobbyLoaded == true;
+  bool get loadingLobby => busy.contains('load:lobby');
   RoomBigWinSnapshot get bigWinSnapshot => RoomBigWinSnapshot(bigWin);
   bool get showBigWinPendant =>
       sessionActive && config.enabled(8, 17) && bigWinSnapshot.hasPendant;
@@ -202,6 +208,9 @@ class RoomToolsState {
     int? currency,
     int? lobbyType,
     bool? lobbyVisible,
+    bool? lobbyLoaded,
+    String? lobbyError,
+    bool clearLobbyError = false,
     List<ToolJson>? lobbyRecords,
     List<ToolJson>? lobbyAwards,
     List<ToolJson>? vehicleEffects,
@@ -228,6 +237,8 @@ class RoomToolsState {
     currency: currency ?? this.currency,
     lobbyType: lobbyType ?? this.lobbyType,
     lobbyVisible: lobbyVisible ?? this.lobbyVisible,
+    lobbyLoaded: lobbyLoaded ?? this.lobbyLoaded,
+    lobbyError: clearLobbyError ? null : lobbyError ?? this.lobbyError,
     lobbyRecords: lobbyRecords ?? this.lobbyRecords,
     lobbyAwards: lobbyAwards ?? this.lobbyAwards,
     vehicleEffects: vehicleEffects ?? this.vehicleEffects,

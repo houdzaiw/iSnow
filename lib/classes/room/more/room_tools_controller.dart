@@ -254,8 +254,10 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
   Future<void> _load(
     String key,
     Future<Object?> Function() load,
-    void Function(Object?) apply,
-  ) async {
+    void Function(Object?) apply, {
+    void Function(String message)? onFailure,
+    RoomToolsState Function(RoomToolsState loading)? onLoading,
+  }) async {
     if (!active) return;
     if (state.busy.contains('load:$key')) {
       _reloadKeys.add(key);
@@ -263,7 +265,8 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
     }
     final generation = _generation;
     final version = _snapshotVersions[key] ?? 0;
-    state = state.copy(busy: {...state.busy, 'load:$key'});
+    final loading = state.copy(busy: {...state.busy, 'load:$key'});
+    state = onLoading?.call(loading) ?? loading;
     try {
       final data = await load();
       if (active &&
@@ -273,8 +276,13 @@ class RoomToolsController extends StateNotifier<RoomToolsState>
       }
     } catch (error) {
       if (active && generation == _generation) {
-        _errorOperation = 'load:$key';
-        state = state.copy(error: userFacingErrorMessage(error));
+        final message = userFacingErrorMessage(error);
+        if (onFailure != null) {
+          if (version == (_snapshotVersions[key] ?? 0)) onFailure(message);
+        } else {
+          _errorOperation = 'load:$key';
+          state = state.copy(error: message);
+        }
       }
     } finally {
       if (active && generation == _generation) {

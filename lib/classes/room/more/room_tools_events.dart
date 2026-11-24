@@ -73,6 +73,8 @@ extension RoomToolsEvents on RoomToolsController {
           _lobbyInsert?.cancel();
           _value = _value.copy(
             lobbyType: type,
+            lobbyLoaded: false,
+            clearLobbyError: true,
             lobbyVisible:
                 [1, 2].contains(type) &&
                 _value.lobbyVisible &&

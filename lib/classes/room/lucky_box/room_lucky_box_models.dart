@@ -49,6 +49,15 @@ class RoomLuckyBoxConfig {
         ? uri.toString()
         : '';
   }
+
+  bool rulesAreImage(String language) {
+    final uri = Uri.tryParse(rules(language));
+    return uri != null &&
+        RegExp(
+          r'\.(jpe?g|png|webp|gif)$',
+          caseSensitive: false,
+        ).hasMatch(uri.path);
+  }
 }
 
 class RoomLuckyBoxResult {

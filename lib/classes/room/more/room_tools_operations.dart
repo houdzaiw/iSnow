@@ -141,6 +141,8 @@ extension RoomToolsOperations on RoomToolsController {
     _value = _value.copy(
       lobbyType: type,
       lobbyVisible: type != 0 && _value.lobbyVisible,
+      lobbyLoaded: false,
+      clearLobbyError: true,
       lobbyRecords: [],
       treasureGifts: [],
       lobbyAwards: [],
@@ -177,7 +179,7 @@ extension RoomToolsOperations on RoomToolsController {
 
   Future<void> loadLobby() async {
     final type = _value.lobbyType;
-    if (![1, 2].contains(type)) return;
+    if (!active || ![1, 2].contains(type)) return;
     await _load(
       'lobby',
       () => repository.get(
@@ -187,15 +189,21 @@ extension RoomToolsOperations on RoomToolsController {
       (data) {
         if (type != _value.lobbyType) return;
         final map = toolMap(data);
+        final records = type == 2 ? toolList(map['playTos']) : toolList(data);
         _value = _value.copy(
           lobbyRecords: [],
           treasureGifts: toolList(map['giftIocs']),
+          lobbyLoaded: records.isEmpty,
+          clearLobbyError: true,
         );
-        _insertLobbyRecords(
-          type == 2 ? toolList(map['playTos']) : toolList(data),
-          type,
-        );
+        _insertLobbyRecords(records, type);
       },
+      onFailure: (message) {
+        if (type == _value.lobbyType) {
+          _value = _value.copy(lobbyError: message);
+        }
+      },
+      onLoading: (loading) => loading.copy(clearLobbyError: true),
     );
   }
 
@@ -404,7 +412,10 @@ extension RoomToolsOperations on RoomToolsController {
     _lobbyInsert?.cancel();
     final generation = _generation;
     if (!visible) {
-      _value = _value.copy(lobbyRecords: records.take(90).toList());
+      _value = _value.copy(
+        lobbyRecords: records.take(90).toList(),
+        lobbyLoaded: true,
+      );
       return;
     }
     var index = 0;
@@ -419,6 +430,7 @@ extension RoomToolsOperations on RoomToolsController {
       final next = [..._value.lobbyRecords, records[index++]];
       _value = _value.copy(
         lobbyRecords: next.length > 100 ? next.take(90).toList() : next,
+        lobbyLoaded: true,
       );
     });
   }

@@ -1,0 +1,379 @@
+{
+  "date": "2026-11-22",
+  "authorization": {
+    "senderUid": 30317291,
+    "roomId": "2113281922745016322",
+    "displayRoomId": 12594212,
+    "type": 0,
+    "gold": 5000,
+    "numberOfRecipients": 2,
+    "countdown": 60,
+    "sendLimit": 1,
+    "grabAllowed": false,
+    "retryAllowed": false
+  },
+  "sendTapCount": 1,
+  "confirmTapCount": 1,
+  "devices": {
+    "pixel": {
+      "uid": "30317291",
+      "requests": {
+        "POST /simi/api/resource/banner": 2,
+        "GET /simi/api/resource/function2": 1,
+        "GET /simi/api/room/mic/charm/isEnable": 1,
+        "GET /simi/api/room/pk/info": 1,
+        "GET /simi/api/redPacket/config": 4,
+        "GET /simi/api/redPacket/list": 6,
+        "GET /simi/api/room/getHotScore": 4,
+        "GET /simi/api/revenue/purse": 4,
+        "POST /simi/api/redPacket/push": 1
+      },
+      "replies": [
+        {
+          "path": "/api/redPacket/list",
+          "code": 200,
+          "data": [],
+          "traceId": "cc7c387a-8310-45ef-8f46-04c0e1b48735",
+          "timestamp": "2026-11-22T11:22:42.936+0000"
+        },
+        {
+          "path": "/api/redPacket/list",
+          "code": 200,
+          "data": [],
+          "traceId": "cf244512-23e7-466c-bb34-be95e950c2dd",
+          "timestamp": "2026-11-22T11:22:48.768+0000"
+        },
+        {
+          "path": "/api/revenue/purse",
+          "code": 200,
+          "data": {
+            "uid": 30317291,
+            "coin": 49855108,
+            "diamond": 35338,
+            "pinkDiamond": 0,
+            "usd": 0.0,
+            "goldenTicket": null,
+            "targetUid": null,
+            "bizId": null,
+            "isFirst": true,
+            "role": 1,
+            "updateTime": 1795320226523
+          },
+          "traceId": "86be3064-e11b-4cd8-8875-1f597aa39d56",
+          "timestamp": "2026-11-22T11:23:20.833+0000"
+        },
+        {
+          "path": "/api/redPacket/list",
+          "code": 200,
+          "data": [],
+          "traceId": "62cb620b-b6f3-4b19-abe8-8ff3ba61032f",
+          "timestamp": "2026-11-22T11:23:21.294+0000"
+        },
+        {
+          "path": "/api/revenue/purse",
+          "code": 200,
+          "data": {
+            "uid": 30317291,
+            "coin": 49855108,
+            "diamond": 35338,
+            "pinkDiamond": 0,
+            "usd": 0.0,
+            "goldenTicket": null,
+            "targetUid": null,
+            "bizId": null,
+            "isFirst": true,
+            "role": 1,
+            "updateTime": 1795320226523
+          },
+          "traceId": "a206c572-ab06-4f3d-ac8e-fca2a617d110",
+          "timestamp": "2026-11-22T11:24:25.222+0000"
+        },
+        {
+          "path": "/api/redPacket/push",
+          "code": 200,
+          "data": {
+            "id": "bf65742d283c4261b64a97a27a917d34",
+            "deadline": 1795347025836,
+            "remainingTime": 359,
+            "uid": null,
+            "avatar": null,
+            "nickName": null,
+            "gender": null,
+            "waveEffectUrl": null,
+            "staticAvatarFrameUrl": null
+          },
+          "traceId": "26cb0966-438d-495f-8e95-a736057cc492",
+          "timestamp": "2026-11-22T11:24:26.478+0000"
+        },
+        {
+          "path": "/api/revenue/purse",
+          "code": 200,
+          "data": {
+            "uid": 30317291,
+            "coin": 49850108,
+            "diamond": 35338,
+            "pinkDiamond": 0,
+            "usd": 0.0,
+            "goldenTicket": null,
+            "targetUid": null,
+            "bizId": null,
+            "isFirst": true,
+            "role": 1,
+            "updateTime": 1795346666166
+          },
+          "traceId": "f2d1be31-271a-46a2-be86-b5e4360bfc0f",
+          "timestamp": "2026-11-22T11:24:26.929+0000"
+        },
+        {
+          "path": "/api/redPacket/list",
+          "code": 200,
+          "data": [
+            {
+              "id": "bf65742d283c4261b64a97a27a917d34",
+              "deadline": 1795346726000,
+              "remainingTime": 57,
+              "uid": 30317291,
+              "avatar": "https://simi-cos.oss-eu-central-1.aliyuncs.com/dev/admin/avatar/default_avatar.jpg",
+              "nickName": "lihei2",
+              "gender": 0,
+              "waveEffectUrl": "",
+              "staticAvatarFrameUrl": ""
+            }
+          ],
+          "traceId": "9ca30230-9b14-4911-9316-1f37c4ca6ab5",
+          "timestamp": "2026-11-22T11:24:28.201+0000"
+        },
+        {
+          "path": "/api/redPacket/list",
+          "code": 200,
+          "data": [
+            {
+              "id": "bf65742d283c4261b64a97a27a917d34",
+              "deadline": 1795346726000,
+              "remainingTime": 57,
+              "uid": 30317291,
+              "avatar": "https://simi-cos.oss-eu-central-1.aliyuncs.com/dev/admin/avatar/default_avatar.jpg",
+              "nickName": "lihei2",
+              "gender": 0,
+              "waveEffectUrl": "",
+              "staticAvatarFrameUrl": ""
+            }
+          ],
+          "traceId": "c60a9e26-a021-4af3-8687-7d1feacb0da3",
+          "timestamp": "2026-11-22T11:24:28.860+0000"
+        },
+        {
+          "path": "/api/redPacket/list",
+          "code": 200,
+          "data": [
+            {
+              "id": "bf65742d283c4261b64a97a27a917d34",
+              "deadline": 1795346726000,
+              "remainingTime": 1,
+              "uid": 30317291,
+              "avatar": "https://simi-cos.oss-eu-central-1.aliyuncs.com/dev/admin/avatar/default_avatar.jpg",
+              "nickName": "lihei2",
+              "gender": 0,
+              "waveEffectUrl": "",
+              "staticAvatarFrameUrl": ""
+            }
+          ],
+          "traceId": "9be067ec-3e16-46cd-83c4-84d5c10ec5d1",
+          "timestamp": "2026-11-22T11:25:24.867+0000"
+        }
+      ],
+      "events": [
+        {
+          "event": "RoomScreenLuckyBagSendEvent",
+          "msgId": "e7f9dd49d7d54808bc3eeb6700e4c4a5",
+          "timestamp": "1795346666409"
+        }
+      ],
+      "finalState": {
+        "pid": 14794,
+        "main": "isolates/8742731411918447",
+        "room": {
+          "status": "ready",
+          "currentRoomId": "2113281922745016322",
+          "isInRoom": "true",
+          "isMinimized": "false",
+          "generation": "1",
+          "onMic": 2
+        },
+        "pk": {
+          "active": "true",
+          "manager": "false",
+          "doubleMode": "true",
+          "duration": "3",
+          "busy": "false",
+          "mini": "true",
+          "error": null,
+          "selectedCount": 0,
+          "pkId": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "4"
+        },
+        "lucky": {
+          "active": "true",
+          "canSend": "true",
+          "loading": "false",
+          "sending": "false",
+          "reviewRequired": "false",
+          "type": "0",
+          "gold": "5000",
+          "people": "2",
+          "countdown": "60",
+          "balance": "49850108",
+          "error": null,
+          "bagCount": 1,
+          "currentBox": null,
+          "result": null
+        },
+        "socket": {
+          "status": "ready",
+          "isTerminal": "false"
+        }
+      },
+      "unhandledFlutterErrors": 0
+    },
+    "owner": {
+      "uid": "12594212",
+      "requests": {
+        "POST /simi/api/resource/banner": 2,
+        "GET /simi/api/redPacket/config": 2,
+        "GET /simi/api/revenue/purse": 1,
+        "GET /simi/api/redPacket/list": 4,
+        "GET /simi/api/room/getHotScore": 4,
+        "GET /simi/api/resource/function2": 1,
+        "GET /simi/api/room/mic/charm/isEnable": 1,
+        "GET /simi/api/room/pk/info": 1
+      },
+      "replies": [
+        {
+          "path": "/api/revenue/purse",
+          "code": 200,
+          "data": {
+            "uid": 12594212,
+            "coin": 4,
+            "diamond": 35265,
+            "pinkDiamond": 0,
+            "usd": 0.0,
+            "goldenTicket": null,
+            "targetUid": null,
+            "bizId": null,
+            "isFirst": true,
+            "role": 1,
+            "updateTime": 1795320227821
+          },
+          "traceId": "901c1c5e-1d1e-41be-939c-ecda46cb179e",
+          "timestamp": "2026-11-22T11:23:33.910+0000"
+        },
+        {
+          "path": "/api/redPacket/list",
+          "code": 200,
+          "data": [],
+          "traceId": "a6e56de1-b004-4e1e-bfc1-95625a4d7031",
+          "timestamp": "2026-11-22T11:23:34.100+0000"
+        },
+        {
+          "path": "/api/redPacket/list",
+          "code": 200,
+          "data": [],
+          "traceId": "14f6c08a-0657-47fd-ae71-218e88062397",
+          "timestamp": "2026-11-22T11:24:00.354+0000"
+        },
+        {
+          "path": "/api/redPacket/list",
+          "code": 200,
+          "data": [
+            {
+              "id": "bf65742d283c4261b64a97a27a917d34",
+              "deadline": 1795346726000,
+              "remainingTime": 58,
+              "uid": 30317291,
+              "avatar": "https://simi-cos.oss-eu-central-1.aliyuncs.com/dev/admin/avatar/default_avatar.jpg",
+              "nickName": "lihei2",
+              "gender": 0,
+              "waveEffectUrl": "",
+              "staticAvatarFrameUrl": ""
+            }
+          ],
+          "traceId": "d0b464bb-bd31-4380-8281-3e85218890c0",
+          "timestamp": "2026-11-22T11:24:27.984+0000"
+        },
+        {
+          "path": "/api/redPacket/list",
+          "code": 200,
+          "data": [],
+          "traceId": "d0c8b0f6-4f70-480f-b828-c5e5f8f82b28",
+          "timestamp": "2026-11-22T11:26:56.057+0000"
+        }
+      ],
+      "events": [
+        {
+          "event": "RoomScreenLuckyBagSendEvent",
+          "msgId": "e7f9dd49d7d54808bc3eeb6700e4c4a5",
+          "timestamp": "1795346666409"
+        }
+      ],
+      "finalState": {
+        "pid": 6804,
+        "main": "isolates/878134234179271",
+        "room": {
+          "status": "ready",
+          "currentRoomId": "2113281922745016322",
+          "isInRoom": "true",
+          "isMinimized": "false",
+          "generation": "1",
+          "onMic": 2
+        },
+        "pk": {
+          "active": "true",
+          "manager": "true",
+          "doubleMode": "true",
+          "duration": "3",
+          "busy": "false",
+          "mini": "false",
+          "error": null,
+          "selectedCount": 2,
+          "pkId": "cbabac7e8c48c64955ce7d573a05f138",
+          "event": "4"
+        },
+        "lucky": {
+          "active": "true",
+          "canSend": "true",
+          "loading": "false",
+          "sending": "false",
+          "reviewRequired": "false",
+          "type": "0",
+          "gold": "5000",
+          "people": "2",
+          "countdown": "60",
+          "balance": "4",
+          "error": null,
+          "bagCount": 0,
+          "currentBox": null,
+          "result": null
+        },
+        "socket": {
+          "status": "ready",
+          "isTerminal": "false"
+        }
+      },
+      "unhandledFlutterErrors": 0
+    }
+  },
+  "findings": [
+    "POST push response remainingTime 359 differs from authoritative list remainingTime 57 and 60s deadline; UI uses list",
+    "Lucky Box public message displays HTML tags",
+    "server rule image says diamonds while actual deduction is coins"
+  ],
+  "money": {
+    "coinsBefore": 49855108,
+    "coinsAfter": 49850108,
+    "coinDebit": 5000,
+    "diamondsBefore": 35338,
+    "diamondsAfter": 35338,
+    "receiverCoinsUnchanged": 4
+  },
+  "uiNote": "Closing second-device ready prompt was followed by the room exit confirmation; cancelled with Back, no Exit/Keep submission."
+}

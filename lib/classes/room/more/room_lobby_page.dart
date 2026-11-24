@@ -23,6 +23,11 @@ class RoomLobbyPage extends HookConsumerWidget {
     final vm = ref.read(roomToolsControllerProvider(roomId).notifier);
     final owner = useMemoized(() => vm);
     final valid = identical(vm, owner) && vm.ownsLobbyPanel(presentationToken);
+    final loading =
+        state.loadingLobby ||
+        (!state.lobbyLoaded &&
+            state.lobbyError == null &&
+            state.lobbyType != 0);
     useEffect(() {
       if (!valid) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -38,13 +43,25 @@ class RoomLobbyPage extends HookConsumerWidget {
           : 'Win',
       child: Column(
         children: [
+          if (loading)
+            const LinearProgressIndicator(key: ValueKey('room-lobby-loading')),
+          if (state.lobbyError case final error?)
+            MaterialBanner(
+              content: Text(error),
+              actions: [
+                TextButton(
+                  onPressed: loading ? null : vm.loadLobby,
+                  child: Text(toolText(context, 'Retry', '重试')),
+                ),
+              ],
+            ),
           if (state.lobbyType == 0)
             Text(toolText(context, 'Lobby is closed', '大厅已关闭')),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TextButton(
-                onPressed: vm.loadLobby,
+                onPressed: loading ? null : vm.loadLobby,
                 child: Text(toolText(context, 'Refresh', '刷新')),
               ),
               TextButton(
@@ -84,7 +101,10 @@ class RoomLobbyPage extends HookConsumerWidget {
               ),
             ),
           ToolHeading(toolText(context, 'Recent wins', '中奖记录')),
-          if (vm.lobbyRecords.isEmpty)
+          if (state.lobbyLoaded &&
+              !state.loadingLobby &&
+              state.lobbyError == null &&
+              vm.lobbyRecords.isEmpty)
             Text(toolText(context, 'No records yet', '暂无记录')),
           for (final record in vm.lobbyRecords)
             ListTile(

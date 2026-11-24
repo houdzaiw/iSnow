@@ -10,6 +10,7 @@ import 'package:project/classes/room/activities/room_activity_widgets.dart';
 import 'package:project/classes/room/activities/room_activity_host.dart';
 import 'package:project/classes/room/gift/effects/room_gift_asset_resolver.dart';
 import 'package:project/classes/room/lucky_box/room_lucky_box_sheet.dart';
+import 'package:project/classes/room/lucky_box/room_lucky_box_rules_sheet.dart';
 import 'package:project/classes/room/lucky_box/room_lucky_box_view_model.dart';
 import 'package:project/classes/room/more/room_tools_controller.dart';
 import 'package:project/classes/room/more/room_tools_repository.dart';
@@ -410,6 +411,44 @@ void main() {
     expect(api.count(HttpApi.roomLuckyGrab), 0);
     await finish(tester);
   });
+  testWidgets('image rules return to the draft and close on account change', (
+    tester,
+  ) async {
+    await mount(tester, 375, const RoomLuckyBoxPage(roomId: '123'));
+    api.responses[HttpApi.roomLuckyConfig] = {
+      ...Map<String, dynamic>.from(
+        api.responses[HttpApi.roomLuckyConfig] as Map,
+      ),
+      'rulesUrlEn': 'https://example.com/rules.jpg',
+    };
+    final box = container.read(roomLuckyBoxProvider('123').notifier);
+    await box.load();
+    box.chooseType(1);
+    final draft = box.state;
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Rules'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+    expect(find.byType(RoomLuckyBoxImageRules), findsOneWidget);
+    expect(find.byType(InteractiveViewer), findsOneWidget);
+    await tester.tap(find.byType(RoomActivityClose).last);
+    await tester.pumpAndSettle();
+    expect(find.byType(RoomLuckyBoxImageRules), findsNothing);
+    expect(box.state.type, draft.type);
+    expect(box.state.gold, draft.gold);
+    expect(box.state.people, draft.people);
+    expect(box.state.countdown, draft.countdown);
+    await tester.tap(find.text('Rules'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+    room.changeAccount(99);
+    await tester.pumpAndSettle();
+    expect(find.byType(RoomLuckyBoxImageRules), findsNothing);
+    expect(api.count(HttpApi.roomLuckyPush), 0);
+    expect(api.count(HttpApi.roomLuckyGrab), 0);
+    await finish(tester);
+  });
+
   testWidgets('contributor dialog rebuild uses its own active context', (
     tester,
   ) async {

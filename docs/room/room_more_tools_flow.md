@@ -575,6 +575,44 @@ flowchart TD
 
 Pixel_9 沿用当前 `hei`（展示 ID 30317291）和 PID29887，热重载后完成 Win 图片打开、收起、再次打开及返回，并查看 More 模式入口后关闭；没有热重启、重装、退进房或切换模式。验收时 `/api/lobby/open` 提交为 0，进房请求为 0，没有新增未处理 Flutter 异常。最终运行态为 `lobbyType=1, lobbyVisible=false`，页面令牌已释放；记录接口当前返回空列表，显示 No records yet。Treasure、服务端关闭、角色变化和账号切换仅通过替身验证，没有为设备验收提交这些操作。`flutter analyze --no-pub` 与 `git diff --check HEAD` 通过。
 
+### 12.5 Chat / Win 加载与错误恢复修正（2026-11-22）
+
+本次继续保留已确认的独立大厅页面，不扩大为 Nady 的麦位内嵌布局。
+
+- 原问题：大厅读取错误进入所有工具共用的 `error`，再次加载成功也没有清除；加载中和成功空列表都显示 `No records yet`；错误重试会刷新无关工具。
+- `RoomToolsState` 新增独立的 `lobbyLoaded`、`lobbyError`，并从既有 busy 集合派生 `loadingLobby`。View 仅渲染这些状态，记录读取仍由现有控制器及 Repository 完成。
+- 首次读取与刷新显示进度，读取期间禁用重复刷新。只有成功返回且可见记录为空时才显示空状态；失败显示错误和重试，不用空状态覆盖失败。
+- 刷新失败保留原有记录；重试只读取当前 Win / Treasure 记录。开始重试和成功后清除大厅自身错误，不清除其他工具或提交操作的错误。
+- 切换模式或 Socket 关闭会重置大厅读取状态。旧模式、旧账号和旧房间会话的迟到失败不得写回；读取期间收到新模式仍沿用原有合并刷新机制。
+- 不修改接口、权限和开关语义：Chat 仍是服务端关闭；Win 已开启时只恢复本地页面；返回和收起均不提交模式开关。
+
+自动化验收：新增 7 项测试（`room_lobby_loading_test.dart` 3 项、`room_tools_controller_test.dart` 4 项），大厅相关 58 项通过；100 个房间测试文件共 997 项通过，包含原有 6 张大厅截图。未修改截图基线或容差。排查中单独冷启动的截图差异仅在底部礼物动画帧，未修改 HEAD 的临时副本也能复现相同像素结果；完整文件及房间回归均通过，未为此改动生产动效或公共截图工具。
+
+设备验收：Pixel_9 与 Medium_Phone_API_35 均成功热重载，没有重启或重装。两端 PID、isolate、房间会话代次保持不变，仍在 hei2（展示 ID 12594212），Room / Socket 为 ready，保留原来的两个麦位；当前 `lobbyType=0`、`lobbyVisible=false`。房主端现有 More 面板仍展示 Chat / Win。没有点击模式、开始 PK、发送消息、送礼或操作宝箱。加载失败与重试由替身验证；真实 Chat → Win → Chat、双端 Socket 同步和真实中奖记录仍需单独授权后验收，不能将本次热重载记为这些操作已通过。
+
+### 12.6 hei2 双端 Chat → Win → Chat 实际验收（2026-11-22）
+
+用户单独授权本轮真实模式切换，要求最后恢复 Chat；不授权送礼、发消息、开始 PK、宝箱操作或改变麦位。本节补充上一节尚未执行的双端联调，不替代其自动化结果。
+
+- 房间：hei2，展示 ID `12594212`，真实 roomId `2113281922745016322`。
+- Pixel_9：账号 `30317291`，PID `14794`；Medium_Phone_API_35 房主端：账号 `12594212`，PID `6804`。验收前后两端均为原进程、原 isolate、会话代次 1，Room / Socket ready，两个原有麦位保持占用。
+- 使用设备实际点击入口验收，运行态检查仅用于读取状态；没有注入伪造 Socket 事件或直接调用控制器代替点击。
+
+| 步骤 | 实际结果 |
+| --- | --- |
+| 初始 Chat | 两端 `lobbyType=0`、`lobbyVisible=false`，房主 More 展示 Chat / Win，公屏无大厅文字按钮。 |
+| 房主 More → Win | 仅一次 `POST /api/lobby/open`，参数 `{roomId,status:1,lobbyType:1}`；HTTP 200、业务 code 200。房主打开 Win 页面，另一端不被强制打开页面，仅展示右侧图片入口。 |
+| 两端同步 | 两端收到同一开启事件 `9059eb4430304946901e4cc94d0e2ee4`，均变为 `lobbyType=1`。 |
+| 房主收起、图片再次打开、返回 | 页面均正常；收起和返回保留服务端 Win 模式，不产生额外开关请求。 |
+| Pixel_9 图片打开、收起、再次打开 | 均正常，收起状态为 `lobbyVisible=false`，打开为 true；本机没有提交模式开关。 |
+| 中奖记录读取 | 两端各 4 次 `GET /api/lobby/lists`，覆盖模式刷新和本地打开读取，均成功返回空列表，页面显示 `No records yet`，没有遗留加载或错误提示。未制造真实中奖。 |
+| 房主 More → Chat | 仅一次关闭请求 `{roomId,status:0,lobbyType:1}`，HTTP 200、业务 code 200。两端收到关闭事件 `6bbcdbc2c1614ad9b2300d3463ee74f6`。 |
+| 关闭时另一端仍打开 Win | Pixel_9 所属 Win 页面自动关闭并返回原房间；两端 Win 图片入口消失，最终 `lobbyType=0`、`lobbyVisible=false`、`lobbyError=null`。房主 More 也已关闭，结束停留原房间。 |
+
+开启 traceId：`af2e34bb-d930-40da-b900-0fcf4fa48b90`；关闭 traceId：`ffccc2ba-a804-4bc3-85e1-0219c465d17d`。完整观察窗口中，房主只有上述两次模式开关提交，Pixel_9 为 0 次；记录到的其他请求为记录、配置、热度及横幅读取，没有送礼、消息发送、PK 开始/结束、领取、上/下麦或退进房请求，没有新增未处理 Flutter 异常。
+
+本轮没有修改生产代码、重启、重装或热重载。真实非空记录、读取失败/超时与重试恢复仍使用上一节的替身覆盖，不将当前成功空列表联调视作这些场景也已联调。运行日志、状态快照和画面证据暂存于 `/tmp/isnow-chat-win-live-20261122/`，不作为截图基线。
+
 ## 13. M09 PK 全链路
 
 本轮补齐实现、资源与验收边界见 [PK 与 Lucky Box 完整流程](room_pk_lucky_box_completion.md)。历史简化页面记录保留，以该补充记录区分源码完成和真实联调。

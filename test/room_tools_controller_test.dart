@@ -300,6 +300,74 @@ void main() {
     expect(vm.snapshot.lobbyType, 0);
     expect(vm.snapshot.lobbyVisible, isFalse);
   });
+
+  test('lobby recovery preserves errors belonging to another tool', () async {
+    await vm.selectMode(1);
+    await vm.perform(
+      'other',
+      (_) async => throw StateError('Other tool failed'),
+    );
+    api.failingPath = HttpApi.roomLobbyRecords;
+    await vm.loadLobby();
+    expect(vm.snapshot.lobbyError, 'Bad state: Server failed');
+    expect(vm.snapshot.error, 'Bad state: Other tool failed');
+    api.failingPath = null;
+    await vm.loadLobby();
+    expect(vm.snapshot.lobbyError, isNull);
+    expect(vm.snapshot.lobbyLoaded, isTrue);
+    expect(vm.snapshot.error, 'Bad state: Other tool failed');
+  });
+
+  test('a failed old lobby request cannot overwrite a Socket close', () async {
+    await vm.selectMode(1);
+    api.calls.clear();
+    api.heldPath = HttpApi.roomLobbyRecords;
+    api.gate = Completer();
+    final pending = vm.loadLobby();
+    await flushTools();
+    room.event('RoomLobbyStatusEvent', {'status': 0, 'lobbyType': 1});
+    api.gate!.completeError(StateError('Old lobby failure'));
+    await pending;
+    expect(vm.snapshot.lobbyType, 0);
+    expect(vm.snapshot.lobbyLoaded, isFalse);
+    expect(vm.snapshot.lobbyError, isNull);
+    expect(vm.snapshot.error, isNull);
+    expect(vm.snapshot.loadingLobby, isFalse);
+    expect(api.count(HttpApi.lobbyOpen), 0);
+  });
+
+  test('a queued lobby reload recovers in the latest server mode', () async {
+    await vm.selectMode(1);
+    api.calls.clear();
+    api.heldPath = HttpApi.roomLobbyRecords;
+    api.gate = Completer();
+    final pending = vm.loadLobby();
+    await flushTools();
+    room.event('RoomLobbyStatusEvent', {'status': 1, 'lobbyType': 2});
+    api.gate!.completeError(StateError('Previous mode failed'));
+    await pending;
+    await flushTools();
+    expect(vm.snapshot.lobbyType, 2);
+    expect(vm.snapshot.lobbyLoaded, isTrue);
+    expect(vm.snapshot.lobbyError, isNull);
+    expect(vm.snapshot.loadingLobby, isFalse);
+    expect(api.count(HttpApi.roomTreasureRecords), 1);
+    expect(api.count(HttpApi.lobbyOpen), 0);
+  });
+
+  test('failed lobby reads cannot write into a new account session', () async {
+    await vm.selectMode(1);
+    api.heldPath = HttpApi.roomLobbyRecords;
+    api.gate = Completer();
+    final pending = vm.loadLobby();
+    await flushTools();
+    room.changeAccount(99);
+    api.gate!.completeError(StateError('Previous account failed'));
+    await pending;
+    expect(vm.snapshot.sessionActive, isFalse);
+    expect(vm.snapshot.lobbyError, isNull);
+    expect(vm.snapshot.lobbyLoaded, isFalse);
+  });
 }
 
 ToolJson _pk(int type) => {
