@@ -16,6 +16,9 @@ class HttpDioManager {
   static final HttpDioManager _instance = HttpDioManager._internal();
   static const _anonymousExternalRequest = 'anonymousExternalRequest';
   static const _externalQueryParameters = 'externalQueryParameters';
+  static const expectedAuthUid = 'expectedAuthUid';
+  static const expectedAuthToken = 'expectedAuthToken';
+  static const requestIsCurrent = 'requestIsCurrent';
 
   late Dio _dio;
   bool _isHandlingUnauthorized = false;
@@ -78,7 +81,26 @@ class HttpDioManager {
               .toString();
           requestParams['v'] = timestamp;
 
-          options.headers.addAll(await _commonHeaders());
+          final headers = await _commonHeaders();
+          final expectedUid = options.extra[expectedAuthUid];
+          final expectedToken = options.extra[expectedAuthToken];
+          final alive = options.extra[requestIsCurrent];
+          if ((expectedUid != null &&
+                  (headers['pub-uid'] != expectedUid ||
+                      headers['oauth-token'] != expectedToken ||
+                      await AuthSession.instance.uid() != expectedUid ||
+                      await AuthSession.instance.token() != expectedToken)) ||
+              (alive is bool Function() && !alive())) {
+            handler.reject(
+              DioException(
+                requestOptions: options,
+                type: DioExceptionType.cancel,
+                message: 'Login session changed or page closed',
+              ),
+            );
+            return;
+          }
+          options.headers.addAll(headers);
           options.headers['v'] = timestamp;
           options.headers['b'] = generateSign(requestParams, _apiSecret);
 

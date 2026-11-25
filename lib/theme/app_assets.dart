@@ -1,4 +1,5 @@
 class AppAssets {
+  static const appLogo = 'assets/base/app_logo.png';
   static const roomActivityDoublePeoplePkBackground =
       'assets/lanhu/room/room_activity_double_people_pk_background.webp';
   static const roomActivityPkStartBtnBg =

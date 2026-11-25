@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'membership_translations.dart';
+import 'profile_tools_translations.dart';
 
 class AppLocalizations {
   final Locale locale;
@@ -52,6 +53,7 @@ class _AppLocalizationsDelegate
 
 const Map<String, Map<String, String>> _localizedValues = {
   'en': {
+    ...profileToolsEnglish,
     'room.gift.firstRecharge': 'First Recharge',
     'room.gift.firstRechargeUnavailable':
         'First recharge is no longer available.',
@@ -521,6 +523,7 @@ const Map<String, Map<String, String>> _localizedValues = {
     'picker.cameraSelected': 'Camera selected',
   },
   'zh': {
+    ...profileToolsChinese,
     'room.gift.firstRecharge': '首充礼包',
     'room.gift.firstRechargeUnavailable': '当前已不符合首充资格。',
     'room.gift.firstRechargeEmpty': '暂无可用首充礼包。',

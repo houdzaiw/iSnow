@@ -1,0 +1,5 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="dev.knottx.flutter_image_gallery_saver">
+  <!-- Match the host declaration; runtime requests remain limited to API < 29. -->
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+</manifest>

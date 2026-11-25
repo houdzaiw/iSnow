@@ -6,8 +6,37 @@ import 'package:project/classes/profile/mine/profile_models.dart';
 import 'package:project/classes/profile/mine/profile_repository.dart';
 import 'package:project/classes/profile/mine/profile_view_model.dart';
 import 'package:project/model/user_profile.dart';
+import 'package:project/classes/profile/membership/membership_session.dart';
 
 void main() {
+  test(
+    'old account confirmation cannot log out or delete the new session',
+    () async {
+      final repository = _ProfileRepository(), session = _ChangingSession();
+      final container = ProviderContainer(
+        overrides: [
+          profileRepositoryProvider.overrideWithValue(repository),
+          membershipSessionProvider.overrideWith((ref) => session),
+        ],
+      );
+      addTearDown(container.dispose);
+      final listener = container.listen(profileViewModelProvider, (_, __) {});
+      addTearDown(listener.close);
+      await Future<void>.delayed(Duration.zero);
+      final model = container.read(profileViewModelProvider.notifier),
+          epoch = container
+              .read(profileViewModelProvider.notifier)
+              .accountEpoch;
+      session.change();
+      await container.pump();
+      expect(model.accountEpoch, isNot(epoch));
+      expect(await model.logout(expectedEpoch: epoch), false);
+      expect(await model.deleteAccount(expectedEpoch: epoch), false);
+      expect(repository.logoutCalls, 0);
+      repository.fetchGate.complete(_profile('New'));
+    },
+  );
+
   test(
     'logout debounces and late profile data cannot restore old account',
     () async {
@@ -91,4 +120,8 @@ class _ProfileRepository implements ProfileRepository {
 
   @override
   Future<void> deleteAccount() => logout();
+}
+
+class _ChangingSession extends MembershipSession {
+  void change() => notifyListeners();
 }

@@ -1,4 +1,5 @@
 import 'user_membership_level.dart';
+import 'user_worn_medal.dart';
 
 enum NadyLoginStatus {
   none,
@@ -62,6 +63,9 @@ class UserData {
     this.userStatus,
     this.userLevel,
     this.roleType,
+    this.isBd,
+    this.isCoiner,
+    this.wornMedals = const [],
   });
 
   final int? uid;
@@ -79,6 +83,8 @@ class UserData {
   final NadyLoginStatus? userStatus;
   final UserMembershipLevel? userLevel;
   final int? roleType;
+  final bool? isBd, isCoiner;
+  final List<UserWornMedal> wornMedals;
 
   String? get userId => uid?.toString();
   String? get email => null;
@@ -100,6 +106,16 @@ class UserData {
       roomId: json['roomId']?.toString(),
       userStatus: nadyLoginStatusFromJson(json['userStatus']),
       roleType: int.tryParse('${json['roleType']}'),
+      isBd: json['isBd'] is bool ? json['isBd'] as bool : null,
+      isCoiner: json['isCoiner'] is bool ? json['isCoiner'] as bool : null,
+      wornMedals: json['userWearMedalVOS'] is List
+          ? ((json['userWearMedalVOS'] as List)
+                .whereType<Map>()
+                .map((m) => UserWornMedal.fromJson(m.cast<String, dynamic>()))
+                .where((m) => m.id.isNotEmpty)
+                .toList()
+              ..sort((a, b) => a.sortingOrder.compareTo(b.sortingOrder)))
+          : const [],
       userLevel: json['userLevel'] is Map
           ? UserMembershipLevel.fromJson(
               (json['userLevel'] as Map).cast<String, dynamic>(),
@@ -124,6 +140,9 @@ class UserData {
     NadyLoginStatus? userStatus,
     UserMembershipLevel? userLevel,
     int? roleType,
+    bool? isBd,
+    bool? isCoiner,
+    List<UserWornMedal>? wornMedals,
   }) {
     return UserData(
       uid: uid ?? this.uid,
@@ -141,6 +160,9 @@ class UserData {
       userStatus: userStatus ?? this.userStatus,
       userLevel: userLevel ?? this.userLevel,
       roleType: roleType ?? this.roleType,
+      isBd: isBd ?? this.isBd,
+      isCoiner: isCoiner ?? this.isCoiner,
+      wornMedals: wornMedals ?? this.wornMedals,
     );
   }
 
@@ -160,6 +182,10 @@ class UserData {
       'roomId': roomId,
       if (userLevel != null) 'userLevel': userLevel!.toJson(),
       if (roleType != null) 'roleType': roleType,
+      if (isBd != null) 'isBd': isBd,
+      if (isCoiner != null) 'isCoiner': isCoiner,
+      if (wornMedals.isNotEmpty)
+        'userWearMedalVOS': wornMedals.map((m) => m.toJson()).toList(),
       'userStatus': userStatus == null
           ? null
           : nadyLoginStatusToJson(userStatus!),

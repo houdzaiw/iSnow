@@ -25,6 +25,7 @@ Future<void> enterSharedRoom(
   WidgetRef ref,
   String roomId, {
   int followUid = 0,
+  int requestedLobby = 0,
   bool Function()? isCurrent,
 }) async {
   await enterSharedRoomChecked(
@@ -32,6 +33,7 @@ Future<void> enterSharedRoom(
     ref,
     roomId,
     followUid: followUid,
+    requestedLobby: requestedLobby,
     isCurrent: isCurrent,
   );
 }
@@ -41,6 +43,7 @@ Future<bool> enterSharedRoomChecked(
   WidgetRef ref,
   String roomId, {
   int followUid = 0,
+  int requestedLobby = 0,
   bool Function()? isCurrent,
   ValueChanged<Route<dynamic>>? onOwnedRoute,
 }) async {
@@ -51,7 +54,15 @@ Future<bool> enterSharedRoomChecked(
   final generation = repository.roomGeneration;
   if (existing.isInRoom && existing.currentRoomId == roomId) {
     repository.restoreRoom();
-    context.go('/room/${Uri.encodeComponent(roomId)}');
+    context.go(
+      Uri(
+        path: '/room/${Uri.encodeComponent(roomId)}',
+        queryParameters: {
+          if ([1, 2].contains(requestedLobby))
+            'requestedLobby': '$requestedLobby',
+        },
+      ).toString(),
+    );
     return true;
   }
   final capturedThemes = InheritedTheme.capture(
@@ -139,6 +150,8 @@ Future<bool> enterSharedRoomChecked(
       queryParameters: {
         if (password.isNotEmpty) 'roomPassword': password,
         if (followUid > 0) 'followUid': '$followUid',
+        if ([1, 2].contains(requestedLobby))
+          'requestedLobby': '$requestedLobby',
       },
     ).toString(),
   );

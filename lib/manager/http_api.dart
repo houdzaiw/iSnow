@@ -1,4 +1,28 @@
 class HttpApi {
+  static const medalShowList = '/api/medal/showList';
+  static const medalWearingNum = '/api/medal/wearingNum';
+  static const medalWear = '/api/medal/wear';
+  static const backpackGifts = '/api/backpack/list';
+  static const backpackUserProps = '/api/backpack/user-prop/list';
+  static const backpackTransfer = '/api/backpack/send/goods';
+  static const userBlacklist = '/api/user/blacklist/list';
+  static const userBlacklistUpdate = '/api/user/blacklist/update';
+  static const appVersion = '/api/app/version/get';
+  static const profileClientInit = '/api/client/init';
+  static const profileAgentPurseVisible =
+      '/api/revenue/purse/agent/purse/isShow';
+  static const storeNewProducts = '/api/shop/prop/getNewProductFlag';
+  static const storeProducts = '/api/shop/prop/getOnSalePropList';
+  static const storePurchase = '/api/shop/prop/purchaseOnSaleProp';
+  static const profileProps = '/api/backpack/prop/list';
+  static const profileUseProp = '/api/backpack/use/goods';
+  static const dailySignInfo = '/api/mission/signInfo';
+  static const dailySign = '/api/mission/sign';
+  static const dailyMissions = '/api/mission/list';
+  static const dailyClaim = '/api/mission/claimReward';
+  static const profileAccountBindings = '/oauth2/binding/info';
+  static const profileBindPhone = '/oauth2/replacement/phone';
+
   /// Anonymous public IPv4/IPv6 lookup, outside the Nady API.
   static const publicIp = 'https://api64.ipify.org';
 

@@ -21,6 +21,7 @@ export 'app_shadows.dart';
 export 'app_spacing.dart';
 export 'app_text_styles.dart';
 export 'membership_theme.dart';
+export 'profile_tools_theme.dart';
 
 class AppTheme {
   const AppTheme._();

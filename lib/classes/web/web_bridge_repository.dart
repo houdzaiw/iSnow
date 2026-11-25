@@ -1,4 +1,5 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:dio/dio.dart';
 
 import '../../manager/http_dio_manager.dart';
 import '../room/more/room_tools_config.dart';
@@ -26,9 +27,11 @@ class WebBridgeRepository {
       'GET' => _http.get(
         request.normalizedUrl,
         queryParameters: request.queryParameters,
+        options: Options(extra: request.extra),
       ),
       'PUT' => _http.put(
         request.normalizedUrl,
+        options: Options(extra: request.extra),
         data: request.usesQueryParameters
             ? const <String, dynamic>{}
             : request.body,
@@ -38,6 +41,7 @@ class WebBridgeRepository {
       ),
       'DELETE' => _http.delete(
         request.normalizedUrl,
+        options: Options(extra: request.extra),
         data: request.usesQueryParameters
             ? const <String, dynamic>{}
             : request.body,
@@ -47,6 +51,7 @@ class WebBridgeRepository {
       ),
       _ => _http.post(
         request.normalizedUrl,
+        options: Options(extra: request.extra),
         data: request.usesQueryParameters
             ? const <String, dynamic>{}
             : request.body,
@@ -64,6 +69,7 @@ class WebBridgeApiRequest {
     required this.url,
     required this.param,
     required this.keys,
+    this.extra = const {},
   });
 
   factory WebBridgeApiRequest.fromJson(Map<String, dynamic> json) {
@@ -79,6 +85,15 @@ class WebBridgeApiRequest {
   final String url;
   final Object? param;
   final String keys;
+  final Map<String, dynamic> extra;
+  WebBridgeApiRequest guarded(Map<String, dynamic> extra) =>
+      WebBridgeApiRequest(
+        method: method,
+        url: url,
+        param: param,
+        keys: keys,
+        extra: extra,
+      );
 
   bool get usesQueryParameters => keys.toLowerCase() == 'params';
 
@@ -116,6 +131,7 @@ class WebBridgeApiRequest {
       url: url,
       param: nextParam,
       keys: keys,
+      extra: extra,
     );
   }
 

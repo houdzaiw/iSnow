@@ -68,6 +68,40 @@ class AuthSession extends ChangeNotifier {
     return prefs.getString(_phoneKey);
   }
 
+  /// Binding metadata changes do not create a new login generation.
+  Future<void> saveBoundPhone({
+    required int expectedUid,
+    required String expectedToken,
+    required String phone,
+    required String areaCode,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getInt(_uidKey) != expectedUid ||
+        prefs.getString(_tokenKey) != expectedToken) {
+      return;
+    }
+    UserData? user;
+    try {
+      final raw = prefs.getString(_userKey);
+      if (raw != null) {
+        user = UserData.fromJson(
+          (jsonDecode(raw) as Map).cast<String, dynamic>(),
+        );
+      }
+    } catch (_) {
+      /* Cached profile is optional. */
+    }
+    await Future.wait([
+      prefs.setString(_phoneKey, phone),
+      prefs.setString(_areaCodeKey, areaCode),
+      if (user != null)
+        prefs.setString(
+          _userKey,
+          jsonEncode(user.copyWith(phone: phone, areaCode: areaCode).toJson()),
+        ),
+    ]);
+  }
+
   Future<String?> areaCode() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_areaCodeKey);

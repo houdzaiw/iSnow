@@ -8,6 +8,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:project/classes/profile/membership/membership_models.dart';
 import 'package:project/classes/profile/membership/membership_repository.dart';
 import 'package:project/classes/profile/membership/membership_view_model.dart';
+import 'package:project/classes/profile/membership/views/membership_media.dart';
 import 'package:project/classes/profile/membership/views/membership_page.dart';
 import 'package:project/localization/app_localizations.dart';
 import 'package:project/manager/http_api.dart';
@@ -39,6 +40,7 @@ class _PreviewCache extends SystemImageCacheFake {
 
 void main() {
   const preview = 'https://example.test/vip-preview.png';
+  const legacyPreview = 'https://legacy.example.test/vip-preview.png';
   const detail = 'https://example.test/vip-privilege.png';
   late MembershipFixture fixture;
   late _PreviewCache cache;
@@ -47,7 +49,9 @@ void main() {
     fixture = MembershipFixture();
     final vip = membershipVip();
     for (final level in vip['vipInfos'] as List) {
-      level['showIconUrl'] = preview;
+      // Actual VIP responses provide different hosts for these two fields.
+      level['iconUrl'] = preview;
+      level['showIconUrl'] = legacyPreview;
       for (final perk in level['privilegeInfoVOS'] as List) {
         perk['detail']['image'] = detail;
       }
@@ -103,9 +107,16 @@ void main() {
     }
   }
 
-  Finder network(String url) => find.byWidgetPredicate(
-    (widget) => widget is AppNetworkImage && widget.url == url,
-  );
+  Finder network(String url) {
+    final image = find.byWidgetPredicate(
+      (widget) => widget is AppNetworkImage && widget.url == url,
+    );
+    // The same tier icon is also used by the membership hero. Assert the
+    // independent, full-width preview rather than accepting that smaller icon.
+    return url == preview
+        ? find.descendant(of: find.byType(MembershipMedia), matching: image)
+        : image;
+  }
 
   Finder decoded(String url) => find.descendant(
     of: network(url),
@@ -132,6 +143,7 @@ void main() {
       cache.gate!.complete();
       await settle(tester);
       expect(decoded(preview), findsOneWidget);
+      expect(cache.requests, isNot(contains(legacyPreview)));
       expect(tester.getSize(network(preview)).width, width);
       expect(tester.takeException(), isNull);
       expect(fixture.api.calls.where((call) => call.method == 'POST'), isEmpty);

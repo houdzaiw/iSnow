@@ -145,6 +145,16 @@ class VipMembershipLevel {
   final int level, activeCount, total;
   final String icon, name, animation, preview;
   final List<MembershipPrivilege> privileges;
+
+  /// Nady uses showIconUrl for animation, but iconUrl for a static tier preview.
+  /// Keep the raw fields intact: showIconUrl may point at a retired image host.
+  String get previewSource {
+    if (preview.isEmpty) return '';
+    final path = Uri.tryParse(preview)?.path.toLowerCase() ?? '';
+    if (['.mp4', '.vap', '.pag', '.svga'].any(path.endsWith)) return preview;
+    return icon.isNotEmpty ? icon : preview;
+  }
+
   factory VipMembershipLevel.fromJson(Map<String, dynamic> j) =>
       VipMembershipLevel(
         level: membershipInt(j['level']),

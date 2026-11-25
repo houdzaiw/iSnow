@@ -462,6 +462,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.21.3+1"
+  flutter_image_gallery_saver:
+    dependency: "direct main"
+    description:
+      path: "packages/profile_gallery_saver"
+      relative: true
+    source: path
+    version: "0.0.2"
   flutter_lints:
     dependency: "direct dev"
     description:

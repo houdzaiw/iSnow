@@ -17,11 +17,24 @@ class ProfileBadgeItem {
     required this.iconAsset,
     required this.titleKey,
     required this.webPath,
+    this.iconUrl = '',
+    this.title = '',
+    this.destination,
   });
 
   final String iconAsset;
   final String titleKey;
   final String webPath;
+  final String iconUrl, title;
+  final ProfileDestination? destination;
+}
+
+enum ProfileDestinationKind { wallet, store, dailyReward, web, native }
+
+class ProfileDestination {
+  const ProfileDestination(this.kind, this.target);
+  final ProfileDestinationKind kind;
+  final String target;
 }
 
 class ProfileMenuData {
@@ -135,68 +148,6 @@ class ProfileMenuData {
     ];
   }
 
-  static List<ProfileBadgeItem> getBadgeItems() {
-    return const [
-      ProfileBadgeItem(
-        iconAsset: AppAssets.lanhuProfileBadge01,
-        titleKey: 'profile.myTeam',
-        webPath: '/h5/profile/my-team.html',
-      ),
-      ProfileBadgeItem(
-        iconAsset: AppAssets.lanhuProfileBadge02,
-        titleKey: 'profile.agent',
-        webPath: '/h5/profile/agent.html',
-      ),
-      ProfileBadgeItem(
-        iconAsset: AppAssets.lanhuProfileBadge03,
-        titleKey: 'profile.bd',
-        webPath: '/h5/profile/bd.html',
-      ),
-      ProfileBadgeItem(
-        iconAsset: AppAssets.lanhuProfileBadge04,
-        titleKey: 'profile.host',
-        webPath: '/h5/profile/host.html',
-      ),
-      ProfileBadgeItem(
-        iconAsset: AppAssets.lanhuProfileBadge05,
-        titleKey: 'profile.manage',
-        webPath: '/h5/profile/manage.html',
-      ),
-      ProfileBadgeItem(
-        iconAsset: AppAssets.lanhuProfileBadge06,
-        titleKey: 'profile.dailyReward',
-        webPath: '/h5/profile/daily-reward.html',
-      ),
-      ProfileBadgeItem(
-        iconAsset: AppAssets.lanhuProfileBadge07,
-        titleKey: 'profile.saleCoin',
-        webPath: '/h5/profile/sale-coin.html',
-      ),
-      ProfileBadgeItem(
-        iconAsset: AppAssets.lanhuProfileBadge08,
-        titleKey: 'profile.gameCoin',
-        webPath: '/h5/profile/game-coin.html',
-      ),
-    ];
-  }
-}
-
-class SettingMenuData {
-  static List<ProfileMenuItem> getMenuItems() {
-    return const [
-      ProfileMenuItem(null, titleKey: 'About Us', action: '/about-us'),
-      ProfileMenuItem(
-        null,
-        titleKey: 'User Agreement',
-        action:
-            '/web-view?title=User Agreement&uri=https://www.example.com/user-agreement',
-      ),
-      ProfileMenuItem(
-        null,
-        titleKey: 'Privacy Policy',
-        action:
-            '/web-view?title=Privacy Policy&uri=https://www.example.com/privacy-policy',
-      ),
-    ];
-  }
+  // Business entries come from ProfileMenuRepository, not invented H5 paths.
+  static List<ProfileBadgeItem> getBadgeItems() => const [];
 }

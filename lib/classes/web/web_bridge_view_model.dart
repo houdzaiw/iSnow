@@ -3,8 +3,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../configs/app_device.dart';
 import '../../manager/api_error_message.dart';
+import '../../manager/http_dio_manager.dart';
+import '../profile/membership/membership_session.dart';
 import 'web_bridge_repository.dart';
 import '../room/more/room_tools_config.dart';
+import '../profile/tools/profile_tools_config.dart';
 
 final webBridgeViewModelProvider = Provider<WebBridgeViewModel>((ref) {
   return WebBridgeViewModel(
@@ -24,19 +27,30 @@ class WebBridgeViewModel {
   final WebBridgeRepository _repository;
   final AppDevice _device;
   final RoomToolsConfig _config;
+  bool trustedSource(Uri uri) =>
+      _config.trustedWebBridge(uri) || const ProfileToolsConfig().trusted(uri);
 
   Future<WebBridgeApiResult> callApi(
     Map<String, dynamic> data, {
     String? language,
     Uri? sourceUri,
+    MembershipIdentity? account,
+    bool Function()? isCurrent,
   }) async {
     try {
-      if (sourceUri != null && !_config.trustedWebBridge(sourceUri)) {
+      if (sourceUri != null && !trustedSource(sourceUri)) {
         throw const WebBridgeApiRequestException(
           'This page is not authorized to use the API bridge',
         );
       }
-      final request = WebBridgeApiRequest.fromJson(data).withLanguage(language);
+      final request = WebBridgeApiRequest.fromJson(data)
+          .withLanguage(language)
+          .guarded({
+            if (account != null) HttpDioManager.expectedAuthUid: account.uid,
+            if (account != null)
+              HttpDioManager.expectedAuthToken: account.token,
+            if (isCurrent != null) HttpDioManager.requestIsCurrent: isCurrent,
+          });
       final response = await _repository.callApi(request);
       return WebBridgeApiResult.success(response);
     } on DioException catch (error) {

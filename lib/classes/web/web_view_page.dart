@@ -7,226 +7,283 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+import '../../localization/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/custom_scaffold.dart';
+import '../party/friends_activity/home_activity_navigation.dart';
+import '../profile/mine/profile_menu_item.dart';
+import '../profile/tools/profile_tools_widgets.dart';
+import '../room/more/room_entry_flow.dart';
+import '../room/more/room_game_page.dart';
+import '../create_room/create_room_sheet.dart';
+import 'profile_web_actions.dart';
+import 'profile_web_checkout.dart';
+import 'profile_web_share_sheet.dart';
 import 'web_bridge_view_model.dart';
+import 'web_page_bridge.dart';
 
 class WebViewPage extends HookConsumerWidget {
-  final String title;
-  final String uri;
-  final bool hiddenAppBar;
-
   const WebViewPage({
     super.key,
     required this.title,
     required this.uri,
     this.hiddenAppBar = false,
   });
+  final String title, uri;
+  final bool hiddenAppBar;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    listenHomeSessionRoute(context, ref);
     final controller = useMemoized(WebViewController.new);
-    final pageTitle = useState(title);
-    final hideAppBar = useState(hiddenAppBar);
+    final pageTitle = useState(title), hideBar = useState(hiddenAppBar);
     final progress = useState(0);
+    final failure = useState<Object?>(null);
     final initialUri = useMemoized(() => Uri.tryParse(uri), [uri]);
-    final bridgeViewModel = ref.read(webBridgeViewModelProvider);
-    final language = initialUri?.queryParameters['language'];
-    final sourceUri = useRef(initialUri);
-    final webEpoch = useRef(0);
+    final api = ref.watch(webBridgeViewModelProvider);
+    final actions = ref.watch(profileWebActionsProvider);
+    final ownedRoutes = useMemoized(() => <Route<dynamic>>{});
+    late WebPageBridge bridge;
 
-    Future<void> callH5Function(
-      String type,
-      String paramsKey,
-      Object? data,
-    ) async {
-      if (!context.mounted) return;
-      final dataString = data is String ? data : jsonEncode(data);
-      final jsCode =
-          '''
-        if (window.nadyBridgeCallback) {
-          window.nadyBridgeCallback(
-            ${jsonEncode(type)},
-            ${jsonEncode(paramsKey)},
-            ${jsonEncode(dataString)}
-          );
-        }
-      ''';
+    Future<T?> owned<T>(Route<T> route) async {
+      ownedRoutes.add(route);
       try {
-        await controller.runJavaScript(jsCode);
-      } catch (error) {
-        debugPrint('WebView callback failed: $error');
+        return await Navigator.of(context, rootNavigator: true).push(route);
+      } finally {
+        ownedRoutes.remove(route);
       }
     }
 
-    Future<void> handleBridgeMessage(JavaScriptMessage message) async {
-      final params = _decodeMap(message.message);
-      if (params == null) {
-        debugPrint('WebView nadyBridge invalid message: ${message.message}');
-        return;
-      }
-
-      final type = params['type']?.toString() ?? '';
-      final paramsKey = params['key']?.toString() ?? '';
-      final data = _asMap(params['data']) ?? const <String, dynamic>{};
-
-      switch (type) {
-        case 'apiCaller':
-          final epoch = webEpoch.value;
-          final result = await bridgeViewModel.callApi(
-            data,
-            language: language,
-            sourceUri: sourceUri.value ?? Uri(),
-          );
-          if (!context.mounted || epoch != webEpoch.value) return;
-          if (result.isSuccess) {
-            await callH5Function('apiCaller', paramsKey, result.data);
-          } else {
-            await callH5Function('apiCallerError', paramsKey, result.error);
+    Future<Object?> native(WebNativeRequest request) async {
+      bool current() =>
+          context.mounted && bridge.alive && request.isCurrent?.call() != false;
+      if (!current()) return null;
+      switch (request.kind) {
+        case WebNativeKind.bar:
+          hideBar.value = request.hide;
+          if (request.title?.isNotEmpty == true) {
+            pageTitle.value = request.title!;
           }
-          break;
-        case 'getAppInfo':
-          await callH5Function(
-            'getAppInfo',
-            paramsKey,
-            bridgeViewModel.appInfo(
-              statusBarHeight: MediaQuery.paddingOf(context).top,
-            ),
-          );
-          break;
-        case 'paymentList':
-          await callH5Function(
-            'paymentList',
-            paramsKey,
-            bridgeViewModel.paymentList(data),
-          );
-          break;
-        case 'changeAppBar':
-          hideAppBar.value = _asBool(data['hide']);
-          final nextTitle = data['title']?.toString();
-          if (nextTitle != null && nextTitle.isNotEmpty) {
-            pageTitle.value = nextTitle;
-          }
-          break;
-        case 'close':
-          if (context.mounted && context.canPop()) {
+        case WebNativeKind.closeDialog:
+          final route = ownedRoutes.lastOrNull;
+          if (route?.isActive == true) route!.navigator?.removeRoute(route);
+        case WebNativeKind.close:
+          if (ModalRoute.of(context)?.isCurrent == true && context.canPop()) {
             context.pop();
           }
-          break;
-        case 'log':
-          debugPrint('WebView log: ${jsonEncode(data)}');
-          break;
-        default:
-          debugPrint('Unhandled WebView bridge message: $type');
-          break;
+        case WebNativeKind.picture:
+          return owned<bool>(
+            ModalBottomSheetRoute(
+              builder: (c) => SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(c, true),
+                      child: Text(c.l10n.t('tools.camera')),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(c, false),
+                      child: Text(c.l10n.t('tools.album')),
+                    ),
+                  ],
+                ),
+              ),
+              isScrollControlled: false,
+            ),
+          );
+        case WebNativeKind.share:
+          return owned<Map<String, dynamic>>(
+            ModalBottomSheetRoute(
+              builder: (_) => ProfileWebShareSheet(
+                request: request.share!,
+                isCurrent: current,
+              ),
+              isScrollControlled: true,
+            ),
+          );
+        case WebNativeKind.payment:
+          return owned<bool>(
+            DialogRoute(
+              context: context,
+              builder: (_) => ProfileWebCheckout(
+                product: request.product!,
+                isCurrent: current,
+              ),
+            ),
+          );
+        case WebNativeKind.game:
+          await openRoomGame(context, ref, request.roomId!, request.title!, '');
+        case WebNativeKind.lobby:
+          final roomId = request.roomId ?? await showCreateRoomSheet(context);
+          if (!context.mounted || !current() || roomId == null) return null;
+          await enterSharedRoom(
+            context,
+            ref,
+            roomId,
+            requestedLobby: request.lobbyType,
+            isCurrent: current,
+          );
+        case WebNativeKind.target:
+          if (request.roomId != null) {
+            await enterSharedRoom(
+              context,
+              ref,
+              request.roomId!,
+              isCurrent: current,
+            );
+          } else if (request.destination case final destination?) {
+            if (destination.kind == ProfileDestinationKind.web) {
+              await context.push(
+                Uri(
+                  path: '/web-view',
+                  queryParameters: {'uri': destination.target, 'title': ''},
+                ).toString(),
+              );
+            } else {
+              await context.push(destination.target);
+            }
+          }
       }
+      return null;
     }
 
+    bridge = useMemoized(
+      () => WebPageBridge(
+        api: api,
+        actions: actions,
+        native: native,
+        source: initialUri,
+        statusBarHeight: () => MediaQuery.paddingOf(context).top,
+        shareOrigin: () {
+          final box = context.findRenderObject();
+          return box is RenderBox
+              ? box.localToGlobal(Offset.zero) & box.size
+              : Rect.zero;
+        },
+        notice: (error, key) {
+          if (context.mounted) {
+            profileToolsNotice(context, error, key: key ?? 'tools.failed');
+          }
+        },
+        callback: (type, key, payload) async {
+          if (!context.mounted) return;
+          final encoded = payload is String ? payload : jsonEncode(payload);
+          try {
+            await controller.runJavaScript(
+              'if(window.nadyBridgeCallback){window.nadyBridgeCallback('
+              '${jsonEncode(type)},${jsonEncode(key)},${jsonEncode(encoded)});}',
+            );
+          } catch (_) {
+            /* Closing or navigating a WebView can cancel its callback. */
+          }
+        },
+      ),
+      [controller, uri, api, actions],
+    );
+
     useEffect(() {
-      final requestUri = initialUri;
-      if (requestUri == null || !requestUri.hasScheme) {
-        debugPrint('Invalid WebView url: $uri');
+      final request = initialUri;
+      if (request == null ||
+          !{'http', 'https'}.contains(request.scheme) ||
+          request.host.isEmpty ||
+          request.userInfo.isNotEmpty) {
+        Future.microtask(() {
+          if (context.mounted) {
+            failure.value = context.l10n.t('tools.unavailable');
+          }
+        });
         return null;
       }
-
       controller
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
         ..setBackgroundColor(AppColors.transparent)
         ..setNavigationDelegate(
           NavigationDelegate(
             onPageStarted: (url) {
-              webEpoch.value++;
-              sourceUri.value = Uri.tryParse(url);
+              bridge.navigate(url);
+              if (context.mounted) failure.value = null;
             },
             onProgress: (value) {
-              if (context.mounted) {
-                progress.value = value;
-              }
+              if (context.mounted) progress.value = value;
             },
             onPageFinished: (_) async {
               if (!context.mounted || pageTitle.value.isNotEmpty) return;
-              final nextTitle = await controller.getTitle();
-              if (nextTitle != null && nextTitle.isNotEmpty) {
-                pageTitle.value = nextTitle;
+              final title = await controller.getTitle();
+              if (context.mounted && title?.isNotEmpty == true) {
+                pageTitle.value = title!;
               }
             },
             onWebResourceError: (error) {
-              debugPrint(
-                'WebView resource error: '
-                '${error.errorCode} ${error.description}',
-              );
+              if (context.mounted && error.isForMainFrame == true) {
+                failure.value = error.description;
+              }
             },
             onNavigationRequest: (request) {
-              final nextUri = Uri.tryParse(request.url);
-              final scheme = nextUri?.scheme;
-              if (scheme == 'http' || scheme == 'https') {
-                if (request.isMainFrame) sourceUri.value = nextUri;
+              final target = Uri.tryParse(request.url);
+              if (target != null &&
+                  {'http', 'https'}.contains(target.scheme) &&
+                  target.userInfo.isEmpty) {
+                if (request.isMainFrame) bridge.navigate(request.url);
                 return NavigationDecision.navigate;
               }
-              if (request.url == 'about:blank') {
-                return NavigationDecision.navigate;
-              }
-              debugPrint(
-                'Prevented non-http WebView navigation: ${request.url}',
-              );
-              return NavigationDecision.prevent;
+              return request.url == 'about:blank'
+                  ? NavigationDecision.navigate
+                  : NavigationDecision.prevent;
             },
           ),
         )
         ..addJavaScriptChannel(
           'nadyBridge',
-          onMessageReceived: handleBridgeMessage,
+          onMessageReceived: (message) => bridge.handle(message.message),
         )
-        ..loadRequest(requestUri);
-
+        ..loadRequest(request);
       return () {
+        bridge.dispose();
         unawaited(controller.removeJavaScriptChannel('nadyBridge'));
+        final routes = ownedRoutes.toList();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          for (final route in routes.reversed) {
+            if (route.isActive) route.navigator?.removeRoute(route);
+          }
+        });
       };
-    }, [controller, uri]);
+    }, [controller, uri, bridge]);
 
-    final webViewBody = Stack(
+    final body = Stack(
       children: [
         WebViewWidget(controller: controller),
         if (progress.value > 0 && progress.value < 100)
           const LinearProgressIndicator(),
+        if (failure.value != null)
+          Positioned.fill(
+            child: ColoredBox(
+              color: ProfileToolsTheme.white,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ProfileToolsError(
+                      error: failure.value,
+                      retry: controller.reload,
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.maybePop(context),
+                      child: Text(context.l10n.t('tools.close')),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
       ],
     );
-
-    if (hideAppBar.value) {
-      return Scaffold(
-        backgroundColor: AppColors.cardBackground,
-        body: webViewBody,
-      );
-    }
-
-    return CustomScaffold(
-      title: pageTitle.value,
-      useGradientBackground: false,
-      body: webViewBody,
-    );
+    return hideBar.value
+        ? Scaffold(backgroundColor: AppColors.cardBackground, body: body)
+        : CustomScaffold(
+            title: pageTitle.value,
+            useGradientBackground: false,
+            body: body,
+          );
   }
-}
-
-Map<String, dynamic>? _decodeMap(String raw) {
-  try {
-    return _asMap(jsonDecode(raw));
-  } catch (_) {
-    return null;
-  }
-}
-
-Map<String, dynamic>? _asMap(Object? value) {
-  if (value == null) return null;
-  if (value is Map<String, dynamic>) return value;
-  if (value is Map) {
-    return value.map((key, value) => MapEntry(key.toString(), value));
-  }
-  return null;
-}
-
-bool _asBool(Object? value) {
-  if (value is bool) return value;
-  if (value is num) return value != 0;
-  final text = value?.toString().toLowerCase();
-  return text == 'true' || text == '1';
 }

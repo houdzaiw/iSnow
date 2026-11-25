@@ -83,11 +83,13 @@ class RoomPage extends HookConsumerWidget {
     required this.roomId,
     this.roomPassword = '',
     this.followUid = 0,
+    this.requestedLobby = 0,
   });
 
   final String roomId;
   final String roomPassword;
   final int followUid;
+  final int requestedLobby;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -275,6 +277,17 @@ class RoomPage extends HookConsumerWidget {
       roomGiftEventManagerProvider(giftRoomId).select((value) => value.slots),
     );
     final moreFeatures = ref.watch(roomToolsControllerProvider(giftRoomId));
+    final requestedLobbyShown = useRef(false);
+    useEffect(() {
+      if (!requestedLobbyShown.value && [1, 2].contains(requestedLobby) &&
+          moreFeatures.sessionActive && !moreFeatures.loading) {
+        requestedLobbyShown.value = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) openRequestedRoomLobby(context, ref, giftRoomId, requestedLobby);
+        });
+      }
+      return null;
+    }, [giftRoomId, requestedLobby, moreFeatures.sessionActive, moreFeatures.loading]);
     ref.listen(
       roomToolsControllerProvider(
         giftRoomId,

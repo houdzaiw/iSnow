@@ -14,9 +14,11 @@ final walletRepositoryProvider = Provider<WalletRepository>((ref) {
 });
 
 class WalletRepository {
-  const WalletRepository(this._httpManager);
+  const WalletRepository(this._httpManager, {String? platformChannel})
+    : _channelOverride = platformChannel;
 
   final HttpDioManager _httpManager;
+  final String? _channelOverride;
 
   Future<WalletPurse> fetchPurse() async {
     final response = await _httpManager.get(HttpApi.walletPurse);
@@ -29,7 +31,7 @@ class WalletRepository {
 
     final response = await _httpManager.post(
       HttpApi.walletRechargePackageList,
-      data: const <String, dynamic>{},
+      // Match Nady's Retrofit request: query parameters and no JSON body.
       queryParameters: {'channel': channel, 'merchant': channel},
     );
     final server = NadyServerResponse<List<WalletRechargeProduct>>.fromJson(
@@ -57,6 +59,7 @@ class WalletRepository {
       productId: product.id,
       channel: 'google',
       merchant: 1,
+      countryRechargeChannelConfigId: product.countryRechargeChannelConfigId,
     );
     final response = await _httpManager.post(
       HttpApi.walletRechargeGoogleCreation,
@@ -100,6 +103,7 @@ class WalletRepository {
   }
 
   String get _platformChannel {
+    if (_channelOverride != null) return _channelOverride;
     if (Platform.isAndroid) return 'google';
     if (Platform.isIOS) return 'apple';
     return '';

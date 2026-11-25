@@ -265,14 +265,13 @@ class _MembershipPageState extends ConsumerState<MembershipPage> {
                                 ),
                               ),
                               if (vip &&
-                                  state.vipLevel?.preview.isNotEmpty == true)
+                                  state.vipLevel?.previewSource.isNotEmpty ==
+                                      true)
                                 SizedBox(
                                   height: MembershipTheme.preview,
                                   child: MembershipMedia(
                                     key: ValueKey('${widget.kind}:$level'),
-                                    url: (vip
-                                        ? state.vipLevel?.preview
-                                        : state.noble?.preview)!,
+                                    url: state.vipLevel!.previewSource,
                                   ),
                                 ),
                               Padding(

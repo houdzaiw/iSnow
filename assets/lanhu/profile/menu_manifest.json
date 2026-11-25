@@ -1,0 +1,91 @@
+{
+  "updated": "2026-11-25",
+  "reference": "Nady behavior, iSnow light theme; all assets reused without modification",
+  "runtime_media": "Honor medals / backpack icons and animations come from authenticated API data; missing media uses red placeholder",
+  "assets": [
+    {
+      "constant": "appLogo",
+      "asset": "assets/base/app_logo.png",
+      "source": "existing iSnow asset; membership provenance in membership/manifest.json where applicable",
+      "sha256": "0581d3a09d3a2f8a6f497289812520220b2ed9d4cce166a71bd64a49d53f386b"
+    },
+    {
+      "constant": "backButton",
+      "asset": "assets/base/back_button.png",
+      "source": "existing iSnow asset; membership provenance in membership/manifest.json where applicable",
+      "sha256": "f6927879650c9d1309aee63def2c36fc71ba6b4a56ee5ef951b17cc84abda8d2"
+    },
+    {
+      "constant": "roomProfileChevron",
+      "asset": "assets/lanhu/room/room_profile_chevron.png",
+      "source": "existing iSnow asset; membership provenance in membership/manifest.json where applicable",
+      "sha256": "d9c6ed887f14d389755b14f035c2ae2866f11a0068098907431619691b08f0fe"
+    },
+    {
+      "constant": "profileMenuSettings",
+      "asset": "assets/profile/profile_menu_settings.png",
+      "source": "existing iSnow asset; membership provenance in membership/manifest.json where applicable",
+      "sha256": "7fe5c999b778e28e6ae04a58ebe80eff68ee4d012057df27df5578e0deb1a00a"
+    },
+    {
+      "constant": "profileMenuBlockList",
+      "asset": "assets/profile/profile_menu_block_list.png",
+      "source": "existing iSnow asset; membership provenance in membership/manifest.json where applicable",
+      "sha256": "91f366874f578b199006c148e94a0d56026bd6a7fd919367f210e0acee1d53ba"
+    },
+    {
+      "constant": "membershipVipBadge",
+      "asset": "assets/lanhu/profile/membership/vip_badge.webp",
+      "source": "existing iSnow asset; membership provenance in membership/manifest.json where applicable",
+      "sha256": "078cb890530c6f630c5eca836281253395e2141979f34a3c32b8d259020cb3c2"
+    },
+    {
+      "constant": "lanhuProfileMenuLevel",
+      "asset": "assets/lanhu/profile/profile_menu_level.png",
+      "source": "existing iSnow asset; membership provenance in membership/manifest.json where applicable",
+      "sha256": "79edb31f3549d87d6126948d69d03601cce11d45c12aa66f052f58ad696b16cf"
+    },
+    {
+      "constant": "lanhuProfileMenuBackpack",
+      "asset": "assets/lanhu/profile/profile_menu_backpack.png",
+      "source": "existing iSnow asset; membership provenance in membership/manifest.json where applicable",
+      "sha256": "6d66471ba34d2dd0a7c8ac1c535df315cb6d20e840276e349ebbf0c30e245160"
+    },
+    {
+      "constant": "lanhuProfileMenuHonor",
+      "asset": "assets/lanhu/profile/profile_menu_honor.png",
+      "source": "existing iSnow asset; membership provenance in membership/manifest.json where applicable",
+      "sha256": "a7ea85d6eba3138d51174e1e2ec2492b0aa4fb6a5e8dcb04b3f7b9e5e4560643"
+    },
+    {
+      "constant": "lanhuProfileMenuSetting",
+      "asset": "assets/lanhu/profile/profile_menu_setting.png",
+      "source": "existing iSnow asset; membership provenance in membership/manifest.json where applicable",
+      "sha256": "f41d748c418b45c98a5e4bc16706fea646a42db53d0429a9971bf8b00102e4a0"
+    },
+    {
+      "constant": "lanhuProfileMenuAbout",
+      "asset": "assets/lanhu/profile/profile_menu_about.png",
+      "source": "existing iSnow asset; membership provenance in membership/manifest.json where applicable",
+      "sha256": "4a8ede1ccb3f0a1ffe06f0fdfeb1c105334303547edbf43b72eb9e891d1c1e07"
+    },
+    {
+      "constant": "lanhuProfileMenuPrivacy",
+      "asset": "assets/lanhu/profile/profile_menu_privacy.png",
+      "source": "existing iSnow asset; membership provenance in membership/manifest.json where applicable",
+      "sha256": "b3dcd264a37ea15da7c50f355b3c7f2bc4d9bd48a1fd5addc7f02c205d44f27d"
+    },
+    {
+      "constant": "lanhuProfileMenuTerms",
+      "asset": "assets/lanhu/profile/profile_menu_terms.png",
+      "source": "existing iSnow asset; membership provenance in membership/manifest.json where applicable",
+      "sha256": "7fd561476de52bce0747898c3bb6ec6fa70d5fb2f9aeedab75942308c48f9291"
+    },
+    {
+      "constant": "iconMissing",
+      "asset": "assets/lanhu/common/icon_missing.png",
+      "source": "existing iSnow asset; membership provenance in membership/manifest.json where applicable",
+      "sha256": "9d190d36e4ec405022a56095bc51330cf6df4200b5131f9e58e0c02bd9638801"
+    }
+  ]
+}

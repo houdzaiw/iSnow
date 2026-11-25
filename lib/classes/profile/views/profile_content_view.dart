@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 
 import '../../../localization/app_localizations.dart';
 import '../../../theme/app_theme.dart';
+import '../../../widgets/app_network_image.dart';
 import '../mine/profile_menu_item.dart';
 import '../mine/profile_models.dart';
 import '../mine/profile_state.dart';
 import '../membership/membership_state.dart';
 import '../membership/views/membership_widgets.dart';
+import '../tools/profile_tools_widgets.dart' show ProfileToolsError;
 
 class ProfileContentView extends StatelessWidget {
   const ProfileContentView({
@@ -23,6 +25,8 @@ class ProfileContentView extends StatelessWidget {
     required this.membership,
     required this.onVipTap,
     required this.onNobleTap,
+    this.toolsError,
+    this.onRetryTools,
   });
 
   final ProfileState state;
@@ -34,6 +38,8 @@ class ProfileContentView extends StatelessWidget {
   final ValueChanged<ProfileMenuItem> onMenuAction;
   final MembershipState membership;
   final VoidCallback onVipTap, onNobleTap;
+  final Object? toolsError;
+  final VoidCallback? onRetryTools;
 
   @override
   Widget build(BuildContext context) {
@@ -94,6 +100,11 @@ class ProfileContentView extends StatelessWidget {
                                   onMenuAction: onMenuAction,
                                 ),
                                 const SizedBox(height: 8),
+                                if (toolsError != null)
+                                  ProfileToolsError(
+                                    error: toolsError,
+                                    retry: onRetryTools ?? onRefresh,
+                                  ),
                                 _ProfileBadgeCard(
                                   items: state.badgeItems,
                                   onBadgeAction: onBadgeAction,
@@ -101,6 +112,7 @@ class ProfileContentView extends StatelessWidget {
                                 const SizedBox(height: 17),
                                 _ProfileMenuCard(
                                   items: state.featureItems,
+                                  honorCount: state.honorCount,
                                   onMenuAction: onMenuAction,
                                 ),
                               ],
@@ -652,20 +664,22 @@ class _ProfileBadgeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final visibleItems = items.take(8).toList(growable: false);
+    final visibleItems = items;
+    if (visibleItems.isEmpty) return const SizedBox.shrink();
 
     return _ProfileWhiteCard(
       width: MediaQuery.of(context).size.width - 24,
-      height: 196,
+      height: null,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(18, 24, 18, 20),
+        padding: ProfileToolsTheme.padding,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final itemWidth = constraints.maxWidth / 5;
+            final itemWidth =
+                constraints.maxWidth / ProfileToolsTheme.menuColumns;
 
             return Wrap(
               alignment: WrapAlignment.start,
-              runSpacing: 18,
+              runSpacing: ProfileToolsTheme.gridSpacing,
               children: [
                 for (final item in visibleItems)
                   SizedBox(
@@ -701,15 +715,25 @@ class _ProfileBadgeItemView extends StatelessWidget {
         width: 54,
         child: Column(
           children: [
-            Image.asset(
-              item.iconAsset,
-              width: 32,
-              height: 32,
-              fit: BoxFit.contain,
-            ),
+            if (item.iconUrl.isNotEmpty)
+              AppNetworkImage(
+                url: item.iconUrl,
+                width: ProfileToolsTheme.badge,
+                height: ProfileToolsTheme.badge,
+                errorWidget: Image.asset(AppAssets.iconMissing),
+              )
+            else
+              Image.asset(
+                item.iconAsset,
+                width: ProfileToolsTheme.badge,
+                height: ProfileToolsTheme.badge,
+                fit: BoxFit.contain,
+              ),
             const SizedBox(height: 8),
             Text(
-              context.l10n.t(item.titleKey),
+              item.title.isNotEmpty
+                  ? item.title
+                  : context.l10n.t(item.titleKey),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
@@ -728,7 +752,12 @@ class _ProfileBadgeItemView extends StatelessWidget {
 }
 
 class _ProfileMenuCard extends StatelessWidget {
-  const _ProfileMenuCard({required this.items, required this.onMenuAction});
+  const _ProfileMenuCard({
+    required this.items,
+    required this.onMenuAction,
+    this.honorCount,
+  });
+  final int? honorCount;
 
   final List<ProfileMenuItem> items;
   final ValueChanged<ProfileMenuItem> onMenuAction;
@@ -745,6 +774,7 @@ class _ProfileMenuCard extends StatelessWidget {
             for (var index = 0; index < items.length; index++) ...[
               _ProfileMenuRow(
                 item: items[index],
+                count: items[index].action == 'honor' ? honorCount : null,
                 onTap: () => onMenuAction(items[index]),
               ),
               if (index != items.length - 1)
@@ -762,7 +792,8 @@ class _ProfileMenuCard extends StatelessWidget {
 }
 
 class _ProfileMenuRow extends StatelessWidget {
-  const _ProfileMenuRow({required this.item, required this.onTap});
+  const _ProfileMenuRow({required this.item, required this.onTap, this.count});
+  final int? count;
 
   final ProfileMenuItem item;
   final VoidCallback onTap;
@@ -793,7 +824,7 @@ class _ProfileMenuRow extends StatelessWidget {
               const SizedBox(width: 9),
               Expanded(
                 child: Text(
-                  context.l10n.t(item.titleKey),
+                  '${context.l10n.t(item.titleKey)}${count == null ? '' : ' ($count)'}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -803,10 +834,10 @@ class _ProfileMenuRow extends StatelessWidget {
                   ),
                 ),
               ),
-              const Icon(
-                Icons.chevron_right,
-                color: Color(0xFFB2B2B2),
-                size: 18,
+              Image.asset(
+                AppAssets.roomProfileChevron,
+                width: ProfileToolsTheme.icon,
+                height: ProfileToolsTheme.icon,
               ),
               const SizedBox(width: 14),
             ],
@@ -825,7 +856,7 @@ class _ProfileWhiteCard extends StatelessWidget {
   });
 
   final double width;
-  final double height;
+  final double? height;
   final Widget child;
 
   @override

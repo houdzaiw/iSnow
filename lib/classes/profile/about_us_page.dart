@@ -1,81 +1,93 @@
-
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:project/localization/app_localizations.dart';
-import 'package:project/widgets/custom_scaffold.dart';
+import '../../localization/app_localizations.dart';
+import '../../theme/app_theme.dart';
+import '../party/friends_activity/home_activity_navigation.dart';
+import 'settings/about_view_model.dart';
+import 'tools/profile_tools_config.dart';
+import 'tools/profile_tools_widgets.dart';
 
-class AboutUsPage extends HookConsumerWidget {
+class AboutUsPage extends ConsumerWidget {
   const AboutUsPage({super.key});
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return CustomScaffold(
+    listenHomeSessionRoute(context, ref);
+    final state = ref.watch(aboutProvider),
+        model = ref.read(aboutProvider.notifier),
+        update = state.update;
+    void web(String key, String url) => context.push(
+      Uri(
+        path: '/web-view',
+        queryParameters: {'title': context.l10n.t(key), 'uri': url},
+      ).toString(),
+    );
+    return ProfileToolsScaffold(
       title: context.l10n.t('profile.aboutUs'),
-      body: Column(
+      child: ListView(
+        padding: ProfileToolsTheme.padding,
         children: [
-          SizedBox(height: 30),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 60),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // App Logo - 120 * 120
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: const Color(0xFFF9E707),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Center(
-                      child: Image.asset("assets/base/app_logo.png", width: 100, height: 100),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  // Version Info
-                  Text(
-                    'Version 1.0.0',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: const Color(0xFF999999),
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  // 联系邮箱
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Text(
-                      'Contact email: moodenote666@163.com',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: const Color(0xFF666666),
-                        height: 1.6,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+          ProfileToolsTheme.gap,
+          const Center(
+            child: MembershipImage(
+              AppAssets.appLogo,
+              size: ProfileToolsTheme.appLogo,
             ),
           ),
-
-          // Description 固定在底部
-          Padding(
-            padding: const EdgeInsets.only(left: 24, right: 24, bottom: 40),
-            child: Text(
-              'A simple and elegant diary app to record your daily emotions and moments.',
+          ProfileToolsTheme.gap,
+          const Text(
+            ProfileToolsConfig.brand,
+            textAlign: TextAlign.center,
+            style: ProfileToolsTheme.title,
+          ),
+          if (state.info != null)
+            Text(
+              state.info!.version,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF666666),
-                    height: 1.6,
-                  ),
+              style: ProfileToolsTheme.caption,
             ),
+          if (state.busy) const LinearProgressIndicator(),
+          if (state.error != null)
+            ProfileToolsError(
+              error: state.error,
+              retry: state.info == null ? model.load : model.check,
+            ),
+          ProfileToolsTheme.gap,
+          ElevatedButton(
+            onPressed: state.busy || state.info == null ? null : model.check,
+            child: Text(context.l10n.t('menu.checkUpdate')),
+          ),
+          if (state.checked && update != null) ...[
+            Text(
+              update.needUpdate
+                  ? update.title.isEmpty
+                        ? context.l10n.t('menu.updateAvailable')
+                        : update.title
+                  : context.l10n.t('menu.latest'),
+              style: ProfileToolsTheme.label,
+            ),
+            if (update.needUpdate) ...[
+              Text(update.description, style: ProfileToolsTheme.body),
+              if (update.url != null)
+                TextButton(
+                  onPressed: state.busy ? null : model.open,
+                  child: Text(context.l10n.t('menu.openUpdate')),
+                )
+              else
+                Text(
+                  context.l10n.t('menu.invalidUpdate'),
+                  style: ProfileToolsTheme.caption,
+                ),
+            ],
+          ],
+          ListTile(
+            title: Text(context.l10n.t('settings.termsOfUse')),
+            onTap: () => web('settings.termsOfUse', ProfileToolsConfig.terms),
+          ),
+          ListTile(
+            title: Text(context.l10n.t('settings.privacyPolicy')),
+            onTap: () =>
+                web('settings.privacyPolicy', ProfileToolsConfig.privacy),
           ),
         ],
       ),

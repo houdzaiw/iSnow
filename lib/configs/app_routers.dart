@@ -20,6 +20,12 @@ import '../classes/profile/edit_profile_page.dart';
 import '../classes/profile/edit_nickname_page.dart';
 import '../classes/profile/homepage/profile_homepage_page.dart';
 import '../classes/profile/mine/profile_page.dart';
+import '../classes/profile/store/store_page.dart';
+import '../classes/profile/store/backpack_page.dart';
+import '../classes/profile/honor/honor_page.dart';
+import '../classes/profile/settings/account_security_page.dart';
+import '../classes/profile/rewards/daily_reward_page.dart';
+import '../classes/profile/binding/account_binding_page.dart';
 import '../classes/profile/relations/profile_relation_page.dart';
 import '../classes/profile/settings_page.dart';
 import '../classes/rank/rank_page.dart';
@@ -45,6 +51,16 @@ final GoRouter goRouter = GoRouter(
   navigatorKey: appRootNavigatorKey,
   initialLocation: _initialRoute,
   routes: [
+    GoRoute(path: '/honor', builder: (_, _) => const HonorPage()),
+    GoRoute(path: '/backpack', builder: (_, _) => const BackpackPage(initialGifts: true)),
+    GoRoute(path: '/settings/account-security', builder: (_, _) => const AccountSecurityPage()),
+    GoRoute(path: '/store', builder: (_, _) => const StorePage()),
+    GoRoute(path: '/store/backpack', builder: (_, _) => const BackpackPage()),
+    GoRoute(path: '/daily-reward', builder: (_, _) => const DailyRewardPage()),
+    GoRoute(
+      path: '/account-binding',
+      builder: (_, _) => const AccountBindingPage(),
+    ),
     GoRoute(
       path: '/party/friends-activity',
       name: 'friends-activity',
@@ -175,6 +191,7 @@ final GoRouter goRouter = GoRouter(
           roomId: state.pathParameters['roomId'] ?? '',
           roomPassword: state.uri.queryParameters['roomPassword'] ?? '',
           followUid: followUid,
+          requestedLobby: int.tryParse(state.uri.queryParameters['requestedLobby'] ?? '') ?? 0,
         );
       },
     ),

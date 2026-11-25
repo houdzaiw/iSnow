@@ -1,77 +1,82 @@
 import 'package:flutter/material.dart';
-import 'package:isar/isar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:project/manager/app_Isar.dart';
-import 'package:project/model/blocked_user.dart';
-import 'package:project/widgets/custom_scaffold.dart';
+import '../../localization/app_localizations.dart';
+import '../../theme/app_theme.dart';
+import '../party/friends_activity/home_activity_navigation.dart';
+import 'settings/blacklist_view_model.dart';
+import 'tools/profile_tools_widgets.dart';
 
-final blockedUsersProvider = FutureProvider<List<BlockedUser>>((ref) async {
-  final isar = await IsarDB.instance.db;
-  return isar.blockedUsers.where().findAll();
-});
-
-class BlockListPage extends HookConsumerWidget {
+class BlockListPage extends ConsumerWidget {
   const BlockListPage({super.key});
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final blockedUsersAsync = ref.watch(blockedUsersProvider);
-
-    return CustomScaffold(
-      title: 'Block List',
-      body: Column(
-        children: [
-          SizedBox(height: 15),
-          Expanded(
-            child: blockedUsersAsync.when(
-              data: (users) {
-                if (users.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      'No blocked users',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  );
-                }
-                return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  itemCount: users.length,
-                  itemBuilder: (context, index) {
-                    final user = users[index];
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage: AssetImage("${user.avatar}.jpg"),
-                        onBackgroundImageError: (_, __) {},
-                        child: user.avatar == null || user.avatar!.isEmpty
-                            ? const Icon(Icons.person)
-                            : null,
-                      ),
-                      title: Text(user.nick ?? ''),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.remove_circle_outline),
-                        onPressed: () async {
-                          final isar = await IsarDB.instance.db;
-                          await isar.writeTxn(() async {
-                            await isar.blockedUsers.delete(user.id);
-                          });
-                          ref.invalidate(blockedUsersProvider);
+    listenHomeSessionRoute(context, ref);
+    final state = ref.watch(blacklistProvider),
+        model = ref.read(blacklistProvider.notifier);
+    return ProfileToolsScaffold(
+      title: context.l10n.t('profile.blockList'),
+      child: RefreshIndicator(
+        onRefresh: model.load,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: ProfileToolsTheme.padding,
+          children: [
+            if (state.loading) const LinearProgressIndicator(),
+            if (state.error != null)
+              ProfileToolsError(error: state.error, retry: model.load),
+            if (!state.loading && state.error == null && state.items.isEmpty)
+              Text(context.l10n.t('tools.empty')),
+            for (final user in state.items)
+              ListTile(
+                leading: MembershipImage(
+                  user.avatar,
+                  size: ProfileToolsTheme.badge,
+                ),
+                title: Text(
+                  user.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: ProfileToolsTheme.label,
+                ),
+                subtitle: Text(
+                  'ID: ${user.userNo > 0 ? user.userNo : user.uid}',
+                  style: ProfileToolsTheme.caption,
+                ),
+                onTap: () => context.push('/profile-homepage/${user.uid}'),
+                trailing: TextButton(
+                  onPressed: state.removing != null || state.loading
+                      ? null
+                      : () async {
+                          final confirmed = await profileToolsConfirm(
+                            context,
+                            context.l10n.t('menu.unblockConfirm', {
+                              'name': user.name,
+                            }),
+                          );
+                          if (!confirmed || !context.mounted) return;
+                          final result = await model.remove(user.uid);
+                          if (context.mounted && result) {
+                            profileToolsNotice(
+                              context,
+                              null,
+                              key: 'tools.success',
+                            );
+                          }
                         },
-                      ),
-                    );
-                  },
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => Center(child: Text('Error: $error')),
-            ),
-          ),
-        ],
+                  child: Text(context.l10n.t('menu.unblock')),
+                ),
+              ),
+            if (state.more && state.items.isNotEmpty)
+              TextButton(
+                onPressed: state.loading || state.removing != null
+                    ? null
+                    : () => model.load(more: true),
+                child: Text(context.l10n.t('tools.more')),
+              ),
+          ],
+        ),
       ),
     );
-  }
-
-  void onRightIconTap(BuildContext context) {
-    context.push('/messages');
   }
 }

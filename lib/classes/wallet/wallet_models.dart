@@ -37,6 +37,7 @@ class WalletRechargeProduct {
     required this.merchant,
     required this.dollarAmount,
     required this.useType,
+    this.countryRechargeChannelConfigId = '',
   });
 
   final String id;
@@ -50,6 +51,7 @@ class WalletRechargeProduct {
   final String merchant;
   final int dollarAmount;
   final int useType;
+  final String countryRechargeChannelConfigId;
 
   factory WalletRechargeProduct.fromJson(Map<String, dynamic> json) {
     return WalletRechargeProduct(
@@ -64,6 +66,8 @@ class WalletRechargeProduct {
       merchant: json['merchant']?.toString() ?? '',
       dollarAmount: _intValue(json['dollarAmount']),
       useType: _intValue(json['useType']),
+      countryRechargeChannelConfigId:
+          '${json['countryRechargeChannelConfigId'] ?? ''}',
     );
   }
 }

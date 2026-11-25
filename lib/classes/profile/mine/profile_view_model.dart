@@ -2,6 +2,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'profile_repository.dart';
 import 'profile_state.dart';
+import '../membership/membership_session.dart';
 
 final profileViewModelProvider =
     NotifierProvider.autoDispose<ProfileViewModel, ProfileState>(
@@ -11,10 +12,16 @@ final profileViewModelProvider =
 class ProfileViewModel extends AutoDisposeNotifier<ProfileState> {
   int _loadRevision = 0;
   bool _alive = true;
+  int _accountEpoch = 0;
+  int get accountEpoch => _accountEpoch;
   ProfileRepository get _repository => ref.read(profileRepositoryProvider);
 
   @override
   ProfileState build() {
+    ref.watch(membershipSessionProvider);
+    _accountEpoch++;
+    _alive = true;
+    _loadRevision++;
     ref.onDispose(() {
       _alive = false;
       _loadRevision += 1;
@@ -46,11 +53,17 @@ class ProfileViewModel extends AutoDisposeNotifier<ProfileState> {
     }
   }
 
-  Future<bool> logout() {
+  Future<bool> logout({int? expectedEpoch}) {
+    if (expectedEpoch != null && expectedEpoch != _accountEpoch) {
+      return Future.value(false);
+    }
     return _runAccountAction(_repository.logout);
   }
 
-  Future<bool> deleteAccount() {
+  Future<bool> deleteAccount({int? expectedEpoch}) {
+    if (expectedEpoch != null && expectedEpoch != _accountEpoch) {
+      return Future.value(false);
+    }
     return _runAccountAction(_repository.deleteAccount);
   }
 

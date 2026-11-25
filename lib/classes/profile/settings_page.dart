@@ -3,335 +3,145 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../localization/app_localizations.dart';
-import '../../manager/api_error_message.dart';
 import '../../manager/locale_provider.dart';
 import '../../theme/app_theme.dart';
-import '../../widgets/custom_scaffold.dart';
+import '../party/friends_activity/home_activity_navigation.dart';
 import 'mine/profile_view_model.dart';
+import 'settings/profile_account_actions.dart';
+import 'tools/profile_tools_config.dart';
+import 'tools/profile_tools_widgets.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
-
-  static const _userAgreementUrl = 'https://www.simisoul.com/protocol.html';
-  static const _privacyPolicyUrl = 'https://www.simisoul.com/policy.html';
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    listenHomeSessionRoute(context, ref);
     final locale = ref.watch(appLocaleProvider);
-    final profileState = ref.watch(profileViewModelProvider);
-    final selectedLanguage = locale.languageCode == 'zh'
-        ? context.l10n.t('app.chinese')
-        : context.l10n.t('app.english');
-
-    return CustomScaffold(
+    final busy = ref.watch(
+      profileViewModelProvider.select((s) => s.isSubmitting),
+    );
+    Widget row(String title, String route, String image) => ListTile(
+      enabled: !busy,
+      leading: MembershipImage(image, size: ProfileToolsTheme.icon),
+      title: Text(context.l10n.t(title), style: ProfileToolsTheme.label),
+      trailing: const MembershipImage(
+        AppAssets.roomProfileChevron,
+        size: ProfileToolsTheme.icon,
+      ),
+      onTap: () => context.push(route),
+    );
+    String web(String key, String url) => Uri(
+      path: '/web-view',
+      queryParameters: {'title': context.l10n.t(key), 'uri': url},
+    ).toString();
+    return ProfileToolsScaffold(
       title: context.l10n.t('profile.settings'),
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            child: Column(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.cardBackground,
-                    borderRadius: AppRadius.cardBorder,
-                    boxShadow: AppShadows.soft,
-                  ),
-                  child: Column(
-                    children: [
-                      _SettingsTile(
-                        leading: Icons.language_rounded,
-                        title: context.l10n.t('app.language'),
-                        subtitle:
-                            '${context.l10n.t('app.currentLanguage')}: $selectedLanguage',
-                        onTap: () {
-                          _showLanguageSheet(context, ref, locale.languageCode);
-                        },
-                      ),
-                      const Divider(
-                        height: 1,
-                        thickness: 1,
-                        color: AppColors.divider,
-                        indent: AppSpacing.xl,
-                        endIndent: AppSpacing.xl,
-                      ),
-                      _SettingsTile(
-                        leading: Icons.description_rounded,
-                        title: context.l10n.t('settings.userAgreement'),
-                        onTap: () {
-                          _openWebView(
-                            context,
-                            title: context.l10n.t('settings.userAgreement'),
-                            uri: _userAgreementUrl,
-                          );
-                        },
-                      ),
-                      const Divider(
-                        height: 1,
-                        thickness: 1,
-                        color: AppColors.divider,
-                        indent: AppSpacing.xl,
-                        endIndent: AppSpacing.xl,
-                      ),
-                      _SettingsTile(
-                        leading: Icons.privacy_tip_rounded,
-                        title: context.l10n.t('settings.privacyPolicy'),
-                        onTap: () {
-                          _openWebView(
-                            context,
-                            title: context.l10n.t('settings.privacyPolicy'),
-                            uri: _privacyPolicyUrl,
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                const Spacer(),
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.cardBackground,
-                    borderRadius: AppRadius.cardBorder,
-                    boxShadow: AppShadows.soft,
-                  ),
-                  child: Column(
-                    children: [
-                      _SettingsTile(
-                        leading: Icons.person_remove_alt_1_rounded,
-                        title: context.l10n.t('profile.deleteAccount'),
-                        titleColor: AppColors.textPrimary,
-                        onTap: () => _confirmDeleteAccount(context, ref),
-                      ),
-                      const Divider(
-                        height: 1,
-                        thickness: 1,
-                        color: AppColors.divider,
-                        indent: AppSpacing.xl,
-                        endIndent: AppSpacing.xl,
-                      ),
-                      _SettingsTile(
-                        leading: Icons.logout_rounded,
-                        title: context.l10n.t('profile.logOut'),
-                        titleColor: AppColors.primaryPinkDeep,
-                        iconColor: AppColors.primaryPinkDeep,
-                        onTap: () => _confirmLogout(context, ref),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+      child: AbsorbPointer(
+        absorbing: busy,
+        child: ListView(
+          padding: ProfileToolsTheme.padding,
+          children: [
+            if (busy) const LinearProgressIndicator(),
+            row(
+              'menu.accountSecurity',
+              '/settings/account-security',
+              AppAssets.profileMenuSettings,
             ),
-          ),
-          if (profileState.isSubmitting)
-            Positioned.fill(
-              child: ColoredBox(
-                color: const Color(0x33000000),
-                child: const Center(child: CircularProgressIndicator()),
+            row(
+              'menu.vipSettings',
+              '/vip/settings',
+              AppAssets.membershipVipBadge,
+            ),
+            row(
+              'profile.blockList',
+              '/block-list',
+              AppAssets.profileMenuBlockList,
+            ),
+            ListTile(
+              leading: const MembershipImage(
+                AppAssets.profileMenuSettings,
+                size: ProfileToolsTheme.icon,
+              ),
+              title: Text(
+                context.l10n.t('app.language'),
+                style: ProfileToolsTheme.label,
+              ),
+              subtitle: Text(
+                context.l10n.t(
+                  locale.languageCode == 'zh' ? 'app.chinese' : 'app.english',
+                ),
+                style: ProfileToolsTheme.caption,
+              ),
+              onTap: () => showModalBottomSheet<void>(
+                context: context,
+                useRootNavigator: true,
+                builder: (c) => SafeArea(
+                  child: RadioGroup<String>(
+                    groupValue: locale.languageCode,
+                    onChanged: (code) async {
+                      if (code == null) return;
+                      try {
+                        await ref
+                            .read(appLocaleProvider.notifier)
+                            .setLanguage(code);
+                        if (c.mounted) Navigator.pop(c);
+                      } catch (e) {
+                        if (c.mounted) profileToolsNotice(c, e);
+                      }
+                    },
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        for (final code in ['en', 'zh'])
+                          RadioListTile<String>(
+                            value: code,
+                            title: Text(
+                              c.l10n.t(
+                                code == 'zh' ? 'app.chinese' : 'app.english',
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
-    final confirmed = await _showConfirmDialog(
-      context,
-      title: context.l10n.t('profile.logOut'),
-      message: context.l10n.t('profile.logOutMessage'),
-      confirmLabel: context.l10n.t('profile.logOut'),
-    );
-    if (!confirmed) return;
-
-    final success = await ref.read(profileViewModelProvider.notifier).logout();
-    if (!context.mounted) return;
-    if (success) {
-      context.go('/login');
-      return;
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          userFacingErrorMessage(
-            ref.read(profileViewModelProvider).actionError,
-            fallback: context.l10n.t('profile.logoutFailed'),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _confirmDeleteAccount(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
-    final confirmed = await _showConfirmDialog(
-      context,
-      title: context.l10n.t('profile.deleteAccount'),
-      message: context.l10n.t('profile.deleteAccountMessage'),
-      confirmLabel: context.l10n.t('app.delete'),
-      destructive: true,
-    );
-    if (!confirmed) return;
-
-    final success = await ref
-        .read(profileViewModelProvider.notifier)
-        .deleteAccount();
-    if (!context.mounted) return;
-    if (success) {
-      context.go('/login');
-      return;
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          userFacingErrorMessage(
-            ref.read(profileViewModelProvider).actionError,
-            fallback: context.l10n.t('profile.deleteAccountFailed'),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<bool> _showConfirmDialog(
-    BuildContext context, {
-    required String title,
-    required String message,
-    required String confirmLabel,
-    bool destructive = false,
-  }) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: Text(title),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: Text(context.l10n.t('app.cancel')),
+            row(
+              'settings.termsOfUse',
+              web('settings.termsOfUse', ProfileToolsConfig.terms),
+              AppAssets.lanhuProfileMenuTerms,
             ),
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: Text(
-                confirmLabel,
-                style: TextStyle(
-                  color: destructive ? Colors.red : null,
-                  fontWeight: FontWeight.w600,
-                ),
+            row(
+              'settings.privacyPolicy',
+              web('settings.privacyPolicy', ProfileToolsConfig.privacy),
+              AppAssets.lanhuProfileMenuPrivacy,
+            ),
+            row(
+              'profile.aboutUs',
+              '/about-us',
+              AppAssets.lanhuProfileMenuAbout,
+            ),
+            ProfileToolsTheme.gap,
+            ListTile(
+              title: Text(
+                context.l10n.t('profile.deleteAccount'),
+                style: ProfileToolsTheme.label,
               ),
+              onTap: () =>
+                  confirmProfileAccountAction(context, ref, delete: true),
+            ),
+            ListTile(
+              title: Text(
+                context.l10n.t('profile.logOut'),
+                style: ProfileToolsTheme.label,
+              ),
+              onTap: () =>
+                  confirmProfileAccountAction(context, ref, delete: false),
             ),
           ],
-        );
-      },
-    );
-    return confirmed ?? false;
-  }
-
-  void _openWebView(
-    BuildContext context, {
-    required String title,
-    required String uri,
-  }) {
-    context.push(
-      Uri(
-        path: '/web-view',
-        queryParameters: {'title': title, 'uri': uri},
-      ).toString(),
-    );
-  }
-
-  void _showLanguageSheet(
-    BuildContext context,
-    WidgetRef ref,
-    String currentLanguageCode,
-  ) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: AppColors.cardBackground,
-      shape: const RoundedRectangleBorder(borderRadius: AppRadius.sheetBorder),
-      builder: (sheetContext) {
-        Widget languageTile(String languageCode, String label) {
-          final selected = currentLanguageCode == languageCode;
-          return ListTile(
-            title: Text(label, style: AppTextStyles.bodyStrong),
-            trailing: selected
-                ? const Icon(Icons.check, color: AppColors.primaryPink)
-                : null,
-            onTap: () async {
-              await ref
-                  .read(appLocaleProvider.notifier)
-                  .setLanguage(languageCode);
-              if (sheetContext.mounted) {
-                Navigator.pop(sheetContext);
-              }
-            },
-          );
-        }
-
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 44,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.neutralLight,
-                    borderRadius: AppRadius.pillBorder,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                languageTile('en', context.l10n.t('app.english')),
-                languageTile('zh', context.l10n.t('app.chinese')),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _SettingsTile extends StatelessWidget {
-  const _SettingsTile({
-    required this.leading,
-    required this.title,
-    required this.onTap,
-    this.subtitle,
-    this.titleColor,
-    this.iconColor,
-  });
-
-  final IconData leading;
-  final String title;
-  final String? subtitle;
-  final Color? titleColor;
-  final Color? iconColor;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(leading, color: iconColor ?? AppColors.primaryPink),
-      title: Text(
-        title,
-        style: AppTextStyles.bodyStrong.copyWith(color: titleColor),
+        ),
       ),
-      subtitle: subtitle == null
-          ? null
-          : Text(subtitle!, style: AppTextStyles.caption),
-      trailing: const Icon(
-        Icons.arrow_forward_ios,
-        color: AppColors.primaryPink,
-        size: 16,
-      ),
-      onTap: onTap,
     );
   }
 }

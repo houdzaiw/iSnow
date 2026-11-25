@@ -14,6 +14,7 @@ class ProfileState {
     this.isSubmitting = false,
     this.loadError,
     this.actionError,
+    this.honorCount,
   });
 
   factory ProfileState.initial() {
@@ -21,7 +22,7 @@ class ProfileState {
       quickItems: ProfileMenuData.getQuickItems(),
       featureItems: ProfileMenuData.getFeatureItems(),
       accountItems: ProfileMenuData.getAccountItems(),
-      badgeItems: ProfileMenuData.getBadgeItems(),
+      badgeItems: const [],
     );
   }
 
@@ -30,6 +31,7 @@ class ProfileState {
   final bool isSubmitting;
   final Object? loadError;
   final Object? actionError;
+  final int? honorCount;
   final List<ProfileMenuItem> quickItems;
   final List<ProfileMenuItem> featureItems;
   final List<ProfileMenuItem> accountItems;
@@ -91,6 +93,8 @@ class ProfileState {
     bool? isSubmitting,
     Object? loadError = _profileStateUnset,
     Object? actionError = _profileStateUnset,
+    List<ProfileBadgeItem>? badgeItems,
+    int? honorCount,
   }) {
     return ProfileState(
       profile: profile ?? this.profile,
@@ -105,7 +109,8 @@ class ProfileState {
       quickItems: quickItems,
       featureItems: featureItems,
       accountItems: accountItems,
-      badgeItems: badgeItems,
+      badgeItems: badgeItems ?? this.badgeItems,
+      honorCount: honorCount ?? this.honorCount,
     );
   }
 }
